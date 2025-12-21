@@ -22,8 +22,8 @@ export default function PasswordGate({ children }: PasswordGateProps) {
     e.preventDefault();
     setLoading(true);
   
-  console.log("URL:", import.meta.env.VITE_PUBLIC_SUPABASE_URL);
-  console.log("KEY:", import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY);
+  console.log("URL:", import.meta.env.VITE_SUPABASE_URL);
+  console.log("KEY:", import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 
 try {
@@ -33,8 +33,8 @@ try {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "apikey": import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY,
-        "Authorization": `Bearer ${import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY}`,
+        "apikey": import.meta.env.VITE_SUPABASE_ANON_KEY,
+        "Authorization": `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
       },
       body: JSON.stringify({ password: input }),
     }
