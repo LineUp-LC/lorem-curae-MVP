@@ -1,0 +1,4 @@
+[functions.password-check]
+verify_jwt = false
+
+# force redeploy

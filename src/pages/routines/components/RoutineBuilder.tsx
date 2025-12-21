@@ -1,0 +1,466 @@
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
+interface Product {
+  id: string;
+  name: string;
+  brand: string;
+  image: string;
+  category: string;
+  purchasedFrom?: string; // Store URL if purchased from marketplace
+  purchaseDate?: Date;
+  expirationDate?: Date;
+}
+
+interface RoutineStep {
+  id: string;
+  stepNumber: number;
+  title: string;
+  description: string;
+  timeOfDay: 'morning' | 'evening' | 'both';
+  product?: Product;
+  recommended: boolean;
+}
+
+const templateSteps: RoutineStep[] = [
+  {
+    id: '1',
+    stepNumber: 1,
+    title: 'Cleanser',
+    description: 'Start with a gentle cleanser to remove impurities and prepare your skin',
+    timeOfDay: 'both',
+    recommended: true,
+  },
+  {
+    id: '2',
+    stepNumber: 2,
+    title: 'Toner',
+    description: 'Balance your skin\'s pH and prep for better absorption',
+    timeOfDay: 'both',
+    recommended: false,
+  },
+  {
+    id: '3',
+    stepNumber: 3,
+    title: 'Serum',
+    description: 'Target specific concerns with concentrated active ingredients',
+    timeOfDay: 'both',
+    recommended: true,
+  },
+  {
+    id: '4',
+    stepNumber: 4,
+    title: 'Eye Cream',
+    description: 'Nourish the delicate eye area with specialized care',
+    timeOfDay: 'both',
+    recommended: false,
+  },
+  {
+    id: '5',
+    stepNumber: 5,
+    title: 'Moisturizer',
+    description: 'Lock in hydration and strengthen your skin barrier',
+    timeOfDay: 'both',
+    recommended: true,
+  },
+  {
+    id: '6',
+    stepNumber: 6,
+    title: 'Sunscreen',
+    description: 'Protect your skin from UV damage (SPF 30 or higher)',
+    timeOfDay: 'morning',
+    recommended: true,
+  },
+  {
+    id: '7',
+    stepNumber: 7,
+    title: 'Night Treatment',
+    description: 'Apply targeted treatments like retinol or sleeping masks',
+    timeOfDay: 'evening',
+    recommended: false,
+  },
+  {
+    id: '9',
+    stepNumber: 9,
+    title: 'Facial Oil',
+    description: 'Nourish and seal in moisture with botanical oils',
+    timeOfDay: 'evening',
+    recommended: false,
+  },
+  {
+    id: '10',
+    stepNumber: 10,
+    title: 'Night Cream',
+    description: 'Rich moisturizer to support overnight repair',
+    timeOfDay: 'evening',
+    recommended: false,
+  },
+];
+
+const savedProducts: Product[] = [
+  {
+    id: '1',
+    name: 'Gentle Hydrating Cleanser',
+    brand: 'Pure Essence',
+    image: 'https://readdy.ai/api/search-image?query=minimalist%20white%20bottle%20gentle%20hydrating%20facial%20cleanser%20on%20clean%20white%20surface%20with%20water%20droplets%20soft%20natural%20lighting%20product%20photography&width=300&height=300&seq=routine-cleanser-1&orientation=squarish',
+    category: 'Cleanser',
+    purchasedFrom: 'https://example.com/store',
+    purchaseDate: new Date('2024-01-10'),
+    expirationDate: new Date('2025-01-10'),
+  },
+  {
+    id: '2',
+    name: 'Vitamin C Brightening Serum',
+    brand: 'Glow Naturals',
+    image: 'https://readdy.ai/api/search-image?query=elegant%20amber%20glass%20dropper%20bottle%20vitamin%20c%20serum%20on%20white%20marble%20surface%20with%20orange%20slices%20soft%20lighting%20minimalist%20product%20photography&width=300&height=300&seq=routine-serum-1&orientation=squarish',
+    category: 'Serum',
+    purchasedFrom: 'https://example.com/store',
+    purchaseDate: new Date('2024-01-05'),
+    expirationDate: new Date('2024-07-05'),
+  },
+  {
+    id: '3',
+    name: 'Deep Hydration Moisturizer',
+    brand: 'Skin Harmony',
+    image: 'https://readdy.ai/api/search-image?query=luxurious%20white%20jar%20moisturizer%20cream%20on%20clean%20surface%20with%20green%20leaves%20soft%20natural%20lighting%20minimalist%20skincare%20photography&width=300&height=300&seq=routine-moisturizer-1&orientation=squarish',
+    category: 'Moisturizer',
+    purchaseDate: new Date('2023-12-20'),
+    expirationDate: new Date('2024-12-20'),
+  },
+  {
+    id: '4',
+    name: 'Mineral Sunscreen SPF 50',
+    brand: 'Clarity Labs',
+    image: 'https://readdy.ai/api/search-image?query=modern%20white%20tube%20sunscreen%20spf%2050%20on%20beach%20sand%20with%20blue%20sky%20background%20clean%20product%20photography%20natural%20lighting&width=300&height=300&seq=routine-sunscreen-1&orientation=squarish',
+    category: 'Sunscreen',
+    purchasedFrom: 'https://example.com/store',
+    purchaseDate: new Date('2024-01-15'),
+    expirationDate: new Date('2025-06-15'),
+  },
+];
+
+export default function RoutineBuilder() {
+  const navigate = useNavigate();
+  const [timeFilter, setTimeFilter] = useState<'morning' | 'evening' | 'both'>('both');
+  const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
+  const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
+
+  const filteredSteps = routineSteps.filter(
+    step => timeFilter === 'both' || step.timeOfDay === timeFilter || step.timeOfDay === 'both'
+  );
+
+  const handleAddProduct = (stepId: string, product: Product) => {
+    setRoutineSteps(prev =>
+      prev.map(step =>
+        step.id === stepId ? { ...step, product } : step
+      )
+    );
+    setShowProductSelector(null);
+  };
+
+  const handleRemoveProduct = (stepId: string) => {
+    setRoutineSteps(prev =>
+      prev.map(step =>
+        step.id === stepId ? { ...step, product: undefined } : step
+      )
+    );
+  };
+
+  const handleProductClick = (product: Product) => {
+    navigate('/product-detail', { state: { product } });
+  };
+
+  const handlePurchaseAgain = (product: Product) => {
+    if (product.purchasedFrom) {
+      window.open(product.purchasedFrom, '_blank');
+    }
+  };
+
+  const handleBrowseProducts = (category: string) => {
+    navigate('/discover', { state: { filterCategory: category } });
+  };
+
+  const getExpirationStatus = (expirationDate?: Date) => {
+    if (!expirationDate) return null;
+    
+    const now = new Date();
+    const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    
+    if (daysUntilExpiration < 0) {
+      return { status: 'expired', color: 'text-red-600 bg-red-50', text: 'Expired', icon: 'ri-error-warning-line' };
+    } else if (daysUntilExpiration <= 30) {
+      return { status: 'expiring-soon', color: 'text-amber-600 bg-amber-50', text: `Expires in ${daysUntilExpiration} days`, icon: 'ri-time-line' };
+    } else if (daysUntilExpiration <= 90) {
+      return { status: 'valid', color: 'text-blue-600 bg-blue-50', text: `Expires in ${Math.ceil(daysUntilExpiration / 30)} months`, icon: 'ri-calendar-line' };
+    }
+    return { status: 'fresh', color: 'text-green-600 bg-green-50', text: 'Fresh', icon: 'ri-checkbox-circle-line' };
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm p-8">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-2">
+            Build Your Routine
+          </h2>
+          <p className="text-gray-600 text-sm">
+            Follow our expert-guided template for a successful skincare routine
+          </p>
+        </div>
+
+        {/* Time Filter */}
+        <div className="flex bg-[#F8F6F3] rounded-full p-1">
+          <button
+            onClick={() => setTimeFilter('morning')}
+            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              timeFilter === 'morning'
+                ? 'bg-white text-[#2C5F4F] shadow-sm'
+                : 'text-gray-600'
+            }`}
+          >
+            <i className="ri-sun-line mr-2"></i>
+            Morning
+          </button>
+          <button
+            onClick={() => setTimeFilter('evening')}
+            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              timeFilter === 'evening'
+                ? 'bg-white text-[#2C5F4F] shadow-sm'
+                : 'text-gray-600'
+            }`}
+          >
+            <i className="ri-moon-line mr-2"></i>
+            Evening
+          </button>
+          <button
+            onClick={() => setTimeFilter('both')}
+            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+              timeFilter === 'both'
+                ? 'bg-white text-[#2C5F4F] shadow-sm'
+                : 'text-gray-600'
+            }`}
+          >
+            <i className="ri-time-line mr-2"></i>
+            Both
+          </button>
+        </div>
+      </div>
+
+      {/* Horizontal Routine Steps */}
+      <div className="relative mb-8">
+        <div className="overflow-x-auto pb-4 scrollbar-hide">
+          <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
+            {filteredSteps.map((step, index) => (
+              <div
+                key={step.id}
+                className="border border-gray-200 rounded-xl p-6 hover:border-[#2C5F4F]/30 transition-all bg-white"
+                style={{ width: '380px', flexShrink: 0 }}
+              >
+                {/* Step Number & Title */}
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-[#2C5F4F] text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    {index + 1}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F]">
+                        {step.title}
+                      </h3>
+                      {step.recommended && (
+                        <span className="px-3 py-1 bg-[#E8956C]/10 text-[#E8956C] text-xs font-medium rounded-full whitespace-nowrap">
+                          Recommended
+                        </span>
+                      )}
+                    </div>
+                    {step.timeOfDay !== 'both' && (
+                      <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full whitespace-nowrap mb-2">
+                        <i className={`${step.timeOfDay === 'morning' ? 'ri-sun-line' : 'ri-moon-line'} mr-1`}></i>
+                        {step.timeOfDay === 'morning' ? 'Morning Only' : 'Evening Only'}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <p className="text-gray-600 text-sm mb-4">{step.description}</p>
+
+                {/* Product Display or Add Button */}
+                {step.product ? (
+                  <div className="bg-[#F8F6F3] rounded-lg p-4">
+                    <div className="flex flex-col gap-3 mb-3">
+                      <div 
+                        className="w-full h-32 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => handleProductClick(step.product!)}
+                      >
+                        <img
+                          src={step.product.image}
+                          alt={step.product.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-xs text-gray-500 mb-1">{step.product.brand}</p>
+                        <h4 
+                          className="font-medium text-[#2C5F4F] mb-2 cursor-pointer hover:underline"
+                          onClick={() => handleProductClick(step.product!)}
+                        >
+                          {step.product.name}
+                        </h4>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handleProductClick(step.product!)}
+                            className="text-sm text-[#2C5F4F] hover:underline font-medium cursor-pointer"
+                          >
+                            View Details →
+                          </button>
+                          <button
+                            onClick={() => handleRemoveProduct(step.id)}
+                            className="ml-auto px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                          >
+                            <i className="ri-delete-bin-line"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Expiration Date & Purchase Info */}
+                    <div className="pt-3 border-t border-gray-200 space-y-2">
+                      {step.product.expirationDate && (
+                        <div>
+                          {(() => {
+                            const expStatus = getExpirationStatus(step.product.expirationDate);
+                            return expStatus ? (
+                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${expStatus.color}`}>
+                                <i className={expStatus.icon}></i>
+                                {expStatus.text}
+                              </span>
+                            ) : null;
+                          })()}
+                        </div>
+                      )}
+                      {step.product.purchaseDate && (
+                        <p className="text-xs text-gray-500">
+                          <i className="ri-shopping-bag-line mr-1"></i>
+                          Purchased {step.product.purchaseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                      )}
+                      {step.product.purchasedFrom && (
+                        <button
+                          onClick={() => handlePurchaseAgain(step.product!)}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                        >
+                          <i className="ri-refresh-line"></i>
+                          Purchase Again
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="space-y-3">
+                      <button
+                        onClick={() => setShowProductSelector(step.id)}
+                        className="w-full px-6 py-3 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      >
+                        <i className="ri-add-line mr-2"></i>
+                        Add from Saved
+                      </button>
+                      <button
+                        onClick={() => handleBrowseProducts(step.title)}
+                        className="w-full px-6 py-3 bg-white border-2 border-[#2C5F4F] text-[#2C5F4F] rounded-lg hover:bg-[#F8F6F3] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      >
+                        <i className="ri-search-line mr-2"></i>
+                        Browse {step.title}s
+                      </button>
+                    </div>
+
+                    {/* Product Selector Modal */}
+                    {showProductSelector === step.id && (
+                      <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="font-medium text-[#2C5F4F] text-sm">Select Product</h4>
+                          <button
+                            onClick={() => setShowProductSelector(null)}
+                            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                          >
+                            <i className="ri-close-line text-xl"></i>
+                          </button>
+                        </div>
+                        <div className="space-y-3">
+                          {savedProducts
+                            .filter(p => p.category === step.title)
+                            .map(product => (
+                              <div
+                                key={product.id}
+                                onClick={() => handleAddProduct(step.id, product)}
+                                className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-[#2C5F4F] hover:bg-[#F8F6F3] transition-all cursor-pointer"
+                              >
+                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
+                                  <p className="text-sm font-medium text-[#2C5F4F] truncate">
+                                    {product.name}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          {savedProducts.filter(p => p.category === step.title).length === 0 && (
+                            <div className="text-center py-6 text-gray-500 text-sm">
+                              No saved products for this category.
+                              <br />
+                              <button
+                                onClick={() => handleBrowseProducts(step.title)}
+                                className="text-[#2C5F4F] hover:underline mt-2 cursor-pointer whitespace-nowrap"
+                              >
+                                Browse {step.title}s →
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Scroll Indicator */}
+        <div className="flex justify-center gap-2 mt-4">
+          {filteredSteps.map((_, index) => (
+            <div
+              key={index}
+              className="w-2 h-2 rounded-full bg-gray-300"
+            ></div>
+          ))}
+        </div>
+      </div>
+
+      {/* Tips Section */}
+      <div className="p-6 bg-[#F8F6F3] rounded-xl">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-full bg-[#E8956C]/20 flex items-center justify-center flex-shrink-0">
+            <i className="ri-lightbulb-line text-[#E8956C] text-xl"></i>
+          </div>
+          <div>
+            <h4 className="font-medium text-[#2C5F4F] mb-2">Pro Tips for Success</h4>
+            <ul className="text-sm text-gray-600 space-y-1">
+              <li>• Wait 30-60 seconds between each step for better absorption</li>
+              <li>• Apply products from thinnest to thickest consistency</li>
+              <li>• Always use sunscreen as your final morning step</li>
+              <li>• Introduce new products one at a time to monitor reactions</li>
+              <li>• Check expiration dates regularly and replace expired products</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

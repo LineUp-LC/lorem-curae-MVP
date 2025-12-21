@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "password-check": {
+      "verify_jwt": false
+    }
+  }
+}
