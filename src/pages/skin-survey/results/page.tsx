@@ -23,18 +23,30 @@ const SurveyResultsPage = () => {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
 
+  // ⬇️ ADD THIS RIGHT HERE
+  if (!surveyData) {
+    return (
+      <>
+        <Navbar />
+        <div className="loading-screen">
+          <h2>Analyzing results…</h2>
+          <p>We’re preparing your personalized routine.</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
+  // ⬆️ STOP HERE — do NOT put it above this line
+
   useEffect(() => {
-    // Load survey data from localStorage
     const savedData = localStorage.getItem('skinSurveyData');
     if (savedData) {
       const data: SurveyData = JSON.parse(savedData);
       setSurveyData(data);
-      
-      // Generate accurate recommendations based on actual responses
+
       const recs = generateRecommendations(data);
       setRecommendations(recs);
 
-      // Save to user profile for personalization
       const userProfile = {
         skinType: data.skinTypes[0] || 'Normal',
         concerns: data.concerns,
