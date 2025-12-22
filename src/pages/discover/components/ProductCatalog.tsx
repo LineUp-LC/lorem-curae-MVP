@@ -128,43 +128,40 @@ const otherProducts = useMemo(() => {
   );
 }, [filteredProducts, userConcerns]);
 
-const concernSortedProducts = useMemo(() => {
-  return [...matchedProducts, ...otherProducts];
-}, [matchedProducts, otherProducts]);
 
 
 // 3️⃣ Final sorting (price, rating, popularity)
-const sortedProducts = [...concernSortedProducts].sort((a, b) => {
-  switch (sortBy) {
-    case 'price-low':
-      return a.price - b.price;
-    case 'price-high':
-      return b.price - a.price;
-    case 'rating':
-      return b.rating - a.rating;
-    case 'popular':
-    default:
-      return b.reviewCount - a.reviewCount;
-  }
-});
+const sortedMatchedProducts = useMemo(() => {
+  return [...matchedProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'rating':
+        return b.rating - a.rating;
+      case 'popular':
+      default:
+        return b.reviewCount - a.reviewCount;
+    }
+  });
+}, [matchedProducts, sortBy]);
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
+const sortedOtherProducts = useMemo(() => {
+  return [...otherProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'rating':
+        return b.rating - a.rating;
+      case 'popular':
+      default:
+        return b.reviewCount - a.reviewCount;
     }
-    if (hasHalfStar) {
-      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
-    }
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
-    }
-    return stars;
-  };
+  });
+}, [otherProducts, sortBy]);
     
     // Recommended for You section (only if personalization is active)
 const recommendedSection = (
@@ -175,7 +172,7 @@ const recommendedSection = (
       </h2>
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {matchedProducts.map((product) => (
+        {sortedMatchedProducts.map((product) => (
           <div
             key={product.id}
             onClick={() => navigate(`/product-detail?id=${product.id}`)}
@@ -355,6 +352,23 @@ const recommendedSection = (
 
   const highlights = getComparisonHighlights();
 
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
+    }
+    if (hasHalfStar) {
+      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
+    }
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
+    }
+    return stars;
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
@@ -471,13 +485,16 @@ const recommendedSection = (
       {/* Results Count */}
       <div className="mb-6">
         <p className="text-sm text-gray-600">
-          Showing <span className="font-semibold text-forest-900">{sortedProducts.length}</span> products
-        </p>
+      Showing{" "}
+      <span className="font-semibold text-forest-900">
+       {sortedMatchedProducts.length + sortedOtherProducts.length}
+      </span>{" "}
+      products        </p>
       </div>
 
       {/* Product Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-product-shop>
-        {sortedProducts.map((product) => (
+        {sortedOtherProducts.map((product) => (
           <div
             key={product.id}
             onClick={() => navigate(`/product-detail?id=${product.id}`)}
@@ -604,8 +621,7 @@ className={`
       </div>
 
       {/* No Results */}
-      {sortedProducts.length === 0 && (
-        <div className="text-center py-16">
+{sortedMatchedProducts.length + sortedOtherProducts.length === 0 && (        <div className="text-center py-16">
           <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-full mx-auto mb-4">
             <i className="ri-search-line text-4xl text-gray-400"></i>
           </div>
