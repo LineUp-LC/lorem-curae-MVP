@@ -17,16 +17,14 @@ const DiscoverPage = () => {
   }, []);
   
 useEffect(() => {
-  const savedSurvey = localStorage.getItem("skinSurveyData");
-  if (savedSurvey) {
-    const surveyData = JSON.parse(savedSurvey);
-    const concerns = surveyData.concerns || [];
-    console.log("Loaded concerns:", concerns);
-    setUserConcerns(concerns);
+  const stored = localStorage.getItem("userConcerns");
+  if (stored) {
+    const parsed = JSON.parse(stored);
+    const concernIds = parsed.map((c: any) => c.id);
+    console.log("Loaded mapped concern IDs:", concernIds);
+    setUserConcerns(concernIds);
   }
 }, []);
-
-
 
   const handleStartQuiz = () => {
     setView('quiz');

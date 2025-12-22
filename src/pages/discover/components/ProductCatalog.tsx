@@ -85,6 +85,22 @@ useEffect(() => {
   ];
 
   const products = productData;
+    
+    
+  // Collect all recommended ingredients for the user's selected concerns
+  const recommendedIngredients = useMemo(() => {
+    const stored = localStorage.getItem("userConcerns");
+    if (!stored) return [];
+
+    try {
+      const parsed = JSON.parse(stored);
+      return parsed.flatMap((c: any) => c.recommendedIngredients || []);
+    } catch (e) {
+      console.error("Failed to parse userConcerns from localStorage", e);
+      return [];
+    }
+  }, []);
+
 
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
@@ -131,6 +147,155 @@ const sortedProducts = [...concernSortedProducts].sort((a, b) => {
       return b.reviewCount - a.reviewCount;
   }
 });
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
+    }
+    if (hasHalfStar) {
+      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
+    }
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
+    }
+    return stars;
+  };
+    
+    // Recommended for You section (only if personalization is active)
+const recommendedSection = (
+  matchedProducts.length > 0 && (
+    <section className="mb-10">
+      <h2 className="text-xl font-semibold text-sage-700 mb-4">
+        Recommended for You
+      </h2>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {matchedProducts.map((product) => (
+          <div
+            key={product.id}
+            onClick={() => navigate(`/product-detail?id=${product.id}`)}
+            className={`
+              bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
+              ${product.concerns?.some(c => userConcerns.includes(c))
+                ? "ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]"
+                : "shadow-md hover:shadow-xl border border-gray-100"
+              }
+            `}
+          >
+            {/* Best Match badge */}
+            {product.concerns?.some(c => userConcerns.includes(c)) && (
+              <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow">
+                Best Match
+              </span>
+            )}
+
+            {/* Comparison Button */}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                handleAddToCompare(product.id, e);
+              }}
+              className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 ${
+                compareList.includes(product.id)
+                  ? 'bg-sage-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-sage-100'
+              }`}
+            >
+              {compareList.includes(product.id) ? (
+                <i className="ri-check-line text-xl"></i>
+              ) : (
+                <i className="ri-scales-line text-xl"></i>
+              )}
+            </button>
+
+            {/* Product Image */}
+            <div className="relative w-full h-80 overflow-hidden bg-gray-50">
+              <img
+                src={product.image}
+                alt={product.name}
+                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+              />
+              {!product.inStock && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <span className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-full text-sm">
+                    Out of Stock
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* Product Info */}
+            <div className="p-5">
+              <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
+                {product.brand}
+              </p>
+
+              <h3 className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
+                {product.name}
+              </h3>
+
+              <div className="flex items-center space-x-2 mb-3">
+                <div className="flex items-center space-x-1">
+                  {renderStars(product.rating)}
+                </div>
+                <span className="text-sm font-medium text-gray-700">{product.rating}</span>
+                <span className="text-sm text-gray-500">({product.reviewCount})</span>
+              </div>
+
+              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+                {product.description}
+              </p>
+
+              {/* Key Ingredients with sage highlighting */}
+              <div className="mb-4">
+                <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
+                <div className="flex flex-wrap gap-1">
+                  {product.keyIngredients.slice(0, 2).map((ingredient, idx) => {
+                    const isRecommended = recommendedIngredients.includes(ingredient);
+                    return (
+                      <span
+                        key={idx}
+                        className={`
+                          px-2 py-1 text-xs rounded-full border
+                          ${isRecommended
+                            ? "bg-sage-100 text-sage-700 border-sage-300"
+                            : "bg-cream-100 text-gray-700 border-gray-200"
+                          }
+                        `}
+                      >
+                        {ingredient}
+                      </span>
+                    );
+                  })}
+                  {product.keyIngredients.length > 2 && (
+                    <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
+                      +{product.keyIngredients.length - 2}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
+                  <span className="text-xl font-bold text-forest-900">
+                    ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+);
+
 
 
   const handleAddToCompare = (productId: number, e: React.MouseEvent) => {
@@ -190,23 +355,6 @@ const sortedProducts = [...concernSortedProducts].sort((a, b) => {
 
   const highlights = getComparisonHighlights();
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
-    }
-    if (hasHalfStar) {
-      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
-    }
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
-    }
-    return stars;
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
@@ -333,7 +481,14 @@ const sortedProducts = [...concernSortedProducts].sort((a, b) => {
           <div
             key={product.id}
             onClick={() => navigate(`/product-detail?id=${product.id}`)}
-            className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-100 group cursor-pointer relative"
+className={`
+  bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
+  ${product.concerns?.some(c => userConcerns.includes(c))
+    ? "ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]"
+    : "shadow-md hover:shadow-xl border border-gray-100"
+  }
+`}
+
           >
           {product.concerns?.some(c => userConcerns.includes(c)) && (
            <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow">
@@ -402,25 +557,37 @@ const sortedProducts = [...concernSortedProducts].sort((a, b) => {
                 {product.description}
               </p>
 
-              {/* Key Ingredients */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
-                <div className="flex flex-wrap gap-1">
-                  {product.keyIngredients.slice(0, 2).map((ingredient, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full"
-                    >
-                      {ingredient}
-                    </span>
-                  ))}
-                  {product.keyIngredients.length > 2 && (
-                    <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full">
-                      +{product.keyIngredients.length - 2}
-                    </span>
-                  )}
-                </div>
-              </div>
+{/* Key Ingredients */}
+<div className="mb-4">
+  <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
+
+  <div className="flex flex-wrap gap-1">
+    {product.keyIngredients.slice(0, 2).map((ingredient, idx) => {
+      const isRecommended = recommendedIngredients.includes(ingredient);
+
+      return (
+        <span
+          key={idx}
+          className={`
+            px-2 py-1 text-xs rounded-full border
+            ${isRecommended
+              ? "bg-sage-100 text-sage-700 border-sage-300"
+              : "bg-cream-100 text-gray-700 border-gray-200"
+            }
+          `}
+        >
+          {ingredient}
+        </span>
+      );
+    })}
+
+    {product.keyIngredients.length > 2 && (
+      <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
+        +{product.keyIngredients.length - 2}
+      </span>
+    )}
+  </div>
+</div>
 
               {/* Price & CTA */}
               <div className="flex items-center justify-between pt-4 border-t border-gray-100">
