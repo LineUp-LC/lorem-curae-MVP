@@ -55,16 +55,6 @@ useEffect(() => {
 }, []);
 
 
-const otherProducts = useMemo(() => {
-  return productData.filter(product =>
-    !product.concerns?.some(c => userConcerns.includes(c))
-  );
-}, [userConcerns]);
-
-const sortedProducts = useMemo(() => {
-  return [...matchedProducts, ...otherProducts];
-}, [matchedProducts, otherProducts]);
-
 // Handle category from URL params (from homepage CTAs)
 useEffect(() => {
   const categoryParam = searchParams.get('category');
