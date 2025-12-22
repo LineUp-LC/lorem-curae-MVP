@@ -1,5 +1,9 @@
 {
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/" }
-  ]
+  "builds": [
+    { "src": "vite.config.ts", "use": "@vercel/static-build", "config": {} }
+  ],
+  "routes": [
+    { "src": "/(.*)", "dest": "/" }
+  ],
+  "outputDirectory": "out"
 }
