@@ -184,7 +184,7 @@ const sortedOtherProducts = useMemo(() => {
     
     // Recommended for You section (only if personalization is active)
 const recommendedSection = (
-  matchedProducts.length > 0 && (
+  sortedMatchedProducts.length > 0 && (
     <section className="mb-10">
       <h2 className="text-xl font-semibold text-sage-700 mb-4">
         Recommended for You
