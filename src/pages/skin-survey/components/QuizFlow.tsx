@@ -362,12 +362,23 @@ const QuizFlow = () => {
     }
   };
 
-  
-
 // Add this function ABOVE the "if (currentStep > totalSteps)" block
 const saveSurveyAndGoToResults = () => {
-  // Save the full survey data to localStorage
-  localStorage.setItem("skinSurveyData", JSON.stringify(surveyData));
+  // Transform your surveyData into the shape the results page expects
+  const transformed = {
+    skinTypes: surveyData.skinType,
+    concerns: surveyData.concerns,
+    acneTypes: surveyData.acneType,
+    scarringTypes: surveyData.scarringType,
+    complexion: surveyData.complexion,
+    allergens: surveyData.allergens,
+    preferences: surveyData.preferences,
+    lifestyle: surveyData.lifestyle,
+    routine: surveyData.routine
+  };
+
+  // Save transformed data
+  localStorage.setItem("skinSurveyData", JSON.stringify(transformed));
 
   // Navigate to results
   window.location.href = "/skin-survey/results";
@@ -390,7 +401,7 @@ if (currentStep > totalSteps) {
           responses to create your personalized skincare profile.
         </p>
 
-        {/* Replace the Link with this button */}
+        {/* Replace Link with this button */}
         <button
           onClick={saveSurveyAndGoToResults}
           className="inline-flex items-center space-x-2 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
