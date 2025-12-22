@@ -23,55 +23,6 @@ const SurveyResultsPage = () => {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
 
-  // 🔥 useEffect MUST run before we check loading states
-  useEffect(() => {
-    const savedData = localStorage.getItem('skinSurveyData');
-    if (savedData) {
-      const data: SurveyData = JSON.parse(savedData);
-      setSurveyData(data);
-
-      const recs = generateRecommendations(data);
-      setRecommendations(recs);
-
-      const userProfile = {
-        skinType: data.skinTypes[0] || 'Normal',
-        concerns: data.concerns,
-        sensitivities: data.allergens,
-        preferences: {
-          crueltyFree: data.preferences.includes('Cruelty-Free'),
-          vegan: data.preferences.includes('Vegan'),
-        },
-        lifestyle: data.lifestyle,
-      };
-
-      localStorage.setItem('userProfile', JSON.stringify(userProfile));
-    }
-  }, []);
-
-  // 🔥 NOW we check loading states — AFTER useEffect has run
-  if (!surveyData || !recommendations) {
-    return (
-      <>
-        <Navbar />
-        <div className="loading-screen">
-          <h2>Analyzing results…</h2>
-          <p>We’re preparing your personalized routine.</p>
-        </div>
-        <Footer />
-      </>
-    );
-  }
-
-  // 🔥 Your real results will render here
-  return (
-    <>
-      <Navbar />
-      {/* Your results UI goes here */}
-      <Footer />
-    </>
-  );
-};
-
   useEffect(() => {
     const savedData = localStorage.getItem('skinSurveyData');
     if (savedData) {
