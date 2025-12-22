@@ -82,6 +82,8 @@ export default function MySkinPage() {
         }));
         const mappedPreferences = mapSurveyPreferences(surveyData);
 
+        localStorage.setItem('userConcerns', JSON.stringify(mappedConcerns));
+
         // Update state
         setSkinProfile({
           skinType: primarySkinType,
