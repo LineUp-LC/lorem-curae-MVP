@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
+  
+
 
 interface Product {
   id: number;
@@ -20,9 +22,19 @@ interface Product {
 
 interface ProductCatalogProps {
   onStartQuiz?: () => void;
+  userConcerns: string[];
+  onProductClick: (id: string) => void;
+  onSaveProduct: (id: string) => void;
+  onFilterChange: (type: string, value: any) => void;
 }
 
-export default function ProductCatalog({ onStartQuiz }: ProductCatalogProps) {
+export default function ProductCatalog({
+  userConcerns,
+  onStartQuiz,
+  onProductClick,
+  onSaveProduct,
+  onFilterChange
+}: ProductCatalogProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -35,20 +47,39 @@ export default function ProductCatalog({ onStartQuiz }: ProductCatalogProps) {
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [surveyCompleted, setSurveyCompleted] = useState(false);
 
-  // Check if user has completed the skin survey
-  useEffect(() => {
-    const userProfile = localStorage.getItem('userProfile');
-    const skinSurveyData = localStorage.getItem('skinSurveyData');
-    setSurveyCompleted(!!(userProfile || skinSurveyData));
-  }, []);
+// Check if user has completed the skin survey
+useEffect(() => {
+  const userProfile = localStorage.getItem('userProfile');
+  const skinSurveyData = localStorage.getItem('skinSurveyData');
+  setSurveyCompleted(!!(userProfile || skinSurveyData));
+}, []);
 
-  // Handle category from URL params (from homepage CTAs)
-  useEffect(() => {
-    const categoryParam = searchParams.get('category');
-    if (categoryParam) {
-      setSelectedCategory(categoryParam);
-    }
-  }, [searchParams]);
+// ⭐ Matching logic MUST be inside the component, BEFORE the return
+const matchedProducts = useMemo(() => {
+  if (!userConcerns || userConcerns.length === 0) return [];
+  return productData.filter(product =>
+    product.concerns?.some(c => userConcerns.includes(c))
+  );
+}, [userConcerns]);
+
+const otherProducts = useMemo(() => {
+  return productData.filter(product =>
+    !product.concerns?.some(c => userConcerns.includes(c))
+  );
+}, [userConcerns]);
+
+const sortedProducts = useMemo(() => {
+  return [...matchedProducts, ...otherProducts];
+}, [matchedProducts, otherProducts]);
+
+// Handle category from URL params (from homepage CTAs)
+useEffect(() => {
+  const categoryParam = searchParams.get('category');
+  if (categoryParam) {
+    setSelectedCategory(categoryParam);
+  }
+}, [searchParams]);
+
 
   const categories = [
     { value: 'all', label: 'All Products', icon: 'ri-grid-line' },
@@ -83,19 +114,41 @@ export default function ProductCatalog({ onStartQuiz }: ProductCatalogProps) {
     return matchesCategory && matchesSkinType && matchesSearch;
   });
 
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'popular':
-      default:
-        return b.reviewCount - a.reviewCount;
-    }
-  });
+// 2️⃣ Concern matching happens AFTER base filtering
+const matchedProducts = useMemo(() => {
+  if (!userConcerns || userConcerns.length === 0) return [];
+  return filteredProducts.filter((product) =>
+    product.concerns?.some((c) => userConcerns.includes(c))
+  );
+}, [filteredProducts, userConcerns]);
+
+const otherProducts = useMemo(() => {
+  return filteredProducts.filter(
+    (product) =>
+      !product.concerns?.some((c) => userConcerns.includes(c))
+  );
+}, [filteredProducts, userConcerns]);
+
+const concernSortedProducts = useMemo(() => {
+  return [...matchedProducts, ...otherProducts];
+}, [matchedProducts, otherProducts]);
+
+
+// 3️⃣ Final sorting (price, rating, popularity)
+const sortedProducts = [...concernSortedProducts].sort((a, b) => {
+  switch (sortBy) {
+    case 'price-low':
+      return a.price - b.price;
+    case 'price-high':
+      return b.price - a.price;
+    case 'rating':
+      return b.rating - a.rating;
+    case 'popular':
+    default:
+      return b.reviewCount - a.reviewCount;
+  }
+});
+
 
   const handleAddToCompare = (productId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -299,6 +352,11 @@ export default function ProductCatalog({ onStartQuiz }: ProductCatalogProps) {
             onClick={() => navigate(`/product-detail?id=${product.id}`)}
             className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-100 group cursor-pointer relative"
           >
+          {product.concerns?.some(c => userConcerns.includes(c)) && (
+           <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow">
+            Best Match
+           </span>
+           )}
             {/* Comparison Button */}
             <button
               onClick={(e) => {

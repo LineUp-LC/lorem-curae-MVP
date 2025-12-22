@@ -9,10 +9,24 @@ import { sessionState } from '../../utils/sessionState';
 const DiscoverPage = () => {
   const [view, setView] = useState<'catalog' | 'quiz' | 'results'>('catalog');
   const [quizData, setQuizData] = useState<any>(null);
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
 
   useEffect(() => {
     sessionState.navigateTo('/discover');
   }, []);
+  
+useEffect(() => {
+  const savedSurvey = localStorage.getItem("skinSurveyData");
+  if (savedSurvey) {
+    const surveyData = JSON.parse(savedSurvey);
+    const concerns = surveyData.concerns || [];
+    console.log("Loaded concerns:", concerns);
+    setUserConcerns(concerns);
+  }
+}, []);
+
+
 
   const handleStartQuiz = () => {
     setView('quiz');
@@ -48,14 +62,15 @@ const DiscoverPage = () => {
     <div className="min-h-screen bg-cream-50">
       <Navbar />
       <main className="pt-20">
-        {view === 'catalog' && (
-          <ProductCatalog
-            onStartQuiz={handleStartQuiz}
-            onProductClick={handleProductClick}
-            onSaveProduct={handleSaveProduct}
-            onFilterChange={handleFilterChange}
-          />
-        )}
+      {view === 'catalog' && (
+      <ProductCatalog
+        userConcerns={userConcerns}   // ⭐ ADD THIS
+       onStartQuiz={handleStartQuiz}
+       onProductClick={handleProductClick}
+       onSaveProduct={handleSaveProduct}
+       onFilterChange={handleFilterChange}
+       />
+    )}
         {view === 'quiz' && <QuizFlow onComplete={handleQuizComplete} />}
         {view === 'results' && <ResultsDisplay data={quizData} onBackToCatalog={handleBackToCatalog} />}
       </main>
