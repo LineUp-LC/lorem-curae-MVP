@@ -54,13 +54,6 @@ useEffect(() => {
   setSurveyCompleted(!!(userProfile || skinSurveyData));
 }, []);
 
-// ⭐ Matching logic MUST be inside the component, BEFORE the return
-const matchedProducts = useMemo(() => {
-  if (!userConcerns || userConcerns.length === 0) return [];
-  return productData.filter(product =>
-    product.concerns?.some(c => userConcerns.includes(c))
-  );
-}, [userConcerns]);
 
 const otherProducts = useMemo(() => {
   return productData.filter(product =>
