@@ -23,7 +23,6 @@ const SurveyResultsPage = () => {
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
 
-  // ⬇️ ADD THIS RIGHT HERE
   if (!surveyData) {
     return (
       <>
@@ -36,7 +35,19 @@ const SurveyResultsPage = () => {
       </>
     );
   }
-  // ⬆️ STOP HERE — do NOT put it above this line
+
+  if (!recommendations) {
+    return (
+      <>
+        <Navbar />
+        <div className="loading-screen">
+          <h2>Analyzing results…</h2>
+          <p>We’re preparing your personalized routine.</p>
+        </div>
+        <Footer />
+      </>
+    );
+  }
 
   useEffect(() => {
     const savedData = localStorage.getItem('skinSurveyData');
