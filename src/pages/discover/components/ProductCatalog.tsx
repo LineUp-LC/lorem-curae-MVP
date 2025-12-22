@@ -162,6 +162,25 @@ const sortedOtherProducts = useMemo(() => {
     }
   });
 }, [otherProducts, sortBy]);
+
+  const renderStars = (rating: number) => {
+    const stars = [];
+    const fullStars = Math.floor(rating);
+    const hasHalfStar = rating % 1 >= 0.5;
+
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
+    }
+    if (hasHalfStar) {
+      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
+    }
+    const emptyStars = 5 - Math.ceil(rating);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
+    }
+    return stars;
+  };
+
     
     // Recommended for You section (only if personalization is active)
 const recommendedSection = (
@@ -351,24 +370,6 @@ const recommendedSection = (
   };
 
   const highlights = getComparisonHighlights();
-
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
-    }
-    if (hasHalfStar) {
-      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
-    }
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
-    }
-    return stars;
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
