@@ -32,8 +32,6 @@ interface Message {
   timestamp: Date;
 }
 
-// ... existing code ...
-
 export default function MySkinPage() {
   const navigate = useNavigate();
   const [skinProfile, setSkinProfile] = useState({
@@ -63,7 +61,6 @@ export default function MySkinPage() {
   const [assessmentInput, setAssessmentInput] = useState('');
   const [isAssessing, setIsAssessing] = useState(false);
 
-  // Load survey data on mount
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
     loadSurveyData();
@@ -230,6 +227,14 @@ export default function MySkinPage() {
         recommendedIngredients: ['Retinol', 'Vitamin C', 'Niacinamide', 'Alpha Arbutin'],
         icon: 'ri-contrast-drop-line',
       },
+      'Textural Irregularities': {
+        id: 'texture',
+        name: 'Textural Irregularities',
+        priority: 10,
+        description: 'Uneven skin texture and rough patches',
+        recommendedIngredients: ['AHA', 'BHA', 'Retinol', 'Niacinamide'],
+        icon: 'ri-grid-line',
+      },
     };
 
     const mapped: SkinConcern[] = [];
@@ -263,18 +268,7 @@ export default function MySkinPage() {
     const prefs: UserPreference[] = [];
     let id = 1;
 
-    // Map skin types
-    if (surveyData.skinTypes && surveyData.skinTypes.length > 0) {
-      surveyData.skinTypes.forEach((type: string) => {
-        prefs.push({
-          id: `${id++}`,
-          category: 'Skin Type',
-          value: type,
-        });
-      });
-    }
-
-    // Map preferences
+    // Map preferences (but NOT skin types or complexion)
     if (surveyData.preferences && surveyData.preferences.length > 0) {
       surveyData.preferences.forEach((pref: string) => {
         prefs.push({
@@ -301,15 +295,6 @@ export default function MySkinPage() {
           value: surveyData.lifestyle.stressLevel,
         });
       }
-    }
-
-    // Map complexion
-    if (surveyData.complexion) {
-      prefs.push({
-        id: `${id++}`,
-        category: 'Complexion',
-        value: surveyData.complexion,
-      });
     }
 
     return prefs;
