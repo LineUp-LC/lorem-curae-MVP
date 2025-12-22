@@ -362,28 +362,46 @@ const QuizFlow = () => {
     }
   };
 
-  if (currentStep > totalSteps) {
-    return (
-      <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
-        <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-sage-100 rounded-full flex items-center justify-center">
-            <i className="ri-check-line text-3xl text-sage-600"></i>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Survey Completed!</h1>
-          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Thank you for completing your skin survey. We're analyzing your responses to create your personalized skincare profile.
-          </p>
-          <Link
-            to="/skin-survey/results"
-            className="inline-flex items-center space-x-2 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
-          >
-            <span>Check Results</span>
-            <i className="ri-arrow-right-line"></i>
-          </Link>
+  
+
+// Add this function ABOVE the "if (currentStep > totalSteps)" block
+const saveSurveyAndGoToResults = () => {
+  // Save the full survey data to localStorage
+  localStorage.setItem("skinSurveyData", JSON.stringify(surveyData));
+
+  // Navigate to results
+  window.location.href = "/skin-survey/results";
+};
+
+if (currentStep > totalSteps) {
+  return (
+    <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
+      <div className="text-center">
+        <div className="w-20 h-20 mx-auto mb-6 bg-sage-100 rounded-full flex items-center justify-center">
+          <i className="ri-check-line text-3xl text-sage-600"></i>
         </div>
-      </main>
-    );
-  }
+
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          Survey Completed!
+        </h1>
+
+        <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+          Thank you for completing your skin survey. We're analyzing your
+          responses to create your personalized skincare profile.
+        </p>
+
+        {/* Replace the Link with this button */}
+        <button
+          onClick={saveSurveyAndGoToResults}
+          className="inline-flex items-center space-x-2 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+        >
+          <span>Check Results</span>
+          <i className="ri-arrow-right-line"></i>
+        </button>
+      </div>
+    </main>
+  );
+}
 
   return (
     <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
