@@ -122,9 +122,9 @@ export default function MySkinPage() {
       },
       {
         id: '2',
-        name: 'Hyperpigmentation',
+        name: 'Uneven Skin Tone',
         priority: 2,
-        description: 'Dark spots, uneven skin tone, and post-inflammatory marks',
+        description: 'Hyperpigmentation and post-inflammatory marks',
         recommendedIngredients: ['Vitamin C', 'Alpha Arbutin', 'Kojic Acid', 'Tranexamic Acid', 'Licorice Root'],
         icon: 'ri-contrast-2-line',
       },
