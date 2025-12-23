@@ -69,7 +69,7 @@ const SurveyResultsPage = () => {
       }
 
       const { error } = await supabase
-        .from("user_profiles")
+        .from("users_profiles")
         .upsert(
           {
             id: user.id,

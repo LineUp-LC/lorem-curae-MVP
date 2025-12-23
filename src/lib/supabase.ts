@@ -119,7 +119,7 @@ export interface AffiliateTransaction {
 // Helper functions
 export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('user_profiles')
+    .from('users_profiles')
     .select('*')
     .eq('id', userId)
     .single();
@@ -137,7 +137,7 @@ export async function updateUserProfile(
   updates: Partial<UserProfile>
 ): Promise<boolean> {
   const { error } = await supabase
-    .from('user_profiles')
+    .from('users_profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId);
 
@@ -154,13 +154,15 @@ export async function createUserProfile(
   email: string,
   fullName: string
 ): Promise<boolean> {
-  const { error } = await supabase.from('user_profiles').insert({
+  const { error } = await supabase.from('users_profiles').insert({
     id: userId,
     email,
     full_name: fullName,
     subscription_tier: 'free',
     skin_type: null,
     concerns: [],
+    preferences: {},
+    lifestyle: {},
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   });
