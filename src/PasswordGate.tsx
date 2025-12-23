@@ -28,7 +28,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
 
 try {
   const res = await fetch(
-    "https://fskvzrobcfokezumadbb.supabase.co/functions/v1/password-check",
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/password-check`,
     {
       method: "POST",
       headers: {
