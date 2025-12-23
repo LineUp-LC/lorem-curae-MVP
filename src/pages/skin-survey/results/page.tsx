@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
+import { useNavigate } from 'react-router-dom';
 
 interface SurveyData {
   skinTypes: string[];
@@ -20,8 +20,10 @@ interface SurveyData {
 }
 
 const SurveyResultsPage = () => {
+  const navigate = useNavigate();
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
+
 
   useEffect(() => {
     const savedData = localStorage.getItem('skinSurveyData');
@@ -513,13 +515,13 @@ const SurveyResultsPage = () => {
 
         {/* Continue Button */}
         <div className="text-center">
-          <button
-            onClick={() => window.REACT_APP_NAVIGATE('/my-skin')}
-            className="bg-sage-600 text-white px-8 py-4 rounded-xl font-medium hover:bg-sage-700 transition-colors text-lg whitespace-nowrap cursor-pointer"
-          >
-            View Your Complete Skin Profile
-            <i className="ri-arrow-right-line ml-2"></i>
-          </button>
+<button
+  onClick={() => navigate('/my-skin')}
+  className="bg-sage-600 text-white px-8 py-4 rounded-xl font-medium hover:bg-sage-700 transition-colors text-lg whitespace-nowrap cursor-pointer"
+>
+  View Your Complete Skin Profile
+  <i className="ri-arrow-right-line ml-2"></i>
+</button>
         </div>
       </main>
 

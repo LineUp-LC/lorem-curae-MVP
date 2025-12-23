@@ -157,9 +157,10 @@ class SessionStateManager {
   }
 
   // Track product views
-  viewProduct(productId: string): void {
-    if (!this.state.context.viewedProducts.includes(productId)) {
-      this.state.context.viewedProducts.push(productId);
+  viewProduct(productId: number): void {
+    const productIdStr = productId.toString();
+    if (!this.state.context.viewedProducts.includes(productIdStr)) {
+      this.state.context.viewedProducts.push(productIdStr);
     }
     this.trackInteraction('click', 'product', { productId });
   }

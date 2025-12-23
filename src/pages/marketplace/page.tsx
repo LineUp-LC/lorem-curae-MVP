@@ -56,9 +56,10 @@ const MarketplacePage = () => {
     }
   };
 
-  const handlePurchase = async (productId: string) => {
+  const handlePurchase = async (productId: number) => {
     try {
-      setPurchasingProduct(productId);
+      const productIdStr = productId.toString();
+      setPurchasingProduct(productIdStr);
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -68,7 +69,7 @@ const MarketplacePage = () => {
 
       const { data, error } = await supabase.functions.invoke('create-marketplace-checkout', {
         body: {
-          productId,
+          productId: productIdStr,
           quantity: 1,
           successUrl: `${window.location.origin}/marketplace/success`,
           cancelUrl: `${window.location.origin}/marketplace`,

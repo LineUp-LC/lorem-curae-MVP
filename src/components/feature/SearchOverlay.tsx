@@ -13,9 +13,10 @@ interface SearchResult {
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
+  onProductClick?: (productId: number) => void;
 }
 
-const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
+const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
@@ -145,7 +146,17 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
     setResults(filtered);
   }, [searchQuery, activeCategory]);
 
-  const handleResultClick = (link: string) => {
+  const handleResultClick = (result: SearchResult) => {
+    if (result.category === 'Product' && onProductClick) {
+      onProductClick(result.id);
+    } else {
+      navigate(result.link);
+    }
+    onClose();
+    setSearchQuery('');
+  };
+
+  const handleQuickLinkClick = (link: string) => {
     navigate(link);
     onClose();
     setSearchQuery('');
@@ -231,7 +242,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
                 {results.map((result) => (
                   <div
                     key={result.id}
-                    onClick={() => handleResultClick(result.link)}
+                    onClick={() => handleResultClick(result)}
                     className="p-4 hover:bg-sage-50 transition-colors cursor-pointer"
                   >
                     <div className="flex items-center space-x-4">
@@ -283,28 +294,28 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
               <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Links</h4>
               <div className="grid grid-cols-2 gap-2">
                 <button
-                  onClick={() => handleResultClick('/discover')}
+                  onClick={() => handleQuickLinkClick('/discover')}
                   className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-compass-line text-sage-600"></i>
                   <span className="text-sm font-medium text-gray-800">Skin Quiz</span>
                 </button>
                 <button
-                  onClick={() => handleResultClick('/ingredients')}
+                  onClick={() => handleQuickLinkClick('/ingredients')}
                   className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-flask-line text-sage-600"></i>
                   <span className="text-sm font-medium text-gray-800">Ingredients</span>
                 </button>
                 <button
-                  onClick={() => handleResultClick('/services')}
+                  onClick={() => handleQuickLinkClick('/services')}
                   className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-service-line text-sage-600"></i>
                   <span className="text-sm font-medium text-gray-800">Services</span>
                 </button>
                 <button
-                  onClick={() => handleResultClick('/marketplace')}
+                  onClick={() => handleQuickLinkClick('/marketplace')}
                   className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-store-line text-sage-600"></i>
