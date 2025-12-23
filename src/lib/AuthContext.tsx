@@ -23,6 +23,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check for existing session on mount
     const initAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
+      console.log("DEBUG: Initial auth check - Current user:", user);
       setUser(user);
 
       if (user) {
@@ -53,12 +54,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signUp = async (email: string, password: string, fullName: string) => {
     const { data, error } = await supabase.auth.signUp({ email, password });
 
+    console.log("DEBUG: Signup result - user:", data?.user);
+    console.log("DEBUG: Signup result - session:", data?.session);
+    console.log("DEBUG: Signup error:", error);
+
     if (error) {
       return { error: error.message };
     }
 
-    if (data.user) {
-      // Create initial profile
+    // If signup succeeded but no session (email confirmation required)
+    if (data.user && !data.session) {
+      console.log("DEBUG: No session after signup, attempting auto-signin...");
+      
+      // Try to sign in immediately (works if email confirmation is disabled)
+      const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      console.log("DEBUG: Auto-signin result - session:", signInData?.session);
+      console.log("DEBUG: Auto-signin error:", signInError);
+      
+      if (signInError) {
+        // Email confirmation might be required - return success but inform user
+        return { error: 'Account created! Please check your email to confirm your account.' };
+      }
+      
+      // Now we have a session, create the profile
+      if (signInData?.user) {
+        const success = await createUserProfile(signInData.user.id, email, fullName);
+        if (!success) {
+          return { error: 'Failed to create user profile' };
+        }
+      }
+    } else if (data.user && data.session) {
+      // We have both user and session, create profile
       const success = await createUserProfile(data.user.id, email, fullName);
       if (!success) {
         return { error: 'Failed to create user profile' };

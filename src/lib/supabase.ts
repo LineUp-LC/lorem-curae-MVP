@@ -3,6 +3,9 @@ import { createClient } from '@supabase/supabase-js';
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+console.log("DEBUG: Supabase URL =", supabaseUrl || "[NOT SET]");
+console.log("DEBUG: Supabase ANON KEY length =", supabaseAnonKey ? supabaseAnonKey.length : 0);
+
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
@@ -154,6 +157,15 @@ export async function createUserProfile(
   email: string,
   fullName: string
 ): Promise<boolean> {
+  // Verify we have a valid session before attempting insert
+  const { data: { user } } = await supabase.auth.getUser();
+  console.log("DEBUG: createUserProfile - current user:", user);
+  
+  if (!user) {
+    console.error('Error creating user profile: No authenticated user');
+    return false;
+  }
+
   const { error } = await supabase.from('users_profiles').insert({
     id: userId,
     email,
@@ -172,5 +184,6 @@ export async function createUserProfile(
     return false;
   }
 
+  console.log("DEBUG: Profile created successfully for user:", userId);
   return true;
 }
