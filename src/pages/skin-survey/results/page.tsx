@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 import { useNavigate } from 'react-router-dom';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+
 
 interface SurveyData {
   skinTypes: string[];
