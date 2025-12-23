@@ -2,8 +2,6 @@ import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
   
-
-
 interface Product {
   id: number;
   name: string;
@@ -28,6 +26,18 @@ interface ProductCatalogProps {
   onFilterChange: (type: string, value: any) => void;
 }
 
+// Synonym map for concern matching
+const concernMap: Record<string, string[]> = {
+  'acne': ['breakouts', 'blemishes', 'pimples'],
+  'aging': ['anti-aging', 'wrinkles', 'fine lines', 'mature skin'],
+  'dryness': ['dry skin', 'dehydration', 'flaky'],
+  'oiliness': ['oily skin', 'excess oil', 'shine'],
+  'dark spots': ['hyperpigmentation', 'discoloration', 'sun spots'],
+  'redness': ['rosacea', 'irritation', 'sensitivity'],
+  'dullness': ['lack of radiance', 'tired skin', 'uneven tone'],
+  'pores': ['large pores', 'clogged pores', 'minimizing pores'],
+};
+
 export default function ProductCatalog({
   userConcerns,
   onStartQuiz,
@@ -47,22 +57,20 @@ export default function ProductCatalog({
   const [showCompareModal, setShowCompareModal] = useState(false);
   const [surveyCompleted, setSurveyCompleted] = useState(false);
 
-// Check if user has completed the skin survey
-useEffect(() => {
-  const userProfile = localStorage.getItem('userProfile');
-  const skinSurveyData = localStorage.getItem('skinSurveyData');
-  setSurveyCompleted(!!(userProfile || skinSurveyData));
-}, []);
+  // Check if user has completed the skin survey
+  useEffect(() => {
+    const userProfile = localStorage.getItem('userProfile');
+    const skinSurveyData = localStorage.getItem('skinSurveyData');
+    setSurveyCompleted(!!(userProfile || skinSurveyData));
+  }, []);
 
-
-// Handle category from URL params (from homepage CTAs)
-useEffect(() => {
-  const categoryParam = searchParams.get('category');
-  if (categoryParam) {
-    setSelectedCategory(categoryParam);
-  }
-}, [searchParams]);
-
+  // Handle category from URL params (from homepage CTAs)
+  useEffect(() => {
+    const categoryParam = searchParams.get('category');
+    if (categoryParam) {
+      setSelectedCategory(categoryParam);
+    }
+  }, [searchParams]);
 
   const categories = [
     { value: 'all', label: 'All Products', icon: 'ri-grid-line' },
@@ -86,7 +94,6 @@ useEffect(() => {
 
   const products = productData;
     
-    
   // Collect all recommended ingredients for the user's selected concerns
   const recommendedIngredients = useMemo(() => {
     const stored = localStorage.getItem("userConcerns");
@@ -101,7 +108,6 @@ useEffect(() => {
     }
   }, []);
 
-
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
     const matchesSkinType = selectedSkinType === 'all' || product.skinTypes.includes(selectedSkinType);
@@ -113,55 +119,60 @@ useEffect(() => {
     return matchesCategory && matchesSkinType && matchesSearch;
   });
 
-// 2️⃣ Concern matching happens AFTER base filtering
-const matchedProducts = useMemo(() => {
-  if (!userConcerns || userConcerns.length === 0) return [];
-  return filteredProducts.filter((product) =>
-    product.concerns?.some((c) => userConcerns.includes(c))
-  );
-}, [filteredProducts, userConcerns]);
+  // Concern matching happens AFTER base filtering
+  const matchedProducts = useMemo(() => {
+    if (!userConcerns || userConcerns.length === 0) return [];
 
-const otherProducts = useMemo(() => {
-  return filteredProducts.filter(
-    (product) =>
-      !product.concerns?.some((c) => userConcerns.includes(c))
-  );
-}, [filteredProducts, userConcerns]);
+    const matches = filteredProducts.filter((product) =>
+      product.concerns?.some((c) => userConcerns.includes(c))
+    );
 
+    console.log("User concerns:", userConcerns);
+    console.log("Filtered products:", filteredProducts);
+    console.log("Matched products:", matches);
 
+    return matches;
+  }, [filteredProducts, userConcerns]);
 
-// 3️⃣ Final sorting (price, rating, popularity)
-const sortedMatchedProducts = useMemo(() => {
-  return [...matchedProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'popular':
-      default:
-        return b.reviewCount - a.reviewCount;
-    }
-  });
-}, [matchedProducts, sortBy]);
+  const otherProducts = useMemo(() => {
+    return filteredProducts.filter(
+      (product) =>
+        !product.concerns?.some((c) => userConcerns.includes(c))
+    );
+  }, [filteredProducts, userConcerns]);
 
-const sortedOtherProducts = useMemo(() => {
-  return [...otherProducts].sort((a, b) => {
-    switch (sortBy) {
-      case 'price-low':
-        return a.price - b.price;
-      case 'price-high':
-        return b.price - a.price;
-      case 'rating':
-        return b.rating - a.rating;
-      case 'popular':
-      default:
-        return b.reviewCount - a.reviewCount;
-    }
-  });
-}, [otherProducts, sortBy]);
+  // Final sorting (price, rating, popularity)
+  const sortedMatchedProducts = useMemo(() => {
+    return [...matchedProducts].sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'popular':
+        default:
+          return b.reviewCount - a.reviewCount;
+      }
+    });
+  }, [matchedProducts, sortBy]);
+
+  const sortedOtherProducts = useMemo(() => {
+    return [...otherProducts].sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return a.price - b.price;
+        case 'price-high':
+          return b.price - a.price;
+        case 'rating':
+          return b.rating - a.rating;
+        case 'popular':
+        default:
+          return b.reviewCount - a.reviewCount;
+      }
+    });
+  }, [otherProducts, sortBy]);
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -181,138 +192,140 @@ const sortedOtherProducts = useMemo(() => {
     return stars;
   };
 
-    
-    // Recommended for You section (only if personalization is active)
-const recommendedSection = (
-  sortedMatchedProducts.length > 0 && (
-    <section className="mb-10">
-      <h2 className="text-xl font-semibold text-sage-700 mb-4">
-        Recommended for You
-      </h2>
+  // Helper function to check if a product is recommended based on synonym-aware matching
+  const isProductRecommended = (product: Product) => {
+    return product.concerns?.some((productConcern) =>
+      userConcerns.some((userConcern) => {
+        const synonyms = concernMap[userConcern] || [];
+        return (
+          productConcern.toLowerCase() === userConcern.toLowerCase() ||
+          synonyms.includes(productConcern.toLowerCase())
+        );
+      })
+    );
+  };
 
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {sortedMatchedProducts.map((product) => (
-          <div
-            key={product.id}
-            onClick={() => navigate(`/product-detail?id=${product.id}`)}
-            className={`
-              bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
-              ${product.concerns?.some(c => userConcerns.includes(c))
-                ? "ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]"
-                : "shadow-md hover:shadow-xl border border-gray-100"
-              }
-            `}
-          >
-            {/* Best Match badge */}
-            {product.concerns?.some(c => userConcerns.includes(c)) && (
-              <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow">
-                Best Match
+  // Render a single product card (shared between recommended and main grid)
+  const renderProductCard = (product: Product) => {
+    const isRecommended = isProductRecommended(product);
+
+    return (
+      <div
+        key={product.id}
+        onClick={() => navigate(`/product-detail?id=${product.id}`)}
+        className={`
+          bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
+          ${isRecommended
+            ? "ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]"
+            : "shadow-md hover:shadow-xl border border-gray-100"
+          }
+        `}
+      >
+        {isRecommended && (
+          <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow z-10">
+            Best Match
+          </span>
+        )}
+
+        {/* Comparison Button */}
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+            handleAddToCompare(product.id, e);
+          }}
+          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 ${
+            compareList.includes(product.id)
+              ? 'bg-sage-600 text-white'
+              : 'bg-white text-gray-700 hover:bg-sage-100'
+          }`}
+          title={compareList.includes(product.id) ? 'Remove from comparison' : 'Add to comparison'}
+        >
+          {compareList.includes(product.id) ? (
+            <i className="ri-check-line text-xl"></i>
+          ) : (
+            <i className="ri-scales-line text-xl"></i>
+          )}
+        </button>
+
+        {/* Product Image */}
+        <div className="relative w-full h-80 overflow-hidden bg-gray-50">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+          />
+          {!product.inStock && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <span className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-full text-sm">
+                Out of Stock
               </span>
-            )}
-
-            {/* Comparison Button */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                handleAddToCompare(product.id, e);
-              }}
-              className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 ${
-                compareList.includes(product.id)
-                  ? 'bg-sage-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-sage-100'
-              }`}
-            >
-              {compareList.includes(product.id) ? (
-                <i className="ri-check-line text-xl"></i>
-              ) : (
-                <i className="ri-scales-line text-xl"></i>
-              )}
-            </button>
-
-            {/* Product Image */}
-            <div className="relative w-full h-80 overflow-hidden bg-gray-50">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-              />
-              {!product.inStock && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <span className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-full text-sm">
-                    Out of Stock
-                  </span>
-                </div>
-              )}
             </div>
+          )}
+        </div>
 
-            {/* Product Info */}
-            <div className="p-5">
-              <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
-                {product.brand}
-              </p>
+        {/* Product Info */}
+        <div className="p-5">
+          <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
+            {product.brand}
+          </p>
 
-              <h3 className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
-                {product.name}
-              </h3>
+          <h3 className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
+            {product.name}
+          </h3>
 
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="flex items-center space-x-1">
-                  {renderStars(product.rating)}
-                </div>
-                <span className="text-sm font-medium text-gray-700">{product.rating}</span>
-                <span className="text-sm text-gray-500">({product.reviewCount})</span>
-              </div>
+          <div className="flex items-center space-x-2 mb-3">
+            <div className="flex items-center space-x-1">
+              {renderStars(product.rating)}
+            </div>
+            <span className="text-sm font-medium text-gray-700">{product.rating}</span>
+            <span className="text-sm text-gray-500">({product.reviewCount})</span>
+          </div>
 
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {product.description}
-              </p>
+          <p className="text-sm text-gray-600 mb-4 line-clamp-2">
+            {product.description}
+          </p>
 
-              {/* Key Ingredients with sage highlighting */}
-              <div className="mb-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
-                <div className="flex flex-wrap gap-1">
-                  {product.keyIngredients.slice(0, 2).map((ingredient, idx) => {
-                    const isRecommended = recommendedIngredients.includes(ingredient);
-                    return (
-                      <span
-                        key={idx}
-                        className={`
-                          px-2 py-1 text-xs rounded-full border
-                          ${isRecommended
-                            ? "bg-sage-100 text-sage-700 border-sage-300"
-                            : "bg-cream-100 text-gray-700 border-gray-200"
-                          }
-                        `}
-                      >
-                        {ingredient}
-                      </span>
-                    );
-                  })}
-                  {product.keyIngredients.length > 2 && (
-                    <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
-                      +{product.keyIngredients.length - 2}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
-                  <span className="text-xl font-bold text-forest-900">
-                    ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
+          {/* Key Ingredients with sage highlighting */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
+            <div className="flex flex-wrap gap-1">
+              {product.keyIngredients.slice(0, 2).map((ingredient, idx) => {
+                const isIngredientRecommended = recommendedIngredients.includes(ingredient);
+                return (
+                  <span
+                    key={idx}
+                    className={`
+                      px-2 py-1 text-xs rounded-full border
+                      ${isIngredientRecommended
+                        ? "bg-sage-100 text-sage-700 border-sage-300"
+                        : "bg-cream-100 text-gray-700 border-gray-200"
+                      }
+                    `}
+                  >
+                    {ingredient}
                   </span>
-                </div>
-              </div>
+                );
+              })}
+              {product.keyIngredients.length > 2 && (
+                <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
+                  +{product.keyIngredients.length - 2}
+                </span>
+              )}
             </div>
           </div>
-        ))}
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div>
+              <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
+              <span className="text-xl font-bold text-forest-900">
+                ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
-    </section>
-  )
-);
-
-
+    );
+  };
 
   const handleAddToCompare = (productId: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -486,143 +499,34 @@ const recommendedSection = (
       {/* Results Count */}
       <div className="mb-6">
         <p className="text-sm text-gray-600">
-      Showing{" "}
-      <span className="font-semibold text-forest-900">
-       {sortedMatchedProducts.length + sortedOtherProducts.length}
-      </span>{" "}
-      products        </p>
+          Showing{" "}
+          <span className="font-semibold text-forest-900">
+            {sortedMatchedProducts.length + sortedOtherProducts.length}
+          </span>{" "}
+          products
+        </p>
       </div>
 
-      {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-product-shop>
-        {sortedOtherProducts.map((product) => (
-          <div
-            key={product.id}
-            onClick={() => navigate(`/product-detail?id=${product.id}`)}
-className={`
-  bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
-  ${product.concerns?.some(c => userConcerns.includes(c))
-    ? "ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]"
-    : "shadow-md hover:shadow-xl border border-gray-100"
-  }
-`}
-
-          >
-          {product.concerns?.some(c => userConcerns.includes(c)) && (
-           <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow">
-            Best Match
-           </span>
-           )}
-            {/* Comparison Button */}
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                handleAddToCompare(product.id, e);
-              }}
-              className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 ${
-                compareList.includes(product.id)
-                  ? 'bg-sage-600 text-white'
-                  : 'bg-white text-gray-700 hover:bg-sage-100'
-              }`}
-              title={compareList.includes(product.id) ? 'Remove from comparison' : 'Add to comparison'}
-            >
-              {compareList.includes(product.id) ? (
-                <i className="ri-check-line text-xl"></i>
-              ) : (
-                <i className="ri-scales-line text-xl"></i>
-              )}
-            </button>
-
-            {/* Product Image */}
-            <div className="relative w-full h-80 overflow-hidden bg-gray-50">
-              <img
-                src={product.image}
-                alt={product.name}
-                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
-              />
-              {!product.inStock && (
-                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                  <span className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-full text-sm">
-                    Out of Stock
-                  </span>
-                </div>
-              )}
-            </div>
-
-            {/* Product Info */}
-            <div className="p-5">
-              {/* Brand */}
-              <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
-                {product.brand}
-              </p>
-
-              {/* Product Name */}
-              <h3 className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
-                {product.name}
-              </h3>
-
-              {/* Rating */}
-              <div className="flex items-center space-x-2 mb-3">
-                <div className="flex items-center space-x-1">
-                  {renderStars(product.rating)}
-                </div>
-                <span className="text-sm font-medium text-gray-700">{product.rating}</span>
-                <span className="text-sm text-gray-500">({product.reviewCount})</span>
-              </div>
-
-              {/* Description */}
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                {product.description}
-              </p>
-
-{/* Key Ingredients */}
-<div className="mb-4">
-  <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
-
-  <div className="flex flex-wrap gap-1">
-    {product.keyIngredients.slice(0, 2).map((ingredient, idx) => {
-      const isRecommended = recommendedIngredients.includes(ingredient);
-
-      return (
-        <span
-          key={idx}
-          className={`
-            px-2 py-1 text-xs rounded-full border
-            ${isRecommended
-              ? "bg-sage-100 text-sage-700 border-sage-300"
-              : "bg-cream-100 text-gray-700 border-gray-200"
-            }
-          `}
-        >
-          {ingredient}
-        </span>
-      );
-    })}
-
-    {product.keyIngredients.length > 2 && (
-      <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
-        +{product.keyIngredients.length - 2}
-      </span>
-    )}
-  </div>
-</div>
-
-              {/* Price & CTA */}
-              <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
-                  <span className="text-xl font-bold text-forest-900">
-                    ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
-                  </span>
-                </div>
-              </div>
-            </div>
+      {/* Recommended for You Section */}
+      {sortedMatchedProducts.length > 0 && (
+        <section className="mb-10">
+          <h2 className="text-xl font-semibold text-sage-700 mb-4">
+            Recommended for You
+          </h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {sortedMatchedProducts.map((product) => renderProductCard(product))}
           </div>
-        ))}
+        </section>
+      )}
+
+      {/* Main Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" data-product-shop>
+        {sortedOtherProducts.map((product) => renderProductCard(product))}
       </div>
 
       {/* No Results */}
-{sortedMatchedProducts.length + sortedOtherProducts.length === 0 && (        <div className="text-center py-16">
+      {sortedMatchedProducts.length + sortedOtherProducts.length === 0 && (
+        <div className="text-center py-16">
           <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-full mx-auto mb-4">
             <i className="ri-search-line text-4xl text-gray-400"></i>
           </div>
