@@ -45,7 +45,7 @@ const StorefrontRegisterPage = () => {
       if (!session) return;
 
       const response = await fetch(
-        `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/check-connect-status`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/check-connect-status`,
         {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
@@ -82,7 +82,7 @@ const StorefrontRegisterPage = () => {
       }
 
       const response = await fetch(
-        `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/create-connect-account`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-connect-account`,
         {
           method: 'POST',
           headers: {
@@ -119,7 +119,7 @@ const StorefrontRegisterPage = () => {
       if (!session) return;
 
       const response = await fetch(
-        `${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/create-connect-dashboard-link`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-connect-dashboard-link`,
         {
           method: 'POST',
           headers: {

@@ -75,11 +75,11 @@ const DataAnonymizationPage: React.FC = () => {
     try {
       const dateFrom = new Date(Date.now() - parseInt(selectedTimeframe) * 24 * 60 * 60 * 1000).toISOString();
       
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/data-anonymization`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/data-anonymization`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           action: 'get_anonymized_insights',
@@ -112,11 +112,11 @@ const DataAnonymizationPage: React.FC = () => {
 
       if (contributors) {
         for (const contributor of contributors.slice(0, 5)) { // Process first 5 for demo
-          const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/data-anonymization`, {
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/data-anonymization`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY}`
+              'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
             },
             body: JSON.stringify({
               action: 'process_user_data',
@@ -142,11 +142,11 @@ const DataAnonymizationPage: React.FC = () => {
     try {
       const dateFrom = new Date(Date.now() - parseInt(selectedTimeframe) * 24 * 60 * 60 * 1000).toISOString();
       
-      const response = await fetch(`${import.meta.env.VITE_PUBLIC_SUPABASE_URL}/functions/v1/data-anonymization`, {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/data-anonymization`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_PUBLIC_SUPABASE_ANON_KEY}`
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
           action: 'generate_research_dataset',
