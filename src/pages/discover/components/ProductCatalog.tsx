@@ -134,12 +134,12 @@ export default function ProductCatalog({
     return matches;
   }, [filteredProducts, userConcerns]);
 
-  const otherProducts = useMemo(() => {
-    return filteredProducts.filter(
-      (product) =>
-        !product.concerns?.some((c) => userConcerns.includes(c))
-    );
-  }, [filteredProducts, userConcerns]);
+const otherProducts = useMemo(() => {
+  return filteredProducts.filter(
+    (product) =>
+      !matchedProducts.some((m) => m.id === product.id)
+  );
+}, [filteredProducts, matchedProducts]);
 
   // Final sorting (price, rating, popularity)
   const sortedMatchedProducts = useMemo(() => {
