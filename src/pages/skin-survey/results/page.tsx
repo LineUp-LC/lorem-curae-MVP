@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 import { useNavigate } from 'react-router-dom';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { supabase } from '../../../lib/supabase';
 
 
 interface SurveyData {
@@ -49,6 +49,44 @@ const SurveyResultsPage = () => {
       localStorage.setItem('userProfile', JSON.stringify(userProfile));
     }
   }, []);
+
+  useEffect(() => {
+    const saveSkinType = async () => {
+      if (!surveyData) return;
+
+      console.log("Saving skin type:", surveyData.skinTypes[0]);
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+
+      console.log("User:", user);
+
+      if (userError || !user) {
+        console.error("No logged-in user, cannot save skin type");
+        return;
+      }
+
+      const { error } = await supabase
+        .from("user_profiles")
+        .upsert(
+          {
+            id: user.id,
+            skin_type: surveyData.skinTypes[0] || "Normal",
+          },
+          { onConflict: "id" }
+        );
+
+      if (error) {
+        console.error("Supabase error:", error);
+      } else {
+        console.log("Skin type saved successfully");
+      }
+    };
+
+    saveSkinType();
+  }, [surveyData]);
 
   const generateRecommendations = (data: SurveyData) => {
     const recs: any = {

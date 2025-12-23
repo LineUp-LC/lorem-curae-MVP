@@ -18,6 +18,10 @@ export interface UserProfile {
   subscription_tier: 'free' | 'plus' | 'premium';
   created_at: string;
   updated_at: string;
+  skin_type?: string;
+  concerns?: string[];
+  preferences?: Record<string, any>;
+  lifestyle?: Record<string, any>;
   profile_theme?: string;
   profile_layout?: string;
   show_badges?: boolean;
@@ -110,4 +114,61 @@ export interface AffiliateTransaction {
   cashback_amount: number;
   status: 'pending' | 'completed';
   created_at: string;
+}
+
+// Helper functions
+export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
+  const { data, error } = await supabase
+    .from('user_profiles')
+    .select('*')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    console.error('Error loading user profile:', error);
+    return null;
+  }
+
+  return data;
+}
+
+export async function updateUserProfile(
+  userId: string,
+  updates: Partial<UserProfile>
+): Promise<boolean> {
+  const { error } = await supabase
+    .from('user_profiles')
+    .update({ ...updates, updated_at: new Date().toISOString() })
+    .eq('id', userId);
+
+  if (error) {
+    console.error('Error updating user profile:', error);
+    return false;
+  }
+
+  return true;
+}
+
+export async function createUserProfile(
+  userId: string,
+  email: string,
+  fullName: string
+): Promise<boolean> {
+  const { error } = await supabase.from('user_profiles').insert({
+    id: userId,
+    email,
+    full_name: fullName,
+    subscription_tier: 'free',
+    skin_type: null,
+    concerns: [],
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  });
+
+  if (error) {
+    console.error('Error creating user profile:', error);
+    return false;
+  }
+
+  return true;
 }

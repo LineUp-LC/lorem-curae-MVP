@@ -1,16 +1,31 @@
-import { useState } from 'react';
+import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../lib/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    // Handle login logic
+    setError(null);
+    setIsLoading(true);
+
+    const { error } = await signIn(formData.email, formData.password);
+
+    setIsLoading(false);
+
+    if (error) {
+      setError(error);
+      return;
+    }
+
     navigate('/account');
   };
 
@@ -37,6 +52,12 @@ const LoginPage = () => {
               Sign in to continue your skincare journey
             </p>
           </div>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+              {error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
@@ -85,9 +106,10 @@ const LoginPage = () => {
 
             <button
               type="submit"
-              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+              disabled={isLoading}
+              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign In
+              {isLoading ? 'Signing In...' : 'Sign In'}
             </button>
           </form>
 
