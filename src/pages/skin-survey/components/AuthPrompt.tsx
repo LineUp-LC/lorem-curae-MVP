@@ -12,19 +12,6 @@ const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
       <Navbar />
       
       <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
-        <div className="text-center mb-12">
-          <div className="w-20 h-20 mx-auto mb-6 bg-sage-100 rounded-full flex items-center justify-center">
-            <i className="ri-questionnaire-line text-3xl text-sage-600"></i>
-          </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Start Your Skin Survey
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Get personalized skincare recommendations based on your unique skin profile. 
-            Sign in to save your results and track your progress over time.
-          </p>
-        </div>
-
         <div className="bg-white rounded-2xl p-8 lg:p-12 shadow-sm border border-gray-100 max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
@@ -50,14 +37,12 @@ const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
               Sign In
             </Link>
 
-            {onContinueAsGuest && (
-              <button
-                onClick={onContinueAsGuest}
-                className="w-full block border-2 border-sage-300 hover:border-sage-400 text-sage-700 py-4 px-6 rounded-lg font-semibold text-center transition-colors cursor-pointer whitespace-nowrap"
-              >
-                Continue as Guest
-              </button>
-            )}
+            <button
+              onClick={onContinueAsGuest}
+              className="w-full block border-2 border-sage-300 hover:border-sage-400 text-sage-700 py-4 px-6 rounded-lg font-semibold text-center transition-colors cursor-pointer whitespace-nowrap"
+            >
+              Continue as Guest
+            </button>
           </div>
 
           <div className="mt-8 pt-8 border-t border-gray-200">
@@ -81,12 +66,10 @@ const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
               </li>
             </ul>
 
-            {onContinueAsGuest && (
-              <p className="mt-4 text-xs text-gray-500">
-                <i className="ri-information-line mr-1"></i>
-                Guest results are saved locally and will be merged into your account when you sign up.
-              </p>
-            )}
+            <p className="mt-4 text-xs text-gray-500">
+              <i className="ri-information-line mr-1"></i>
+              Guest results are saved locally and will be merged into your account when you sign up.
+            </p>
           </div>
         </div>
       </main>

@@ -111,7 +111,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (data.user) {
       // createUserProfile will merge temp data and clear it
-      const success = await createUserProfile(data.user.id, email);
+      const success = await createUserProfile(email);
       if (success) {
         const newProfile = await loadUserProfile(data.user.id);
         setProfile(newProfile);

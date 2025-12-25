@@ -66,16 +66,36 @@ export async function updateUserProfile(
 // Create user profile
 // -----------------------------
 export async function createUserProfile(
-  userId: string,
   email: string,
   fullName: string | null = null
 ): Promise<boolean> {
-  console.log('DEBUG: Creating profile for user:', userId);
+  const {
+    data: { user },
+    error: userError
+  } = await supabase.auth.getUser();
 
-  if (!userId || !email) {
-    console.error('Invalid userId or email passed to createUserProfile');
+  if (userError || !user) {
+    console.error("No authenticated user found", userError);
     return false;
   }
+
+  const userId = user.id;
+
+  console.log("DEBUG: Creating profile for user:", userId);
+
+  const { error } = await supabase.from("users_profiles").insert({
+    user_id: userId,
+    email,
+    full_name: fullName
+  });
+
+  if (error) {
+    console.error("Error inserting profile:", error);
+    return false;
+  }
+
+  return true;
+}
 
   // -----------------------------
   // NEW — Merge anonymous temp data into new profile
