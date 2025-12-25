@@ -6,7 +6,7 @@ import {
 } from '../../../utils/sessionState';
 
 interface ProductComparisonProps {
-  productIds: number[];
+  productIds?: number[];
   onClose: () => void;
   onRemove: (id: number) => void;
 }
@@ -17,8 +17,10 @@ const ProductComparison = ({
   onRemove,
 }: ProductComparisonProps) => {
   const navigate = useNavigate();
-
-  const products = productData.filter((p) => productIds.includes(p.id));
+  
+  // Safe fallback for productIds to prevent undefined errors
+  const safeProductIds = productIds ?? [];
+  const products = productData.filter((p) => safeProductIds.includes(p.id));
 
   if (products.length === 0) {
     return (
@@ -67,16 +69,13 @@ const ProductComparison = ({
             >
               Remove
             </button>
-
             <img
               src={product.image}
               alt={product.name}
               className="comparison-image"
               onClick={() => handleNavigate(product.id)}
             />
-
             <h3 className="font-semibold mt-2">{product.name}</h3>
-
             <p className="text-sm text-gray-600">{product.brand}</p>
 
             <div className="mt-2">
@@ -84,7 +83,7 @@ const ProductComparison = ({
                 Skin Type Match:
               </p>
               <p className="text-sm">
-                {product.skin_types?.includes(userProfile.skinType)
+                {product.skinTypes?.includes(userProfile.skinType)
                   ? '✔ Good match'
                   : '⚠ Not ideal'}
               </p>
@@ -115,7 +114,7 @@ const ProductComparison = ({
                 Key Ingredients:
               </p>
               <ul className="text-sm list-disc ml-4">
-                {product.key_ingredients?.map((ing) => (
+                {product.keyIngredients?.map((ing) => (
                   <li key={ing}>{ing}</li>
                 ))}
               </ul>

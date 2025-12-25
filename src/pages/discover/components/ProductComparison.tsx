@@ -12,8 +12,8 @@ interface ComparisonHighlights {
 }
 
 interface ProductComparisonProps {
-  products: Product[];
-  userConcerns: string[];
+  products?: Product[];
+  userConcerns?: string[];
   onClose: () => void;
   onRemoveProduct: (productId: number) => void;
 }
@@ -26,6 +26,10 @@ export default function ProductComparison({
 }: ProductComparisonProps) {
   const navigate = useNavigate();
 
+  // Safe fallbacks to prevent undefined errors
+  const safeProducts = products ?? [];
+  const safeUserConcerns = userConcerns ?? [];
+
   const handleViewProductDetail = (productId: number) => {
     onClose();
     navigate(`/product-detail?id=${productId}`);
@@ -33,11 +37,11 @@ export default function ProductComparison({
 
   // Calculate comparison highlights
   const getComparisonHighlights = (): ComparisonHighlights => {
-    if (products.length === 0) return {};
+    if (safeProducts.length === 0) return {};
 
-    const prices = products.map((p) => p.price);
-    const ratings = products.map((p) => p.rating);
-    const reviewCounts = products.map((p) => p.reviewCount);
+    const prices = safeProducts.map((p) => p.price);
+    const ratings = safeProducts.map((p) => p.rating);
+    const reviewCounts = safeProducts.map((p) => p.reviewCount);
 
     return {
       lowestPrice: Math.min(...prices),
@@ -81,7 +85,7 @@ export default function ProductComparison({
             <div>
               <h2 className="text-2xl font-serif text-forest-900">Product Comparison</h2>
               <p className="text-sm text-gray-600">
-                Compare {products.length} products side by side
+                Compare {safeProducts.length} products side by side
               </p>
             </div>
           </div>
@@ -96,19 +100,19 @@ export default function ProductComparison({
         {/* Comparison Grid */}
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {products.map((product) => {
+            {safeProducts.map((product) => {
               const isLowestPrice =
-                product.price === highlights.lowestPrice && products.length > 1;
+                product.price === highlights.lowestPrice && safeProducts.length > 1;
               const isHighestPrice =
-                product.price === highlights.highestPrice && products.length > 1;
+                product.price === highlights.highestPrice && safeProducts.length > 1;
               const isHighestRating =
-                product.rating === highlights.highestRating && products.length > 1;
+                product.rating === highlights.highestRating && safeProducts.length > 1;
               const isLowestRating =
-                product.rating === highlights.lowestRating && products.length > 1;
+                product.rating === highlights.lowestRating && safeProducts.length > 1;
               const hasMostReviews =
-                product.reviewCount === highlights.mostReviews && products.length > 1;
+                product.reviewCount === highlights.mostReviews && safeProducts.length > 1;
               const hasLeastReviews =
-                product.reviewCount === highlights.leastReviews && products.length > 1;
+                product.reviewCount === highlights.leastReviews && safeProducts.length > 1;
 
               return (
                 <div
@@ -255,7 +259,7 @@ export default function ProductComparison({
                       </p>
                       <div className="flex flex-wrap gap-1">
                         {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
-                          const isRecommended = matchesIngredient(ingredient, userConcerns);
+                          const isRecommended = matchesIngredient(ingredient, safeUserConcerns);
 
                           return (
                             <span
@@ -278,7 +282,7 @@ export default function ProductComparison({
                       <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
                       <div className="flex flex-wrap gap-1">
                         {product.concerns.slice(0, 2).map((concern, idx) => {
-                          const isMatch = matchesConcern(concern, userConcerns);
+                          const isMatch = matchesConcern(concern, safeUserConcerns);
 
                           return (
                             <span
