@@ -1,6 +1,6 @@
-
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../../utils/sessionState';
 
 interface Review {
   id: number;
@@ -23,10 +23,13 @@ interface ProductReviewsProps {
 }
 
 const ProductReviews = ({ productId }: ProductReviewsProps) => {
-  // Mock user skin profile - in real app, this would come from user data
+  // Get user skin profile from sessionState (unified source of truth)
+  const skinType = getEffectiveSkinType() || 'combination';
+  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['Acne & Breakouts', 'Hyperpigmentation'];
+  
   const [userSkinProfile] = useState({
-    skinType: 'combination',
-    primaryConcerns: ['Acne & Breakouts', 'Hyperpigmentation'],
+    skinType,
+    primaryConcerns: concerns,
     age: 28,
     routineLength: '3-6 months'
   });
@@ -192,57 +195,43 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
   const getSimilarityBadge = (score: number) => {
     if (score >= 70) return { label: 'Very Similar Profile', color: 'bg-green-100 text-green-800', icon: 'ri-user-heart-line' };
-    if (score >= 50) return { label: 'Similar Profile', color: 'bg-blue-100 text-blue-800', icon: 'ri-user-line' };
-    if (score >= 30) return { label: 'Somewhat Similar', color: 'bg-amber-100 text-amber-800', icon: 'ri-user-2-line' };
-    return null;
+    if (score >= 50) return { label: 'Similar Profile', color: 'bg-sage-100 text-sage-800', icon: 'ri-user-line' };
+    return { label: 'Related', color: 'bg-gray-100 text-gray-700', icon: 'ri-user-shared-line' };
   };
 
-  // Error boundary for image loading
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 60 60"%3E%3Ccircle cx="30" cy="30" r="30" fill="%23E5E7EB"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239CA3AF" font-size="24"%3E%3F%3C/text%3E%3C/svg%3E';
+    e.currentTarget.src = 'https://via.placeholder.com/60?text=User';
   };
 
   return (
-    <div id="reviews-section" className="py-12 px-6 lg:px-12 bg-cream-50">
-      <div className="max-w-7xl mx-auto">
-        {/* Reviews Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-          <div>
-            <h2 className="text-3xl font-serif text-forest-900 mb-3">Customer Reviews</h2>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center space-x-1">
-                  {renderStars(averageRating)}
-                </div>
-                <span className="text-2xl font-bold text-forest-900">{averageRating}</span>
-              </div>
-              <span className="text-gray-600">
-                Based on {totalReviews.toLocaleString()} reviews
-              </span>
+    <div id="reviews" className="py-16 bg-gradient-to-b from-[#F8F6F3] to-white">
+      <div className="max-w-7xl mx-auto px-6">
+        {/* Section Header */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
+          <div className="flex items-center space-x-4 mb-4 md:mb-0">
+            <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center">
+              <i className="ri-chat-3-line text-2xl text-sage-600"></i>
+            </div>
+            <div>
+              <h2 className="text-3xl font-serif font-bold text-forest-900">
+                Community Reviews
+              </h2>
+              <p className="text-gray-600 mt-1">Real experiences from verified buyers</p>
             </div>
           </div>
-
-          <Link
-            to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-            className="flex items-center space-x-2 px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
-          >
-            <span>View All Reviews</span>
-            <i className="ri-arrow-right-line"></i>
-          </Link>
         </div>
 
-        {/* Personalization Toggle */}
+        {/* Personalization Banner */}
         {personalizedReviews.length > 0 && (
-          <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg border-l-4 border-sage-600">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0">
-                  <i className="ri-user-heart-line text-sage-600 text-xl"></i>
+          <div className="bg-sage-50 rounded-2xl p-6 mb-8 border border-sage-200">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center">
+                  <i className="ri-user-heart-line text-xl text-sage-600"></i>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-forest-900 mb-2">
-                    Personalized Reviews for You
+                  <h3 className="text-lg font-semibold text-forest-900 mb-1">
+                    Personalized for Your Skin
                   </h3>
                   <p className="text-gray-600 text-sm mb-3">
                     Based on your skin profile: <strong>{userSkinProfile.skinType} skin</strong> with concerns about{' '}

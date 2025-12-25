@@ -3,6 +3,7 @@ import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import { sessionState } from '../../../utils/sessionState';
 
 
 interface SurveyData {
@@ -35,6 +36,14 @@ const SurveyResultsPage = () => {
 
       const recs = generateRecommendations(data);
       setRecommendations(recs);
+
+      // Store in sessionState for cross-component access (works for both guest and logged-in users)
+      if (data.skinTypes && data.skinTypes.length > 0) {
+        sessionState.setTempSkinType(data.skinTypes[0]);
+      }
+      if (data.concerns && data.concerns.length > 0) {
+        sessionState.setTempConcerns(data.concerns);
+      }
 
       const userProfile = {
         skinType: data.skinTypes[0] || 'Normal',

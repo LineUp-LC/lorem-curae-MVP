@@ -2,7 +2,11 @@ import { Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 
-const AuthPrompt = () => {
+interface AuthPromptProps {
+  onContinueAsGuest?: () => void;
+}
+
+const AuthPrompt = ({ onContinueAsGuest }: AuthPromptProps) => {
   return (
     <div className="min-h-screen bg-cream-50">
       <Navbar />
@@ -24,10 +28,10 @@ const AuthPrompt = () => {
         <div className="bg-white rounded-2xl p-8 lg:p-12 shadow-sm border border-gray-100 max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-2xl font-semibold text-gray-900 mb-4">
-              Sign in to continue
+              How would you like to continue?
             </h2>
             <p className="text-gray-600">
-              Create an account or sign in to take your personalized skin survey and unlock tailored recommendations.
+              Create an account to save your results permanently, or continue as a guest to try it out first.
             </p>
           </div>
 
@@ -45,6 +49,15 @@ const AuthPrompt = () => {
             >
               Sign In
             </Link>
+
+            {onContinueAsGuest && (
+              <button
+                onClick={onContinueAsGuest}
+                className="w-full block border-2 border-sage-300 hover:border-sage-400 text-sage-700 py-4 px-6 rounded-lg font-semibold text-center transition-colors cursor-pointer whitespace-nowrap"
+              >
+                Continue as Guest
+              </button>
+            )}
           </div>
 
           <div className="mt-8 pt-8 border-t border-gray-200">
@@ -67,6 +80,13 @@ const AuthPrompt = () => {
                 <span>Access to curated product recommendations</span>
               </li>
             </ul>
+
+            {onContinueAsGuest && (
+              <p className="mt-4 text-xs text-gray-500">
+                <i className="ri-information-line mr-1"></i>
+                Guest results are saved locally and will be merged into your account when you sign up.
+              </p>
+            )}
           </div>
         </div>
       </main>

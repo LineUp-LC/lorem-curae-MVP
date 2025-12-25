@@ -1,4 +1,5 @@
 // Session-level state management for personalized prototype experience
+import React from 'react';
 
 interface SessionState {
   userId: string;
@@ -7,6 +8,21 @@ interface SessionState {
   interactions: Interaction[];
   preferences: UserPreferences;
   context: SessionContext;
+  // New: temporary skin data for anonymous users
+  tempSkinType?: string;
+  tempConcerns?: string[];
+  // New: authenticated user data
+  user?: AuthenticatedUser;
+}
+
+interface AuthenticatedUser {
+  id: string;
+  email: string;
+  full_name: string;
+  skin_type?: string;
+  concerns?: string[];
+  preferences?: Record<string, any>;
+  lifestyle?: Record<string, any>;
 }
 
 interface Interaction {
@@ -61,6 +77,9 @@ class SessionStateManager {
         viewedProducts: [],
         savedItems: [],
       },
+      tempSkinType: undefined,
+      tempConcerns: undefined,
+      user: undefined,
     };
   }
 
@@ -98,6 +117,57 @@ class SessionStateManager {
     
     // Save on page unload
     window.addEventListener('beforeunload', () => this.saveState());
+  }
+
+  // ========================================
+  // Temporary skin data methods (anonymous users)
+  // ========================================
+
+  setTempSkinType(skinType: string): void {
+    this.state.tempSkinType = skinType;
+    this.notifyListeners();
+    this.saveState();
+  }
+
+  setTempConcerns(concerns: string[]): void {
+    this.state.tempConcerns = concerns;
+    this.notifyListeners();
+    this.saveState();
+  }
+
+  getTempSkinType(): string | undefined {
+    return this.state.tempSkinType;
+  }
+
+  getTempConcerns(): string[] | undefined {
+    return this.state.tempConcerns;
+  }
+
+  clearTempData(): void {
+    this.state.tempSkinType = undefined;
+    this.state.tempConcerns = undefined;
+    this.notifyListeners();
+    this.saveState();
+  }
+
+  // ========================================
+  // Authenticated user methods
+  // ========================================
+
+  setUser(user: AuthenticatedUser): void {
+    this.state.user = user;
+    this.notifyListeners();
+    this.saveState();
+  }
+
+  getUser(): AuthenticatedUser | undefined {
+    return this.state.user;
+  }
+
+  clearUser(): void {
+    this.state.user = undefined;
+    this.notifyListeners();
+    this.saveState();
   }
 
   // Track user interactions
@@ -265,6 +335,27 @@ class SessionStateManager {
 // Singleton instance
 export const sessionState = new SessionStateManager();
 
+// ========================================
+// Unified getters for skin personalization
+// Priority: user.skin_type > tempSkinType > undefined
+// ========================================
+
+export function getEffectiveSkinType(): string | undefined {
+  const user = sessionState.getUser();
+  if (user?.skin_type) {
+    return user.skin_type;
+  }
+  return sessionState.getTempSkinType();
+}
+
+export function getEffectiveConcerns(): string[] {
+  const user = sessionState.getUser();
+  if (user?.concerns && user.concerns.length > 0) {
+    return user.concerns;
+  }
+  return sessionState.getTempConcerns() || [];
+}
+
 // React hook for using session state
 export function useSessionState() {
   const [state, setState] = React.useState(sessionState.getState());
@@ -285,8 +376,11 @@ export function useSessionState() {
     saveItem: sessionState.saveItem.bind(sessionState),
     getBehaviorPatterns: sessionState.getBehaviorPatterns.bind(sessionState),
     getPersonalizationContext: sessionState.getPersonalizationContext.bind(sessionState),
+    // New methods
+    setTempSkinType: sessionState.setTempSkinType.bind(sessionState),
+    setTempConcerns: sessionState.setTempConcerns.bind(sessionState),
+    clearTempData: sessionState.clearTempData.bind(sessionState),
+    setUser: sessionState.setUser.bind(sessionState),
+    clearUser: sessionState.clearUser.bind(sessionState),
   };
 }
-
-// Import React for the hook
-import React from 'react';

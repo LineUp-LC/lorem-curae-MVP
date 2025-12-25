@@ -2,6 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../../utils/sessionState';
 
 interface Business {
   id: string;
@@ -36,9 +37,13 @@ export default function ServicesComparePage() {
   const [showReviewsModal, setShowReviewsModal] = useState(false);
   const [selectedBusinessReviews, setSelectedBusinessReviews] = useState<Review[]>([]);
   const [selectedBusinessName, setSelectedBusinessName] = useState('');
+  
+  // Get user profile from sessionState (unified source of truth)
+  const skinType = getEffectiveSkinType() || 'combination';
+  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['acne', 'hyperpigmentation'];
   const [userProfile] = useState({
-    skinType: 'combination',
-    concerns: ['acne', 'hyperpigmentation'],
+    skinType,
+    concerns,
   });
 
   useEffect(() => {
