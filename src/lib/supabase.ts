@@ -65,6 +65,7 @@ export async function updateUserProfile(
 // -----------------------------
 // Create user profile
 // -----------------------------
+
 export async function createUserProfile(
   email: string,
   fullName: string | null = null
@@ -79,37 +80,17 @@ export async function createUserProfile(
     return false;
   }
 
-  const userId = user.id;
+  const userId = user.id; // <-- THIS MUST EXIST
 
-  console.log("DEBUG: Creating profile for user:", userId);
-
-  const { error } = await supabase.from("users_profiles").insert({
-    user_id: userId,
-    email,
-    full_name: fullName
-  });
-
-  if (error) {
-    console.error("Error inserting profile:", error);
-    return false;
-  }
-
-  return true;
-}
-
-  // -----------------------------
-  // NEW — Merge anonymous temp data into new profile
-  // -----------------------------
   const tempSkinType = getEffectiveSkinType();
   const tempConcerns = getEffectiveConcerns();
 
   const { error } = await supabase.from('users_profiles').insert({
-    id: userId,
+    user_id: userId, // <-- FIXED
     email,
     full_name: fullName,
     subscription_tier: 'free',
 
-    // NEW — merge anonymous quiz data
     skin_type: tempSkinType || null,
     concerns: tempConcerns.length > 0 ? tempConcerns : [],
 
@@ -120,17 +101,11 @@ export async function createUserProfile(
   });
 
   if (error) {
-    console.error('Error creating user profile:', error);
+    console.error("Error inserting profile:", error);
     return false;
   }
 
-  console.log('DEBUG: Profile created successfully for user:', userId);
-
-  // -----------------------------
-  // NEW — Clear temp data after successful profile creation
-  // -----------------------------
   sessionState.clearTempData();
-
   return true;
 }
 

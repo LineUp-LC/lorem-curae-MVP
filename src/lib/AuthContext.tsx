@@ -5,7 +5,7 @@ import {
   useState,
   ReactNode,
 } from 'react';
-import { User } from '@supabase/supabase-js';
+import { User, AuthChangeEvent, Session } from '@supabase/supabase-js';
 import {
   supabase,
   UserProfile,
@@ -31,143 +31,112 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Initial load
+  // Helper to sync profile to sessionState
+  const syncProfileToSessionState = (userProfile: UserProfile) => {
+    sessionState.setUser({
+      id: userProfile.id,
+      email: userProfile.email,
+      full_name: userProfile.full_name || '',
+      skin_type: userProfile.skin_type || undefined,
+      concerns: userProfile.concerns || [],
+      preferences: userProfile.preferences || {},
+      lifestyle: userProfile.lifestyle || {},
+    });
+  };
+
+  // Initial load + auth state listener
   useEffect(() => {
+    let isMounted = true;
+
     const init = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
+
+      if (!isMounted) return;
 
       const currentUser = session?.user ?? null;
       setUser(currentUser);
 
       if (currentUser) {
         const userProfile = await loadUserProfile(currentUser.id);
-        setProfile(userProfile);
-
-        // Sync to sessionState
-        if (userProfile) {
-          sessionState.setUser({
-            id: userProfile.id,
-            email: userProfile.email,
-            full_name: userProfile.full_name || '',
-            skin_type: userProfile.skin_type || undefined,
-            concerns: userProfile.concerns || [],
-            preferences: userProfile.preferences || {},
-            lifestyle: userProfile.lifestyle || {},
-          });
+        if (isMounted) {
+          setProfile(userProfile);
+          if (userProfile) {
+            syncProfileToSessionState(userProfile);
+          }
         }
       }
 
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     };
 
     init();
 
-    // Listen for auth state changes
+    // Single auth state change listener
     const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
+        if (!isMounted) return;
+
         const authUser = session?.user ?? null;
         setUser(authUser);
 
-        if (authUser) {
+        if (event === 'SIGNED_IN' && authUser) {
+          // Create profile if missing, then load it
+          await createUserProfile(authUser.email);
           const userProfile = await loadUserProfile(authUser.id);
-          setProfile(userProfile);
-
-          // Sync to sessionState
-          if (userProfile) {
-            sessionState.setUser({
-              id: userProfile.id,
-              email: userProfile.email,
-              full_name: userProfile.full_name || '',
-              skin_type: userProfile.skin_type || undefined,
-              concerns: userProfile.concerns || [],
-              preferences: userProfile.preferences || {},
-              lifestyle: userProfile.lifestyle || {},
-            });
+          
+          if (isMounted) {
+            setProfile(userProfile);
+            if (userProfile) {
+              syncProfileToSessionState(userProfile);
+            }
           }
-        } else {
-          setProfile(null);
+        }
 
-          // Clear user from sessionState but keep temp data
-          sessionState.clearUser();
+        if (event === 'SIGNED_OUT') {
+          if (isMounted) {
+            setProfile(null);
+            sessionState.clearUser();
+          }
         }
       }
     );
 
     return () => {
+      isMounted = false;
       listener.subscription.unsubscribe();
     };
   }, []);
 
-  // Sign up
+  // Sign Up - only creates auth user, profile created on SIGNED_IN event
   const signUp = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signUp({
+    const { error } = await supabase.auth.signUp({
       email,
       password,
     });
 
     if (error) throw error;
-
-    if (data.user) {
-      // createUserProfile will merge temp data and clear it
-      const success = await createUserProfile(email);
-      if (success) {
-        const newProfile = await loadUserProfile(data.user.id);
-        setProfile(newProfile);
-
-        // Sync to sessionState
-        if (newProfile) {
-          sessionState.setUser({
-            id: newProfile.id,
-            email: newProfile.email,
-            full_name: newProfile.full_name || '',
-            skin_type: newProfile.skin_type || undefined,
-            concerns: newProfile.concerns || [],
-            preferences: newProfile.preferences || {},
-            lifestyle: newProfile.lifestyle || {},
-          });
-        }
-      }
-    }
   };
 
-  // Sign in
+  // Sign In
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
 
     if (error) throw error;
-
-    if (data.user) {
-      const userProfile = await loadUserProfile(data.user.id);
-      setProfile(userProfile);
-
-      // Sync to sessionState
-      if (userProfile) {
-        sessionState.setUser({
-          id: userProfile.id,
-          email: userProfile.email,
-          full_name: userProfile.full_name || '',
-          skin_type: userProfile.skin_type || undefined,
-          concerns: userProfile.concerns || [],
-          preferences: userProfile.preferences || {},
-          lifestyle: userProfile.lifestyle || {},
-        });
-      }
-    }
+    // Profile loading handled by onAuthStateChange listener
   };
 
-  // Sign out
+  // Sign Out
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setProfile(null);
-
-    // Clear user from sessionState
-    sessionState.clearUser();
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+    // State cleanup handled by onAuthStateChange listener
   };
 
   // Refresh profile
@@ -176,17 +145,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userProfile = await loadUserProfile(user.id);
       setProfile(userProfile);
 
-      // Sync to sessionState
       if (userProfile) {
-        sessionState.setUser({
-          id: userProfile.id,
-          email: userProfile.email,
-          full_name: userProfile.full_name || '',
-          skin_type: userProfile.skin_type || undefined,
-          concerns: userProfile.concerns || [],
-          preferences: userProfile.preferences || {},
-          lifestyle: userProfile.lifestyle || {},
-        });
+        syncProfileToSessionState(userProfile);
       }
     }
   };
