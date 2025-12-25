@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import ProductCatalog from './components/ProductCatalog';
 import ProductComparison from './components/ProductComparison';
-import QuizFlow from './components/QuizFlow';
-import ResultsDisplay from './components/ResultsDisplay';
+import Navbar from '../../components/feature/Navbar';
+import Footer from '../../components/feature/Footer';
 import { sessionState, getEffectiveConcerns } from '../../utils/sessionState';
 import type { Product } from '../../types/product';
 
 const DiscoverPage = () => {
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [quizResults, setQuizResults] = useState<any>(null);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -57,15 +55,6 @@ const DiscoverPage = () => {
     return unsubscribe;
   }, []);
 
-  const handleStartQuiz = () => {
-    setShowQuiz(true);
-  };
-
-  const handleQuizComplete = (results: any) => {
-    setQuizResults(results);
-    setShowQuiz(false);
-  };
-
   const handleOpenComparison = () => {
     setShowComparison(true);
   };
@@ -79,36 +68,21 @@ const DiscoverPage = () => {
   };
 
   return (
-    <div className="discover-page">
-      {!quizResults && !showQuiz && (
-        <button
-          onClick={handleStartQuiz}
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Start Skin Quiz
-        </button>
-      )}
-
-      {showQuiz && <QuizFlow onComplete={handleQuizComplete} />}
-
-      {quizResults && (
-        <ResultsDisplay
-          results={quizResults}
+    <div className="min-h-screen bg-cream-50">
+      <Navbar />
+      
+      <main className="pt-20">
+        <ProductCatalog
           userConcerns={userConcerns}
-          selectedProducts={selectedProducts}
+          compareList={selectedProducts}
+          setCompareList={setSelectedProducts}
+          onOpenComparison={handleOpenComparison}
+          onStartQuiz={() => {}}
+          onProductClick={(id) => console.log('Product clicked:', id)}
+          onSaveProduct={(id) => console.log('Product saved:', id)}
+          onFilterChange={(type, value) => console.log('Filter changed:', type, value)}
         />
-      )}
-
-      <ProductCatalog
-        userConcerns={userConcerns}
-        compareList={selectedProducts}
-        setCompareList={setSelectedProducts}
-        onOpenComparison={handleOpenComparison}
-        onStartQuiz={handleStartQuiz}
-        onProductClick={(id) => console.log('Product clicked:', id)}
-        onSaveProduct={(id) => console.log('Product saved:', id)}
-        onFilterChange={(type, value) => console.log('Filter changed:', type, value)}
-      />
+      </main>
 
       {showComparison && selectedProducts.length >= 2 && (
         <ProductComparison
@@ -118,6 +92,8 @@ const DiscoverPage = () => {
           onRemoveProduct={handleRemoveProduct}
         />
       )}
+
+      <Footer />
     </div>
   );
 };

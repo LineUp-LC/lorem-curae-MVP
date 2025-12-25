@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
+import { matchesIngredient } from '../../../utils/matching';
 import type { Product } from '../../../types/product';
 
 interface ProductCatalogProps {
@@ -33,8 +34,9 @@ export default function ProductCatalog({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [surveyCompleted, setSurveyCompleted] = useState(false);
 
-  // Safe fallback for compareList to prevent undefined errors
+  // Safe fallbacks
   const safeCompareList = compareList ?? [];
+  const safeUserConcerns = userConcerns ?? [];
 
   // Derive showCompareBar from safeCompareList length
   const showCompareBar = safeCompareList.length > 0;
@@ -93,9 +95,6 @@ export default function ProductCatalog({
       return matchesCategory && matchesSkinType && matchesSearch;
     });
   }, [products, selectedCategory, selectedSkinType, searchQuery]);
-
-  // Safe fallback for userConcerns
-  const safeUserConcerns = userConcerns ?? [];
 
   // Concern matching: simple array includes check
   const matchedProducts = useMemo(() => {
@@ -159,7 +158,7 @@ export default function ProductCatalog({
     return stars;
   };
 
-  // Check if product is in compare list (using safe list)
+  // Check if product is in compare list
   const isInCompareList = (productId: number) => {
     return safeCompareList.some((p) => p.id === productId);
   };
@@ -175,7 +174,6 @@ export default function ProductCatalog({
 
   const handleAddToCompare = (product: Product, e: React.MouseEvent) => {
     e.stopPropagation();
-    // Guard: only proceed if setCompareList is provided
     if (!setCompareList) return;
     
     if (isInCompareList(product.id)) {
@@ -186,7 +184,6 @@ export default function ProductCatalog({
   };
 
   const handleClearCompare = () => {
-    // Guard: only proceed if setCompareList is provided
     if (!setCompareList) return;
     setCompareList([]);
   };
@@ -266,21 +263,29 @@ export default function ProductCatalog({
 
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
 
-          {/* Key Ingredients */}
+          {/* Key Ingredients - with sage highlighting for matching ingredients */}
           <div className="mb-4">
             <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
             <div className="flex flex-wrap gap-1">
-              {product.keyIngredients.slice(0, 2).map((ingredient, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200"
-                >
-                  {ingredient}
-                </span>
-              ))}
-              {product.keyIngredients.length > 2 && (
+              {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
+                const isMatchingIngredient = matchesIngredient(ingredient, safeUserConcerns);
+                
+                return (
+                  <span
+                    key={idx}
+                    className={
+                      isMatchingIngredient
+                        ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full border border-sage-300 font-medium'
+                        : 'px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200'
+                    }
+                  >
+                    {ingredient}
+                  </span>
+                );
+              })}
+              {product.keyIngredients.length > 3 && (
                 <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
-                  +{product.keyIngredients.length - 2}
+                  +{product.keyIngredients.length - 3}
                 </span>
               )}
             </div>
