@@ -11,6 +11,7 @@ const DiscoverPage = () => {
   const [quizResults, setQuizResults] = useState<any>(null);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+  const [showComparison, setShowComparison] = useState(false);
 
   useEffect(() => {
     // Load selected products from localStorage
@@ -65,6 +66,18 @@ const DiscoverPage = () => {
     setShowQuiz(false);
   };
 
+  const handleOpenComparison = () => {
+    setShowComparison(true);
+  };
+
+  const handleCloseComparison = () => {
+    setShowComparison(false);
+  };
+
+  const handleRemoveProduct = (productId: number) => {
+    setSelectedProducts((prev) => prev.filter((p) => p.id !== productId));
+  };
+
   return (
     <div className="discover-page">
       {!quizResults && !showQuiz && (
@@ -88,11 +101,23 @@ const DiscoverPage = () => {
 
       <ProductCatalog
         userConcerns={userConcerns}
-        selectedProducts={selectedProducts}
-        setSelectedProducts={setSelectedProducts}
+        compareList={selectedProducts}
+        setCompareList={setSelectedProducts}
+        onOpenComparison={handleOpenComparison}
+        onStartQuiz={handleStartQuiz}
+        onProductClick={(id) => console.log('Product clicked:', id)}
+        onSaveProduct={(id) => console.log('Product saved:', id)}
+        onFilterChange={(type, value) => console.log('Filter changed:', type, value)}
       />
 
-      <ProductComparison selectedProducts={selectedProducts} />
+      {showComparison && selectedProducts.length >= 2 && (
+        <ProductComparison
+          products={selectedProducts}
+          userConcerns={userConcerns}
+          onClose={handleCloseComparison}
+          onRemoveProduct={handleRemoveProduct}
+        />
+      )}
     </div>
   );
 };
