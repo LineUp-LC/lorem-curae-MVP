@@ -5,8 +5,8 @@ import type { Product } from '../../../types/product';
 
 interface ProductCatalogProps {
   userConcerns: string[];
-  compareList: Product[];
-  setCompareList: React.Dispatch<React.SetStateAction<Product[]>>;
+  compareList?: Product[];
+  setCompareList?: React.Dispatch<React.SetStateAction<Product[]>>;
   onOpenComparison: () => void;
   onStartQuiz: () => void;
   onProductClick: (productId: number) => void;
@@ -33,8 +33,11 @@ export default function ProductCatalog({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [surveyCompleted, setSurveyCompleted] = useState(false);
 
-  // Derive showCompareBar from compareList length
-  const showCompareBar = compareList.length > 0;
+  // Safe fallback for compareList to prevent undefined errors
+  const safeCompareList = compareList ?? [];
+
+  // Derive showCompareBar from safeCompareList length
+  const showCompareBar = safeCompareList.length > 0;
 
   // Check if user has completed the skin survey
   useEffect(() => {
@@ -91,16 +94,19 @@ export default function ProductCatalog({
     });
   }, [products, selectedCategory, selectedSkinType, searchQuery]);
 
+  // Safe fallback for userConcerns
+  const safeUserConcerns = userConcerns ?? [];
+
   // Concern matching: simple array includes check
   const matchedProducts = useMemo(() => {
-    if (!userConcerns || userConcerns.length === 0) return [];
+    if (!safeUserConcerns || safeUserConcerns.length === 0) return [];
 
     return filteredProducts.filter((product) =>
       product.concerns?.some((c) =>
-        userConcerns.some((uc) => c.toLowerCase() === uc.toLowerCase())
+        safeUserConcerns.some((uc) => c.toLowerCase() === uc.toLowerCase())
       )
     );
-  }, [filteredProducts, userConcerns]);
+  }, [filteredProducts, safeUserConcerns]);
 
   const otherProducts = useMemo(() => {
     return filteredProducts.filter(
@@ -153,15 +159,15 @@ export default function ProductCatalog({
     return stars;
   };
 
-  // Check if product is in compare list
+  // Check if product is in compare list (using safe list)
   const isInCompareList = (productId: number) => {
-    return compareList.some((p) => p.id === productId);
+    return safeCompareList.some((p) => p.id === productId);
   };
 
   // Simple check if product concerns overlap with user concerns
   const isProductRecommended = (product: Product) => {
     return product.concerns?.some((productConcern) =>
-      userConcerns.some(
+      safeUserConcerns.some(
         (userConcern) => productConcern.toLowerCase() === userConcern.toLowerCase()
       )
     );
@@ -169,14 +175,19 @@ export default function ProductCatalog({
 
   const handleAddToCompare = (product: Product, e: React.MouseEvent) => {
     e.stopPropagation();
+    // Guard: only proceed if setCompareList is provided
+    if (!setCompareList) return;
+    
     if (isInCompareList(product.id)) {
       setCompareList((prev) => prev.filter((p) => p.id !== product.id));
-    } else if (compareList.length < 4) {
+    } else if (safeCompareList.length < 4) {
       setCompareList((prev) => [...prev, product]);
     }
   };
 
   const handleClearCompare = () => {
+    // Guard: only proceed if setCompareList is provided
+    if (!setCompareList) return;
     setCompareList([]);
   };
 
@@ -478,12 +489,12 @@ export default function ProductCatalog({
                   <div>
                     <h3 className="font-semibold text-forest-900">Compare Products</h3>
                     <p className="text-sm text-gray-600">
-                      {compareList.length} of 4 products selected
+                      {safeCompareList.length} of 4 products selected
                     </p>
                   </div>
                 </div>
                 <div className="hidden md:flex items-center space-x-2">
-                  {compareList.map((product) => (
+                  {safeCompareList.map((product) => (
                     <div
                       key={product.id}
                       className="flex items-center space-x-2 px-3 py-2 bg-sage-50 rounded-full"
@@ -510,14 +521,14 @@ export default function ProductCatalog({
                 </button>
                 <button
                   onClick={onOpenComparison}
-                  disabled={compareList.length < 2}
+                  disabled={safeCompareList.length < 2}
                   className={`px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
-                    compareList.length >= 2
+                    safeCompareList.length >= 2
                       ? 'bg-sage-600 text-white hover:bg-sage-700 shadow-md cursor-pointer'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  Compare Now ({compareList.length})
+                  Compare Now ({safeCompareList.length})
                 </button>
               </div>
             </div>
