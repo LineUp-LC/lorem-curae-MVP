@@ -68,22 +68,11 @@ export async function updateUserProfile(
 export async function createUserProfile(authUser: User): Promise<boolean> {
   const userId = authUser.id;
 
-  // Prevent duplicate inserts
-  const { data: existing } = await supabase
-    .from('users_profiles')
-    .select('id')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (existing) {
-    return true; // profile already exists
-  }
-
   const tempSkinType = getEffectiveSkinType();
   const tempConcerns = getEffectiveConcerns();
 
   const { error } = await supabase.from('users_profiles').insert({
-    id: userId,
+    id: userId, // MUST match Supabase Auth user ID
     email: authUser.email,
     full_name: authUser.user_metadata?.full_name || null,
     subscription_tier: 'free',

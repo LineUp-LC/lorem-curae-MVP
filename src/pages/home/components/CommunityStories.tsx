@@ -16,7 +16,7 @@ const CommunityStories = () => {
       if (user) {
         const { data } = await supabase
           .from('users_profiles')
-          .select('skin_type, skin_concerns, skin_goals')
+          .select('skin_type, concerns, preferences, lifestyle')
           .eq('id', user.id)
           .single();
         
