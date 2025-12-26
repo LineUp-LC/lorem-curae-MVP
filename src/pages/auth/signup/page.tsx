@@ -17,30 +17,32 @@ const SignUpPage = () => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (formData.password !== formData.confirmPassword) {
+  
+    const email = formData.email;
+    const password = formData.password;
+  
+    if (password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
-    if (formData.password.length < 6) {
+  
+    if (password.length < 6) {
       setError('Password must be at least 6 characters');
       return;
     }
-
-    setIsLoading(true);
-
-    const { error } = await signUp(formData.email, formData.password, formData.name);
-
-    setIsLoading(false);
-
-    if (error) {
-      setError(error);
-      return;
+  
+    try {
+      setIsLoading(true);
+  
+      await signUp(email, password); // now email/password exist
+  
+      setIsLoading(false);
+  
+      navigate('/account');
+    } catch (err: any) {
+      setIsLoading(false);
+      setError(err.message || 'Something went wrong during sign up');
     }
-
-    // Redirect to skin survey for onboarding
-    navigate('/skin-survey-account');
   };
 
   return (
@@ -164,7 +166,7 @@ const SignUpPage = () => {
           {/* Login Link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Already have an account?{' '}
-            <Link to="/login" className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer">
+            <Link to="/auth/login" className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer">
               Sign in
             </Link>
           </p>

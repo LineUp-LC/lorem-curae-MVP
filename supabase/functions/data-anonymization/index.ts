@@ -63,7 +63,7 @@ async function processUserData(supabaseClient: any, userId: string) {
     const { data: contribution, error: contributionError } = await supabaseClient
       .from('data_impact_contributions')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .eq('opted_in', true)
       .single();
 
@@ -104,7 +104,7 @@ async function processUserData(supabaseClient: any, userId: string) {
         contribution_count: contribution.contribution_count + anonymizedData.length,
         last_contribution_at: new Date().toISOString()
       })
-      .eq('user_id', userId);
+      .eq('id', userId);
 
     if (updateError) {
       throw updateError;

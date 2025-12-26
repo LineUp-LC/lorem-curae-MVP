@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper to sync profile to sessionState
+  // Sync profile to sessionState
   const syncProfileToSessionState = (userProfile: UserProfile) => {
     sessionState.setUser({
       id: userProfile.id,
@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  // Initial load + auth state listener
+  // Initial load + auth listener
   useEffect(() => {
     let isMounted = true;
 
@@ -62,20 +62,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const userProfile = await loadUserProfile(currentUser.id);
         if (isMounted) {
           setProfile(userProfile);
-          if (userProfile) {
-            syncProfileToSessionState(userProfile);
-          }
+          if (userProfile) syncProfileToSessionState(userProfile);
         }
       }
 
-      if (isMounted) {
-        setLoading(false);
-      }
+      if (isMounted) setLoading(false);
     };
 
     init();
 
-    // Single auth state change listener
+    // Auth state listener
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
         if (!isMounted) return;
@@ -84,15 +80,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser);
 
         if (event === 'SIGNED_IN' && authUser) {
-          // Create profile if missing, then load it
-          await createUserProfile(authUser.email);
+          // Check if profile exists
+          const existing = await loadUserProfile(authUser.id);
+
+          // Create only if missing
+          if (!existing) {
+            await createUserProfile(authUser);
+          }
+
+          // Load profile after ensuring it exists
           const userProfile = await loadUserProfile(authUser.id);
-          
+
           if (isMounted) {
             setProfile(userProfile);
-            if (userProfile) {
-              syncProfileToSessionState(userProfile);
-            }
+            if (userProfile) syncProfileToSessionState(userProfile);
           }
         }
 
@@ -111,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  // Sign Up - only creates auth user, profile created on SIGNED_IN event
+  // Sign Up
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({
       email,
@@ -129,25 +130,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     if (error) throw error;
-    // Profile loading handled by onAuthStateChange listener
   };
 
   // Sign Out
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
-    // State cleanup handled by onAuthStateChange listener
   };
 
-  // Refresh profile
+  // Refresh profile manually
   const refreshProfile = async () => {
     if (user) {
       const userProfile = await loadUserProfile(user.id);
       setProfile(userProfile);
 
-      if (userProfile) {
-        syncProfileToSessionState(userProfile);
-      }
+      if (userProfile) syncProfileToSessionState(userProfile);
     }
   };
 

@@ -16,17 +16,15 @@ const LoginPage = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-
-    const { error } = await signIn(formData.email, formData.password);
-
-    setIsLoading(false);
-
-    if (error) {
-      setError(error);
-      return;
+  
+    try {
+      await signIn(formData.email, formData.password);
+      navigate('/account'); // or router.push('/account') depending on your router
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    navigate('/account');
   };
 
   return (

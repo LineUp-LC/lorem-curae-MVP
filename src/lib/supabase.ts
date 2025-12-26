@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, User } from '@supabase/supabase-js';
 import { sessionState, getEffectiveSkinType, getEffectiveConcerns } from '../utils/sessionState';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -27,7 +27,7 @@ export interface UserProfile {
 // -----------------------------
 export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('users_profiles')
+    .from('users_profiles')   // FIXED
     .select('*')
     .eq('id', userId)
     .single();
@@ -48,7 +48,7 @@ export async function updateUserProfile(
   updates: Partial<UserProfile>
 ): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('users_profiles')
+    .from('users_profiles')   // FIXED
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId)
     .select()
@@ -65,30 +65,27 @@ export async function updateUserProfile(
 // -----------------------------
 // Create user profile
 // -----------------------------
+export async function createUserProfile(authUser: User): Promise<boolean> {
+  const userId = authUser.id;
 
-export async function createUserProfile(
-  email: string,
-  fullName: string | null = null
-): Promise<boolean> {
-  const {
-    data: { user },
-    error: userError
-  } = await supabase.auth.getUser();
+  // Prevent duplicate inserts
+  const { data: existing } = await supabase
+    .from('users_profiles')
+    .select('id')
+    .eq('id', userId)
+    .maybeSingle();
 
-  if (userError || !user) {
-    console.error("No authenticated user found", userError);
-    return false;
+  if (existing) {
+    return true; // profile already exists
   }
-
-  const userId = user.id; // <-- THIS MUST EXIST
 
   const tempSkinType = getEffectiveSkinType();
   const tempConcerns = getEffectiveConcerns();
 
   const { error } = await supabase.from('users_profiles').insert({
-    user_id: userId, // <-- FIXED
-    email,
-    full_name: fullName,
+    id: userId,
+    email: authUser.email,
+    full_name: authUser.user_metadata?.full_name || null,
     subscription_tier: 'free',
 
     skin_type: tempSkinType || null,
