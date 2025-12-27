@@ -72,7 +72,7 @@ const SettingsPage = () => {
           <div className="lg:col-span-3">
             <div className="bg-white rounded-xl p-8">
               {activeTab === 'profile' && (
-                <div className="space-y-6 animate-fade-in">
+                <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
                   
                   <div>
@@ -109,7 +109,7 @@ const SettingsPage = () => {
               )}
 
               {activeTab === 'account' && (
-                <div className="space-y-6 animate-fade-in">
+                <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
                   
                   <div>
@@ -138,7 +138,7 @@ const SettingsPage = () => {
               )}
 
               {activeTab === 'notifications' && (
-                <div className="space-y-6 animate-fade-in">
+                <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-gray-900">Notification Preferences</h2>
                   
                   <div className="space-y-4">
@@ -170,7 +170,7 @@ const SettingsPage = () => {
               )}
 
               {activeTab === 'privacy' && (
-                <div className="space-y-6 animate-fade-in">
+                <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-gray-900">Privacy Settings</h2>
                   
                   <div className="space-y-4">
@@ -194,7 +194,7 @@ const SettingsPage = () => {
               )}
 
               {activeTab === 'preferences' && (
-                <div className="space-y-6 animate-fade-in">
+                <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-gray-900">App Preferences</h2>
                   
                   <div>

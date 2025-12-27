@@ -121,7 +121,7 @@ export default function ServicesPage() {
               {businesses.map((business) => (
                 <div
                   key={business.id}
-                  className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl transition-all group cursor-pointer"
+                  className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
                   onClick={() => handleViewBusiness(business.id)}
                 >
                   {/* Image */}

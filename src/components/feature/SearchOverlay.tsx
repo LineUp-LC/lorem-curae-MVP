@@ -128,6 +128,16 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
     }
   }, [isOpen]);
 
+  // Global escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
+
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setResults([]);
@@ -171,10 +181,10 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm motion-safe:animate-enter-fade isolate" onClick={onClose}>
       <div className="min-h-screen px-3 sm:px-4 pt-16 sm:pt-20 pb-6 sm:pb-10">
         <div 
-          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
+          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden motion-safe:animate-enter-up will-change-transform"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input */}
@@ -243,8 +253,8 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                   <div
                     key={result.id}
                     onClick={() => handleResultClick(result)}
-                    className="p-3 sm:p-4 hover:bg-sage-50 transition-colors cursor-pointer animate-slide-up"
-                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+                    className="p-3 sm:p-4 hover:bg-sage-50 transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
+                    style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
                   >
                     <div className="flex items-center space-x-3 sm:space-x-4">
                       {result.image ? (

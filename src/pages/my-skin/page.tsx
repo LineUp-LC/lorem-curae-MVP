@@ -688,9 +688,9 @@ export default function MySkinPage() {
                               <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                             </div>
                             <div className="flex gap-1">
-                              <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce"></div>
-                              <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
+                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                             </div>
                           </div>
                         </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 interface ProfileDropdownProps {
@@ -8,6 +8,16 @@ interface ProfileDropdownProps {
 
 const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const navigate = useNavigate();
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -59,11 +69,11 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   return (
     <>
       <div 
-        className="fixed inset-0 z-40 animate-fade-in" 
+        className="fixed inset-0 z-40 motion-safe:animate-enter-fade" 
         onClick={onClose}
       />
       {/* Mobile: Full-width bottom sheet | Desktop: Positioned dropdown */}
-      <div className="fixed sm:absolute right-0 left-0 sm:left-auto bottom-0 sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-64 bg-white rounded-t-xl sm:rounded-xl shadow-xl border border-gray-100 z-50 overflow-visible max-h-[85vh] sm:max-h-none overflow-y-auto animate-slide-up sm:animate-scale-in origin-top-right">
+      <div className="fixed sm:absolute right-0 left-0 sm:left-auto bottom-0 sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-64 bg-white rounded-t-xl sm:rounded-xl shadow-xl border border-gray-100 z-50 overflow-visible max-h-[85vh] sm:max-h-none overflow-y-auto motion-safe:animate-enter-up sm:motion-safe:animate-enter-scale origin-top-right will-change-transform">
         {/* Profile Header */}
         <div className="p-4 border-b border-gray-50">
           <div className="flex items-center space-x-3 mb-3">

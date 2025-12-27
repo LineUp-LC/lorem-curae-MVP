@@ -94,7 +94,7 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
           <i className="ri-robot-2-line text-lg"></i>
         </div>
         <span className="font-medium text-sm whitespace-nowrap">AI Assistant</span>
-        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+        <div className="w-2 h-2 rounded-full bg-green-400 motion-safe:animate-pulse"></div>
       </button>
 
       {/* Chat Window */}
@@ -162,9 +162,9 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
                       <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                     </div>
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce"></div>
-                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>

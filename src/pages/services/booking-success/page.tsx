@@ -21,7 +21,7 @@ export default function BookingSuccessPage() {
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Success Animation */}
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6 animate-bounce">
+            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6 motion-safe:animate-bounce">
               <i className="ri-check-line text-5xl text-green-600"></i>
             </div>
             <h1 className="font-serif text-5xl font-bold text-forest-800 mb-4">

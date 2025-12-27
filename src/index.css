@@ -1,3 +1,250 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   LOREM CURAE MOTION DESIGN SYSTEM
+   Unified animation tokens and utilities
+   ============================================ */
+
+/* === CSS CUSTOM PROPERTIES (TOKENS) === */
+:root {
+  /* Duration tokens */
+  --motion-duration-instant: 0ms;
+  --motion-duration-fast: 150ms;
+  --motion-duration-normal: 200ms;
+  --motion-duration-moderate: 250ms;
+  --motion-duration-slow: 300ms;
+  --motion-duration-slower: 500ms;
+  
+  /* Easing tokens */
+  --motion-ease-default: ease-out;
+  --motion-ease-enter: ease-out;
+  --motion-ease-exit: ease-in;
+  --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --motion-ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Transform tokens */
+  --motion-translate-sm: 4px;
+  --motion-translate-md: 10px;
+  --motion-translate-lg: 20px;
+  --motion-scale-hover: 1.05;
+  --motion-scale-press: 0.98;
+  --motion-scale-enter: 0.95;
+  
+  /* Stagger delays */
+  --motion-stagger-1: 50ms;
+  --motion-stagger-2: 100ms;
+  --motion-stagger-3: 150ms;
+  --motion-stagger-4: 200ms;
+}
+
+/* === UTILITY CLASSES === */
+
+/* Hide scrollbar while keeping scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* GPU-accelerated transforms */
+.transform-gpu {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+/* === SEMANTIC HOVER UTILITIES === */
+@layer utilities {
+  /* Card lift effect: translateY + shadow */
+  .motion-hover-lift {
+    @apply transition-[transform,box-shadow] duration-slow transform-gpu;
+  }
+  .motion-hover-lift:hover {
+    @apply -translate-y-1 shadow-xl;
+  }
+  
+  /* Image grow effect */
+  .motion-hover-grow {
+    @apply transition-transform duration-slow transform-gpu;
+  }
+  .motion-hover-grow:hover {
+    @apply scale-105;
+  }
+  
+  /* Subtle scale for buttons */
+  .motion-hover-scale {
+    @apply transition-transform duration-fast transform-gpu;
+  }
+  .motion-hover-scale:hover {
+    @apply scale-105;
+  }
+  .motion-hover-scale:active {
+    transform: scale(0.98);
+  }
+}
+
+/* === STAGGER DELAY UTILITIES === */
+@layer utilities {
+  .motion-stagger-1 { animation-delay: var(--motion-stagger-1); }
+  .motion-stagger-2 { animation-delay: var(--motion-stagger-2); }
+  .motion-stagger-3 { animation-delay: var(--motion-stagger-3); }
+  .motion-stagger-4 { animation-delay: var(--motion-stagger-4); }
+  
+  /* For use with animation-fill-mode: backwards */
+  .motion-stagger-fill {
+    animation-fill-mode: backwards;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION ACCESSIBILITY
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  /* Disable all animations */
+  .animate-enter-fade,
+  .animate-enter-up,
+  .animate-enter-down,
+  .animate-enter-right,
+  .animate-enter-scale,
+  .animate-exit-fade,
+  .animate-exit-down,
+  .animate-exit-scale,
+  .animate-loading-bounce,
+  .animate-loading-pulse,
+  .animate-loading-dots,
+  .animate-shimmer,
+  .animate-ping,
+  /* Legacy classes */
+  .animate-bounce,
+  .animate-pulse,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-slide-in-right,
+  .animate-fade-in,
+  .animate-fade-out,
+  .animate-scale-in {
+    animation: none !important;
+  }
+  
+  /* Loading spinners: stop but remain visible */
+  .animate-spin,
+  .animate-loading-spin {
+    animation: none !important;
+  }
+  
+  /* Instant transitions */
+  .transition,
+  .transition-all,
+  .transition-colors,
+  .transition-opacity,
+  .transition-shadow,
+  .transition-transform,
+  [class*="transition-"] {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  
+  /* Disable hover transforms */
+  .motion-hover-lift:hover,
+  .motion-hover-grow:hover,
+  .motion-hover-scale:hover,
+  .hover\:-translate-y-1:hover,
+  .hover\:-translate-y-2:hover,
+  .hover\:translate-x-1:hover,
+  .hover\:scale-105:hover,
+  .hover\:scale-110:hover,
+  .group:hover .group-hover\:scale-105,
+  .group:hover .group-hover\:scale-110 {
+    transform: none !important;
+  }
+  
+  /* Ensure visibility */
+  .animate-enter-fade,
+  .animate-enter-up,
+  .animate-enter-down,
+  .animate-enter-right,
+  .animate-enter-scale,
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-down,
+  .animate-scale-in,
+  [class*="motion-safe:animate-"] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* === MOTION-SAFE UTILITIES === */
+@media (prefers-reduced-motion: no-preference) {
+  /* Semantic enter animations */
+  .motion-safe\:animate-enter-fade {
+    animation: enter-fade var(--motion-duration-normal) var(--motion-ease-enter) forwards;
+  }
+  .motion-safe\:animate-enter-up {
+    animation: enter-up var(--motion-duration-moderate) var(--motion-ease-enter) forwards;
+  }
+  .motion-safe\:animate-enter-down {
+    animation: enter-down var(--motion-duration-moderate) var(--motion-ease-enter) forwards;
+  }
+  .motion-safe\:animate-enter-right {
+    animation: enter-right var(--motion-duration-normal) var(--motion-ease-enter) forwards;
+  }
+  .motion-safe\:animate-enter-scale {
+    animation: enter-scale var(--motion-duration-normal) var(--motion-ease-enter) forwards;
+  }
+  
+  /* Loading animations */
+  .motion-safe\:animate-loading-spin {
+    animation: loading-spin 1s linear infinite;
+  }
+  .motion-safe\:animate-loading-pulse {
+    animation: loading-pulse 2s var(--motion-ease-smooth) infinite;
+  }
+  .motion-safe\:animate-loading-bounce {
+    animation: loading-bounce 1s infinite;
+  }
+  .motion-safe\:animate-loading-dots {
+    animation: loading-dots 1.4s infinite ease-in-out both;
+  }
+  
+  /* Legacy compatibility */
+  .motion-safe\:animate-fade-in {
+    animation: fadeIn 0.2s ease-out forwards;
+  }
+  .motion-safe\:animate-slide-up {
+    animation: slideUp 0.25s ease-out forwards;
+  }
+  .motion-safe\:animate-slide-down {
+    animation: slideDown 0.25s ease-out forwards;
+  }
+  .motion-safe\:animate-slide-in-right {
+    animation: slideInRight 0.2s ease-out forwards;
+  }
+  .motion-safe\:animate-scale-in {
+    animation: scaleIn 0.2s ease-out forwards;
+  }
+  .motion-safe\:animate-bounce {
+    animation: bounce 1s infinite;
+  }
+  .motion-safe\:animate-pulse {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
+/* === MOTION-REDUCE UTILITIES === */
+@media (prefers-reduced-motion: reduce) {
+  .motion-reduce\:animate-none {
+    animation: none !important;
+  }
+  .motion-reduce\:transition-none {
+    transition: none !important;
+  }
+  .motion-reduce\:transform-none {
+    transform: none !important;
+  }
+}

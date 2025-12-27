@@ -23,7 +23,7 @@ export default function HeroSection() {
 
       {/* Scroll Indicator */}
       <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10">
-        <div className="flex flex-col items-center space-y-2 animate-bounce">
+        <div className="flex flex-col items-center space-y-2 motion-safe:animate-bounce">
           <span className="text-white/80 text-sm font-medium">Explore</span>
           <i className="ri-arrow-down-line text-white/80 text-2xl"></i>
         </div>

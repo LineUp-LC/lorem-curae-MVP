@@ -1,8 +1,29 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
 import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
+
+// Static data moved outside component to prevent recreation on each render
+const categories = [
+  { value: 'all', label: 'All Products', icon: 'ri-grid-line' },
+  { value: 'cleanser', label: 'Cleansers', icon: 'ri-drop-line' },
+  { value: 'toner', label: 'Toners', icon: 'ri-contrast-drop-line' },
+  { value: 'serum', label: 'Serums', icon: 'ri-flask-line' },
+  { value: 'moisturizer', label: 'Moisturizers', icon: 'ri-contrast-drop-2-line' },
+  { value: 'sunscreen', label: 'Sunscreen', icon: 'ri-sun-line' },
+  { value: 'treatment', label: 'Treatments', icon: 'ri-heart-pulse-line' },
+  { value: 'mask', label: 'Masks', icon: 'ri-user-smile-line' },
+];
+
+const skinTypes = [
+  { value: 'all', label: 'All Skin Types' },
+  { value: 'dry', label: 'Dry' },
+  { value: 'oily', label: 'Oily' },
+  { value: 'combination', label: 'Combination' },
+  { value: 'normal', label: 'Normal' },
+  { value: 'sensitive', label: 'Sensitive' },
+];
 
 interface ProductCatalogProps {
   userConcerns: string[];
@@ -40,8 +61,22 @@ export default function ProductCatalog({
   // Derive showCompareBar from safeCompareList length
   const showCompareBar = safeCompareList.length > 0;
 
+  // Comparison bar state: minimize toggle and scroll-based translucency
+  const [isCompareBarMinimized, setIsCompareBarMinimized] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const compareBarRef = useRef<HTMLDivElement>(null);
+
   // Safe fallback for userConcerns
   const safeUserConcerns = userConcerns ?? [];
+
+  // Detect scroll for translucent background effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 100);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Check if user has completed the skin survey
   useEffect(() => {
@@ -57,26 +92,6 @@ export default function ProductCatalog({
       setSelectedCategory(categoryParam);
     }
   }, [searchParams]);
-
-  const categories = [
-    { value: 'all', label: 'All Products', icon: 'ri-grid-line' },
-    { value: 'cleanser', label: 'Cleansers', icon: 'ri-drop-line' },
-    { value: 'toner', label: 'Toners', icon: 'ri-contrast-drop-line' },
-    { value: 'serum', label: 'Serums', icon: 'ri-flask-line' },
-    { value: 'moisturizer', label: 'Moisturizers', icon: 'ri-contrast-drop-2-line' },
-    { value: 'sunscreen', label: 'Sunscreen', icon: 'ri-sun-line' },
-    { value: 'treatment', label: 'Treatments', icon: 'ri-heart-pulse-line' },
-    { value: 'mask', label: 'Masks', icon: 'ri-user-smile-line' },
-  ];
-
-  const skinTypes = [
-    { value: 'all', label: 'All Skin Types' },
-    { value: 'dry', label: 'Dry' },
-    { value: 'oily', label: 'Oily' },
-    { value: 'combination', label: 'Combination' },
-    { value: 'normal', label: 'Normal' },
-    { value: 'sensitive', label: 'Sensitive' },
-  ];
 
   const products = productData;
 
@@ -196,7 +211,7 @@ export default function ProductCatalog({
         key={product.id}
         onClick={() => navigate(`/product-detail?id=${product.id}`)}
         className={`
-          bg-white rounded-2xl overflow-hidden transition-all duration-300 group cursor-pointer relative hover:-translate-y-1
+          bg-white rounded-2xl overflow-hidden transition-[transform,box-shadow] duration-300 group cursor-pointer relative hover:-translate-y-1 transform-gpu
           ${
             isRecommended
               ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
@@ -210,15 +225,17 @@ export default function ProductCatalog({
           </span>
         )}
 
-        {/* Comparison Button */}
+        {/* Comparison Button - WITH QA accessibility fixes */}
         <button
           onClick={(e) => handleAddToCompare(product, e)}
-          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 ${
+          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
             isSelected
               ? 'bg-sage-600 text-white'
               : 'bg-white text-gray-700 hover:bg-sage-100'
           }`}
           title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
+          aria-label={isSelected ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
+          aria-pressed={isSelected}
         >
           {isSelected ? (
             <i className="ri-check-line text-xl"></i>
@@ -232,7 +249,8 @@ export default function ProductCatalog({
           <img
             src={product.image}
             alt={product.name}
-            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300 transform-gpu"
           />
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
@@ -534,62 +552,136 @@ export default function ProductCatalog({
         </div>
       )}
 
-      {/* Comparison Bar */}
+      {/* Comparison Bar - MERGED: All enhancements + QA accessibility fixes */}
       {showCompareBar && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-sage-600 shadow-2xl z-50 transition-all animate-slide-up">
-          <div className="max-w-7xl mx-auto px-6 py-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
+        <div
+          ref={compareBarRef}
+          role="region"
+          aria-label="Product comparison bar"
+          aria-live="polite"
+          className={`
+            fixed bottom-0 left-0 right-0 z-50
+            border-t-2 border-sage-600 shadow-2xl
+            transition-all duration-300 ease-out
+            motion-safe:animate-slide-up
+            ${isScrolled ? 'bg-white/90 backdrop-blur-md' : 'bg-white'}
+            ${isCompareBarMinimized ? 'py-2' : ''}
+          `}
+        >
+          {/* Minimize Toggle Button */}
+          <button
+            onClick={() => setIsCompareBarMinimized(!isCompareBarMinimized)}
+            aria-expanded={!isCompareBarMinimized}
+            aria-controls="compare-bar-content"
+            aria-label={isCompareBarMinimized ? 'Expand comparison bar' : 'Minimize comparison bar'}
+            className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-6 bg-sage-600 hover:bg-sage-700 text-white rounded-t-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2"
+          >
+            <i className={`ri-arrow-${isCompareBarMinimized ? 'up' : 'down'}-s-line text-lg transition-transform`} aria-hidden="true"></i>
+          </button>
+
+          <div
+            id="compare-bar-content"
+            className={`
+              max-w-7xl mx-auto px-4 sm:px-6
+              transition-all duration-300 ease-out
+              ${isCompareBarMinimized ? 'py-1 opacity-90' : 'py-4'}
+            `}
+          >
+            {/* Minimized State */}
+            {isCompareBarMinimized ? (
+              <div className="flex items-center justify-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <div className="w-10 h-10 flex items-center justify-center bg-sage-100 rounded-full">
-                    <i className="ri-scales-3-line text-xl text-sage-600"></i>
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-forest-900">Compare Products</h3>
-                    <p className="text-sm text-gray-600">
-                      {safeCompareList.length} of 4 products selected
-                    </p>
-                  </div>
+                  <i className="ri-scales-3-line text-sage-600" aria-hidden="true"></i>
+                  <span className="text-sm font-medium text-forest-900">
+                    {safeCompareList.length} products to compare
+                  </span>
                 </div>
-                <div className="hidden md:flex items-center space-x-2">
-                  {safeCompareList.map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex items-center space-x-2 px-3 py-2 bg-sage-50 rounded-full"
-                    >
-                      <span className="text-sm font-medium text-forest-900">
-                        {product.brand}
-                      </span>
-                      <button
-                        onClick={(e) => handleAddToCompare(product, e)}
-                        className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-red-600 cursor-pointer"
-                      >
-                        <i className="ri-close-line text-base"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleClearCompare}
-                  className="px-4 py-2 text-gray-700 hover:text-gray-900 font-medium transition-colors whitespace-nowrap cursor-pointer"
-                >
-                  Clear All
-                </button>
                 <button
                   onClick={onOpenComparison}
                   disabled={safeCompareList.length < 2}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
+                  aria-label={safeCompareList.length < 2 ? 'Select at least 2 products to compare' : `Compare ${safeCompareList.length} products`}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
                     safeCompareList.length >= 2
-                      ? 'bg-sage-600 text-white hover:bg-sage-700 shadow-md cursor-pointer'
+                      ? 'bg-sage-600 text-white hover:bg-sage-700 cursor-pointer'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
-                  Compare Now ({safeCompareList.length})
+                  Compare
                 </button>
               </div>
-            </div>
+            ) : (
+              /* Expanded State */
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center space-x-4 min-w-0">
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    <div 
+                      className="w-10 h-10 flex items-center justify-center bg-sage-100 rounded-full"
+                      aria-hidden="true"
+                    >
+                      <i className="ri-scales-3-line text-xl text-sage-600"></i>
+                    </div>
+                    <div>
+                      <h3 id="compare-bar-title" className="font-semibold text-forest-900">
+                        Compare Products
+                      </h3>
+                      <p className="text-sm text-gray-600" aria-live="polite">
+                        <span className="sr-only">Currently </span>
+                        {safeCompareList.length} of 4 products selected
+                      </p>
+                    </div>
+                  </div>
+                  
+                  {/* Product Pills - Horizontal scrollable on mobile */}
+                  <div 
+                    className="flex items-center space-x-2 overflow-x-auto scrollbar-hide md:overflow-visible max-w-[200px] sm:max-w-[300px] md:max-w-none pb-1 md:pb-0"
+                    role="list"
+                    aria-label="Selected products for comparison"
+                  >
+                    {safeCompareList.map((product) => (
+                      <div
+                        key={product.id}
+                        role="listitem"
+                        className="flex items-center space-x-2 px-3 py-2 bg-sage-50 rounded-full flex-shrink-0"
+                      >
+                        <span className="text-sm font-medium text-forest-900 truncate max-w-[100px] sm:max-w-[150px]">
+                          {product.brand}
+                        </span>
+                        <button
+                          onClick={(e) => handleAddToCompare(product, e)}
+                          aria-label={`Remove ${product.brand} from comparison`}
+                          className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                        >
+                          <i className="ri-close-line text-base" aria-hidden="true"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                  <button
+                    onClick={handleClearCompare}
+                    aria-label="Clear all products from comparison"
+                    className="px-3 sm:px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                  >
+                    Clear All
+                  </button>
+                  <button
+                    onClick={onOpenComparison}
+                    disabled={safeCompareList.length < 2}
+                    aria-label={safeCompareList.length < 2 ? 'Select at least 2 products to compare' : `Compare ${safeCompareList.length} products`}
+                    aria-disabled={safeCompareList.length < 2}
+                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
+                      safeCompareList.length >= 2
+                        ? 'bg-sage-600 text-white hover:bg-sage-700 shadow-md cursor-pointer'
+                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    Compare Now ({safeCompareList.length})
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

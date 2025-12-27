@@ -460,7 +460,7 @@ export default function ProductDetailPage() {
       <Navbar />
       
       {showSaveSuccess && (
-        <div className="fixed top-24 right-6 z-50 bg-sage-600 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in">
+        <div className="fixed top-24 right-6 z-50 bg-sage-600 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 motion-safe:animate-fade-in">
           <i className="ri-checkbox-circle-fill text-xl"></i>
           <span className="font-medium">Saved to your routine!</span>
         </div>

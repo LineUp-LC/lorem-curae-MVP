@@ -4,6 +4,17 @@ import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
 
+// Static data moved outside component to prevent recreation on each render
+const navLinks = [
+  { name: 'Home', path: '/' },
+  { name: 'Discover', path: '/discover' },
+  { name: 'Skin Survey', path: '/skin-survey-account' },
+  { name: 'Ingredients', path: '/ingredients' },
+  { name: 'Marketplace', path: '/marketplace' },
+  { name: 'Community', path: '/community' },
+  { name: 'About', path: '/about' },
+];
+
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
@@ -17,7 +28,7 @@ const Navbar = () => {
       setIsScrolled(window.scrollY > 50);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -26,15 +37,17 @@ const Navbar = () => {
     setShowMobileMenu(false);
   }, [location.pathname]);
 
-  const navLinks = [
-    { name: 'Home', path: '/' },
-    { name: 'Discover', path: '/discover' },
-    { name: 'Skin Survey', path: '/skin-survey-account' },
-    { name: 'Ingredients', path: '/ingredients' },
-    { name: 'Marketplace', path: '/marketplace' },
-    { name: 'Community', path: '/community' },
-    { name: 'About', path: '/about' },
-  ];
+  // Close mobile menu and profile dropdown on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowMobileMenu(false);
+        setShowProfileDropdown(false);
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, []);
 
   const isHomePage = location.pathname === '/';
 
@@ -136,14 +149,14 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <div className="lg:hidden bg-white border-t border-gray-100 animate-slide-down">
+          <div className="lg:hidden bg-white border-t border-gray-100 motion-safe:animate-enter-down">
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link, index) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="block px-4 py-3 text-forest-800 hover:bg-sage-50 hover:text-sage-600 rounded-lg font-medium transition-colors cursor-pointer animate-slide-in-right"
-                  style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
+                  className="block px-4 py-3 text-forest-800 hover:bg-sage-50 hover:text-sage-600 rounded-lg font-medium transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
+                  style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
                   onClick={() => setShowMobileMenu(false)}
                 >
                   {link.name}

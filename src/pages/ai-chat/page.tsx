@@ -570,7 +570,7 @@ const AIChatPage = () => {
               {messages.map((message, index) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} motion-safe:animate-slide-up`}
                   style={{ animationDelay: `${Math.min(index * 50, 200)}ms`, animationFillMode: 'backwards' }}
                 >
                   <div className={`max-w-[80%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
@@ -608,9 +608,9 @@ const AIChatPage = () => {
                         <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                       </div>
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce"></div>
-                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { matchesConcern, matchesIngredient } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
@@ -25,6 +26,15 @@ export default function ProductComparison({
   onRemoveProduct,
 }: ProductComparisonProps) {
   const navigate = useNavigate();
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [onClose]);
 
   // Safe fallbacks to prevent undefined errors
   const safeProducts = products ?? [];
@@ -74,8 +84,14 @@ export default function ProductComparison({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 animate-fade-in">
-      <div className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col animate-scale-in">
+    <div 
+      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 motion-safe:animate-fade-in"
+      onClick={onClose}
+    >
+      <div 
+        className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col motion-safe:animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Modal Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 md:px-8 py-4 sm:py-6 flex items-center justify-between rounded-t-2xl sm:rounded-t-3xl z-10 shadow-sm">
           <div className="flex items-center space-x-2 sm:space-x-3">

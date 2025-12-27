@@ -129,9 +129,11 @@ export default function ConflictDetection() {
             }`}
           >
             {/* Conflict Header */}
-            <div
+            <button
               onClick={() => setExpandedConflict(expandedConflict === conflict.id ? null : conflict.id)}
-              className="p-6 cursor-pointer hover:bg-gray-50 transition-colors"
+              className="w-full p-6 cursor-pointer hover:bg-gray-50 transition-colors text-left"
+              aria-expanded={expandedConflict === conflict.id}
+              aria-controls={`conflict-details-${conflict.id}`}
             >
               <div className="flex items-start gap-4">
                 <div className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-2 whitespace-nowrap ${getSeverityColor(conflict.severity)}`}>
@@ -153,15 +155,18 @@ export default function ConflictDetection() {
                     {conflict.explanation.substring(0, 150)}...
                   </p>
                 </div>
-                <button className="text-forest-800 hover:text-forest-900 transition-colors">
+                <span className="text-forest-800 hover:text-forest-900 transition-colors" aria-hidden="true">
                   <i className={`text-2xl transition-transform duration-200 ${expandedConflict === conflict.id ? 'ri-arrow-up-s-line rotate-0' : 'ri-arrow-down-s-line'}`}></i>
-                </button>
+                </span>
               </div>
-            </div>
+            </button>
 
             {/* Expanded Details */}
             {expandedConflict === conflict.id && (
-              <div className="border-t border-gray-200 bg-cream-100 p-6 animate-slide-down">
+              <div 
+                id={`conflict-details-${conflict.id}`}
+                className="border-t border-gray-200 bg-cream-100 p-6 motion-safe:animate-slide-down"
+              >
                 {/* Full Explanation */}
                 <div className="mb-6">
                   <h4 className="font-medium text-forest-800 mb-2 flex items-center gap-2">
