@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase-browser';
 
 const StorefrontRegisterPage = () => {
   const navigate = useNavigate();

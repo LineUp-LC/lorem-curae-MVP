@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
+import { sessionState } from '../../lib/utils/sessionState';
 import QuizFlow from '../skin-survey/components/QuizFlow';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
@@ -36,8 +37,16 @@ export default function SkinSurveyAccountPage() {
   };
 
   const handleQuizComplete = async (data: any) => {
-    // Save quiz data
+    // Save quiz data to localStorage
     localStorage.setItem('skinSurveyData', JSON.stringify(data));
+    
+    // FIXED: Sync to sessionState for immediate use across the app
+    if (data.skinType?.[0]) {
+      sessionState.setTempSkinType(data.skinType[0]);
+    }
+    if (data.concerns?.length > 0) {
+      sessionState.setTempConcerns(data.concerns);
+    }
     
     // If user is authenticated, save to database
     if (isAuthenticated) {
@@ -48,10 +57,10 @@ export default function SkinSurveyAccountPage() {
           await supabase
             .from('users_profiles')
             .upsert({
-              user_id: user.id,
-              skin_type: data.skinType,
-              skin_concerns: data.concerns,
-              fitzpatrick_type: data.fitzpatrickType,
+              id: user.id,
+              skin_type: data.skinType?.[0] || null,
+              concerns: data.concerns || [],
+              fitzpatrick_type: data.complexion || null,
               updated_at: new Date().toISOString(),
             });
         }

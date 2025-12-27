@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
-import { getPointsAccount, CuraePointsAccount, getTierBenefits, getPointsToNextTier } from '../../utils/curaePoints';
+import { supabase } from '../../lib/supabase-browser';
+import { getPointsAccount, CuraePointsAccount, getTierBenefits, getPointsToNextTier } from '../../lib/utils/curaePoints';
 
 const PointsDisplay = () => {
   const [pointsAccount, setPointsAccount] = useState<CuraePointsAccount | null>(null);

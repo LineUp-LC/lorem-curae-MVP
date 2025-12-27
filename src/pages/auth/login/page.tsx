@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../lib/AuthContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -40,56 +40,77 @@ const LoginPage = () => {
           <span className="text-2xl font-semibold text-gray-900">Lorem Curae</span>
         </Link>
 
-        {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back
-            </h1>
-            <p className="text-gray-600">
-              Sign in to continue your skincare journey
-            </p>
-          </div>
+{/* Card */}
+<div className="bg-white rounded-2xl shadow-xl p-8">
+  <div className="text-center mb-8">
+    <h1 className="text-3xl font-bold text-gray-900 mb-2">
+      Welcome back
+    </h1>
+    <p className="text-gray-600">
+      Sign in to continue your skincare journey
+    </p>
+  </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
-            </div>
-          )}
+  {error && (
+    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+      {error}
+    </div>
+  )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+  <form onSubmit={handleSubmit} className="space-y-5">
+  <div>
+  <label
+    htmlFor="email"
+    className="block text-sm font-medium text-gray-700 mb-2"
+  >
+    Email Address
+  </label>
+
+  <input
+  id="email"
+  name="email"
+  type="email"
+  value={formData.email}
+  onChange={(e) =>
+    setFormData({ ...formData, email: e.target.value })
+  }
+  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+  placeholder="you@example.com"
+  autoComplete="email"
+  required
+/>
+</div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
+  <div className="flex items-center justify-between mb-2">
+    <label
+      htmlFor="password"
+      className="block text-sm font-medium text-gray-700"
+    >
+      Password
+    </label>
 
-            <div>
-              <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
-                  Password
-                </label>
-                <a href="/forgot-password" className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer">
-                  Forgot?
-                </a>
-              </div>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-                placeholder="Enter your password"
-                required
-              />
-            </div>
+    <a
+      href="/forgot-password"
+      className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer"
+    >
+      Forgot?
+    </a>
+  </div>
+
+  <input
+    id="password"
+    name="password"
+    type="password"
+    value={formData.password}
+    onChange={(e) =>
+      setFormData({ ...formData, password: e.target.value })
+    }
+    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+    placeholder="Enter your password"
+    required
+  />
+</div>
 
             <div className="flex items-center">
               <input

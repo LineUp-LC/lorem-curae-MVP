@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 export default function AffiliateRedirectPage() {
   const [searchParams] = useSearchParams();
@@ -42,7 +42,7 @@ export default function AffiliateRedirectPage() {
       // Track the click
       const clickData = {
         partner_id: partner.id,
-        user_id: user?.id || null,
+        id: user?.id || null,
         product_name: product || null,
         ip_address: null, // Client-side can't get real IP
         user_agent: navigator.userAgent,

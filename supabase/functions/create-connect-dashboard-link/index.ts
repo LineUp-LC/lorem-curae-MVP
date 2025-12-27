@@ -40,7 +40,7 @@ serve(async (req) => {
     const { data: accountData, error: dbError } = await supabaseClient
       .from('stripe_connected_accounts')
       .select('stripe_account_id')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (dbError || !accountData) {

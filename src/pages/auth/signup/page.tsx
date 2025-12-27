@@ -1,6 +1,6 @@
 import { useState, FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../lib/AuthContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
@@ -91,18 +91,27 @@ const SignUpPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-                placeholder="you@example.com"
-                required
-              />
-            </div>
+  <label
+    htmlFor="email"
+    className="block text-sm font-medium text-gray-700 mb-2"
+  >
+    Email Address
+  </label>
+
+  <input
+  id="email"
+  name="email"
+  type="email"
+  value={formData.email}
+  onChange={(e) =>
+    setFormData({ ...formData, email: e.target.value })
+  }
+  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+  placeholder="you@example.com"
+  autoComplete="email"
+  required
+/>
+</div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">

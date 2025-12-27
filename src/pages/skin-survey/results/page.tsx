@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '../../../lib/supabase';
-import { sessionState } from '../../../utils/sessionState';
+import { supabase } from '../../../lib/supabase-browser';
+import { sessionState } from '../../../lib/utils/sessionState';
 
 
 interface SurveyData {

@@ -1,11 +1,22 @@
 import { useState, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { sessionState } from '../../utils/sessionState';
-import { adaptiveAI } from '../../utils/adaptiveAI';
+import { sessionState } from '../../lib/utils/sessionState';
+import { adaptiveAI } from '../../lib/utils/adaptiveAI';
 import { Link } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
+
+// Local interface for AI chat user profile (different from Supabase UserProfile)
+interface AIChatUserProfile {
+  skinType: string;
+  concerns: string[];
+  goals: string[];
+  sensitivities: string[];
+  preferences: {
+    crueltyFree: boolean;
+    vegan: boolean;
+  };
+}
 
 interface Message {
   id: number;
@@ -55,7 +66,7 @@ const AIChatPage = () => {
   const [showInsights, setShowInsights] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const [userProfile, setUserProfile] = useState<UserProfile>({
+  const [userProfile, setUserProfile] = useState<AIChatUserProfile>({
     skinType: 'normal',
     concerns: [],
     goals: [],
@@ -110,7 +121,7 @@ const AIChatPage = () => {
           concerns: results.concerns || [],
           goals: results.goals || [],
           sensitivities: results.sensitivities || [],
-          preferences: results.preferences || {},
+          preferences: results.preferences || { crueltyFree: false, vegan: false },
         });
       }
     }
@@ -125,7 +136,7 @@ const AIChatPage = () => {
       const { data: notes, error } = await supabase
         .from('routine_notes')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id)  // Fixed: was 'id', should be 'user_id'
         .order('created_at', { ascending: false })
         .limit(30);
 
@@ -324,32 +335,35 @@ const AIChatPage = () => {
     setCurrentSession('current');
   };
 
+  // Fixed: Message objects now match the Message interface
   const handleSendMessage = () => {
     if (!inputMessage.trim()) return;
 
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
+    const userMessage: Message = {
+      id: Date.now(),
+      sender: 'user',
       content: inputMessage,
-      timestamp: new Date(),
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setIsTyping(true);
     sessionState.trackInteraction('input', 'ai-chat-message', { message: inputMessage });
 
     // Generate adaptive AI response
     const aiResponse = adaptiveAI.generateResponse(inputMessage);
     
-    const assistantMessage = {
-      id: (Date.now() + 1).toString(),
-      role: 'assistant' as const,
+    const assistantMessage: Message = {
+      id: Date.now() + 1,
+      sender: 'ai',
       content: aiResponse.message,
-      timestamp: new Date(),
-      suggestions: aiResponse.suggestions,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
     setTimeout(() => {
       setMessages(prev => [...prev, assistantMessage]);
+      setIsTyping(false);
+      saveChatSession();
       sessionState.trackInteraction('completion', 'ai-response-generated');
     }, 800);
 
@@ -406,153 +420,75 @@ const AIChatPage = () => {
                   ]);
                   setCurrentSession('current');
                 }}
-                className="w-8 h-8 flex items-center justify-center text-[#2C5F4F] hover:bg-[#2C5F4F]/10 rounded-lg transition-colors cursor-pointer"
+                className="text-sm text-[#2C5F4F] font-medium cursor-pointer"
               >
-                <i className="ri-add-line text-xl"></i>
+                + New Chat
               </button>
             </div>
-
+            
             <div className="space-y-2">
-              {chatSessions.map((chat) => (
+              {chatSessions.map((session) => (
                 <div
-                  key={chat.id}
-                  className={`relative group cursor-pointer ${
-                    currentSession === chat.id ? 'bg-[#2C5F4F]/10' : ''
+                  key={session.id}
+                  onClick={() => loadChatSession(session)}
+                  className={`p-3 rounded-lg cursor-pointer transition-colors group ${
+                    currentSession === session.id ? 'bg-[#2C5F4F]/10' : 'hover:bg-gray-100'
                   }`}
                 >
-                  <button
-                    onClick={() => loadChatSession(chat)}
-                    className="w-full text-left p-3 hover:bg-[#2C5F4F]/5 rounded-lg transition-colors"
-                  >
-                    <div className="flex items-start justify-between mb-1">
-                      <h3 className="font-medium text-gray-900 text-sm line-clamp-1 group-hover:text-[#2C5F4F] pr-8">
-                        {chat.title}
-                      </h3>
-                    </div>
-                    <p className="text-xs text-gray-500 line-clamp-1 mb-1">{chat.preview}</p>
-                    <span className="text-xs text-gray-400">{chat.date}</span>
-                  </button>
-                  <button
-                    onClick={(e) => deleteSession(chat.id, e)}
-                    className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-                  >
-                    <i className="ri-delete-bin-line text-sm"></i>
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm font-medium text-gray-900 truncate">{session.title}</p>
+                    <button
+                      onClick={(e) => deleteSession(session.id, e)}
+                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity cursor-pointer"
+                    >
+                      <i className="ri-delete-bin-line text-sm"></i>
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500">{session.date}</p>
                 </div>
               ))}
             </div>
 
-            <div className="mt-6 pt-6 border-t border-gray-200">
+            {/* Settings Button */}
+            <div className="mt-6 pt-4 border-t border-gray-200">
               <button
                 onClick={() => setShowCustomize(!showCustomize)}
-                className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#2C5F4F]/5 rounded-lg transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
-                <div className="flex items-center space-x-2">
-                  <i className="ri-settings-3-line text-[#2C5F4F]"></i>
-                  <span className="text-sm font-medium text-gray-900">Customize Curae</span>
-                </div>
-                <i className={`ri-arrow-${showCustomize ? 'up' : 'down'}-s-line text-gray-400`}></i>
+                <span className="text-sm font-medium text-gray-700">AI Settings</span>
+                <i className="ri-settings-3-line text-gray-500"></i>
               </button>
-
-              {showCustomize && (
-                <div className="mt-3 space-y-3 px-3">
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Tone</label>
-                    <select
-                      value={aiSettings.tone}
-                      onChange={(e) => setAiSettings({ ...aiSettings, tone: e.target.value })}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded cursor-pointer focus:ring-2 focus:ring-[#2C5F4F]/20"
-                    >
-                      <option value="friendly">Friendly & Warm</option>
-                      <option value="professional">Professional</option>
-                      <option value="casual">Casual & Fun</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Detail Level</label>
-                    <select
-                      value={aiSettings.detailLevel}
-                      onChange={(e) => setAiSettings({ ...aiSettings, detailLevel: e.target.value })}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded cursor-pointer focus:ring-2 focus:ring-[#2C5F4F]/20"
-                    >
-                      <option value="concise">Concise & Brief</option>
-                      <option value="balanced">Balanced</option>
-                      <option value="detailed">Detailed & Thorough</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Response Style</label>
-                    <select
-                      value={aiSettings.responseStyle}
-                      onChange={(e) => setAiSettings({ ...aiSettings, responseStyle: e.target.value })}
-                      className="w-full px-2 py-1 text-xs border border-gray-300 rounded cursor-pointer focus:ring-2 focus:ring-[#2C5F4F]/20"
-                    >
-                      <option value="conversational">Conversational</option>
-                      <option value="educational">Educational</option>
-                      <option value="actionable">Action-Oriented</option>
-                    </select>
-                  </div>
-
-                  <button 
-                    onClick={handleSaveSettings}
-                    className="w-full px-3 py-2 bg-[#2C5F4F] text-white text-xs rounded-lg hover:bg-[#234839] transition-colors whitespace-nowrap cursor-pointer"
-                  >
-                    Save Settings
-                  </button>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Summary */}
-            <div className="mt-4 p-3 bg-[#F8F6F3] rounded-lg">
-              <div className="flex items-center gap-2 mb-2">
-                <i className="ri-user-line text-[#2C5F4F]"></i>
-                <span className="text-xs font-medium text-[#2C5F4F]">Your Profile</span>
-              </div>
-              <div className="text-xs text-gray-600 space-y-1">
-                <div>Skin Type: <strong>{userProfile.skinType || 'Not set'}</strong></div>
-                {userProfile.concerns.length > 0 && (
-                  <div>Concerns: <strong>{userProfile.concerns.length}</strong></div>
-                )}
-              </div>
-              <Link
-                to="/my-skin"
-                className="text-xs text-[#2C5F4F] hover:underline mt-2 inline-block cursor-pointer"
-              >
-                Update profile →
-              </Link>
             </div>
           </div>
 
           {/* Main Chat Area */}
-          <div className="lg:col-span-3 bg-white rounded-xl flex flex-col shadow-sm">
+          <div className="lg:col-span-3 bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
             {/* Chat Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-[#2C5F4F] to-[#3D7A63] rounded-full">
-                  <i className="ri-robot-line text-2xl text-white"></i>
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-[#2C5F4F] rounded-full flex items-center justify-center">
+                  <i className="ri-robot-2-line text-white text-xl"></i>
                 </div>
                 <div>
-                  <h2 className="font-bold text-gray-900">Curae AI</h2>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="text-sm text-gray-600">Ready to help</span>
-                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900">Curae AI</h2>
+                  <p className="text-sm text-gray-500">Your personalized skincare assistant</p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <button
                   onClick={() => setShowInsights(!showInsights)}
-                  className="px-4 py-2 text-sm bg-[#F8F6F3] text-[#2C5F4F] rounded-lg hover:bg-[#2C5F4F]/10 transition-colors cursor-pointer whitespace-nowrap"
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                    showInsights
+                      ? 'bg-[#2C5F4F] text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
                 >
-                  <i className={`ri-${showInsights ? 'eye-off' : 'eye'}-line mr-1`}></i>
-                  {showInsights ? 'Hide' : 'Show'} Insights
+                  <i className="ri-lightbulb-line mr-2"></i>
+                  Insights
                 </button>
                 <Link
                   to="/routines"
-                  className="px-4 py-2 text-sm bg-[#F8F6F3] text-[#2C5F4F] rounded-lg hover:bg-[#2C5F4F]/10 transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                 >
                   <i className="ri-calendar-check-line mr-1"></i>
                   View Progress

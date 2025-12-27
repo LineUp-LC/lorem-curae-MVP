@@ -40,7 +40,7 @@ serve(async (req) => {
     const { data: accountData, error: dbError } = await supabaseClient
       .from('stripe_connected_accounts')
       .select('*')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (dbError || !accountData) {
@@ -66,7 +66,7 @@ serve(async (req) => {
         charges_enabled: account.charges_enabled || false,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', user.id);
+      .eq('id', user.id);
 
     if (updateError) throw updateError;
 

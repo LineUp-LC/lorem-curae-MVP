@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { matchesConcern, matchesIngredient } from '../../../utils/matching';
+import { matchesConcern, matchesIngredient } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
 
 interface ComparisonHighlights {

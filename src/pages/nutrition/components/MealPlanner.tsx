@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase-browser';
 
 interface Food {
   id: string;
@@ -50,7 +50,7 @@ const MealPlanner = () => {
           *,
           nutrition_foods (id, name, calories, preparation_time)
         `)
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .gte('planned_date', startDate.toISOString().split('T')[0])
         .lte('planned_date', endDate.toISOString().split('T')[0])
         .order('planned_date')

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { cartState } from '../../../utils/cartState';
+import { cartState } from '../../../lib/utils/cartState';
 
 const MarketplaceSection = () => {
   const handleAddToCart = (product: {

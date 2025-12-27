@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase-browser';
 
 interface Note {
   id: string;
@@ -59,7 +59,7 @@ export default function NotesSection() {
       const { data, error } = await supabase
         .from('routine_notes')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;

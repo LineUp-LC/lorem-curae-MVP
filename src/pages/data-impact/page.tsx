@@ -33,7 +33,7 @@ export default function DataImpactPage() {
         const { data: contributionData, error: contributionError } = await supabase
           .from('data_impact_contributions')
           .select('*')
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .single();
         
         if (contributionError && contributionError.code !== 'PGRST116') {
@@ -64,7 +64,7 @@ export default function DataImpactPage() {
             opted_in: newOptInStatus,
             last_contribution_at: newOptInStatus ? new Date().toISOString() : contribution.last_contribution_at
           })
-          .eq('user_id', userProfile.id);
+          .eq('id', userProfile.id);
 
         if (error) throw error;
       } else {

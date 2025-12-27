@@ -90,7 +90,7 @@ export default function CommunityPage() {
           *,
           community:communities(*)
         `)
-        .eq('user_id', userProfile.id);
+        .eq('id', userProfile.id);
       
       if (error) throw error;
       setMyCommunities(data?.map(m => m.community) || []);
@@ -112,7 +112,7 @@ export default function CommunityPage() {
       const { error } = await supabase
         .from('community_posts')
         .insert({
-          user_id: user.id,
+          id: user.id,
           community_id: selectedCommunity,
           content: newPost,
           likes: 0,
@@ -153,7 +153,7 @@ export default function CommunityPage() {
         .from('community_members')
         .insert({
           community_id: community.id,
-          user_id: userProfile.id,
+          id: userProfile.id,
           role: 'member'
         });
 

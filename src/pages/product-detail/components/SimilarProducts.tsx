@@ -1,13 +1,18 @@
 import { productData } from '../../../mocks/products';
 import { useNavigate } from 'react-router-dom';
 
+// FIXED: Made onAddToComparison and selectedForComparison optional
 interface SimilarProductsProps {
   productId: number;
-  onAddToComparison: (id: number) => void;
-  selectedForComparison: number[];
+  onAddToComparison?: (id: number) => void;
+  selectedForComparison?: number[];
 }
 
-const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }: SimilarProductsProps) => {
+const SimilarProducts = ({ 
+  productId, 
+  onAddToComparison, 
+  selectedForComparison = [] // Default to empty array
+}: SimilarProductsProps) => {
   const navigate = useNavigate();
   const currentProduct = productData.find(p => p.id === productId);
   
@@ -39,6 +44,9 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
     }
     return stars;
   };
+
+  // FIXED: Check if comparison feature is enabled
+  const comparisonEnabled = typeof onAddToComparison === 'function';
 
   return (
     <div className="py-12 px-6 lg:px-12 bg-cream-50">
@@ -75,29 +83,31 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
                   />
                   
-                  {/* Compare Checkbox */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      if (canSelect) {
-                        onAddToComparison(product.id);
-                      }
-                    }}
-                    disabled={!canSelect}
-                    className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all ${
-                      isSelected
-                        ? 'bg-forest-900 text-white'
-                        : canSelect
-                        ? 'bg-white/90 text-gray-700 hover:bg-forest-900 hover:text-white'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    }`}
-                  >
-                    {isSelected ? (
-                      <i className="ri-check-line text-xl"></i>
-                    ) : (
-                      <i className="ri-scales-line text-xl"></i>
-                    )}
-                  </button>
+                  {/* FIXED: Only render compare button if comparison is enabled */}
+                  {comparisonEnabled && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (canSelect && onAddToComparison) {
+                          onAddToComparison(product.id);
+                        }
+                      }}
+                      disabled={!canSelect}
+                      className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all ${
+                        isSelected
+                          ? 'bg-forest-900 text-white'
+                          : canSelect
+                          ? 'bg-white/90 text-gray-700 hover:bg-forest-900 hover:text-white'
+                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      }`}
+                    >
+                      {isSelected ? (
+                        <i className="ri-check-line text-xl"></i>
+                      ) : (
+                        <i className="ri-scales-line text-xl"></i>
+                      )}
+                    </button>
+                  )}
                 </div>
 
                 {/* Product Info */}
@@ -173,8 +183,8 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
           })}
         </div>
 
-        {/* Comparison Hint */}
-        {selectedForComparison.length > 0 && (
+        {/* FIXED: Only show comparison hint if comparison is enabled AND items are selected */}
+        {comparisonEnabled && selectedForComparison.length > 0 && (
           <div className="mt-8 p-6 bg-sage-50 border border-sage-200 rounded-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">

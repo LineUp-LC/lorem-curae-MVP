@@ -2,7 +2,7 @@ import { useState } from 'react';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
-} from '../../../utils/sessionState';
+} from '../../../lib/utils/sessionState';
 
 export default function ProductOverview() {
   const [selectedImage, setSelectedImage] = useState(0);

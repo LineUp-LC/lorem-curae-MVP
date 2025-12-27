@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 interface AnonymizationStats {
   totalDataPoints: number;
@@ -107,7 +107,7 @@ const DataAnonymizationPage: React.FC = () => {
       // Get all opted-in users
       const { data: contributors } = await supabase
         .from('data_impact_contributions')
-        .select('user_id')
+        .select('id')
         .eq('opted_in', true);
 
       if (contributors) {
@@ -120,7 +120,7 @@ const DataAnonymizationPage: React.FC = () => {
             },
             body: JSON.stringify({
               action: 'process_user_data',
-              user_id: contributor.user_id
+              id: contributor.user_id
             })
           });
 

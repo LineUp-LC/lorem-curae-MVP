@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { supabase } from '../../lib/supabase';
-import { cartState } from '../../utils/cartState';
+import { supabase } from '../../lib/supabase-browser';
+import { cartState } from '../../lib/utils/cartState';
 
 export default function StorefrontProductDetailsPage() {
   const [searchParams] = useSearchParams();

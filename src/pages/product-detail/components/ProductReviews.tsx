@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { getEffectiveSkinType, getEffectiveConcerns } from '../../../utils/sessionState';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 
 interface Review {
   id: number;

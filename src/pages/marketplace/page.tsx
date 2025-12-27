@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 const MarketplacePage = () => {
   const [currentTier, setCurrentTier] = useState('free');

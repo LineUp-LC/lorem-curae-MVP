@@ -6,7 +6,7 @@ import FoodLibrary from './components/FoodLibrary';
 import FoodDetailModal from './components/FoodDetailModal';
 import MealPlanner from './components/MealPlanner';
 import NutrientTracker from './components/NutrientTracker';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 interface Food {
   id: string;

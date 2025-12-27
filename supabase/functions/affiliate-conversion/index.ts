@@ -104,7 +104,7 @@ serve(async (req) => {
         converted: true, 
         conversion_timestamp: new Date().toISOString() 
       })
-      .eq('id', click.id);
+      .eq('user_id', click.id);
 
     if (updateError) {
       throw updateError;

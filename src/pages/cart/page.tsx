@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { useCartItems } from '../../utils/cartState';
+import { useCartItems } from '../../lib/utils/cartState';
 
 const CartPage = () => {
   const { items: cartItems, updateQuantity, removeItem, count } = useCartItems();

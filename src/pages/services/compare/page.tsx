@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
-import { getEffectiveSkinType, getEffectiveConcerns } from '../../../utils/sessionState';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 
 interface Business {
   id: string;

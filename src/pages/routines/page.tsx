@@ -4,7 +4,7 @@ import Footer from '../../components/feature/Footer';
 import RoutineBuilder from './components/RoutineBuilder';
 import ConflictDetection from './components/ConflictDetection';
 import NotesSection from './components/NotesSection';
-import { sessionState } from '../../utils/sessionState';
+import { sessionState } from '../../lib/utils/sessionState';
 
 export default function RoutinesPage() {
   const [activeTab, setActiveTab] = useState<'routine' | 'notes'>('routine');

@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ const AccountPage = () => {
             marketplace_products(name, image_url, price),
             marketplace_storefronts(business_name)
           `)
-          .eq('user_id', user.id)
+          .eq('buyer_id', user.id)
           .order('created_at', { ascending: false })
           .limit(6);
         

@@ -51,29 +51,40 @@ const Footer = () => {
 
           {/* Column 2 - Stay Connected */}
           <div className="space-y-6">
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-cream-50">Stay Connected</h4>
-            <form className="space-y-3">
-              <div className="relative">
-                <input
-                  type="email"
-                  placeholder="Your email address"
-                  className="w-full bg-transparent border-b border-cream-300 text-cream-100 placeholder-cream-400 py-2 pr-10 focus:outline-none focus:border-sage-400 transition-colors"
-                />
-                <button
-                  type="submit"
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-cream-100 hover:text-sage-400 transition-colors cursor-pointer"
-                  aria-label="Subscribe"
-                >
-                  <i className="ri-arrow-right-line text-xl"></i>
-                </button>
-              </div>
-              <p className="text-xs text-cream-400">
-                <a href="/privacy" className="hover:text-cream-200 transition-colors cursor-pointer">
-                  Privacy Policy
-                </a>
-              </p>
-            </form>
-          </div>
+  <h4 className="text-xs uppercase tracking-wider font-semibold text-cream-50">
+    Stay Connected
+  </h4>
+
+  <form className="space-y-3">
+    <div className="relative">
+      <input
+        id="newsletter-email"
+        name="email"
+        type="email"
+        placeholder="Your email address"
+        autoComplete="email"
+        className="w-full bg-transparent border-b border-cream-300 text-cream-100 placeholder-cream-400 py-2 pr-10 focus:outline-none focus:border-sage-400 transition-colors"
+      />
+
+      <button
+        type="submit"
+        className="absolute right-0 top-1/2 -translate-y-1/2 text-cream-100 hover:text-sage-400 transition-colors cursor-pointer"
+        aria-label="Subscribe"
+      >
+        <i className="ri-arrow-right-line text-xl"></i>
+      </button>
+    </div>
+
+    <p className="text-xs text-cream-400">
+      <a
+        href="/privacy"
+        className="hover:text-cream-200 transition-colors cursor-pointer"
+      >
+        Privacy Policy
+      </a>
+    </p>
+  </form>
+</div>
 
           {/* Column 3 - Quick Links */}
           <div className="space-y-6">

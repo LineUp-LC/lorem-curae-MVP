@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 interface SurveyData {
@@ -13,7 +13,12 @@ interface SurveyData {
   routine: string[];
 }
 
-const QuizFlow = () => {
+// FIXED: Added props interface for onComplete callback
+interface QuizFlowProps {
+  onComplete?: (data: SurveyData) => void;
+}
+
+const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [surveyData, setSurveyData] = useState<SurveyData>({
     skinType: [],
@@ -39,12 +44,19 @@ const QuizFlow = () => {
   ];
 
   const handleMultiSelect = (category: keyof SurveyData, value: string) => {
-    setSurveyData(prev => ({
-      ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter(item => item !== value)
-        : [...prev[category], value]
-    }));
+    setSurveyData(prev => {
+      const current = prev[category];
+  
+      // Only proceed if this field is an array
+      if (!Array.isArray(current)) return prev;
+  
+      return {
+        ...prev,
+        [category]: current.includes(value)
+          ? current.filter(item => item !== value)
+          : [...current, value]
+      };
+    });
   };
 
   const handleSingleSelect = (category: keyof SurveyData, value: string) => {
@@ -361,6 +373,13 @@ const QuizFlow = () => {
         return null;
     }
   };
+
+  // FIXED: Call onComplete when quiz is finished
+  useEffect(() => {
+    if (currentStep > totalSteps && onComplete) {
+      onComplete(surveyData);
+    }
+  }, [currentStep, totalSteps]);
 
   if (currentStep > totalSteps) {
     return (

@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase-browser';
 
 interface NutrientGoal {
   id: string;
@@ -42,7 +42,7 @@ const NutrientTracker = () => {
       const { data: goalsData, error: goalsError } = await supabase
         .from('nutrient_goals')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('id', user.id);
 
       if (goalsError) throw goalsError;
 
@@ -64,7 +64,7 @@ const NutrientTracker = () => {
       const { data: intakeData, error: intakeError } = await supabase
         .from('daily_nutrient_intake')
         .select('nutrients')
-        .eq('user_id', user.id)
+        .eq('id', user.id)
         .eq('date', dateStr);
 
       if (intakeError) throw intakeError;

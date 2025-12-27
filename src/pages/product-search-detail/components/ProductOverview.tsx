@@ -4,7 +4,7 @@ import { productData } from '../../../mocks/products';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
-} from '../../../utils/sessionState';
+} from '../../../lib/utils/sessionState';
 
 interface ProductOverviewProps {
   productId: number;

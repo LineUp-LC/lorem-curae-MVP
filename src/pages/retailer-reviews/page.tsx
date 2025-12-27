@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { getEffectiveSkinType, getEffectiveConcerns } from '../../utils/sessionState';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../lib/utils/sessionState';
 
 interface Review {
   id: number;

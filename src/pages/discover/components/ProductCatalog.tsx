@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
+import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
 
 interface ProductCatalogProps {
@@ -38,6 +39,9 @@ export default function ProductCatalog({
 
   // Derive showCompareBar from safeCompareList length
   const showCompareBar = safeCompareList.length > 0;
+
+  // Safe fallback for userConcerns
+  const safeUserConcerns = userConcerns ?? [];
 
   // Check if user has completed the skin survey
   useEffect(() => {
@@ -94,17 +98,12 @@ export default function ProductCatalog({
     });
   }, [products, selectedCategory, selectedSkinType, searchQuery]);
 
-  // Safe fallback for userConcerns
-  const safeUserConcerns = userConcerns ?? [];
-
-  // Concern matching: simple array includes check
+  // Concern matching using the matching utility with synonym support
   const matchedProducts = useMemo(() => {
     if (!safeUserConcerns || safeUserConcerns.length === 0) return [];
 
     return filteredProducts.filter((product) =>
-      product.concerns?.some((c) =>
-        safeUserConcerns.some((uc) => c.toLowerCase() === uc.toLowerCase())
-      )
+      productMatchesUserConcerns(product.concerns, safeUserConcerns)
     );
   }, [filteredProducts, safeUserConcerns]);
 
@@ -164,13 +163,9 @@ export default function ProductCatalog({
     return safeCompareList.some((p) => p.id === productId);
   };
 
-  // Simple check if product concerns overlap with user concerns
+  // Check if product is recommended using synonym-aware matching
   const isProductRecommended = (product: Product) => {
-    return product.concerns?.some((productConcern) =>
-      safeUserConcerns.some(
-        (userConcern) => productConcern.toLowerCase() === userConcern.toLowerCase()
-      )
-    );
+    return productMatchesUserConcerns(product.concerns, safeUserConcerns);
   };
 
   const handleAddToCompare = (product: Product, e: React.MouseEvent) => {
@@ -266,21 +261,29 @@ export default function ProductCatalog({
 
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
 
-          {/* Key Ingredients */}
+          {/* Key Ingredients - with highlighting for matching ingredients */}
           <div className="mb-4">
             <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
             <div className="flex flex-wrap gap-1">
-              {product.keyIngredients.slice(0, 2).map((ingredient, idx) => (
-                <span
-                  key={idx}
-                  className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200"
-                >
-                  {ingredient}
-                </span>
-              ))}
-              {product.keyIngredients.length > 2 && (
+              {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
+                const isMatchingIngredient = matchesIngredient(ingredient, safeUserConcerns);
+                
+                return (
+                  <span
+                    key={idx}
+                    className={`px-2 py-1 text-xs rounded-full border ${
+                      isMatchingIngredient
+                        ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
+                        : 'bg-cream-100 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    {ingredient}
+                  </span>
+                );
+              })}
+              {product.keyIngredients.length > 3 && (
                 <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
-                  +{product.keyIngredients.length - 2}
+                  +{product.keyIngredients.length - 3}
                 </span>
               )}
             </div>
@@ -336,12 +339,20 @@ export default function ProductCatalog({
       {/* Search Bar */}
       <div className="mb-8">
         <div className="relative max-w-2xl mx-auto">
+          <label htmlFor="discover-search" className="sr-only">
+            Search products
+          </label>
+
           <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400"></i>
+
           <input
+            id="discover-search"
+            name="search"
             type="text"
             placeholder="Search products, brands, or ingredients..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
             className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 focus:border-sage-600 focus:outline-none text-sm transition-all"
           />
         </div>
@@ -375,13 +386,25 @@ export default function ProductCatalog({
 
         {/* Skin Type, Time of Day & Sort */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+
+          {/* Skin Type + Time of Day */}
           <div className="flex items-center space-x-3 flex-wrap gap-3">
-            <label className="text-sm font-semibold text-gray-700">Skin Type:</label>
+
+            {/* Skin Type */}
+            <label
+              htmlFor="filter-skin-type"
+              className="text-sm font-semibold text-gray-700"
+            >
+              Skin Type:
+            </label>
+
             <select
+              id="filter-skin-type"
+              name="skinType"
               value={selectedSkinType}
               onChange={(e) => {
-                setSelectedSkinType(e.target.value);
-                onFilterChange('skinType', e.target.value);
+                setSelectedSkinType(e.target.value)
+                onFilterChange('skinType', e.target.value)
               }}
               className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
             >
@@ -392,12 +415,21 @@ export default function ProductCatalog({
               ))}
             </select>
 
-            <label className="text-sm font-semibold text-gray-700 ml-4">Time of Day:</label>
+            {/* Time of Day */}
+            <label
+              htmlFor="filter-time-of-day"
+              className="text-sm font-semibold text-gray-700 ml-4"
+            >
+              Time of Day:
+            </label>
+
             <select
+              id="filter-time-of-day"
+              name="timeOfDay"
               value={timeOfDay}
               onChange={(e) => {
-                setTimeOfDay(e.target.value);
-                onFilterChange('timeOfDay', e.target.value);
+                setTimeOfDay(e.target.value)
+                onFilterChange('timeOfDay', e.target.value)
               }}
               className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
             >
@@ -407,13 +439,22 @@ export default function ProductCatalog({
             </select>
           </div>
 
+          {/* Sort */}
           <div className="flex items-center space-x-3">
-            <label className="text-sm font-semibold text-gray-700">Sort by:</label>
+            <label
+              htmlFor="filter-sort-by"
+              className="text-sm font-semibold text-gray-700"
+            >
+              Sort by:
+            </label>
+
             <select
+              id="filter-sort-by"
+              name="sortBy"
               value={sortBy}
               onChange={(e) => {
-                setSortBy(e.target.value);
-                onFilterChange('sortBy', e.target.value);
+                setSortBy(e.target.value)
+                onFilterChange('sortBy', e.target.value)
               }}
               className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
             >
@@ -434,17 +475,34 @@ export default function ProductCatalog({
             {sortedMatchedProducts.length + sortedOtherProducts.length}
           </span>{' '}
           products
+          {safeUserConcerns.length > 0 && sortedMatchedProducts.length > 0 && (
+            <span className="text-sage-600 ml-2">
+              ({sortedMatchedProducts.length} recommended for your concerns)
+            </span>
+          )}
         </p>
       </div>
 
       {/* Recommended for You Section */}
       {sortedMatchedProducts.length > 0 && (
         <section className="mb-10">
-          <h2 className="text-xl font-semibold text-sage-700 mb-4">Recommended for You</h2>
+          <div className="flex items-center gap-3 mb-4">
+            <h2 className="text-xl font-semibold text-sage-700">Recommended for You</h2>
+            <span className="px-3 py-1 bg-sage-100 text-sage-700 text-sm rounded-full">
+              Based on your skin concerns
+            </span>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {sortedMatchedProducts.map((product) => renderProductCard(product))}
           </div>
         </section>
+      )}
+
+      {/* Divider between recommended and other products */}
+      {sortedMatchedProducts.length > 0 && sortedOtherProducts.length > 0 && (
+        <div className="border-t border-gray-200 my-10 pt-6">
+          <h2 className="text-xl font-semibold text-gray-700 mb-4">More Products</h2>
+        </div>
       )}
 
       {/* Main Product Grid */}

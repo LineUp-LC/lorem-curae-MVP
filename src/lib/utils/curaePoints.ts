@@ -1,4 +1,4 @@
-import { supabase } from '../lib/supabase';
+import { supabase } from '../supabase-browser';
 
 export interface PointsTransaction {
   id: string;
@@ -79,7 +79,7 @@ export const getPointsAccount = async (userId: string): Promise<CuraePointsAccou
     const { data, error } = await supabase
       .from('curae_points')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .single();
 
     if (error) {
@@ -127,7 +127,7 @@ export const awardPoints = async (
         tier: newTier,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', userId);
+      .eq('id', userId);
 
     if (updateError) throw updateError;
 
@@ -173,7 +173,7 @@ export const redeemPoints = async (
         points_balance: newBalance,
         updated_at: new Date().toISOString(),
       })
-      .eq('user_id', userId);
+      .eq('id', userId);
 
     if (updateError) throw updateError;
 
@@ -206,7 +206,7 @@ export const getTransactionHistory = async (
     const { data, error } = await supabase
       .from('points_transactions')
       .select('*')
-      .eq('user_id', userId)
+      .eq('id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
 

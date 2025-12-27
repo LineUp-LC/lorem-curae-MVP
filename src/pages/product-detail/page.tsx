@@ -1,23 +1,22 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import ProductOverview from './components/ProductOverview';
 import ProductReviews from './components/ProductReviews';
-import ProductComparison from './components/ProductComparison';
 import PurchaseOptions from './components/PurchaseOptions';
 import SimilarProducts from './components/SimilarProducts';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
 
 export default function ProductDetailPage() {
-  const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useState('overview');
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
-  const [showNotification, setShowNotification] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  
+  // State for product comparison feature
+  const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
 
   const product = {
     id: 1,
@@ -43,14 +42,6 @@ export default function ProductDetailPage() {
     'Vitamin E'
   ];
 
-  const suitableFor = [
-    { type: 'All Skin Types', icon: '✨' },
-    { type: 'dry', label: 'Dry' },
-    { type: 'oily', label: 'Oily' },
-    { type: 'combination', label: 'Combination' },
-    { type: 'normal', label: 'Normal' }
-  ];
-
   const locationData = {
     location: 'New York, NY',
     climate: 'Humid Continental',
@@ -58,6 +49,89 @@ export default function ProductDetailPage() {
     pollutionLevel: 'Moderate',
     season: 'Spring'
   };
+
+  const retailers = [
+    {
+      id: 1,
+      name: 'DermStore',
+      price: 43.50,
+      totalPrice: 43.50,
+      shipping: 'Free',
+      shippingCost: 0,
+      tax: 0,
+      deliveryTime: '3-5 days',
+      trustScore: 98,
+      verified: true,
+      logo: 'https://via.placeholder.com/100x40?text=DermStore',
+      returnPolicy: '30 days',
+      rewards: 'Earn 5% back in points',
+      url: 'https://www.dermstore.com',
+    },
+    {
+      id: 2,
+      name: 'Sephora',
+      price: 45.00,
+      totalPrice: 45.00,
+      shipping: 'Free over $50',
+      shippingCost: 0,
+      tax: 0,
+      deliveryTime: '2-4 days',
+      trustScore: 99,
+      verified: true,
+      logo: 'https://via.placeholder.com/100x40?text=Sephora',
+      returnPolicy: '60 days',
+      rewards: 'Beauty Insider points',
+      url: 'https://www.sephora.com',
+    },
+    {
+      id: 3,
+      name: 'Ulta Beauty',
+      price: 44.00,
+      totalPrice: 47.99,
+      shipping: '$3.99',
+      shippingCost: 3.99,
+      tax: 0,
+      deliveryTime: '4-6 days',
+      trustScore: 97,
+      verified: true,
+      logo: 'https://via.placeholder.com/100x40?text=Ulta',
+      returnPolicy: '60 days',
+      rewards: 'Ultamate Rewards',
+      url: 'https://www.ulta.com',
+    },
+    {
+      id: 4,
+      name: 'Amazon',
+      price: 42.00,
+      totalPrice: 42.00,
+      shipping: 'Free with Prime',
+      shippingCost: 0,
+      tax: 0,
+      deliveryTime: '1-2 days',
+      trustScore: 92,
+      verified: false,
+      logo: 'https://via.placeholder.com/100x40?text=Amazon',
+      returnPolicy: '30 days',
+      rewards: 'Prime benefits',
+      url: 'https://www.amazon.com',
+    },
+    {
+      id: 5,
+      name: 'Target',
+      price: 44.50,
+      totalPrice: 44.50,
+      shipping: 'Free over $35',
+      shippingCost: 0,
+      tax: 0,
+      deliveryTime: '3-5 days',
+      trustScore: 96,
+      verified: true,
+      logo: 'https://via.placeholder.com/100x40?text=Target',
+      returnPolicy: '90 days',
+      rewards: 'Circle rewards',
+      url: 'https://www.target.com',
+    },
+  ];
 
   const scrollToReviews = () => {
     setActiveTab('reviews');
@@ -96,8 +170,20 @@ export default function ProductDetailPage() {
     }
   };
 
+  // Handler for adding/removing products from comparison
+  const handleAddToComparison = (productId: number) => {
+    setSelectedForComparison(prev => {
+      if (prev.includes(productId)) {
+        return prev.filter(id => id !== productId);
+      }
+      if (prev.length < 3) {
+        return [...prev, productId];
+      }
+      return prev;
+    });
+  };
+
   useEffect(() => {
-    // Fetch user profile
     const fetchUserProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
@@ -116,7 +202,6 @@ export default function ProductDetailPage() {
   if (showComparison) {
     const selectedRetailers = retailers.filter(r => selectedRetailerIds.includes(r.id));
     
-    // Find best/worst values for highlighting
     const prices = selectedRetailers.map(r => r.totalPrice);
     const bestPrice = Math.min(...prices);
     const worstPrice = Math.max(...prices);
@@ -165,7 +250,6 @@ export default function ProductDetailPage() {
           </div>
 
           <div className="p-6">
-            {/* Retailer Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {retailers.map((retailer) => (
                 <label
@@ -207,7 +291,6 @@ export default function ProductDetailPage() {
               ))}
             </div>
 
-            {/* Comparison Table */}
             {selectedRetailers.length > 0 && (
               <div className="bg-gray-50 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-6">
@@ -263,10 +346,10 @@ export default function ProductDetailPage() {
                         {selectedRetailers.map((retailer) => (
                           <td key={retailer.id} className="p-4">
                             <span className="text-gray-900">
-                              {retailer.shipping === 0 ? (
-                                <span className="text-[#7C9885] font-medium">Free</span>
+                              {retailer.shippingCost === 0 ? (
+                                <span className="text-[#7C9885] font-medium">{retailer.shipping}</span>
                               ) : (
-                                `$${retailer.shipping.toFixed(2)}`
+                                <span>{retailer.shipping}</span>
                               )}
                             </span>
                           </td>
@@ -347,7 +430,6 @@ export default function ProductDetailPage() {
                   </table>
                 </div>
 
-                {/* Legend */}
                 <div className="mt-6 flex items-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-[#7C9885]"></div>
@@ -377,7 +459,6 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
       
-      {/* Success Notification */}
       {showSaveSuccess && (
         <div className="fixed top-24 right-6 z-50 bg-sage-600 text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 animate-fade-in">
           <i className="ri-checkbox-circle-fill text-xl"></i>
@@ -386,7 +467,6 @@ export default function ProductDetailPage() {
       )}
 
       <main className="flex-1 pt-20">
-        {/* Product Section */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Image Gallery */}
@@ -557,7 +637,7 @@ export default function ProductDetailPage() {
         </div>
 
         {/* Where to Buy Section */}
-        <PurchaseOptions />
+        <PurchaseOptions productId={product.id} />
 
         {/* Tabs Section */}
         <div className="bg-gray-50 py-16">
@@ -592,7 +672,6 @@ export default function ProductDetailPage() {
               <div className="space-y-8">
                 <ProductOverview />
 
-                {/* Full Ingredient List */}
                 <div id="full-ingredients-section">
                   <h3 className="text-xl font-semibold text-gray-900 mb-4">Full Ingredient List</h3>
                   <p className="text-gray-700 leading-relaxed">
@@ -658,12 +737,16 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             )}
-            {activeTab === 'reviews' && <ProductReviews />}
+            {activeTab === 'reviews' && <ProductReviews productId={product.id} />}
           </div>
         </div>
 
-        {/* Similar Products */}
-        <SimilarProducts />
+        {/* Similar Products - with optional comparison props */}
+        <SimilarProducts
+          productId={product.id}
+          onAddToComparison={handleAddToComparison}
+          selectedForComparison={selectedForComparison}
+        />
       </main>
 
       <Footer />

@@ -79,10 +79,11 @@ serve(async (req) => {
         const paymentIntent = event.data.object;
         
         // Update transaction status to failed
+        // Update transaction with payment details
         await supabaseClient
           .from('marketplace_transactions')
           .update({
-            status: 'failed',
+            status: 'completed',
             updated_at: new Date().toISOString(),
           })
           .eq('stripe_payment_intent_id', paymentIntent.id);

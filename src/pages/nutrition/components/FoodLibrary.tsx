@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { supabase } from '../../../lib/supabase-browser';
 
 interface Food {
   id: string;
@@ -92,7 +92,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
       const { data, error } = await supabase
         .from('saved_meals')
         .select('food_id')
-        .eq('user_id', user.id);
+        .eq('id', user.id);
 
       if (error) throw error;
 
@@ -115,7 +115,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
         const { error } = await supabase
           .from('saved_meals')
           .delete()
-          .eq('user_id', user.id)
+          .eq('id', user.id)
           .eq('food_id', foodId);
 
         if (error) throw error;

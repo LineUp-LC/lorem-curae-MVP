@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
-} from '../../../utils/sessionState';
+} from '../../../lib/utils/sessionState';
 
 interface ProductComparisonProps {
   productIds?: number[];

@@ -1,14 +1,34 @@
-import { createClient, User } from '@supabase/supabase-js';
-import { sessionState, getEffectiveSkinType, getEffectiveConcerns } from '../utils/sessionState';
-
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import type { User } from '@supabase/supabase-js'
+import { supabase } from './supabase-browser'
+import {
+  sessionState,
+  getEffectiveSkinType,
+  getEffectiveConcerns
+} from './utils/sessionState'
 
 // -----------------------------
 // Types
 // -----------------------------
+
+// Subscription tier type (for user profile field)
+export type SubscriptionPlan = 'free' | 'plus' | 'premium';
+
+// Database row type for subscription_plans table
+export interface SubscriptionPlanRow {
+  id: string;
+  name: string;
+  price_monthly: number;
+  price_yearly: number;
+  max_communities: number;
+  can_create_communities: boolean;
+  storage_limit_mb: number;
+  marketplace_discount: number;
+  cashback_percentage: number;
+  features: string[] | string;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -27,7 +47,7 @@ export interface UserProfile {
 // -----------------------------
 export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('users_profiles')   // FIXED
+    .from('users_profiles')
     .select('*')
     .eq('id', userId)
     .single();
@@ -48,7 +68,7 @@ export async function updateUserProfile(
   updates: Partial<UserProfile>
 ): Promise<UserProfile | null> {
   const { data, error } = await supabase
-    .from('users_profiles')   // FIXED
+    .from('users_profiles')
     .update({ ...updates, updated_at: new Date().toISOString() })
     .eq('id', userId)
     .select()
@@ -72,7 +92,7 @@ export async function createUserProfile(authUser: User): Promise<boolean> {
   const tempConcerns = getEffectiveConcerns();
 
   const { error } = await supabase.from('users_profiles').insert({
-    id: userId, // MUST match Supabase Auth user ID
+    id: userId,
     email: authUser.email,
     full_name: authUser.user_metadata?.full_name || null,
     subscription_tier: 'free',

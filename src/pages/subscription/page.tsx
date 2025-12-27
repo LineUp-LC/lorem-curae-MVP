@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { supabase, UserProfile, SubscriptionPlan } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase-browser';
+import { UserProfile, SubscriptionPlanRow } from '../../lib/supabase';
 
 export default function SubscriptionPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('monthly');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [plans, setPlans] = useState<SubscriptionPlanRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function SubscriptionPage() {
           .single();
         
         if (profileError) throw profileError;
-        setUserProfile(profileData);
+        setUserProfile(profileData as UserProfile);
       }
 
       // Load subscription plans
@@ -40,7 +41,7 @@ export default function SubscriptionPage() {
       if (plansError) throw plansError;
       
       // Parse features field if it's a string
-      const parsedPlans = (plansData || []).map(plan => ({
+      const parsedPlans: SubscriptionPlanRow[] = (plansData || []).map(plan => ({
         ...plan,
         features: typeof plan.features === 'string' 
           ? JSON.parse(plan.features) 
@@ -67,17 +68,17 @@ export default function SubscriptionPage() {
     alert(`Subscription to ${planName} will be implemented with Stripe integration`);
   };
 
-  const getTierBadge = (tier: string) => {
-    const badges = {
+  const getTierBadge = (tier: string | null) => {
+    const badges: Record<string, { text: string; color: string }> = {
       free: { text: 'Current Plan', color: 'bg-gray-100 text-gray-700' },
       plus: { text: 'Current Plan', color: 'bg-sage-100 text-sage-700' },
       premium: { text: 'Current Plan', color: 'bg-amber-100 text-amber-700' }
     };
-    return badges[tier as keyof typeof badges] || badges.free;
+    return badges[tier || 'free'] || badges.free;
   };
 
   const isCurrentPlan = (planName: string) => {
-    if (!userProfile) return false;
+    if (!userProfile || !userProfile.subscription_tier) return false;
     return userProfile.subscription_tier.toLowerCase() === planName.toLowerCase().replace('nutrire ', '');
   };
 
@@ -140,6 +141,7 @@ export default function SubscriptionPage() {
               const isPremium = plan.name.toLowerCase().includes('premium');
               const price = billingCycle === 'monthly' ? plan.price_monthly : plan.price_yearly;
               const monthlyEquivalent = billingCycle === 'yearly' ? (plan.price_yearly / 12).toFixed(2) : null;
+              const featuresArray = Array.isArray(plan.features) ? plan.features : [];
 
               return (
                 <div
@@ -222,7 +224,7 @@ export default function SubscriptionPage() {
                           <strong>{plan.cashback_percentage}%</strong> affiliate cashback
                         </p>
                       </div>
-                      {Array.isArray(plan.features) && plan.features.map((feature, index) => (
+                      {featuresArray.map((feature, index) => (
                         <div key={index} className="flex items-start gap-3">
                           <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
                           <p className="text-gray-700 text-sm">{feature}</p>

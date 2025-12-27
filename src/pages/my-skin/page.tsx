@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
-import { sessionState } from '../../utils/sessionState';
+import { sessionState } from '../../lib/utils/sessionState';
 
 interface SkinConcern {
   id: string;
@@ -73,7 +73,7 @@ export default function MySkinPage() {
         const surveyData = JSON.parse(savedSurvey);
         
         // Map survey data to skin profile
-        const primarySkinType = surveyData.skinTypes?.[0] || 'Normal';
+        const primarySkinType = surveyData.skinType?.[0] || 'Normal';
         const mappedConcerns = mapSurveyConcernsToConcerns(surveyData.concerns || []);
         const mappedAllergens = (surveyData.allergens || []).map((allergen: string, index: number) => ({
           id: `allergen-${index}`,
@@ -82,7 +82,10 @@ export default function MySkinPage() {
         }));
         const mappedPreferences = mapSurveyPreferences(surveyData);
 
-        localStorage.setItem('userConcerns', JSON.stringify(mappedConcerns));
+        // Save raw concern strings for matching, not SkinConcern objects
+        // This ensures DiscoverPage can use these directly with matching.ts
+        localStorage.setItem('userConcerns', JSON.stringify(surveyData.concerns || []));
+
 
         // Update state
         setSkinProfile({

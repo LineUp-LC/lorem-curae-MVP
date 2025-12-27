@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
-import { useCartCount } from '../../utils/cartState';
+import { useCartCount } from '../../lib/utils/cartState';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
