@@ -215,20 +215,20 @@ export default function ProductDetailPage() {
     const slowestDelivery = Math.max(...deliveryDays);
     
     const getPriceColor = (price: number) => {
-      if (price === bestPrice) return 'text-[#7C9885] font-semibold';
+      if (price === bestPrice) return 'text-sage-500 font-semibold';
       if (price === worstPrice) return 'text-orange-600 font-semibold';
       return 'text-gray-900';
     };
     
     const getTrustColor = (score: number) => {
-      if (score === bestTrust) return 'text-[#7C9885] font-semibold';
+      if (score === bestTrust) return 'text-sage-500 font-semibold';
       if (score === worstTrust) return 'text-orange-600 font-semibold';
       return 'text-gray-900';
     };
     
     const getDeliveryColor = (time: string) => {
       const days = parseInt(time.split('-')[0]);
-      if (days === fastestDelivery) return 'text-[#7C9885] font-semibold';
+      if (days === fastestDelivery) return 'text-sage-500 font-semibold';
       if (days === slowestDelivery) return 'text-orange-600 font-semibold';
       return 'text-gray-900';
     };
@@ -256,7 +256,7 @@ export default function ProductDetailPage() {
                   key={retailer.id}
                   className={`relative border-2 rounded-lg p-4 cursor-pointer transition-all ${
                     selectedRetailerIds.includes(retailer.id)
-                      ? 'border-[#7C9885] bg-[#7C9885]/5'
+                      ? 'border-sage-500 bg-sage-500/5'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
@@ -294,7 +294,7 @@ export default function ProductDetailPage() {
             {selectedRetailers.length > 0 && (
               <div className="bg-gray-50 rounded-xl p-6">
                 <div className="flex items-center gap-2 mb-6">
-                  <i className="ri-bar-chart-box-line text-xl text-[#7C9885]"></i>
+                  <i className="ri-bar-chart-box-line text-xl text-sage-500"></i>
                   <h3 className="text-lg font-semibold text-gray-900">Side-by-Side Comparison</h3>
                 </div>
 
@@ -320,7 +320,7 @@ export default function ProductDetailPage() {
                                 ${retailer.totalPrice.toFixed(2)}
                               </span>
                               {retailer.totalPrice === bestPrice && (
-                                <span className="px-2 py-0.5 bg-[#7C9885]/10 text-[#7C9885] text-xs font-medium rounded-full whitespace-nowrap">
+                                <span className="px-2 py-0.5 bg-sage-500/10 text-sage-500 text-xs font-medium rounded-full whitespace-nowrap">
                                   Best Price
                                 </span>
                               )}
@@ -347,7 +347,7 @@ export default function ProductDetailPage() {
                           <td key={retailer.id} className="p-4">
                             <span className="text-gray-900">
                               {retailer.shippingCost === 0 ? (
-                                <span className="text-[#7C9885] font-medium">{retailer.shipping}</span>
+                                <span className="text-sage-500 font-medium">{retailer.shipping}</span>
                               ) : (
                                 <span>{retailer.shipping}</span>
                               )}
@@ -375,7 +375,7 @@ export default function ProductDetailPage() {
                                 </span>
                               </div>
                               {retailer.trustScore === bestTrust && (
-                                <span className="px-2 py-0.5 bg-[#7C9885]/10 text-[#7C9885] text-xs font-medium rounded-full whitespace-nowrap">
+                                <span className="px-2 py-0.5 bg-sage-500/10 text-sage-500 text-xs font-medium rounded-full whitespace-nowrap">
                                   Highest Rated
                                 </span>
                               )}
@@ -397,7 +397,7 @@ export default function ProductDetailPage() {
                                 {retailer.deliveryTime}
                               </span>
                               {parseInt(retailer.deliveryTime.split('-')[0]) === fastestDelivery && (
-                                <span className="px-2 py-0.5 bg-[#7C9885]/10 text-[#7C9885] text-xs font-medium rounded-full whitespace-nowrap">
+                                <span className="px-2 py-0.5 bg-sage-500/10 text-sage-500 text-xs font-medium rounded-full whitespace-nowrap">
                                   Fastest
                                 </span>
                               )}
@@ -418,7 +418,7 @@ export default function ProductDetailPage() {
                               href={retailer.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 px-4 py-2 bg-[#7C9885] text-white rounded-lg hover:bg-[#6B8574] transition-colors text-sm font-medium whitespace-nowrap"
+                              className="inline-flex items-center gap-2 px-4 py-2 bg-sage-500 text-white rounded-lg hover:bg-sage-600 transition-colors text-sm font-medium whitespace-nowrap"
                             >
                               Visit Store
                               <i className="ri-external-link-line"></i>
@@ -432,7 +432,7 @@ export default function ProductDetailPage() {
 
                 <div className="mt-6 flex items-center gap-6 text-sm">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-full bg-[#7C9885]"></div>
+                    <div className="w-3 h-3 rounded-full bg-sage-500"></div>
                     <span className="text-gray-600">Best Value</span>
                   </div>
                   <div className="flex items-center gap-2">

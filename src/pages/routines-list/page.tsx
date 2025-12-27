@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
@@ -110,32 +109,41 @@ export default function RoutinesListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
       <Navbar />
       
-      <main className="pt-24 pb-16">
+      {/* CHANGED: pt-24 -> pt-20 sm:pt-24, pb-16 -> pb-12 sm:pb-16 */}
+      <main className="pt-20 sm:pt-24 pb-12 sm:pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="font-['Cormorant_Garamond'] text-5xl font-bold text-[#2C5F4F] mb-4">
+          {/* CHANGED: mb-12 -> mb-8 sm:mb-12 */}
+          <div className="text-center mb-8 sm:mb-12">
+            {/* CHANGED: text-5xl -> text-3xl sm:text-4xl md:text-5xl, mb-4 -> mb-3 sm:mb-4 */}
+            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-forest-800 mb-3 sm:mb-4">
               My Skincare Routines
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            {/* CHANGED: text-lg -> text-base sm:text-lg, added px-4 */}
+            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
               Manage all your personalized skincare routines in one place
             </p>
           </div>
 
           {/* Routines Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* CHANGED: grid md:grid-cols-2 lg:grid-cols-3 gap-6 -> grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
             {/* Create New Routine Card */}
+            {/* CHANGED: rounded-2xl -> rounded-xl sm:rounded-2xl, p-8 -> p-6 sm:p-8, min-h-[400px] -> min-h-[300px] sm:min-h-[400px] */}
             <div
               onClick={handleCreateRoutine}
-              className="bg-white rounded-2xl shadow-sm border-2 border-dashed border-gray-300 hover:border-[#2C5F4F] p-8 flex flex-col items-center justify-center min-h-[400px] cursor-pointer transition-all group"
+              className="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-dashed border-gray-300 hover:border-forest-800 p-6 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] cursor-pointer transition-all group"
             >
-              <div className="w-20 h-20 rounded-full bg-[#2C5F4F]/10 group-hover:bg-[#2C5F4F]/20 flex items-center justify-center mb-4 transition-colors">
-                <i className="ri-add-line text-4xl text-[#2C5F4F]"></i>
+              {/* CHANGED: w-20 h-20 -> w-16 h-16 sm:w-20 sm:h-20, mb-4 -> mb-3 sm:mb-4 */}
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-forest-800/10 group-hover:bg-forest-800/20 flex items-center justify-center mb-3 sm:mb-4 transition-colors">
+                {/* CHANGED: text-4xl -> text-3xl sm:text-4xl */}
+                <i className="ri-add-line text-3xl sm:text-4xl text-forest-800"></i>
               </div>
-              <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F] mb-2">
+              {/* CHANGED: text-2xl -> text-xl sm:text-2xl, added text-center */}
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-forest-800 mb-2 text-center">
                 Build Your Routine
               </h3>
               <p className="text-gray-600 text-center text-sm">
@@ -147,10 +155,12 @@ export default function RoutinesListPage() {
             {routines.map((routine) => (
               <div
                 key={routine.id}
-                className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-lg transition-all group"
+                /* CHANGED: rounded-2xl -> rounded-xl sm:rounded-2xl */
+                className="bg-white rounded-xl sm:rounded-2xl shadow-sm overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
               >
                 {/* Thumbnail */}
-                <div className="relative h-48 overflow-hidden bg-gray-100">
+                {/* CHANGED: h-48 -> h-40 sm:h-48 */}
+                <div className="relative h-40 sm:h-48 overflow-hidden bg-gray-100">
                   <img
                     src={routine.thumbnail}
                     alt={routine.name}
@@ -159,27 +169,30 @@ export default function RoutinesListPage() {
                   <div className="absolute top-3 right-3 flex gap-2">
                     <button
                       onClick={() => handleShareRoutine(routine.id)}
-                      className="w-10 h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-sm transition-colors cursor-pointer"
+                      /* CHANGED: w-10 h-10 -> w-9 h-9 sm:w-10 sm:h-10 */
+                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-sm transition-colors cursor-pointer"
                       title="Share Routine"
                     >
                       {shareRoutineId === routine.id ? (
-                        <i className="ri-loader-4-line text-[#2C5F4F] animate-spin"></i>
+                        <i className="ri-loader-4-line text-forest-800 animate-spin"></i>
                       ) : (
-                        <i className="ri-share-line text-[#2C5F4F]"></i>
+                        <i className="ri-share-line text-forest-800"></i>
                       )}
                     </button>
                   </div>
                   
                   {/* Completion Badge */}
                   <div className="absolute bottom-3 left-3">
-                    <div className="px-3 py-1 bg-white/90 rounded-full text-xs font-medium text-[#2C5F4F]">
+                    {/* CHANGED: px-3 -> px-2 sm:px-3 */}
+                    <div className="px-2 sm:px-3 py-1 bg-white/90 rounded-full text-xs font-medium text-forest-800">
                       {routine.completionRate}% Complete
                     </div>
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6">
+                {/* CHANGED: p-6 -> p-4 sm:p-6 */}
+                <div className="p-4 sm:p-6">
                   {/* Editable Name */}
                   {editingId === routine.id ? (
                     <div className="mb-4">
@@ -187,65 +200,75 @@ export default function RoutinesListPage() {
                         type="text"
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
-                        className="w-full px-3 py-2 border border-[#2C5F4F] rounded-lg font-['Cormorant_Garamond'] text-xl font-bold text-[#2C5F4F] focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20"
+                        /* CHANGED: text-xl -> text-lg sm:text-xl */
+                        className="w-full px-3 py-2 border border-forest-800 rounded-lg font-serif text-lg sm:text-xl font-bold text-forest-800 focus:outline-none focus:ring-2 focus:ring-forest-800/20"
                         autoFocus
                       />
                       <div className="flex gap-2 mt-2">
                         <button
                           onClick={() => handleSaveName(routine.id)}
-                          className="flex-1 px-4 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                          /* CHANGED: px-4 -> px-3 sm:px-4 */
+                          className="flex-1 px-3 sm:px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                         >
                           Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
-                          className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                          /* CHANGED: px-4 -> px-3 sm:px-4 */
+                          className="flex-1 px-3 sm:px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                         >
                           Cancel
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-2 mb-4">
-                      <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F] flex-1">
+                    /* CHANGED: mb-4 -> mb-3 sm:mb-4 */
+                    <div className="flex items-center gap-2 mb-3 sm:mb-4">
+                      {/* CHANGED: text-2xl -> text-xl sm:text-2xl, added line-clamp-1 */}
+                      <h3 className="font-serif text-xl sm:text-2xl font-bold text-forest-800 flex-1 line-clamp-1">
                         {routine.name}
                       </h3>
+                      {/* ADDED: flex-shrink-0 to prevent button from shrinking */}
                       <button
                         onClick={() => handleEditName(routine)}
-                        className="w-8 h-8 rounded-lg hover:bg-[#F8F6F3] flex items-center justify-center transition-colors cursor-pointer"
+                        className="w-8 h-8 rounded-lg hover:bg-cream-100 flex items-center justify-center transition-colors cursor-pointer flex-shrink-0"
                         title="Edit Name"
                       >
-                        <i className="ri-pencil-line text-[#2C5F4F]"></i>
+                        <i className="ri-pencil-line text-forest-800"></i>
                       </button>
                     </div>
                   )}
 
                   {/* Stats */}
-                  <div className="flex items-center gap-4 mb-4 text-sm text-gray-600">
+                  {/* CHANGED: gap-4 mb-4 text-sm -> gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm */}
+                  <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-gray-600">
                     <div className="flex items-center gap-1">
-                      <i className="ri-list-check text-[#2C5F4F]"></i>
+                      <i className="ri-list-check text-forest-800"></i>
                       <span>{routine.stepCount} steps</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <i className="ri-time-line text-[#2C5F4F]"></i>
-                      <span>Updated {routine.lastModified.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <i className="ri-time-line text-forest-800"></i>
+                      {/* CHANGED: Shortened "Updated" label for mobile */}
+                      <span>{routine.lastModified.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
-                  <div className="mb-4">
+                  {/* CHANGED: mb-4 -> mb-3 sm:mb-4 */}
+                  <div className="mb-3 sm:mb-4">
                     <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-[#2C5F4F] transition-all duration-300"
+                        className="h-full bg-forest-800 transition-all duration-300"
                         style={{ width: `${routine.completionRate}%` }}
                       ></div>
                     </div>
                   </div>
 
                   {/* Action Button */}
+                  {/* CHANGED: px-6 py-3 -> px-4 sm:px-6 py-2.5 sm:py-3 */}
                   <button
                     onClick={() => handleViewRoutine(routine.id)}
-                    className="w-full px-6 py-3 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                    className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                   >
                     View & Edit Routine
                   </button>
@@ -256,19 +279,25 @@ export default function RoutinesListPage() {
 
           {/* Empty State */}
           {routines.length === 0 && (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
-                <i className="ri-file-list-3-line text-gray-400 text-5xl"></i>
+            /* CHANGED: py-16 -> py-12 sm:py-16 */
+            <div className="text-center py-12 sm:py-16">
+              {/* CHANGED: w-24 h-24 mb-6 -> w-20 h-20 sm:w-24 sm:h-24 mb-4 sm:mb-6 */}
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4 sm:mb-6">
+                {/* CHANGED: text-5xl -> text-4xl sm:text-5xl */}
+                <i className="ri-file-list-3-line text-gray-400 text-4xl sm:text-5xl"></i>
               </div>
-              <h3 className="font-['Cormorant_Garamond'] text-3xl font-bold text-gray-400 mb-3">
+              {/* CHANGED: text-3xl mb-3 -> text-2xl sm:text-3xl mb-2 sm:mb-3 */}
+              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-gray-400 mb-2 sm:mb-3">
                 No Routines Yet
               </h3>
-              <p className="text-gray-500 mb-8 max-w-md mx-auto">
+              {/* CHANGED: mb-8 -> mb-6 sm:mb-8, added text-sm sm:text-base and px-4 */}
+              <p className="text-sm sm:text-base text-gray-500 mb-6 sm:mb-8 max-w-md mx-auto px-4">
                 Start building your first skincare routine with our guided template
               </p>
+              {/* CHANGED: px-8 py-4 -> px-6 sm:px-8 py-3 sm:py-4 */}
               <button
                 onClick={handleCreateRoutine}
-                className="px-8 py-4 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-6 sm:px-8 py-3 sm:py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-add-line mr-2"></i>
                 Create Your First Routine

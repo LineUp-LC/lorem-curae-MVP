@@ -319,7 +319,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 <div
                   key={ingredient.id}
                   onClick={() => onSelectIngredient(ingredient.id)}
-                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border-2 border-sage-600 ring-2 ring-sage-600/20 cursor-pointer group"
+                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2 border-sage-600 ring-2 ring-sage-600/20 cursor-pointer group"
                 >
                   <div className="mb-3 flex items-center gap-2 flex-wrap">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full">
@@ -399,7 +399,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 <div
                   key={ingredient.id}
                   onClick={() => onSelectIngredient(ingredient.id)}
-                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all border border-gray-100 cursor-pointer group"
+                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 cursor-pointer group"
                 >
                   {ingredient.hasSimilarReviews && (
                     <div className="mb-3">

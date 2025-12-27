@@ -107,7 +107,7 @@ export default function ServiceDetailPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
       <Navbar />
       
       <main className="pt-24 pb-16">
@@ -116,7 +116,7 @@ export default function ServiceDetailPage() {
           <div className="mb-8">
             <button
               onClick={() => navigate('/services/search')}
-              className="flex items-center gap-2 text-[#2C5F4F] hover:text-[#234839] mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-forest-800 hover:text-forest-900 mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Search</span>
@@ -124,19 +124,19 @@ export default function ServiceDetailPage() {
 
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="font-['Cormorant_Garamond'] text-5xl font-bold text-[#2C5F4F] mb-3">
+                <h1 className="font-serif text-5xl font-bold text-forest-800 mb-3">
                   {businessData.name}
                 </h1>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
-                    <i className="ri-star-fill text-[#E8956C] text-xl"></i>
-                    <span className="font-bold text-[#2C5F4F] text-xl">{businessData.rating}</span>
+                    <i className="ri-star-fill text-coral-400 text-xl"></i>
+                    <span className="font-bold text-forest-800 text-xl">{businessData.rating}</span>
                     <span className="text-gray-600">({businessData.reviewCount} reviews)</span>
                   </div>
                   <span className="text-gray-400">•</span>
                   <button
                     onClick={() => setShowReviewModal(true)}
-                    className="text-[#2C5F4F] hover:underline cursor-pointer"
+                    className="text-forest-800 hover:underline cursor-pointer"
                   >
                     Write a Review
                   </button>
@@ -144,7 +144,7 @@ export default function ServiceDetailPage() {
               </div>
               <button
                 onClick={handleBookNow}
-                className="px-8 py-4 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-calendar-line mr-2"></i>
                 Book Now
@@ -158,8 +158,8 @@ export default function ServiceDetailPage() {
               onClick={() => setActiveTab('overview')}
               className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
                 activeTab === 'overview'
-                  ? 'text-[#2C5F4F] border-b-2 border-[#2C5F4F]'
-                  : 'text-gray-500 hover:text-[#2C5F4F]'
+                  ? 'text-forest-800 border-b-2 border-forest-800'
+                  : 'text-gray-500 hover:text-forest-800'
               }`}
             >
               Overview
@@ -168,8 +168,8 @@ export default function ServiceDetailPage() {
               onClick={() => setActiveTab('reviews')}
               className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
                 activeTab === 'reviews'
-                  ? 'text-[#2C5F4F] border-b-2 border-[#2C5F4F]'
-                  : 'text-gray-500 hover:text-[#2C5F4F]'
+                  ? 'text-forest-800 border-b-2 border-forest-800'
+                  : 'text-gray-500 hover:text-forest-800'
               }`}
             >
               Reviews
@@ -180,7 +180,7 @@ export default function ServiceDetailPage() {
             <div className="space-y-8">
               {/* Media Gallery */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-6">
+                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
                   Gallery
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -202,7 +202,7 @@ export default function ServiceDetailPage() {
                       />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                          <i className="ri-play-fill text-3xl text-[#2C5F4F]"></i>
+                          <i className="ri-play-fill text-3xl text-forest-800"></i>
                         </div>
                       </div>
                     </div>
@@ -212,30 +212,30 @@ export default function ServiceDetailPage() {
 
               {/* About */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-4">
+                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-4">
                   About
                 </h2>
                 <p className="text-gray-600 leading-relaxed mb-6">{businessData.description}</p>
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
-                    <i className="ri-map-pin-line text-[#2C5F4F] text-xl mt-1"></i>
+                    <i className="ri-map-pin-line text-forest-800 text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-[#2C5F4F] mb-1">Location</p>
+                      <p className="font-medium text-forest-800 mb-1">Location</p>
                       <p className="text-gray-600 text-sm">{businessData.location}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="ri-phone-line text-[#2C5F4F] text-xl mt-1"></i>
+                    <i className="ri-phone-line text-forest-800 text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-[#2C5F4F] mb-1">Phone</p>
+                      <p className="font-medium text-forest-800 mb-1">Phone</p>
                       <p className="text-gray-600 text-sm">{businessData.phone}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="ri-time-line text-[#2C5F4F] text-xl mt-1"></i>
+                    <i className="ri-time-line text-forest-800 text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-[#2C5F4F] mb-1">Hours</p>
+                      <p className="font-medium text-forest-800 mb-1">Hours</p>
                       <p className="text-gray-600 text-sm">{businessData.hours}</p>
                     </div>
                   </div>
@@ -244,23 +244,23 @@ export default function ServiceDetailPage() {
 
               {/* Treatments */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-6">
+                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
                   Our Treatments
                 </h2>
                 <div className="space-y-4">
                   {mockTreatments.map((treatment) => (
                     <div
                       key={treatment.id}
-                      className="p-6 border border-gray-200 rounded-xl hover:border-[#2C5F4F]/30 transition-all"
+                      className="p-6 border border-gray-200 rounded-xl hover:border-forest-800/30 transition-all"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F]">
+                        <h3 className="font-serif text-2xl font-bold text-forest-800">
                           {treatment.name}
                         </h3>
-                        <span className="text-xl font-bold text-[#2C5F4F]">{treatment.price}</span>
+                        <span className="text-xl font-bold text-forest-800">{treatment.price}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <i className="ri-time-line text-[#2C5F4F]"></i>
+                        <i className="ri-time-line text-forest-800"></i>
                         <span>{treatment.duration}</span>
                       </div>
                       <p className="text-gray-600 text-sm">{treatment.description}</p>
@@ -271,7 +271,7 @@ export default function ServiceDetailPage() {
 
               {/* Team */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-6">
+                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
                   Meet Our Team
                 </h2>
                 <div className="grid md:grid-cols-3 gap-6">
@@ -284,19 +284,19 @@ export default function ServiceDetailPage() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="font-['Cormorant_Garamond'] text-xl font-bold text-[#2C5F4F] mb-1">
+                      <h3 className="font-serif text-xl font-bold text-forest-800 mb-1">
                         {employee.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">{employee.title}</p>
                       <div className="flex items-center justify-center gap-1 mb-3">
-                        <i className="ri-star-fill text-[#E8956C]"></i>
-                        <span className="font-medium text-[#2C5F4F]">{employee.rating}</span>
+                        <i className="ri-star-fill text-coral-400"></i>
+                        <span className="font-medium text-forest-800">{employee.rating}</span>
                       </div>
                       <div className="flex flex-wrap gap-2 justify-center">
                         {employee.specialties.map((specialty, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-[#F8F6F3] text-[#2C5F4F] text-xs rounded-full"
+                            className="px-2 py-1 bg-cream-100 text-forest-800 text-xs rounded-full"
                           >
                             {specialty}
                           </span>
@@ -311,7 +311,7 @@ export default function ServiceDetailPage() {
 
           {activeTab === 'reviews' && (
             <div className="bg-white rounded-2xl shadow-sm p-8">
-              <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-6">
+              <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
                 Customer Reviews
               </h2>
               <p className="text-gray-600">Reviews section coming soon...</p>
@@ -325,7 +325,7 @@ export default function ServiceDetailPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F]">
+              <h3 className="font-serif text-3xl font-bold text-forest-800">
                 Write a Review
               </h3>
               <button
@@ -339,17 +339,17 @@ export default function ServiceDetailPage() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-[#2C5F4F] mb-2">Rating</label>
+                <label className="block text-sm font-medium text-forest-800 mb-2">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button key={star} className="cursor-pointer">
-                      <i className="ri-star-line text-3xl text-gray-300 hover:text-[#E8956C]"></i>
+                      <i className="ri-star-line text-3xl text-gray-300 hover:text-coral-400"></i>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-[#2C5F4F] mb-2">Your Review</label>
+                <label className="block text-sm font-medium text-forest-800 mb-2">Your Review</label>
                 <textarea
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20"
@@ -357,7 +357,7 @@ export default function ServiceDetailPage() {
                   maxLength={500}
                 ></textarea>
               </div>
-              <button className="w-full px-6 py-3 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors font-medium whitespace-nowrap cursor-pointer">
+              <button className="w-full px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer">
                 Submit Review
               </button>
             </div>

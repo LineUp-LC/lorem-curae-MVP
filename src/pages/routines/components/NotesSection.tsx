@@ -170,9 +170,9 @@ export default function NotesSection() {
     <div className="max-w-4xl mx-auto">
       {/* Header */}
       <div className="bg-white rounded-2xl p-8 shadow-sm mb-6">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-2xl font-serif text-[#2C5F4F] mb-2">Routine Notes & Progress</h2>
+            <h2 className="text-2xl font-serif text-forest-800 mb-2">Routine Notes & Progress</h2>
             <p className="text-gray-600">Track your daily routine and skin observations</p>
           </div>
           <div className="flex gap-3">
@@ -185,11 +185,26 @@ export default function NotesSection() {
             </button>
             <button
               onClick={() => setIsAddingNote(true)}
-              className="px-6 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+              className="px-6 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
             >
               <i className="ri-add-line text-xl"></i>
               Add Note
             </button>
+          </div>
+        </div>
+
+        {/* FIXED: Added AI personalization info banner */}
+        <div className="bg-sage-50 border border-sage-200 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 flex items-center justify-center bg-sage-100 rounded-full flex-shrink-0">
+              <i className="ri-sparkling-line text-sage-600"></i>
+            </div>
+            <div>
+              <p className="text-sm text-gray-700">
+                <span className="font-medium text-forest-800">Self-tracking helps your AI understand you better.</span>{' '}
+                The more notes you add, the more personalized your skincare recommendations and overall website experience becomes.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -230,8 +245,8 @@ export default function NotesSection() {
 
         {/* Add Note Form */}
         {isAddingNote && (
-          <div className="bg-[#F8F6F3] rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold text-[#2C5F4F] mb-4">New Routine Note</h3>
+          <div className="bg-cream-100 rounded-xl p-6 mb-6">
+            <h3 className="text-lg font-semibold text-forest-800 mb-4">New Routine Note</h3>
             
             <div className="space-y-4">
               {/* Routine Type */}
@@ -242,7 +257,7 @@ export default function NotesSection() {
                     onClick={() => setNewNote({ ...newNote, routine_type: 'morning' })}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
                       newNote.routine_type === 'morning'
-                        ? 'bg-[#2C5F4F] text-white'
+                        ? 'bg-forest-800 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -253,7 +268,7 @@ export default function NotesSection() {
                     onClick={() => setNewNote({ ...newNote, routine_type: 'evening' })}
                     className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
                       newNote.routine_type === 'evening'
-                        ? 'bg-[#2C5F4F] text-white'
+                        ? 'bg-forest-800 text-white'
                         : 'bg-white text-gray-700 hover:bg-gray-50'
                     }`}
                   >
@@ -269,8 +284,8 @@ export default function NotesSection() {
                   Add Photo (Optional)
                 </label>
                 <div className="flex items-center gap-4">
-                  <label className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-dashed border-gray-300 rounded-lg hover:border-[#2C5F4F] transition-colors cursor-pointer">
-                    <i className="ri-camera-line text-[#2C5F4F]"></i>
+                  <label className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-dashed border-gray-300 rounded-lg hover:border-forest-800 transition-colors cursor-pointer">
+                    <i className="ri-camera-line text-forest-800"></i>
                     <span className="text-sm text-gray-700">Upload Photo</span>
                     <input
                       type="file"
@@ -377,7 +392,7 @@ export default function NotesSection() {
                 </button>
                 <button
                   onClick={handleSaveNote}
-                  className="px-6 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors cursor-pointer whitespace-nowrap"
+                  className="px-6 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors cursor-pointer whitespace-nowrap"
                 >
                   Save Note
                 </button>
@@ -396,7 +411,7 @@ export default function NotesSection() {
             <p className="text-gray-600 mb-6">Start tracking your routine to see progress over time</p>
             <button
               onClick={() => setIsAddingNote(true)}
-              className="px-6 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors cursor-pointer whitespace-nowrap"
+              className="px-6 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors cursor-pointer whitespace-nowrap"
             >
               Add Your First Note
             </button>
@@ -460,7 +475,7 @@ export default function NotesSection() {
                       {note.products_used.map((product, idx) => (
                         <span
                           key={idx}
-                          className="px-3 py-1 bg-[#F8F6F3] text-[#2C5F4F] text-sm rounded-full"
+                          className="px-3 py-1 bg-cream-100 text-forest-800 text-sm rounded-full"
                         >
                           {product}
                         </span>

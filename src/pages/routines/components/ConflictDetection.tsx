@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -92,7 +91,7 @@ export default function ConflictDetection() {
           <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
             <i className="ri-checkbox-circle-line text-green-600 text-4xl"></i>
           </div>
-          <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F] mb-2">
+          <h3 className="font-serif text-2xl font-bold text-forest-800 mb-2">
             No Conflicts Detected
           </h3>
           <p className="text-gray-600">
@@ -111,7 +110,7 @@ export default function ConflictDetection() {
           <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
             <i className="ri-shield-check-line text-red-600 text-xl"></i>
           </div>
-          <h2 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F]">
+          <h2 className="font-serif text-3xl font-bold text-forest-800">
             Conflict Detection
           </h2>
         </div>
@@ -126,7 +125,7 @@ export default function ConflictDetection() {
           <div
             key={conflict.id}
             className={`border-2 rounded-xl overflow-hidden transition-all ${
-              expandedConflict === conflict.id ? 'border-[#2C5F4F]' : 'border-gray-200'
+              expandedConflict === conflict.id ? 'border-forest-800' : 'border-gray-200'
             }`}
           >
             {/* Conflict Header */}
@@ -140,7 +139,7 @@ export default function ConflictDetection() {
                   {conflict.severity.toUpperCase()} PRIORITY
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-['Cormorant_Garamond'] text-xl font-bold text-[#2C5F4F] mb-2">
+                  <h3 className="font-serif text-xl font-bold text-forest-800 mb-2">
                     {conflict.issue}
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-3">
@@ -154,18 +153,18 @@ export default function ConflictDetection() {
                     {conflict.explanation.substring(0, 150)}...
                   </p>
                 </div>
-                <button className="text-[#2C5F4F] hover:text-[#234839] transition-colors">
-                  <i className={`text-2xl ${expandedConflict === conflict.id ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'}`}></i>
+                <button className="text-forest-800 hover:text-forest-900 transition-colors">
+                  <i className={`text-2xl transition-transform duration-200 ${expandedConflict === conflict.id ? 'ri-arrow-up-s-line rotate-0' : 'ri-arrow-down-s-line'}`}></i>
                 </button>
               </div>
             </div>
 
             {/* Expanded Details */}
             {expandedConflict === conflict.id && (
-              <div className="border-t border-gray-200 bg-[#F8F6F3] p-6">
+              <div className="border-t border-gray-200 bg-cream-100 p-6 animate-slide-down">
                 {/* Full Explanation */}
                 <div className="mb-6">
-                  <h4 className="font-medium text-[#2C5F4F] mb-2 flex items-center gap-2">
+                  <h4 className="font-medium text-forest-800 mb-2 flex items-center gap-2">
                     <i className="ri-information-line"></i>
                     Why This Matters
                   </h4>
@@ -175,8 +174,8 @@ export default function ConflictDetection() {
                 </div>
 
                 {/* Recommendation */}
-                <div className="mb-6 p-4 bg-white rounded-lg border border-[#2C5F4F]/20">
-                  <h4 className="font-medium text-[#2C5F4F] mb-2 flex items-center gap-2">
+                <div className="mb-6 p-4 bg-white rounded-lg border border-forest-800/20">
+                  <h4 className="font-medium text-forest-800 mb-2 flex items-center gap-2">
                     <i className="ri-lightbulb-line"></i>
                     Our Recommendation
                   </h4>
@@ -188,7 +187,7 @@ export default function ConflictDetection() {
                 {/* Alternative Products */}
                 {conflict.alternativeProducts && conflict.alternativeProducts.length > 0 && (
                   <div>
-                    <h4 className="font-medium text-[#2C5F4F] mb-4 flex items-center gap-2">
+                    <h4 className="font-medium text-forest-800 mb-4 flex items-center gap-2">
                       <i className="ri-star-line"></i>
                       Better Alternatives for Your Routine
                     </h4>
@@ -196,7 +195,7 @@ export default function ConflictDetection() {
                       {conflict.alternativeProducts.map((product) => (
                         <div
                           key={product.id}
-                          className="bg-white rounded-lg p-4 border border-gray-200 hover:border-[#2C5F4F] transition-all"
+                          className="bg-white rounded-lg p-4 border border-gray-200 hover:border-forest-800 transition-all"
                         >
                           <div className="flex items-start gap-4">
                             <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
@@ -208,7 +207,7 @@ export default function ConflictDetection() {
                             </div>
                             <div className="flex-1">
                               <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
-                              <h5 className="font-medium text-[#2C5F4F] mb-2">{product.name}</h5>
+                              <h5 className="font-medium text-forest-800 mb-2">{product.name}</h5>
                               <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
                                 <p className="text-sm text-gray-700">
                                   <strong className="text-green-700">Why this works better:</strong> {product.reason}
@@ -216,7 +215,7 @@ export default function ConflictDetection() {
                               </div>
                               <button
                                 onClick={() => navigate('/discover')}
-                                className="px-4 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                                className="px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                               >
                                 View Product Details
                               </button>
@@ -234,19 +233,19 @@ export default function ConflictDetection() {
       </div>
 
       {/* Educational Footer */}
-      <div className="mt-8 p-6 bg-gradient-to-r from-[#2C5F4F]/5 to-[#E8956C]/5 rounded-xl border border-[#2C5F4F]/10">
+      <div className="mt-8 p-6 bg-gradient-to-r from-[#2C5F4F]/5 to-[#E8956C]/5 rounded-xl border border-forest-800/10">
         <div className="flex items-start gap-4">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center flex-shrink-0">
-            <i className="ri-book-open-line text-[#2C5F4F] text-xl"></i>
+            <i className="ri-book-open-line text-forest-800 text-xl"></i>
           </div>
           <div>
-            <h4 className="font-medium text-[#2C5F4F] mb-2">Learn More About Ingredient Interactions</h4>
+            <h4 className="font-medium text-forest-800 mb-2">Learn More About Ingredient Interactions</h4>
             <p className="text-sm text-gray-600 mb-3">
               Understanding how ingredients work together helps you build a more effective routine. Our conflict detection uses dermatological research to keep your skin safe and healthy.
             </p>
             <button
               onClick={() => navigate('/ingredients')}
-              className="text-sm text-[#2C5F4F] hover:underline font-medium cursor-pointer whitespace-nowrap"
+              className="text-sm text-forest-800 hover:underline font-medium cursor-pointer whitespace-nowrap"
             >
               Explore Ingredient Library →
             </button>

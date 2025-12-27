@@ -171,17 +171,17 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" onClick={onClose}>
-      <div className="min-h-screen px-4 pt-20 pb-10">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm animate-fade-in" onClick={onClose}>
+      <div className="min-h-screen px-3 sm:px-4 pt-16 sm:pt-20 pb-6 sm:pb-10">
         <div 
-          className="max-w-3xl mx-auto bg-white rounded-2xl shadow-2xl overflow-hidden"
+          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden animate-slide-up"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input */}
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 flex items-center justify-center rounded-full bg-sage-100">
-                <i className="ri-search-line text-2xl text-sage-700"></i>
+          <div className="p-4 sm:p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3 sm:space-x-4">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-sage-100 flex-shrink-0">
+                <i className="ri-search-line text-xl sm:text-2xl text-sage-700"></i>
               </div>
               <input
                 ref={inputRef}
@@ -189,25 +189,25 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search products, services, ingredients, businesses..."
-                className="flex-1 text-lg outline-none text-gray-800 placeholder-gray-400"
+                placeholder="Search products, services..."
+                className="flex-1 text-base sm:text-lg outline-none text-gray-800 placeholder-gray-400 min-w-0"
               />
               <button
                 onClick={onClose}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer flex-shrink-0"
                 aria-label="Close search"
               >
-                <i className="ri-close-line text-2xl text-gray-600"></i>
+                <i className="ri-close-line text-xl sm:text-2xl text-gray-600"></i>
               </button>
             </div>
 
             {/* Category Filters */}
-            <div className="flex items-center space-x-2 mt-4 overflow-x-auto pb-2">
+            <div className="flex items-center space-x-2 mt-3 sm:mt-4 overflow-x-auto pb-2 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                     activeCategory === category
                       ? 'bg-sage-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -220,34 +220,35 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
           </div>
 
           {/* Search Results */}
-          <div className="max-h-[500px] overflow-y-auto">
+          <div className="max-h-[50vh] sm:max-h-[500px] overflow-y-auto">
             {searchQuery.trim() === '' ? (
-              <div className="p-12 text-center">
-                <div className="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-sage-50">
-                  <i className="ri-search-2-line text-4xl text-sage-400"></i>
+              <div className="p-8 sm:p-12 text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-sage-50">
+                  <i className="ri-search-2-line text-3xl sm:text-4xl text-sage-400"></i>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">Start Searching</h3>
-                <p className="text-gray-600">Find products, services, ingredients, and more</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Start Searching</h3>
+                <p className="text-sm sm:text-base text-gray-600">Find products, services, ingredients, and more</p>
               </div>
             ) : results.length === 0 ? (
-              <div className="p-12 text-center">
-                <div className="w-20 h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-gray-100">
-                  <i className="ri-file-search-line text-4xl text-gray-400"></i>
+              <div className="p-8 sm:p-12 text-center">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-gray-100">
+                  <i className="ri-file-search-line text-3xl sm:text-4xl text-gray-400"></i>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">No Results Found</h3>
-                <p className="text-gray-600">Try adjusting your search or filters</p>
+                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">No Results Found</h3>
+                <p className="text-sm sm:text-base text-gray-600">Try adjusting your search or filters</p>
               </div>
             ) : (
               <div className="divide-y divide-gray-100">
-                {results.map((result) => (
+                {results.map((result, index) => (
                   <div
                     key={result.id}
                     onClick={() => handleResultClick(result)}
-                    className="p-4 hover:bg-sage-50 transition-colors cursor-pointer"
+                    className="p-3 sm:p-4 hover:bg-sage-50 transition-colors cursor-pointer animate-slide-up"
+                    style={{ animationDelay: `${index * 50}ms`, animationFillMode: 'backwards' }}
                   >
-                    <div className="flex items-center space-x-4">
+                    <div className="flex items-center space-x-3 sm:space-x-4">
                       {result.image ? (
-                        <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
                           <img
                             src={result.image}
                             alt={result.title}
@@ -255,8 +256,8 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                           />
                         </div>
                       ) : (
-                        <div className="w-16 h-16 flex items-center justify-center flex-shrink-0 rounded-lg bg-sage-100">
-                          <i className={`text-2xl text-sage-600 ${
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center flex-shrink-0 rounded-lg bg-sage-100">
+                          <i className={`text-xl sm:text-2xl text-sage-600 ${
                             result.category === 'Page' ? 'ri-file-text-line' :
                             result.category === 'Product' ? 'ri-shopping-bag-line' :
                             result.category === 'Service' ? 'ri-service-line' :
@@ -267,7 +268,7 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h4 className="font-semibold text-gray-900 truncate">{result.title}</h4>
+                          <h4 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{result.title}</h4>
                           <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
                             result.category === 'Product' ? 'bg-blue-100 text-blue-700' :
                             result.category === 'Service' ? 'bg-purple-100 text-purple-700' :
@@ -278,9 +279,9 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                             {result.category}
                           </span>
                         </div>
-                        <p className="text-sm text-gray-600 truncate">{result.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-600 truncate">{result.description}</p>
                       </div>
-                      <i className="ri-arrow-right-line text-xl text-gray-400"></i>
+                      <i className="ri-arrow-right-line text-lg sm:text-xl text-gray-400"></i>
                     </div>
                   </div>
                 ))}
@@ -290,36 +291,36 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
 
           {/* Quick Links */}
           {searchQuery.trim() === '' && (
-            <div className="p-6 bg-gray-50 border-t border-gray-200">
-              <h4 className="text-sm font-semibold text-gray-700 mb-3">Quick Links</h4>
+            <div className="p-4 sm:p-6 bg-gray-50 border-t border-gray-200">
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Quick Links</h4>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleQuickLinkClick('/discover')}
-                  className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-compass-line text-sage-600"></i>
-                  <span className="text-sm font-medium text-gray-800">Skin Quiz</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-800">Discover</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/ingredients')}
-                  className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-flask-line text-sage-600"></i>
-                  <span className="text-sm font-medium text-gray-800">Ingredients</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-800">Ingredients</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/services')}
-                  className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-service-line text-sage-600"></i>
-                  <span className="text-sm font-medium text-gray-800">Services</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-800">Services</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/marketplace')}
-                  className="flex items-center space-x-2 px-4 py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
                 >
                   <i className="ri-store-line text-sage-600"></i>
-                  <span className="text-sm font-medium text-gray-800">Marketplace</span>
+                  <span className="text-xs sm:text-sm font-medium text-gray-800">Marketplace</span>
                 </button>
               </div>
             </div>

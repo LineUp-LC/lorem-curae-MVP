@@ -399,7 +399,7 @@ const AIChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
@@ -420,7 +420,7 @@ const AIChatPage = () => {
                   ]);
                   setCurrentSession('current');
                 }}
-                className="text-sm text-[#2C5F4F] font-medium cursor-pointer"
+                className="text-sm text-forest-800 font-medium cursor-pointer"
               >
                 + New Chat
               </button>
@@ -432,7 +432,7 @@ const AIChatPage = () => {
                   key={session.id}
                   onClick={() => loadChatSession(session)}
                   className={`p-3 rounded-lg cursor-pointer transition-colors group ${
-                    currentSession === session.id ? 'bg-[#2C5F4F]/10' : 'hover:bg-gray-100'
+                    currentSession === session.id ? 'bg-forest-800/10' : 'hover:bg-gray-100'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -466,7 +466,7 @@ const AIChatPage = () => {
             {/* Chat Header */}
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-[#2C5F4F] rounded-full flex items-center justify-center">
+                <div className="w-12 h-12 bg-forest-800 rounded-full flex items-center justify-center">
                   <i className="ri-robot-2-line text-white text-xl"></i>
                 </div>
                 <div>
@@ -479,7 +479,7 @@ const AIChatPage = () => {
                   onClick={() => setShowInsights(!showInsights)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     showInsights
-                      ? 'bg-[#2C5F4F] text-white'
+                      ? 'bg-forest-800 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   }`}
                 >
@@ -498,9 +498,9 @@ const AIChatPage = () => {
 
             {/* AI Journey Insights */}
             {showInsights && aiInsights.length > 0 && (
-              <div className="p-6 border-b border-gray-200 bg-gradient-to-br from-[#F8F6F3] to-white">
+              <div className="p-6 border-b border-gray-200 bg-gradient-to-br from-cream-100 to-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-[#2C5F4F]">AI Journey Insights</h3>
+                  <h3 className="text-lg font-semibold text-forest-800">AI Journey Insights</h3>
                   <span className="text-xs text-gray-500">{aiInsights.length} insights available</span>
                 </div>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -567,25 +567,26 @@ const AIChatPage = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              {messages.map((message) => (
+              {messages.map((message, index) => (
                 <div
                   key={message.id}
-                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
+                  style={{ animationDelay: `${Math.min(index * 50, 200)}ms`, animationFillMode: 'backwards' }}
                 >
                   <div className={`max-w-[80%] ${message.sender === 'user' ? 'order-2' : 'order-1'}`}>
                     <div
                       className={`rounded-2xl px-4 py-3 ${
                         message.sender === 'user'
-                          ? 'bg-[#2C5F4F] text-white'
+                          ? 'bg-forest-800 text-white'
                           : 'bg-gray-100 text-gray-900'
                       }`}
                     >
                       {message.sender === 'ai' && (
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-6 h-6 rounded-full bg-[#2C5F4F]/10 flex items-center justify-center">
-                            <i className="ri-robot-2-line text-[#2C5F4F] text-xs"></i>
+                          <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
+                            <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                           </div>
-                          <span className="text-xs font-medium text-[#2C5F4F]">Curae</span>
+                          <span className="text-xs font-medium text-forest-800">Curae</span>
                         </div>
                       )}
                       <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
@@ -603,13 +604,13 @@ const AIChatPage = () => {
                 <div className="flex justify-start">
                   <div className="bg-gray-100 rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-[#2C5F4F]/10 flex items-center justify-center">
-                        <i className="ri-robot-2-line text-[#2C5F4F] text-xs"></i>
+                      <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
+                        <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                       </div>
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce"></div>
-                        <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
@@ -630,7 +631,7 @@ const AIChatPage = () => {
                         setInputMessage(prompt);
                         sessionState.trackInteraction('click', 'quick-prompt', { prompt });
                       }}
-                      className="px-3 py-1.5 bg-[#F8F6F3] text-[#2C5F4F] text-sm rounded-full hover:bg-[#2C5F4F]/10 transition-colors whitespace-nowrap cursor-pointer"
+                      className="px-3 py-1.5 bg-cream-100 text-forest-800 text-sm rounded-full hover:bg-forest-800/10 transition-colors whitespace-nowrap cursor-pointer"
                     >
                       {prompt}
                     </button>
@@ -653,14 +654,14 @@ const AIChatPage = () => {
                       }
                     }}
                     placeholder="Ask Curae AI anything about skincare..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C5F4F]/20 focus:border-[#2C5F4F] resize-none"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C5F4F]/20 focus:border-forest-800 resize-none"
                     rows={1}
                   />
                 </div>
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={!inputMessage.trim() || isTyping}
-                  className="w-12 h-12 flex items-center justify-center bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-12 h-12 flex items-center justify-center bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <i className="ri-send-plane-fill text-xl"></i>
                 </button>

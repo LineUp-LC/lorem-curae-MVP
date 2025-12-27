@@ -166,14 +166,14 @@ export default function ServicesSearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
       <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Header */}
           <div className="mb-8">
-            <h1 className="font-['Cormorant_Garamond'] text-5xl font-bold text-[#2C5F4F] mb-4">
+            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-4">
               Find Your Perfect Skincare Professional
             </h1>
             <p className="text-lg text-gray-600 mb-6">
@@ -195,7 +195,7 @@ export default function ServicesSearchPage() {
               </div>
               <button
                 onClick={handleSearch}
-                className="px-8 py-4 bg-[#2C5F4F] text-white rounded-xl hover:bg-[#234839] transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer"
               >
                 Search
               </button>
@@ -209,7 +209,7 @@ export default function ServicesSearchPage() {
                   onClick={() => handleSort('rating')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     sortBy === 'rating'
-                      ? 'bg-[#2C5F4F] text-white'
+                      ? 'bg-forest-800 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -220,7 +220,7 @@ export default function ServicesSearchPage() {
                   onClick={() => handleSort('distance')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     sortBy === 'distance'
-                      ? 'bg-[#2C5F4F] text-white'
+                      ? 'bg-forest-800 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -231,7 +231,7 @@ export default function ServicesSearchPage() {
                   onClick={() => handleSort('price')}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     sortBy === 'price'
-                      ? 'bg-[#2C5F4F] text-white'
+                      ? 'bg-forest-800 text-white'
                       : 'bg-white text-gray-700 hover:bg-gray-100'
                   }`}
                 >
@@ -250,8 +250,8 @@ export default function ServicesSearchPage() {
                       onClick={() => togglePriceFilter(range.value)}
                       className={`px-3 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
                         priceFilter.includes(range.value)
-                          ? 'bg-[#2C5F4F] text-white shadow-md'
-                          : 'bg-white text-gray-700 border border-gray-300 hover:border-[#2C5F4F]'
+                          ? 'bg-forest-800 text-white shadow-md'
+                          : 'bg-white text-gray-700 border border-gray-300 hover:border-forest-800'
                       }`}
                     >
                       {range.label}
@@ -269,7 +269,7 @@ export default function ServicesSearchPage() {
                 {showPriceInfo && (
                   <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-200 p-4 z-10">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-semibold text-[#2C5F4F]">Price Range Guide</h4>
+                      <h4 className="font-semibold text-forest-800">Price Range Guide</h4>
                       <button
                         onClick={() => setShowPriceInfo(false)}
                         className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-gray-100 cursor-pointer"
@@ -280,7 +280,7 @@ export default function ServicesSearchPage() {
                     <div className="space-y-2">
                       {priceRanges.map((range) => (
                         <div key={range.value} className="flex items-start gap-3">
-                          <span className="font-bold text-[#2C5F4F] min-w-[40px]">{range.label}</span>
+                          <span className="font-bold text-forest-800 min-w-[40px]">{range.label}</span>
                           <div>
                             <p className="font-medium text-gray-900 text-sm">{range.range}</p>
                             <p className="text-xs text-gray-600">{range.description}</p>
@@ -300,12 +300,12 @@ export default function ServicesSearchPage() {
                 {priceFilter.map((price) => (
                   <span
                     key={price}
-                    className="inline-flex items-center gap-1 px-3 py-1 bg-[#2C5F4F]/10 text-[#2C5F4F] rounded-full text-sm"
+                    className="inline-flex items-center gap-1 px-3 py-1 bg-forest-800/10 text-forest-800 rounded-full text-sm"
                   >
                     {price}
                     <button
                       onClick={() => togglePriceFilter(price)}
-                      className="w-4 h-4 flex items-center justify-center hover:bg-[#2C5F4F]/20 rounded-full cursor-pointer"
+                      className="w-4 h-4 flex items-center justify-center hover:bg-forest-800/20 rounded-full cursor-pointer"
                     >
                       <i className="ri-close-line text-xs"></i>
                     </button>
@@ -313,7 +313,7 @@ export default function ServicesSearchPage() {
                 ))}
                 <button
                   onClick={() => setPriceFilter([])}
-                  className="text-sm text-gray-600 hover:text-[#2C5F4F] cursor-pointer"
+                  className="text-sm text-gray-600 hover:text-forest-800 cursor-pointer"
                 >
                   Clear all
                 </button>
@@ -324,7 +324,7 @@ export default function ServicesSearchPage() {
           {/* Results Count */}
           <div className="mb-6">
             <p className="text-gray-600">
-              <span className="font-bold text-[#2C5F4F]">{businesses.length}</span> businesses found
+              <span className="font-bold text-forest-800">{businesses.length}</span> businesses found
               {searchQuery && <span> for "{searchQuery}"</span>}
             </p>
           </div>
@@ -352,8 +352,8 @@ export default function ServicesSearchPage() {
                       }}
                       className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md ${
                         compareList.includes(business.id)
-                          ? 'bg-[#2C5F4F] text-white'
-                          : 'bg-white text-gray-700 hover:bg-[#2C5F4F] hover:text-white'
+                          ? 'bg-forest-800 text-white'
+                          : 'bg-white text-gray-700 hover:bg-forest-800 hover:text-white'
                       }`}
                     >
                       {compareList.includes(business.id) ? (
@@ -368,17 +368,17 @@ export default function ServicesSearchPage() {
                   <div className="flex-1 p-6">
                     <div className="flex items-start justify-between mb-3">
                       <div>
-                        <h3 className="font-['Cormorant_Garamond'] text-3xl font-bold text-[#2C5F4F] mb-2">
+                        <h3 className="font-serif text-3xl font-bold text-forest-800 mb-2">
                           {business.name}
                         </h3>
                         <div className="flex items-center gap-3 mb-2">
                           <div className="flex items-center gap-1">
-                            <i className="ri-star-fill text-[#E8956C]"></i>
-                            <span className="font-bold text-[#2C5F4F]">{business.rating}</span>
+                            <i className="ri-star-fill text-coral-400"></i>
+                            <span className="font-bold text-forest-800">{business.rating}</span>
                             <span className="text-sm text-gray-500">({business.reviewCount} reviews)</span>
                           </div>
                           <span className="text-gray-400">•</span>
-                          <span className="text-sm font-medium text-[#2C5F4F]">{business.priceRange}</span>
+                          <span className="text-sm font-medium text-forest-800">{business.priceRange}</span>
                         </div>
                       </div>
                       <div className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
@@ -387,7 +387,7 @@ export default function ServicesSearchPage() {
                     </div>
 
                     <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
-                      <i className="ri-map-pin-line text-[#2C5F4F]"></i>
+                      <i className="ri-map-pin-line text-forest-800"></i>
                       <span>{business.location}</span>
                       <span className="text-gray-400">•</span>
                       <span>{business.distance}</span>
@@ -399,7 +399,7 @@ export default function ServicesSearchPage() {
                         {business.specialties.map((specialty, idx) => (
                           <span
                             key={idx}
-                            className="px-3 py-1 bg-[#F8F6F3] text-[#2C5F4F] text-sm font-medium rounded-full"
+                            className="px-3 py-1 bg-cream-100 text-forest-800 text-sm font-medium rounded-full"
                           >
                             {specialty}
                           </span>
@@ -412,7 +412,7 @@ export default function ServicesSearchPage() {
                         e.stopPropagation();
                         handleViewBusiness(business.id);
                       }}
-                      className="px-6 py-3 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                     >
                       View Details &amp; Book Appointment
                     </button>
@@ -424,14 +424,14 @@ export default function ServicesSearchPage() {
 
           {/* Compare Bar */}
           {compareList.length > 0 && (
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-[#2C5F4F] shadow-2xl z-50">
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-forest-800 shadow-2xl z-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <div className="flex items-center gap-2">
-                      <i className="ri-scales-3-line text-2xl text-[#2C5F4F]"></i>
+                      <i className="ri-scales-3-line text-2xl text-forest-800"></i>
                       <div>
-                        <h3 className="font-semibold text-[#2C5F4F]">Compare Services</h3>
+                        <h3 className="font-semibold text-forest-800">Compare Services</h3>
                         <p className="text-sm text-gray-600">
                           {compareList.length} of 3 selected
                         </p>
@@ -450,7 +450,7 @@ export default function ServicesSearchPage() {
                       disabled={compareList.length < 2}
                       className={`px-6 py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
                         compareList.length >= 2
-                          ? 'bg-[#2C5F4F] text-white hover:bg-[#234839] cursor-pointer'
+                          ? 'bg-forest-800 text-white hover:bg-forest-900 cursor-pointer'
                           : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                       }`}
                     >
@@ -468,7 +468,7 @@ export default function ServicesSearchPage() {
               <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-6">
                 <i className="ri-search-line text-gray-400 text-5xl"></i>
               </div>
-              <h3 className="font-['Cormorant_Garamond'] text-3xl font-bold text-gray-400 mb-3">
+              <h3 className="font-serif text-3xl font-bold text-gray-400 mb-3">
                 No Results Found
               </h3>
               <p className="text-gray-500 mb-8">
@@ -479,7 +479,7 @@ export default function ServicesSearchPage() {
                   setSearchQuery('');
                   setBusinesses(allBusinesses);
                 }}
-                className="px-8 py-4 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer"
               >
                 Clear Search
               </button>

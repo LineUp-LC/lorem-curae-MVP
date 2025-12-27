@@ -273,7 +273,7 @@ const MarketplacePage = () => {
                   return (
                     <div
                       key={product.id}
-                      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-lg transition-all group"
+                      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
                     >
                       {/* Product Image */}
                       <div className="relative h-64 overflow-hidden bg-gray-50">
@@ -422,7 +422,7 @@ const MarketplacePage = () => {
                   to={storefront.type === 'services' ? `/services/${storefront.id}` : `/storefront/${storefront.id}`}
                   className="group cursor-pointer"
                 >
-                  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-xl transition-all">
+                  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     {/* Banner */}
                     <div className="relative h-32 overflow-hidden">
                       <img 

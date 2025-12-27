@@ -180,7 +180,7 @@ export default function ServicesComparePage() {
 
   if (businesses.length < 2) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+      <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
         <Navbar />
         <main className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
@@ -189,7 +189,7 @@ export default function ServicesComparePage() {
             <p className="text-gray-600 mb-8">Please select at least 2 services to compare</p>
             <button
               onClick={() => navigate('/services/search')}
-              className="px-6 py-3 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors cursor-pointer"
+              className="px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors cursor-pointer"
             >
               Back to Search
             </button>
@@ -201,7 +201,7 @@ export default function ServicesComparePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
       <Navbar />
       
       <main className="pt-24 pb-16">
@@ -210,12 +210,12 @@ export default function ServicesComparePage() {
           <div className="mb-8">
             <button
               onClick={() => navigate('/services/search')}
-              className="flex items-center gap-2 text-[#2C5F4F] hover:text-[#234839] mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-forest-800 hover:text-forest-900 mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Search</span>
             </button>
-            <h1 className="font-['Cormorant_Garamond'] text-5xl font-bold text-[#2C5F4F] mb-3">
+            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-3">
               Compare Services
             </h1>
             <p className="text-gray-600">
@@ -236,18 +236,18 @@ export default function ServicesComparePage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h3 className="font-['Cormorant_Garamond'] text-2xl font-bold text-[#2C5F4F] mb-2">
+                  <h3 className="font-serif text-2xl font-bold text-forest-800 mb-2">
                     {business.name}
                   </h3>
                   <div className="flex items-center gap-2 mb-3">
-                    <i className="ri-star-fill text-[#E8956C]"></i>
-                    <span className="font-bold text-[#2C5F4F]">{business.rating}</span>
+                    <i className="ri-star-fill text-coral-400"></i>
+                    <span className="font-bold text-forest-800">{business.rating}</span>
                     <span className="text-sm text-gray-600">({business.reviewCount})</span>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{business.location}</p>
                   <button
                     onClick={() => navigate(`/services/${business.id}`)}
-                    className="w-full px-4 py-2 bg-[#2C5F4F] text-white rounded-lg hover:bg-[#234839] transition-colors text-sm font-medium cursor-pointer"
+                    className="w-full px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium cursor-pointer"
                   >
                     View Details
                   </button>
@@ -257,7 +257,7 @@ export default function ServicesComparePage() {
 
             {/* Best Match for You */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Best Match for You
               </div>
               {businesses.map((business) => {
@@ -277,12 +277,12 @@ export default function ServicesComparePage() {
 
             {/* Price Range */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Price Range
               </div>
               {businesses.map((business) => (
                 <div key={business.id} className="bg-white p-4">
-                  <span className="text-2xl font-bold text-[#2C5F4F]">
+                  <span className="text-2xl font-bold text-forest-800">
                     {business.priceRange}
                   </span>
                 </div>
@@ -291,7 +291,7 @@ export default function ServicesComparePage() {
 
             {/* Specialties */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Specialties
               </div>
               {businesses.map((business) => (
@@ -300,7 +300,7 @@ export default function ServicesComparePage() {
                     {business.specialties.map((specialty, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-1 bg-[#F8F6F3] text-[#2C5F4F] text-xs rounded-full"
+                        className="px-2 py-1 bg-cream-100 text-forest-800 text-xs rounded-full"
                       >
                         {specialty}
                       </span>
@@ -312,7 +312,7 @@ export default function ServicesComparePage() {
 
             {/* Key Benefits */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Key Benefits
               </div>
               {businesses.map((business) => (
@@ -331,7 +331,7 @@ export default function ServicesComparePage() {
 
             {/* Best For */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Best For
               </div>
               {businesses.map((business) => (
@@ -339,7 +339,7 @@ export default function ServicesComparePage() {
                   <div className="space-y-2">
                     {business.bestFor.map((item, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                        <i className="ri-user-heart-line text-[#2C5F4F]"></i>
+                        <i className="ri-user-heart-line text-forest-800"></i>
                         <span>{item}</span>
                       </div>
                     ))}
@@ -350,15 +350,15 @@ export default function ServicesComparePage() {
 
             {/* Reviews from Similar Profiles */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-[#2C5F4F]">
+              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
                 Reviews from Similar Skin Profiles
               </div>
               {businesses.map((business) => (
                 <div key={business.id} className="bg-white p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <i className="ri-group-line text-2xl text-[#2C5F4F]"></i>
+                    <i className="ri-group-line text-2xl text-forest-800"></i>
                     <div>
-                      <p className="text-2xl font-bold text-[#2C5F4F]">
+                      <p className="text-2xl font-bold text-forest-800">
                         {business.similarProfileReviews}
                       </p>
                       <p className="text-xs text-gray-600">

@@ -125,7 +125,7 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
           </div>
 
           {/* Messages */}
-          <div className="h-96 overflow-y-auto p-4 space-y-4 bg-[#F8F6F3]">
+          <div className="h-96 overflow-y-auto p-4 space-y-4 bg-cream-100">
             {messages.map((message) => (
               <div
                 key={message.id}
@@ -134,16 +134,16 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
                 <div
                   className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                     message.type === 'user'
-                      ? 'bg-[#2C5F4F] text-white'
+                      ? 'bg-forest-800 text-white'
                       : 'bg-white text-gray-800 shadow-sm'
                   }`}
                 >
                   {message.type === 'ai' && (
                     <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 rounded-full bg-[#2C5F4F]/10 flex items-center justify-center">
-                        <i className="ri-robot-2-line text-[#2C5F4F] text-xs"></i>
+                      <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
+                        <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                       </div>
-                      <span className="text-xs font-medium text-[#2C5F4F]">AI Assistant</span>
+                      <span className="text-xs font-medium text-forest-800">AI Assistant</span>
                     </div>
                   )}
                   <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
@@ -158,13 +158,13 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
               <div className="flex justify-start">
                 <div className="bg-white rounded-2xl px-4 py-3 shadow-sm">
                   <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 rounded-full bg-[#2C5F4F]/10 flex items-center justify-center">
-                      <i className="ri-robot-2-line text-[#2C5F4F] text-xs"></i>
+                    <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
+                      <i className="ri-robot-2-line text-forest-800 text-xs"></i>
                     </div>
                     <div className="flex gap-1">
-                      <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce"></div>
-                      <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 rounded-full bg-[#2C5F4F] animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce"></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 rounded-full bg-forest-800 animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                     </div>
                   </div>
                 </div>
@@ -181,7 +181,7 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
                   <button
                     key={idx}
                     onClick={() => setInputValue(prompt)}
-                    className="px-3 py-1 bg-[#F8F6F3] text-[#2C5F4F] text-xs rounded-full hover:bg-[#2C5F4F] hover:text-white transition-colors cursor-pointer"
+                    className="px-3 py-1 bg-cream-100 text-forest-800 text-xs rounded-full hover:bg-forest-800 hover:text-white transition-colors cursor-pointer"
                   >
                     {prompt}
                   </button>
@@ -204,7 +204,7 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
               <button
                 onClick={handleSendMessage}
                 disabled={!inputValue.trim()}
-                className="w-10 h-10 rounded-lg bg-[#2C5F4F] text-white flex items-center justify-center hover:bg-[#234839] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                className="w-10 h-10 rounded-lg bg-forest-800 text-white flex items-center justify-center hover:bg-forest-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
                 <i className="ri-send-plane-fill"></i>
               </button>

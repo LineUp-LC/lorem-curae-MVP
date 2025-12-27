@@ -196,7 +196,7 @@ export default function ProductCatalog({
         key={product.id}
         onClick={() => navigate(`/product-detail?id=${product.id}`)}
         className={`
-          bg-white rounded-2xl overflow-hidden transition-all group cursor-pointer relative
+          bg-white rounded-2xl overflow-hidden transition-all duration-300 group cursor-pointer relative hover:-translate-y-1
           ${
             isRecommended
               ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
@@ -536,7 +536,7 @@ export default function ProductCatalog({
 
       {/* Comparison Bar */}
       {showCompareBar && (
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-sage-600 shadow-2xl z-50 transition-all">
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t-2 border-sage-600 shadow-2xl z-50 transition-all animate-slide-up">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
