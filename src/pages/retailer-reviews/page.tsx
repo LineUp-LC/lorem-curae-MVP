@@ -267,8 +267,8 @@ const ReviewsPage = () => {
               <i className="ri-arrow-right-s-line"></i>
               <span className="text-sage-600">Retailer Reviews</span>
             </div>
-            <h1 className="text-4xl font-serif text-forest-900 mb-3">Retailer Reviews &amp; Service Ratings</h1>
-            <p className="text-lg text-gray-600 max-w-3xl">Real customer experiences with online beauty retailers. Read about service quality, shipping reliability, website experience, and overall satisfaction.</p>
+            <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">Retailer Reviews &amp; Service Ratings</h1>
+            <p className="text-xl text-gray-600 max-w-3xl">Real customer experiences with online beauty retailers. Read about service quality, shipping reliability, website experience, and overall satisfaction.</p>
           </div>
 
           {userSkinTypeParam && (

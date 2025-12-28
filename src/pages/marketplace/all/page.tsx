@@ -238,22 +238,22 @@ const MarketplaceAllPage = () => {
                       <div className="absolute top-3 right-3 flex gap-2">
                         {storefront.featured && storefront.premiumVisibility && (
                           <>
-                            <div className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full">
+                            <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full">
                               Featured
                             </div>
-                            <div className="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                            <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                               <i className="ri-vip-crown-line"></i>
                               Premium
                             </div>
                           </>
                         )}
                         {storefront.featured && !storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full">
+                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full">
                             Featured
                           </div>
                         )}
                         {!storefront.featured && storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
                             <i className="ri-vip-crown-line"></i>
                             Premium
                           </div>

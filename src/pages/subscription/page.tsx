@@ -94,15 +94,15 @@ export default function SubscriptionPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
       <div className="pt-20 pb-16">
         {/* Hero Section */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16 mb-12">
+        <div className="bg-gradient-to-br from-forest-800 to-sage-700 text-white py-16 mb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-5xl font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-xl text-gray-300 mb-8">Unlock premium features and support sustainable skincare</p>
+            <h1 className="text-5xl font-serif font-bold mb-4">Choose Your Plan</h1>
+            <p className="text-xl text-cream-100 mb-8">Unlock premium features and support sustainable skincare</p>
             
             {/* Billing Toggle */}
             <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full p-2">
@@ -110,7 +110,7 @@ export default function SubscriptionPage() {
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                   billingCycle === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-lg'
+                    ? 'bg-white text-forest-800 shadow-lg'
                     : 'text-white hover:bg-white/10'
                 }`}
               >
@@ -120,12 +120,12 @@ export default function SubscriptionPage() {
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                   billingCycle === 'yearly'
-                    ? 'bg-white text-gray-900 shadow-lg'
+                    ? 'bg-white text-forest-800 shadow-lg'
                     : 'text-white hover:bg-white/10'
                 }`}
               >
                 Yearly
-                <span className="ml-2 px-2 py-1 bg-sage-600 text-white rounded-full text-xs font-bold">
+                <span className="ml-2 px-2 py-1 bg-coral-400 text-white rounded-full text-xs font-bold">
                   Save 25%
                 </span>
               </button>
@@ -147,28 +147,28 @@ export default function SubscriptionPage() {
                 <div
                   key={plan.id}
                   className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 ${
-                    isPremium ? 'border-amber-500 relative transform scale-105' : 'border-gray-200'
+                    isPremium ? 'border-teal-400 relative transform scale-105' : 'border-gray-200'
                   }`}
                 >
                   {isPremium && (
-                    <div className="bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 text-white text-center py-3 font-bold text-sm">
+                    <div className="bg-gradient-to-r from-sage-500 via-teal-500 to-sage-600 text-white text-center py-3 font-bold text-sm">
                       ⭐ PREMIUM - MOST POPULAR
                     </div>
                   )}
                   
                   <div className="p-8">
-                    <h3 className={`text-2xl font-bold mb-2 ${isPremium ? 'text-amber-600' : 'text-gray-900'}`}>
+                    <h3 className={`text-2xl font-serif font-bold mb-2 ${isPremium ? 'text-teal-600' : 'text-forest-800'}`}>
                       {plan.name}
                     </h3>
                     <div className="mb-6">
                       <div className="flex items-baseline gap-2">
-                        <span className={`text-5xl font-bold ${isPremium ? 'text-amber-600' : 'text-gray-900'}`}>
+                        <span className={`text-5xl font-bold ${isPremium ? 'text-teal-600' : 'text-forest-800'}`}>
                           ${price}
                         </span>
                         <span className="text-gray-600">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                       </div>
                       {monthlyEquivalent && (
-                        <p className={`text-sm mt-1 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}>
+                        <p className={`text-sm mt-1 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}>
                           ${monthlyEquivalent}/month when billed annually
                         </p>
                       )}
@@ -183,7 +183,7 @@ export default function SubscriptionPage() {
                         onClick={() => handleSubscribe(plan.name)}
                         className={`w-full py-3 rounded-lg font-bold transition-colors whitespace-nowrap ${
                           isPremium
-                            ? 'bg-gradient-to-r from-amber-500 via-amber-600 to-orange-500 text-white hover:from-amber-600 hover:via-amber-700 hover:to-orange-600 shadow-lg'
+                            ? 'bg-gradient-to-r from-sage-500 via-teal-500 to-sage-600 text-white hover:from-sage-600 hover:via-teal-600 hover:to-sage-700 shadow-lg'
                             : 'bg-gray-900 text-white hover:bg-gray-800'
                         }`}
                       >
@@ -193,40 +193,40 @@ export default function SubscriptionPage() {
 
                     <div className="mt-8 space-y-4">
                       <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                         <p className="text-gray-700 text-sm">
                           Join up to <strong>{plan.max_communities === 999 ? 'unlimited' : plan.max_communities}</strong> communities
                         </p>
                       </div>
                       {plan.can_create_communities && (
                         <div className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                           <p className="text-gray-700 text-sm">Create your own communities</p>
                         </div>
                       )}
                       <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                         <p className="text-gray-700 text-sm">
                           <strong>{plan.storage_limit_mb}MB</strong> storage for uploads
                         </p>
                       </div>
                       {plan.marketplace_discount > 0 && (
                         <div className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                           <p className="text-gray-700 text-sm">
                             <strong>{plan.marketplace_discount}%</strong> marketplace discount
                           </p>
                         </div>
                       )}
                       <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                         <p className="text-gray-700 text-sm">
                           <strong>{plan.cashback_percentage}%</strong> affiliate cashback
                         </p>
                       </div>
                       {featuresArray.map((feature, index) => (
                         <div key={index} className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-amber-600' : 'text-sage-600'}`}></i>
+                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-teal-600' : 'text-sage-600'}`}></i>
                           <p className="text-gray-700 text-sm">{feature}</p>
                         </div>
                       ))}
@@ -239,8 +239,8 @@ export default function SubscriptionPage() {
 
           {/* Feature Comparison Table */}
           <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-16 border border-gray-200">
-            <div className="bg-gray-900 text-white p-6">
-              <h2 className="text-3xl font-bold text-center">Feature Comparison</h2>
+            <div className="bg-gradient-to-r from-forest-800 to-sage-700 text-white p-6">
+              <h2 className="text-3xl font-serif font-bold text-center">Feature Comparison</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -354,7 +354,7 @@ export default function SubscriptionPage() {
 
           {/* FAQ Section */}
           <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">Frequently Asked Questions</h2>
+            <h2 className="text-3xl font-serif font-bold text-forest-800 text-center mb-12">Frequently Asked Questions</h2>
             <div className="space-y-6">
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Can I change plans anytime?</h3>

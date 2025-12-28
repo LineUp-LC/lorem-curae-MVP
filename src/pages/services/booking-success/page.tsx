@@ -1,146 +1,298 @@
-import { useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Navbar from '../../components/feature/Navbar';
+import Footer from '../../components/feature/Footer';
 
-export default function BookingSuccessPage() {
+interface Business {
+  id: string;
+  name: string;
+  rating: number;
+  reviewCount: number;
+  location: string;
+  distance: string;
+  specialties: string[];
+  image: string;
+  featured: boolean;
+  priceRange: string;
+}
+
+const featuredBusinesses: Business[] = [
+  {
+    id: '1',
+    name: 'Radiance Skin Studio',
+    rating: 4.9,
+    reviewCount: 342,
+    location: 'Downtown, Los Angeles',
+    distance: '2.3 miles',
+    specialties: ['Acne Treatment', 'Chemical Peels', 'Microneedling'],
+    image: 'https://readdy.ai/api/search-image?query=modern%20luxury%20skincare%20spa%20interior%20with%20treatment%20beds%20soft%20lighting%20elegant%20minimalist%20design%20professional%20aesthetic%20clean%20white%20surfaces&width=600&height=400&seq=spa-1&orientation=landscape',
+    featured: true,
+    priceRange: '$$$',
+  },
+  {
+    id: '2',
+    name: 'Glow Aesthetics Clinic',
+    rating: 4.8,
+    reviewCount: 289,
+    location: 'Beverly Hills, CA',
+    distance: '5.1 miles',
+    specialties: ['Laser Therapy', 'Anti-Aging', 'Hydrafacial'],
+    image: 'https://readdy.ai/api/search-image?query=upscale%20medical%20spa%20treatment%20room%20with%20advanced%20skincare%20equipment%20modern%20professional%20interior%20soft%20ambient%20lighting%20luxury%20aesthetic&width=600&height=400&seq=spa-2&orientation=landscape',
+    featured: true,
+    priceRange: '$$$$',
+  },
+  {
+    id: '3',
+    name: 'Pure Essence Spa',
+    rating: 4.7,
+    reviewCount: 456,
+    location: 'Santa Monica, CA',
+    distance: '8.7 miles',
+    specialties: ['Organic Facials', 'LED Therapy', 'Dermaplaning'],
+    image: 'https://readdy.ai/api/search-image?query=serene%20natural%20spa%20room%20with%20plants%20organic%20skincare%20products%20calming%20atmosphere%20zen%20aesthetic%20soft%20natural%20lighting%20wellness%20center&width=600&height=400&seq=spa-3&orientation=landscape',
+    featured: true,
+    priceRange: '$$',
+  },
+];
+
+export default function ServicesPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
-  const serviceId = searchParams.get('serviceId');
+  const [businesses] = useState<Business[]>(featuredBusinesses);
 
-  useEffect(() => {
-    // Scroll to top on mount
-    window.scrollTo(0, 0);
-  }, []);
+  const handleDiscoverBusinesses = () => {
+    navigate('/services/search');
+  };
+
+  const handleViewBusiness = (id: string) => {
+    navigate(`/services/${id}`);
+  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-24 pb-16">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Success Animation */}
-          <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-24 h-24 bg-green-100 rounded-full mb-6 motion-safe:animate-bounce">
-              <i className="ri-check-line text-5xl text-green-600"></i>
+      <main className="pt-20">
+        {/* Hero Section - Clean style matching About/Marketplace */}
+        <section className="py-12 px-6 lg:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-4">
+                Discover Professional Skincare Services
+              </h1>
+              <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-8">
+                Find trusted skincare professionals, spas, and clinics near you for expert treatments and personalized care.
+              </p>
+              <button
+                onClick={handleDiscoverBusinesses}
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer inline-flex items-center space-x-2"
+              >
+                <i className="ri-compass-line text-xl"></i>
+                <span>Discover Businesses</span>
+              </button>
             </div>
-            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-4">
-              Booking Confirmed!
-            </h1>
-            <p className="text-xl text-gray-600">
-              Your appointment has been successfully scheduled
-            </p>
+          </div>
+        </section>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Featured Businesses Section */}
+          <div className="mb-16">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-sage-100 rounded-full mb-4">
+                <i className="ri-star-fill text-sage-600"></i>
+                <span className="text-sm font-medium text-sage-700">Proudly Featured</span>
+              </div>
+              <h2 className="font-serif text-4xl lg:text-5xl text-forest-900 mb-4">
+                Top-Rated Skincare Professionals
+              </h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                Handpicked businesses with exceptional reviews and proven expertise in skincare treatments
+              </p>
+              <button
+                onClick={handleDiscoverBusinesses}
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer inline-flex items-center space-x-2"
+              >
+                <i className="ri-compass-line text-xl"></i>
+                <span>Discover All Businesses</span>
+              </button>
+            </div>
+
+            {/* Featured Business Cards */}
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {businesses.map((business) => (
+                <div
+                  key={business.id}
+                  className="bg-white rounded-2xl shadow-sm overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                  onClick={() => handleViewBusiness(business.id)}
+                >
+                  {/* Image */}
+                  <div className="relative h-56 overflow-hidden">
+                    <img
+                      src={business.image}
+                      alt={business.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Available';
+                      }}
+                    />
+                    {/* Fix 3: Featured label now uses sage-600 to match Best Match */}
+                    {business.featured && (
+                      <div className="absolute top-4 left-4">
+                        <div className="px-3 py-1 bg-sage-600 text-white rounded-full text-xs font-medium flex items-center gap-1 shadow">
+                          <i className="ri-star-fill"></i>
+                          Featured
+                        </div>
+                      </div>
+                    )}
+                    {/* Fix 4: Price indicator with tooltip */}
+                    <div className="absolute top-4 right-4 group/price">
+                      <div 
+                        className="px-3 py-1 bg-white/95 rounded-full text-xs font-medium text-forest-800 cursor-help shadow-sm"
+                        tabIndex={0}
+                        role="button"
+                        aria-describedby={`price-tooltip-${business.id}`}
+                      >
+                        {business.priceRange}
+                      </div>
+                      {/* Tooltip */}
+                      <div 
+                        id={`price-tooltip-${business.id}`}
+                        role="tooltip"
+                        className="absolute right-0 top-full mt-2 w-52 p-3 bg-forest-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover/price:opacity-100 group-hover/price:visible group-focus-within/price:opacity-100 group-focus-within/price:visible motion-safe:animate-enter-fade transition-all duration-fast z-20"
+                      >
+                        <p className="font-semibold mb-1">Price Range Guide</p>
+                        <p className="text-white/90">
+                          {business.priceRange === '$' && '$ — Under $100: Budget-friendly options'}
+                          {business.priceRange === '$$' && '$$ — $100–$200: Mid-range services'}
+                          {business.priceRange === '$$$' && '$$$ — $200–$350: Premium treatments'}
+                          {business.priceRange === '$$$$' && '$$$$ — $350+: Luxury experiences'}
+                        </p>
+                        <div className="absolute -top-1 right-4 w-2 h-2 bg-forest-900 rotate-45"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6">
+                    <h3 className="font-serif text-2xl font-bold text-forest-800 mb-2">
+                      {business.name}
+                    </h3>
+
+                    {/* Rating */}
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="flex items-center gap-1">
+                        <i className="ri-star-fill text-coral-400"></i>
+                        <span className="font-bold text-forest-800">{business.rating}</span>
+                      </div>
+                      <span className="text-sm text-gray-500">({business.reviewCount} reviews)</span>
+                    </div>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600 mb-4">
+                      <i className="ri-map-pin-line text-forest-800"></i>
+                      <span>{business.location}</span>
+                      <span className="text-gray-400">•</span>
+                      <span>{business.distance}</span>
+                    </div>
+
+                    {/* Specialties */}
+                    <div className="mb-4">
+                      <div className="flex flex-wrap gap-2">
+                        {business.specialties.slice(0, 3).map((specialty, idx) => (
+                          <span
+                            key={idx}
+                            className="px-3 py-1 bg-cream-100 text-forest-800 text-xs font-medium rounded-full"
+                          >
+                            {specialty}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* View Button */}
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleViewBusiness(business.id);
+                      }}
+                      className="w-full px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                    >
+                      View Details & Book
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
 
-          {/* Confirmation Details */}
-          <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <div className="flex items-start gap-4 mb-6 pb-6 border-b border-gray-200">
-              <div className="w-12 h-12 rounded-xl bg-forest-800/10 flex items-center justify-center flex-shrink-0">
-                <i className="ri-mail-line text-forest-800 text-2xl"></i>
-              </div>
-              <div>
-                <h3 className="font-bold text-gray-900 mb-2">Confirmation Email Sent</h3>
-                <p className="text-gray-600 text-sm">
-                  We've sent a confirmation email with all the details to your registered email address. 
-                  Please check your inbox and spam folder.
+          {/* Why Choose Professional Services */}
+          <div className="bg-white rounded-2xl shadow-sm p-12">
+            <h2 className="font-serif text-4xl text-forest-900 text-center mb-12">
+              Why Choose Professional Skincare Services?
+            </h2>
+            <div className="grid md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-user-star-line text-3xl text-sage-600"></i>
+                </div>
+                <h3 className="font-serif text-2xl text-forest-900 mb-3">
+                  Expert Care
+                </h3>
+                <p className="text-gray-600">
+                  Licensed professionals with years of experience in advanced skincare treatments
                 </p>
               </div>
-            </div>
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-forest-800/10 flex items-center justify-center flex-shrink-0">
-                  <i className="ri-calendar-check-line text-forest-800 text-2xl"></i>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-microscope-line text-3xl text-sage-600"></i>
                 </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">What's Next?</h4>
-                  <ul className="text-sm text-gray-600 space-y-2">
-                    <li className="flex items-start gap-2">
-                      <i className="ri-checkbox-circle-line text-forest-800 mt-0.5"></i>
-                      <span>You'll receive a reminder 24 hours before your appointment</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <i className="ri-checkbox-circle-line text-forest-800 mt-0.5"></i>
-                      <span>Arrive 10 minutes early to complete any necessary paperwork</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <i className="ri-checkbox-circle-line text-forest-800 mt-0.5"></i>
-                      <span>Bring any relevant medical history or skincare concerns</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-forest-800/10 flex items-center justify-center flex-shrink-0">
-                  <i className="ri-phone-line text-forest-800 text-2xl"></i>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-gray-900 mb-1">Need to Make Changes?</h4>
-                  <p className="text-sm text-gray-600">
-                    If you need to reschedule or cancel your appointment, please contact the business 
-                    directly using the contact information in your confirmation email.
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Link
-              to={serviceId ? `/services/${serviceId}` : '/services'}
-              className="flex-1 px-8 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-lg hover:bg-cream-100 transition-colors font-medium text-center whitespace-nowrap cursor-pointer"
-            >
-              <i className="ri-arrow-left-line mr-2"></i>
-              Back to Business
-            </Link>
-            <Link
-              to="/account"
-              className="flex-1 px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium text-center whitespace-nowrap cursor-pointer"
-            >
-              View My Bookings
-              <i className="ri-arrow-right-line ml-2"></i>
-            </Link>
-          </div>
-
-          {/* Additional Info */}
-          <div className="mt-8 p-6 bg-gradient-to-br from-[#2C5F4F]/5 to-[#E8956C]/5 rounded-xl border border-forest-800/20">
-            <div className="flex items-start gap-3">
-              <i className="ri-information-line text-forest-800 text-xl flex-shrink-0 mt-0.5"></i>
-              <div>
-                <h4 className="font-semibold text-forest-800 mb-2">Cancellation Policy</h4>
-                <p className="text-sm text-gray-700">
-                  Please provide at least 24 hours notice if you need to cancel or reschedule your appointment. 
-                  Late cancellations may be subject to a fee as per the business's policy.
+                <h3 className="font-serif text-2xl text-forest-900 mb-3">
+                  Advanced Technology
+                </h3>
+                <p className="text-gray-600">
+                  Access to professional-grade equipment and cutting-edge treatment methods
                 </p>
               </div>
-            </div>
-          </div>
-
-          {/* Explore More */}
-          <div className="mt-12 text-center">
-            <h3 className="font-serif text-2xl font-bold text-forest-800 mb-6">
-              Explore More Services
-            </h3>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link
-                to="/services/search"
-                className="px-6 py-3 bg-cream-100 text-forest-800 rounded-lg hover:bg-gray-200 transition-colors font-medium whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-search-line mr-2"></i>
-                Find More Services
-              </Link>
-              <Link
-                to="/marketplace"
-                className="px-6 py-3 bg-cream-100 text-forest-800 rounded-lg hover:bg-gray-200 transition-colors font-medium whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-shopping-bag-line mr-2"></i>
-                Browse Products
-              </Link>
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-heart-pulse-line text-3xl text-sage-600"></i>
+                </div>
+                <h3 className="font-serif text-2xl text-forest-900 mb-3">
+                  Personalized Plans
+                </h3>
+                <p className="text-gray-600">
+                  Customized treatment plans tailored to your unique skin concerns and goals
+                </p>
+              </div>
             </div>
           </div>
         </div>
+
+        {/* Bottom CTA Section - Clean style matching Marketplace */}
+        <section className="py-16 px-6 lg:px-12 mt-16">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-6">
+              Ready to Book Your Treatment?
+            </h2>
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+              Browse our curated selection of skincare professionals and find the perfect match for your needs
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <button
+                onClick={handleDiscoverBusinesses}
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer"
+              >
+                Discover All Businesses
+              </button>
+              <button
+                onClick={() => navigate('/services/search')}
+                className="px-8 py-4 bg-transparent border-2 border-sage-600 text-sage-600 rounded-full font-semibold hover:bg-sage-50 transition-colors duration-fast whitespace-nowrap cursor-pointer"
+              >
+                Search Near Me
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
 
       <Footer />

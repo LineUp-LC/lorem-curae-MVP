@@ -212,9 +212,9 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
   const userConcerns = userProfile?.concerns || [];
 
   return (
-    <div className="min-h-screen py-12 px-6 lg:px-12">
+    <div className="py-12 px-6 lg:px-12">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
+        {/* Header - Clean style matching Marketplace */}
         <div className="text-center mb-12">
           <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-4">
             Ingredient Library
@@ -327,7 +327,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                       Recommended for You
                     </span>
                     {ingredient.hasSimilarReviews && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full shadow-sm">
                         <i className="ri-user-heart-line"></i>
                         Similar Skin Reviews
                       </span>
@@ -403,7 +403,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 >
                   {ingredient.hasSimilarReviews && (
                     <div className="mb-3">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full shadow-sm">
                         <i className="ri-user-heart-line"></i>
                         Similar Skin Reviews
                       </span>

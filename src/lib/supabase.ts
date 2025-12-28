@@ -6,6 +6,9 @@ import {
   getEffectiveConcerns
 } from './utils/sessionState'
 
+// Re-export supabase client for convenience
+export { supabase }
+
 // -----------------------------
 // Types
 // -----------------------------
@@ -38,6 +41,48 @@ export interface UserProfile {
   concerns: string[];
   preferences: Record<string, any>;
   lifestyle: Record<string, any>;
+  created_at: string;
+  updated_at: string;
+}
+
+// Community types
+export interface Community {
+  id: string;
+  name: string;
+  description: string | null;
+  image_url: string | null;
+  category: string | null;
+  member_count: number;
+  is_private: boolean;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommunityPost {
+  id: string;
+  community_id: string;
+  user_id: string;
+  content: string;
+  image_url: string | null;
+  likes_count: number;
+  comments_count: number;
+  created_at: string;
+  updated_at: string;
+  // Joined fields
+  user_profile?: UserProfile;
+  community?: Community;
+}
+
+// Data Impact types
+export interface DataImpactContribution {
+  id: string;
+  user_id: string;
+  opted_in: boolean;
+  contribution_level: 'basic' | 'full' | 'anonymous';
+  data_points_shared: number;
+  impact_score: number;
+  rewards_earned: number;
   created_at: string;
   updated_at: string;
 }

@@ -166,22 +166,22 @@ export default function ServicesSearchPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-24 pb-16">
+      <main className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Search Header */}
-          <div className="mb-8">
-            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-4">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">
               Find Your Perfect Skincare Professional
             </h1>
-            <p className="text-lg text-gray-600 mb-6">
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
               Search by treatment, location, or business name
             </p>
 
             {/* Search Bar */}
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 max-w-3xl mx-auto mb-6">
               <div className="flex-1 relative">
                 <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 text-xl"></i>
                 <input
@@ -190,12 +190,12 @@ export default function ServicesSearchPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
                   placeholder="Search for treatments, businesses, or locations..."
-                  className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20 text-lg"
+                  className="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-2xl focus:outline-none focus:border-sage-600 transition-colors text-lg"
                 />
               </div>
               <button
                 onClick={handleSearch}
-                className="px-8 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-all font-semibold whitespace-nowrap cursor-pointer shadow-lg"
               >
                 Search
               </button>

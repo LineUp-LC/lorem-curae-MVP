@@ -87,9 +87,9 @@ const NutritionPage = () => {
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Nutrition Management</h1>
-          <p className="text-lg text-gray-600">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">Nutrition Management</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Discover skin-beneficial foods, plan your meals, and track your nutrient intake
           </p>
         </div>

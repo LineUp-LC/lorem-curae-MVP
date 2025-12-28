@@ -63,16 +63,6 @@ export default function ProductOverview() {
       </div>
 
       <div className="product-info">
-        <h1 className="text-2xl font-semibold">{product.name}</h1>
-        <p className="text-gray-600">{product.brand}</p>
-
-        <div className="mt-2">
-          <span className="text-xl font-bold">${product.price}</span>
-          <span className="ml-2 text-yellow-500">
-            ★ {product.rating} ({product.reviews} reviews)
-          </span>
-        </div>
-
         <p className="mt-4 text-gray-700">{product.description}</p>
 
         <div className="mt-4">

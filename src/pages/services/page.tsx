@@ -68,40 +68,33 @@ export default function ServicesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-24 pb-16">
-        {/* Hero Section */}
-        <div className="relative bg-gradient-to-r from-[#2C5F4F] to-[#3D7A63] text-white py-20 mb-16">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="max-w-3xl">
-              <h1 className="font-serif text-6xl font-bold mb-6">
+      <main className="pt-20">
+        {/* Hero Section - Clean style matching Discover/Ingredients */}
+        <section className="py-12 px-6 lg:px-12 mb-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-5xl lg:text-6xl font-serif text-forest-900 mb-6">
                 Discover Professional Skincare Services
               </h1>
-              <p className="text-xl text-white/90 mb-8">
+              <p className="text-xl text-gray-600 max-w-3xl mx-auto">
                 Find trusted skincare professionals, spas, and clinics near you for expert treatments and personalized care
               </p>
-              <button
-                onClick={handleDiscoverBusinesses}
-                className="px-8 py-4 bg-white text-forest-800 rounded-lg hover:bg-gray-100 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-search-line mr-2"></i>
-                Discover Businesses
-              </button>
             </div>
           </div>
-        </div>
+        </section>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Featured Businesses Section */}
           <div className="mb-16">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-coral-400/10 rounded-full mb-4">
-                <i className="ri-star-fill text-coral-400"></i>
-                <span className="text-sm font-medium text-coral-400">Proudly Featured</span>
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-sage-600/10 rounded-full mb-4">
+                <i className="ri-star-fill text-sage-600"></i>
+                <span className="text-sm font-medium text-sage-600">Proudly Featured</span>
               </div>
-              <h2 className="font-serif text-5xl font-bold text-forest-800 mb-4">
+              <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">
                 Top-Rated Skincare Professionals
               </h2>
               <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
@@ -109,7 +102,7 @@ export default function ServicesPage() {
               </p>
               <button
                 onClick={handleDiscoverBusinesses}
-                className="px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-lg whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-compass-line mr-2"></i>
                 Discover All Businesses
@@ -137,7 +130,7 @@ export default function ServicesPage() {
                     />
                     {business.featured && (
                       <div className="absolute top-4 left-4">
-                        <div className="px-3 py-1 bg-coral-400 text-white rounded-full text-xs font-medium flex items-center gap-1">
+                        <div className="px-3 py-1 bg-sage-600 text-white rounded-full text-xs font-medium flex items-center gap-1">
                           <i className="ri-star-fill"></i>
                           Featured
                         </div>
@@ -159,7 +152,7 @@ export default function ServicesPage() {
                     {/* Rating */}
                     <div className="flex items-center gap-2 mb-3">
                       <div className="flex items-center gap-1">
-                        <i className="ri-star-fill text-coral-400"></i>
+                        <i className="ri-star-fill text-amber-500"></i>
                         <span className="font-bold text-forest-800">{business.rating}</span>
                       </div>
                       <span className="text-sm text-gray-500">({business.reviewCount} reviews)</span>
@@ -193,7 +186,7 @@ export default function ServicesPage() {
                         e.stopPropagation();
                         handleViewBusiness(business.id);
                       }}
-                      className="w-full px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="w-full px-6 py-3 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-all text-sm font-semibold whitespace-nowrap cursor-pointer"
                     >
                       View Details & Book
                     </button>
@@ -205,7 +198,7 @@ export default function ServicesPage() {
 
           {/* Why Choose Professional Services */}
           <div className="bg-white rounded-2xl shadow-sm p-12">
-            <h2 className="font-serif text-4xl font-bold text-forest-800 text-center mb-12">
+            <h2 className="text-4xl font-serif text-forest-900 text-center mb-12">
               Why Choose Professional Skincare Services?
             </h2>
             <div className="grid md:grid-cols-3 gap-8">

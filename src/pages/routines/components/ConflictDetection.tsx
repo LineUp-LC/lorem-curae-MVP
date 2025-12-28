@@ -196,21 +196,15 @@ export default function ConflictDetection() {
                       <i className="ri-star-line"></i>
                       Better Alternatives for Your Routine
                     </h4>
-                    <div className="grid gap-4">
+                    {/* Horizontal scrollable container for mobile */}
+                    <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-2 px-2 md:grid md:grid-cols-1 md:overflow-visible md:mx-0 md:px-0">
                       {conflict.alternativeProducts.map((product) => (
                         <div
                           key={product.id}
-                          className="bg-white rounded-lg p-4 border border-gray-200 hover:border-forest-800 transition-all"
+                          className="bg-white rounded-lg p-4 border border-gray-200 hover:border-sage-500 transition-colors duration-fast flex-shrink-0 w-[85vw] max-w-sm snap-start md:w-full md:max-w-none"
                         >
                           <div className="flex items-start gap-4">
-                            <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0">
-                              <img
-                                src={product.image}
-                                alt={product.name}
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div className="flex-1">
+                            <div className="flex-1 min-w-0">
                               <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
                               <h5 className="font-medium text-forest-800 mb-2">{product.name}</h5>
                               <div className="mb-3 p-3 bg-green-50 rounded-lg border border-green-200">
@@ -219,8 +213,9 @@ export default function ConflictDetection() {
                                 </p>
                               </div>
                               <button
-                                onClick={() => navigate('/discover')}
-                                className="px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                                onClick={() => navigate(`/product-detail?id=${product.id}`)}
+                                className="px-4 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 transition-colors duration-fast text-sm font-medium whitespace-nowrap cursor-pointer"
+                                aria-label={`View details for ${product.name}`}
                               >
                                 View Product Details
                               </button>

@@ -7,15 +7,13 @@ const AboutPage = () => {
       <Navbar />
       
       <main className="pt-20">
-        {/* Hero Section */}
-        <section className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-sage-600 to-sage-800"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30"></div>
-          <div className="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
+        {/* Hero Section - Clean style matching Ingredients/Marketplace */}
+        <section className="py-16 px-6 lg:px-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">
               We Are Lorem Curae
             </h1>
-            <p className="text-xl text-sage-100 leading-relaxed">
+            <p className="text-lg text-gray-600 leading-relaxed max-w-3xl mx-auto">
               Lorem Curae is a home built on honesty, authenticity, and customer care—values that are at the core of everything we do. Our name, Lorem Curae, derives from Latin, means "Customer Care," a philosophy we embrace wholeheartedly. Lorem Curae is more than just an experience; it's a promise—a commitment to put you, the user, first at every step of your skincare journey.
             </p>
           </div>
@@ -45,33 +43,33 @@ const AboutPage = () => {
         {/* Values Section */}
         <section className="py-20 bg-cream-50">
           <div className="max-w-6xl mx-auto px-6 lg:px-12">
-            <h2 className="text-4xl font-bold text-gray-900 text-center mb-12">Our Core Values</h2>
+            <h2 className="text-4xl font-serif text-forest-900 text-center mb-12">Our Core Values</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all">
+              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all duration-slow">
                 <div className="w-16 h-16 flex items-center justify-center bg-sage-100 text-sage-600 rounded-full mx-auto mb-4">
                   <i className="ri-heart-line text-3xl"></i>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Honesty</h3>
+                <h3 className="text-xl font-serif text-forest-900 mb-3">Honesty</h3>
                 <p className="text-gray-600">
                   We provide transparent information about ingredients, products, and services so you can make informed decisions.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all">
-                <div className="w-16 h-16 flex items-center justify-center bg-coral-100 text-coral-600 rounded-full mx-auto mb-4">
+              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all duration-slow">
+                <div className="w-16 h-16 flex items-center justify-center bg-sage-100 text-sage-600 rounded-full mx-auto mb-4">
                   <i className="ri-shield-check-line text-3xl"></i>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Authenticity</h3>
+                <h3 className="text-xl font-serif text-forest-900 mb-3">Authenticity</h3>
                 <p className="text-gray-600">
                   We celebrate real stories, real results, and real people. No filters, no false promises—just genuine care.
                 </p>
               </div>
 
-              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all">
-                <div className="w-16 h-16 flex items-center justify-center bg-purple-100 text-purple-600 rounded-full mx-auto mb-4">
+              <div className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all duration-slow">
+                <div className="w-16 h-16 flex items-center justify-center bg-sage-100 text-sage-600 rounded-full mx-auto mb-4">
                   <i className="ri-customer-service-line text-3xl"></i>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-3">Customer Care</h3>
+                <h3 className="text-xl font-serif text-forest-900 mb-3">Customer Care</h3>
                 <p className="text-gray-600">
                   Your journey is our priority. We're here to support, guide, and empower you every step of the way.
                 </p>
@@ -114,26 +112,25 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-sage-600 to-sage-800 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30"></div>
-          <div className="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">
+        {/* CTA Section - Clean style matching Marketplace */}
+        <section className="py-16 px-6 lg:px-12 bg-cream-100">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-6">
               Join Our Community
             </h2>
-            <p className="text-xl text-sage-100 mb-8">
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               Start your personalized skincare journey today and discover what works for you
             </p>
-            <div className="flex items-center justify-center space-x-4">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
               <a
-                href="/signup"
-                className="px-8 py-4 bg-white text-sage-700 rounded-lg font-semibold hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
+                href="/auth/signup"
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer"
               >
                 Get Started
               </a>
               <a
-                href="/discover"
-                className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-semibold hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer"
+                href="/skin-survey-account"
+                className="px-8 py-4 bg-transparent border-2 border-sage-600 text-sage-600 rounded-full font-semibold hover:bg-sage-50 transition-colors duration-fast whitespace-nowrap cursor-pointer"
               >
                 Take the Quiz
               </a>

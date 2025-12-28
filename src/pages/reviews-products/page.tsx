@@ -227,14 +227,14 @@ const ProductReviewsPage = () => {
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-              <Link to="/" className="hover:text-sage-600 cursor-pointer">Home</Link>
+              <Link to="/discover" className="hover:text-sage-600 focus:text-sage-600 focus:outline-none cursor-pointer transition-colors duration-fast">Discover</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <Link to="/discover" className="hover:text-sage-600 cursor-pointer">Products</Link>
+              <Link to="/product-detail" className="hover:text-sage-600 focus:text-sage-600 focus:outline-none cursor-pointer transition-colors duration-fast">Products</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <span className="text-sage-600">Product Reviews</span>
+              <span className="text-sage-600 font-medium">Product Reviews</span>
             </div>
-            <h1 className="text-4xl font-serif text-forest-900 mb-3">Product Reviews &amp; Results</h1>
-            <p className="text-lg text-gray-600 max-w-3xl">Real customer experiences with detailed before/after results, pros and cons, and personalized recommendations based on skin profiles.</p>
+            <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">Product Reviews &amp; Results</h1>
+            <p className="text-xl text-gray-600 max-w-3xl">Real customer experiences with detailed before/after results, pros and cons, and personalized recommendations based on skin profiles.</p>
           </div>
 
           {userSkinTypeParam && (

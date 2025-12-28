@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
@@ -143,8 +142,8 @@ const BadgesPage = () => {
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Achievements</h1>
-          <p className="text-lg text-gray-600 mb-8">
+          <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">Your Achievements</h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8">
             Earn badges by completing challenges and milestones on your skincare journey
           </p>
           

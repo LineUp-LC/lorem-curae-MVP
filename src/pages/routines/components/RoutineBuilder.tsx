@@ -249,7 +249,31 @@ export default function RoutineBuilder() {
 
       {/* Horizontal Routine Steps */}
       <div className="relative mb-8">
-        <div className="overflow-x-auto pb-4 scrollbar-hide">
+        <div 
+          className="overflow-x-auto pb-4 scrollbar-hide cursor-grab active:cursor-grabbing select-none"
+          onMouseDown={(e) => {
+            const ele = e.currentTarget;
+            const startX = e.pageX - ele.offsetLeft;
+            const scrollLeft = ele.scrollLeft;
+            let isDragging = false;
+            
+            const handleMouseMove = (e: MouseEvent) => {
+              isDragging = true;
+              const x = e.pageX - ele.offsetLeft;
+              const walk = (x - startX) * 2;
+              ele.scrollLeft = scrollLeft - walk;
+            };
+            
+            const handleMouseUp = () => {
+              document.removeEventListener('mousemove', handleMouseMove);
+              document.removeEventListener('mouseup', handleMouseUp);
+              setTimeout(() => { isDragging = false; }, 0);
+            };
+            
+            document.addEventListener('mousemove', handleMouseMove);
+            document.addEventListener('mouseup', handleMouseUp);
+          }}
+        >
           <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
             {filteredSteps.map((step, index) => (
               <div

@@ -213,40 +213,34 @@ const MarketplacePage = () => {
       <Navbar />
       
       <main className="pt-20">
-        {/* Hero Section */}
-        <section className="relative py-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-sage-600 to-sage-800"></div>
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30"></div>
-          <div className="relative max-w-7xl mx-auto px-6 lg:px-12 text-center">
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              Discover Authentic Brands
-            </h1>
-            <p className="text-xl text-sage-100 mb-8 max-w-3xl mx-auto">
-              Shop from verified storefronts offering curated, high-quality skincare products/services
-            </p>
-            {discountBadge && (
-              <div className="mb-6">
-                <span className={`inline-block px-6 py-2 ${discountBadge.color} text-white rounded-full font-semibold text-lg`}>
-                  🎉 Your {currentTier === 'premium' ? 'Premium' : 'Plus'} Discount: {discountBadge.text} on all purchases
-                </span>
-              </div>
-            )}
-            <div className="flex items-center justify-center space-x-4">
-              <Link
-                to="/storefront/join"
-                className="px-8 py-4 bg-white text-sage-700 rounded-lg font-semibold hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
-              >
-                Become a Seller
-              </Link>
-              <div className="relative max-w-md">
-                <input
-                  type="text"
-                  placeholder="Search storefronts..."
-                  className="w-full px-6 py-4 pr-12 rounded-lg focus:ring-2 focus:ring-white/50 focus:outline-none text-sm"
-                />
-                <button className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-sage-600 cursor-pointer">
-                  <i className="ri-search-line text-xl"></i>
-                </button>
+        {/* Hero Section - Clean style matching Ingredients page */}
+        <section className="py-12 px-6 lg:px-12">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-4">
+                Discover Authentic Brands
+              </h1>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                Shop from verified storefronts offering curated, high-quality skincare products and services.
+              </p>
+              {discountBadge && (
+                <div className="mb-6">
+                  <span className={`inline-block px-6 py-2 ${discountBadge.color} text-white rounded-full font-semibold text-lg`}>
+                    🎉 Your {currentTier === 'premium' ? 'Premium' : 'Plus'} Discount: {discountBadge.text} on all purchases
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center justify-center">
+                <div className="relative w-full max-w-md">
+                  <input
+                    type="text"
+                    placeholder="Search storefronts..."
+                    className="w-full px-6 py-4 pr-12 bg-white border-2 border-gray-200 rounded-2xl text-base focus:outline-none focus:border-sage-600 transition-colors"
+                  />
+                  <button className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-sage-600 cursor-pointer transition-colors">
+                    <i className="ri-search-line text-xl"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -432,14 +426,14 @@ const MarketplacePage = () => {
                       />
                       <div className="absolute top-3 right-3 flex items-center gap-2">
                         {storefront.featured && (
-                          <div className="px-3 py-1 bg-amber-500 text-white text-xs font-semibold rounded-full">
+                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full shadow">
                             Featured
                           </div>
                         )}
                         {storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-purple-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow">
                             <i className="ri-vip-crown-line"></i>
-                            Premium Visibility
+                            Premium
                           </div>
                         )}
                       </div>
@@ -558,18 +552,17 @@ const MarketplacePage = () => {
         </section>
 
         {/* CTA Section */}
-        <section className="py-20 bg-gradient-to-br from-sage-600 to-sage-800 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/10 to-black/30"></div>
-          <div className="relative max-w-4xl mx-auto px-6 lg:px-12 text-center">
-            <h2 className="text-4xl font-bold text-white mb-6">
+        <section className="py-16 px-6 lg:px-12">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-6">
               Ready to Grow Your Brand?
             </h2>
-            <p className="text-xl text-sage-100 mb-8">
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               Join our marketplace and reach thousands of skincare enthusiasts
             </p>
             <Link
               to="/storefront/join"
-              className="inline-block px-8 py-4 bg-white text-sage-700 rounded-lg font-semibold hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
+              className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer"
             >
               Become an LC Storefront
             </Link>

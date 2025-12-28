@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
@@ -145,9 +144,9 @@ export default function AffiliateDashboardPage() {
       <div className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">Affiliate Dashboard</h1>
-            <p className="text-gray-600">
+          <div className="text-center mb-12">
+            <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">Affiliate Dashboard</h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Track your earnings from beauty brand partnerships and manage your affiliate links
             </p>
           </div>

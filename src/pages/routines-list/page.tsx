@@ -109,7 +109,7 @@ export default function RoutinesListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-cream-50">
       <Navbar />
       
       {/* CHANGED: pt-24 -> pt-20 sm:pt-24, pb-16 -> pb-12 sm:pb-16 */}
@@ -118,12 +118,12 @@ export default function RoutinesListPage() {
           {/* Header */}
           {/* CHANGED: mb-12 -> mb-8 sm:mb-12 */}
           <div className="text-center mb-8 sm:mb-12">
-            {/* CHANGED: text-5xl -> text-3xl sm:text-4xl md:text-5xl, mb-4 -> mb-3 sm:mb-4 */}
-            <h1 className="font-serif text-3xl sm:text-4xl md:text-5xl font-bold text-forest-800 mb-3 sm:mb-4">
+            {/* Updated: consistent with design system */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-forest-900 mb-4">
               My Skincare Routines
             </h1>
             {/* CHANGED: text-lg -> text-base sm:text-lg, added px-4 */}
-            <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Manage all your personalized skincare routines in one place
             </p>
           </div>

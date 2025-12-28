@@ -466,8 +466,9 @@ const AIChatPage = () => {
             {/* Chat Header */}
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-forest-800 rounded-full flex items-center justify-center">
-                  <i className="ri-robot-2-line text-white text-xl"></i>
+                <div className="w-12 h-12 bg-gradient-to-br from-forest-800 to-sage-600 rounded-full flex items-center justify-center relative">
+                  <i className="ri-sparkling-2-fill text-white text-xl"></i>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-coral-400 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">Curae AI</h2>
@@ -487,7 +488,7 @@ const AIChatPage = () => {
                   Insights
                 </button>
                 <Link
-                  to="/routines"
+                  to="/my-skin"
                   className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                 >
                   <i className="ri-calendar-check-line mr-1"></i>

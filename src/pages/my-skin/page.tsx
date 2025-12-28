@@ -60,6 +60,10 @@ export default function MySkinPage() {
   ]);
   const [assessmentInput, setAssessmentInput] = useState('');
   const [isAssessing, setIsAssessing] = useState(false);
+  const [showServicePopup, setShowServicePopup] = useState(false);
+  const [selectedConcernForService, setSelectedConcernForService] = useState<SkinConcern | null>(null);
+  const [showProductPopup, setShowProductPopup] = useState(false);
+  const [selectedConcernForProduct, setSelectedConcernForProduct] = useState<SkinConcern | null>(null);
 
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
@@ -338,9 +342,11 @@ export default function MySkinPage() {
     try {
       sessionState.trackInteraction('click', 'prioritize-concern', { concern: concern.name, destination });
       if (destination === 'products') {
-        navigate('/discover', { state: { concernFilter: concern.name } });
+        setSelectedConcernForProduct(concern);
+        setShowProductPopup(true);
       } else {
-        navigate('/services', { state: { concernFilter: concern.name } });
+        setSelectedConcernForService(concern);
+        setShowServicePopup(true);
       }
     } catch (error) {
       console.error('Navigation error:', error);
@@ -637,8 +643,9 @@ export default function MySkinPage() {
                   {/* Chat Header */}
                   <div className="bg-gradient-to-r from-[#2C5F4F] to-[#3D7A63] text-white p-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                        <i className="ri-robot-2-line text-xl"></i>
+                      <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center relative">
+                        <i className="ri-sparkling-2-fill text-xl"></i>
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-coral-400 rounded-full border border-white"></div>
                       </div>
                       <div>
                         <h3 className="font-bold">Curae AI</h3>
@@ -667,7 +674,7 @@ export default function MySkinPage() {
                           {message.type === 'ai' && (
                             <div className="flex items-center gap-2 mb-2">
                               <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                                <i className="ri-robot-2-line text-forest-800 text-xs"></i>
+                                <i className="ri-sparkling-2-fill text-forest-800 text-xs"></i>
                               </div>
                               <span className="text-xs font-medium text-forest-800">AI Assistant</span>
                             </div>
@@ -685,7 +692,7 @@ export default function MySkinPage() {
                         <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-200">
                           <div className="flex items-center gap-2">
                             <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                              <i className="ri-robot-2-line text-forest-800 text-xs"></i>
+                              <i className="ri-sparkling-2-fill text-forest-800 text-xs"></i>
                             </div>
                             <div className="flex gap-1">
                               <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
@@ -967,6 +974,126 @@ export default function MySkinPage() {
           </div>
         </div>
       </main>
+
+      {/* Service Selection Popup */}
+      {showServicePopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowServicePopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <i className="ri-close-line text-2xl"></i>
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-forest-800/10 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-store-line text-forest-800 text-3xl"></i>
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Find Services</h3>
+              <p className="text-gray-600 text-sm">
+                {selectedConcernForService && `for ${selectedConcernForService.name}`}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  navigate('/marketplace', { state: { concernFilter: selectedConcernForService?.name } });
+                  setShowServicePopup(false);
+                }}
+                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                  <i className="ri-shopping-bag-3-line text-2xl"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Marketplace</p>
+                  <p className="text-sm text-cream-100">Browse curated services and products</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('/services', { state: { concernFilter: selectedConcernForService?.name } });
+                  setShowServicePopup(false);
+                }}
+                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
+                  <i className="ri-search-line text-2xl text-forest-800"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Search for Services</p>
+                  <p className="text-sm text-gray-600">Find specific skincare services</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Selection Popup */}
+      {showProductPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowProductPopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <i className="ri-close-line text-2xl"></i>
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-forest-800/10 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-shopping-bag-line text-forest-800 text-3xl"></i>
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Find Products</h3>
+              <p className="text-gray-600 text-sm">
+                {selectedConcernForProduct && `for ${selectedConcernForProduct.name}`}
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  navigate('/marketplace', { state: { concernFilter: selectedConcernForProduct?.name } });
+                  setShowProductPopup(false);
+                }}
+                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                  <i className="ri-shopping-bag-3-line text-2xl"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Marketplace</p>
+                  <p className="text-sm text-cream-100">Browse curated products and services</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </button>
+
+              <button
+                onClick={() => {
+                  navigate('/discover', { state: { concernFilter: selectedConcernForProduct?.name } });
+                  setShowProductPopup(false);
+                }}
+                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4"
+              >
+                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
+                  <i className="ri-search-line text-2xl text-forest-800"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Search for Products</p>
+                  <p className="text-sm text-gray-600">Find specific skincare products</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>
