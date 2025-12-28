@@ -9,11 +9,34 @@ const MarketplacePage = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [purchasingProduct, setPurchasingProduct] = useState<string | null>(null);
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
 
   useEffect(() => {
     fetchUserTier();
     fetchProducts();
+    loadUserConcerns();
   }, []);
+
+  const loadUserConcerns = () => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
+    }
+  };
+
+  // Check if product concerns match user's concerns
+  const matchesUserConcerns = (productConcerns: string[] | undefined): boolean => {
+    if (!productConcerns || !userConcerns.length) return false;
+    return productConcerns.some(concern => 
+      userConcerns.some(userConcern => 
+        concern.toLowerCase().includes(userConcern) || 
+        userConcern.includes(concern.toLowerCase())
+      )
+    );
+  };
 
   const fetchUserTier = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -263,12 +286,24 @@ const MarketplacePage = () => {
                   const hasDiscount = pricing.discount > 0;
                   const storefront = product.marketplace_storefronts;
                   const isConnected = storefront?.stripe_connected_accounts?.[0]?.charges_enabled;
+                  const isConcernMatch = matchesUserConcerns(product.concerns || product.target_concerns);
 
                   return (
                     <div
                       key={product.id}
-                      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group"
+                      className={`bg-white rounded-xl overflow-hidden border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group ${
+                        isConcernMatch 
+                          ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-sage-300' 
+                          : 'border-gray-200 hover:border-sage-300'
+                      }`}
                     >
+                      {/* Concern Match Badge */}
+                      {isConcernMatch && (
+                        <div className="bg-sage-50 px-3 py-1.5 flex items-center gap-2 border-b border-sage-200">
+                          <i className="ri-sparkling-2-fill text-sage-600 text-sm"></i>
+                          <span className="text-xs font-medium text-sage-700">Matches your skin concerns</span>
+                        </div>
+                      )}
                       {/* Product Image */}
                       <div className="relative h-64 overflow-hidden bg-gray-50">
                         <img

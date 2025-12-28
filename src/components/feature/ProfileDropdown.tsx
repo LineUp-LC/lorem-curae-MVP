@@ -73,9 +73,9 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
         onClick={onClose}
       />
       {/* Mobile: Full-width bottom sheet | Desktop: Positioned dropdown */}
-      <div className="fixed sm:absolute right-0 left-0 sm:left-auto bottom-0 sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-64 bg-white rounded-t-xl sm:rounded-xl shadow-xl border border-gray-100 z-50 overflow-visible max-h-[85vh] sm:max-h-none overflow-y-auto motion-safe:animate-enter-up sm:motion-safe:animate-enter-scale origin-top-right will-change-transform">
+      <div className="fixed sm:absolute right-0 left-0 sm:left-auto bottom-0 sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-64 bg-white rounded-t-xl sm:rounded-xl shadow-xl border border-gray-100 z-50 max-h-[85vh] sm:max-h-none overflow-y-auto sm:overflow-visible motion-safe:animate-enter-up sm:motion-safe:animate-enter-scale origin-top-right will-change-transform">
         {/* Profile Header */}
-        <div className="p-4 border-b border-gray-50">
+        <div className="p-4 border-b border-gray-50 overflow-visible">
           <div className="flex items-center space-x-3 mb-3">
             <Link 
               to="/profile/edit"
@@ -102,19 +102,19 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
           </div>
 
           {/* Badges */}
-          <div className="mb-3">
+          <div className="mb-3 overflow-visible">
             <p className="text-[10px] text-gray-500 mb-1.5">Badges</p>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 overflow-visible">
               {user.badges.map((badge) => (
                 <div
                   key={badge.id}
                   onClick={() => handleBadgeClick(badge.id)}
-                  className={`relative w-8 h-8 flex items-center justify-center rounded-md ${badge.color} group cursor-pointer hover:scale-110 transition-transform`}
+                  className={`relative w-8 h-8 flex items-center justify-center rounded-md ${badge.color} group cursor-pointer hover:scale-110 transition-transform overflow-visible`}
                   title={badge.name}
                 >
                   <i className={`${badge.icon} text-sm ${badge.iconColor}`}></i>
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[100] w-max hidden sm:block">
-                    <div className="bg-gray-900 text-white text-[10px] rounded-lg px-2 py-1.5 shadow-lg max-w-[160px]">
+                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[9999] w-max hidden sm:block">
+                    <div className="bg-gray-900 text-white text-[10px] rounded-lg px-2 py-1.5 shadow-xl max-w-[160px] whitespace-normal">
                       <p className="font-semibold mb-0.5">{badge.name}</p>
                       <p className="text-gray-300">{badge.description}</p>
                       <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">

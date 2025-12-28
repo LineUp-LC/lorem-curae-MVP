@@ -14,6 +14,34 @@ interface Routine {
   thumbnail?: string;
 }
 
+// Education flow content
+const educationSteps = [
+  {
+    title: "Understanding AM Routines",
+    icon: "ri-sun-line",
+    content: "Your morning routine focuses on protection and hydration. Start with a gentle cleanser to remove overnight oil buildup, followed by serums that target your specific concerns.",
+    tip: "The key is to end with SPF - this protects all the work you've done!"
+  },
+  {
+    title: "Understanding PM Routines",
+    icon: "ri-moon-line",
+    content: "Evening routines are about repair and treatment. Double cleansing removes makeup and sunscreen, then you apply active ingredients that work while you sleep.",
+    tip: "Nighttime is when your skin does most of its repair work!"
+  },
+  {
+    title: "The Importance of Order",
+    icon: "ri-sort-asc",
+    content: "Products are applied from thinnest to thickest consistency. Water-based serums first, then oils, then creams. This ensures proper absorption.",
+    tip: "Think of it like building layers - each one should be able to penetrate the previous layer."
+  },
+  {
+    title: "Why Order Matters",
+    icon: "ri-lightbulb-line",
+    content: "Applying products in the wrong order can reduce their effectiveness. Heavy creams before serums create a barrier that prevents absorption.",
+    tip: "Wait 30-60 seconds between steps for optimal absorption."
+  }
+];
+
 const mockRoutines: Routine[] = [
   {
     id: '1',
@@ -50,6 +78,21 @@ export default function RoutinesListPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [shareRoutineId, setShareRoutineId] = useState<string | null>(null);
+  
+  // Routine builder education flow state
+  const [showFamiliarityPopup, setShowFamiliarityPopup] = useState(false);
+  const [showEducationFlow, setShowEducationFlow] = useState(false);
+  const [educationStep, setEducationStep] = useState(0);
+  const [showSystemExplanation, setShowSystemExplanation] = useState(false);
+  const [userConcerns, setUserConcerns] = useState<string[]>(() => {
+    const saved = localStorage.getItem('skinSurveyData');
+    if (saved) {
+      try {
+        return JSON.parse(saved).concerns || [];
+      } catch { return []; }
+    }
+    return [];
+  });
 
   const handleEditName = (routine: Routine) => {
     setEditingId(routine.id);
@@ -101,6 +144,35 @@ export default function RoutinesListPage() {
   };
 
   const handleCreateRoutine = () => {
+    setShowFamiliarityPopup(true);
+  };
+
+  const handleFamiliarityResponse = (isFamiliar: boolean) => {
+    setShowFamiliarityPopup(false);
+    if (isFamiliar) {
+      setShowSystemExplanation(true);
+    } else {
+      setShowEducationFlow(true);
+      setEducationStep(0);
+    }
+  };
+
+  const handleNextEducationStep = () => {
+    if (educationStep < educationSteps.length - 1) {
+      setEducationStep(educationStep + 1);
+    } else {
+      setShowEducationFlow(false);
+      navigate('/routines');
+    }
+  };
+
+  const handleSkipEducation = () => {
+    setShowEducationFlow(false);
+    navigate('/routines');
+  };
+
+  const handleStartBuilding = () => {
+    setShowSystemExplanation(false);
     navigate('/routines');
   };
 
@@ -306,6 +378,137 @@ export default function RoutinesListPage() {
           )}
         </div>
       </main>
+
+      {/* Phase 1: Familiarity Popup */}
+      {showFamiliarityPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <div className="w-20 h-20 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-6">
+              <i className="ri-questionnaire-line text-sage-600 text-4xl"></i>
+            </div>
+            <h3 className="text-2xl font-serif font-bold text-forest-800 mb-4">
+              Are you familiar with skincare routines?
+            </h3>
+            <p className="text-gray-600 mb-8">
+              This helps us personalize your experience
+            </p>
+            <div className="flex gap-4">
+              <button
+                onClick={() => handleFamiliarityResponse(true)}
+                className="flex-1 px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors font-medium cursor-pointer"
+              >
+                Yes
+              </button>
+              <button
+                onClick={() => handleFamiliarityResponse(false)}
+                className="flex-1 px-6 py-4 border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors font-medium cursor-pointer"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phase 2: Education Flow (for users not familiar) */}
+      {showEducationFlow && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
+            {/* Progress Indicator */}
+            <div className="flex items-center justify-center gap-2 mb-6">
+              {educationSteps.map((_, idx) => (
+                <div
+                  key={idx}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    idx <= educationStep ? 'bg-sage-600' : 'bg-gray-200'
+                  }`}
+                />
+              ))}
+            </div>
+
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+                <i className={`${educationSteps[educationStep].icon} text-sage-600 text-3xl`}></i>
+              </div>
+              <h3 className="text-xl font-bold text-forest-800 mb-3">
+                {educationSteps[educationStep].title}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {educationSteps[educationStep].content}
+              </p>
+              
+              {/* Personalized tip based on user concerns */}
+              {userConcerns.length > 0 && (
+                <div className="bg-coral-50 border border-coral-200 rounded-lg p-4 mt-4">
+                  <p className="text-sm text-coral-800">
+                    <i className="ri-lightbulb-flash-line mr-2"></i>
+                    <strong>Personalized for you:</strong> This step is especially beneficial for your concern: <span className="font-semibold">{userConcerns[0]}</span>
+                  </p>
+                </div>
+              )}
+              
+              <div className="bg-sage-50 rounded-lg p-4 mt-4">
+                <p className="text-sm text-sage-800 italic">
+                  💡 {educationSteps[educationStep].tip}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleSkipEducation}
+                className="flex-1 px-4 py-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors font-medium cursor-pointer"
+              >
+                Skip
+              </button>
+              <button
+                onClick={handleNextEducationStep}
+                className="flex-1 px-6 py-3 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors font-medium cursor-pointer"
+              >
+                {educationStep < educationSteps.length - 1 ? 'Next' : 'Start Building'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phase 3: System Explanation (for familiar users) */}
+      {showSystemExplanation && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
+            <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-6">
+              <i className="ri-checkbox-circle-line text-sage-600 text-3xl"></i>
+            </div>
+            <h3 className="text-xl font-bold text-forest-800 mb-4">
+              Here's how the regimen system works
+            </h3>
+            <div className="text-left space-y-4 mb-6">
+              <div className="flex items-start gap-3">
+                <i className="ri-drag-move-line text-sage-600 text-xl mt-0.5"></i>
+                <p className="text-gray-600 text-sm">Drag and drop steps to reorder your routine</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="ri-add-circle-line text-sage-600 text-xl mt-0.5"></i>
+                <p className="text-gray-600 text-sm">Add products from your saved list or browse new ones</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="ri-alert-line text-coral-500 text-xl mt-0.5"></i>
+                <p className="text-gray-600 text-sm">Our conflict detection warns about ingredient interactions</p>
+              </div>
+              <div className="flex items-start gap-3">
+                <i className="ri-calendar-check-line text-sage-600 text-xl mt-0.5"></i>
+                <p className="text-gray-600 text-sm">Track your progress with daily check-ins and notes</p>
+              </div>
+            </div>
+            <button
+              onClick={handleStartBuilding}
+              className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors font-medium cursor-pointer"
+            >
+              Start Building
+            </button>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import RoutineBuilder from './components/RoutineBuilder';
@@ -7,12 +8,52 @@ import NotesSection from './components/NotesSection';
 import { sessionState } from '../../lib/utils/sessionState';
 
 export default function RoutinesPage() {
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<'routine' | 'notes'>('routine');
   const [routineSteps, setRoutineSteps] = useState<any[]>([]);
+  const [routineName, setRoutineName] = useState('My Skincare Routine');
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [showBrowsePopup, setShowBrowsePopup] = useState(false);
+  const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);
+  const [savedProducts, setSavedProducts] = useState<any[]>([]);
 
   useEffect(() => {
     sessionState.navigateTo('/routines');
-  }, []);
+    
+    // Load routine name from URL params or localStorage
+    const routineId = searchParams.get('id');
+    if (routineId) {
+      const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
+      const routine = savedRoutines.find((r: any) => r.id === routineId);
+      if (routine) {
+        setRoutineName(routine.name);
+      }
+    }
+    
+    // Load saved products
+    const products = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    setSavedProducts(products);
+  }, [searchParams]);
+
+  const handleSaveRoutineName = () => {
+    setIsEditingName(false);
+    // Save to localStorage
+    const routineId = searchParams.get('id');
+    if (routineId) {
+      const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
+      const updatedRoutines = savedRoutines.map((r: any) => 
+        r.id === routineId ? { ...r, name: routineName } : r
+      );
+      localStorage.setItem('routines', JSON.stringify(updatedRoutines));
+    }
+    sessionState.trackInteraction('click', 'save-routine-name', { name: routineName });
+  };
+
+  const handleRemoveSavedProduct = (productId: number) => {
+    const updated = savedProducts.filter((p: any) => p.id !== productId);
+    setSavedProducts(updated);
+    localStorage.setItem('savedProducts', JSON.stringify(updated));
+  };
 
   const handleAddStep = (step: any) => {
     const newSteps = [...routineSteps, { ...step, id: Date.now().toString() }];
@@ -52,14 +93,44 @@ export default function RoutinesPage() {
       
       <main className="pt-20 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
+          {/* Header - Shows routine name only */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">
-              My Skincare Routine
-            </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-              Build your personalized routine with our guided templates and smart conflict detection
-            </p>
+            <div className="flex items-center justify-center gap-3">
+              {isEditingName ? (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={routineName}
+                    onChange={(e) => setRoutineName(e.target.value)}
+                    className="text-4xl lg:text-6xl font-serif text-forest-900 bg-transparent border-b-2 border-forest-800 focus:outline-none text-center"
+                    autoFocus
+                    onBlur={handleSaveRoutineName}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSaveRoutineName()}
+                  />
+                </div>
+              ) : (
+                <h1 
+                  className="text-4xl lg:text-6xl font-serif text-forest-900 cursor-pointer hover:text-forest-700 transition-colors flex items-center gap-3"
+                  onClick={() => setIsEditingName(true)}
+                >
+                  {routineName}
+                  <button className="text-gray-400 hover:text-forest-800 transition-colors">
+                    <i className="ri-pencil-line text-2xl"></i>
+                  </button>
+                </h1>
+              )}
+            </div>
+          </div>
+
+          {/* View Saved Products CTA (Task 11) */}
+          <div className="flex justify-center mb-6">
+            <button
+              onClick={() => setShowSavedProductsPopup(true)}
+              className="px-4 py-2 bg-sage-100 text-sage-700 rounded-full text-sm font-medium hover:bg-sage-200 transition-colors cursor-pointer flex items-center gap-2"
+            >
+              <i className="ri-bookmark-line"></i>
+              View Saved Products ({savedProducts.length})
+            </button>
           </div>
 
           {/* Tab Navigation */}
@@ -97,6 +168,7 @@ export default function RoutinesPage() {
                 onRemoveStep={handleRemoveStep}
                 onReorderSteps={handleReorderSteps}
                 onSave={handleSaveRoutine}
+                onBrowseClick={() => setShowBrowsePopup(true)}
               />
               <ConflictDetection />
             </div>
@@ -105,6 +177,120 @@ export default function RoutinesPage() {
           )}
         </div>
       </main>
+
+      {/* Browse Popup (Task 7) */}
+      {showBrowsePopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
+            <button
+              onClick={() => setShowBrowsePopup(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+            >
+              <i className="ri-close-line text-2xl"></i>
+            </button>
+            
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-search-line text-sage-600 text-3xl"></i>
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Browse Products</h3>
+              <p className="text-gray-600 text-sm">Find products to add to your routine</p>
+            </div>
+
+            <div className="space-y-3">
+              <a
+                href="/marketplace"
+                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
+                  <i className="ri-shopping-bag-3-line text-2xl"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Browse Marketplace</p>
+                  <p className="text-sm text-cream-100">Shop curated products and services</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </a>
+
+              <a
+                href="/discover"
+                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4 cursor-pointer"
+              >
+                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
+                  <i className="ri-compass-discover-line text-2xl text-forest-800"></i>
+                </div>
+                <div>
+                  <p className="font-semibold">Browse Discovery</p>
+                  <p className="text-sm text-gray-600">Explore personalized recommendations</p>
+                </div>
+                <i className="ri-arrow-right-line text-xl ml-auto"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Saved Products Popup (Task 11) */}
+      {showSavedProductsPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden relative">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-forest-800">Saved Products</h3>
+              <button
+                onClick={() => setShowSavedProductsPopup(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {savedProducts.length === 0 ? (
+                <div className="text-center py-8">
+                  <i className="ri-bookmark-line text-4xl text-gray-300 mb-3"></i>
+                  <p className="text-gray-500">No saved products yet</p>
+                  <a href="/discover" className="text-sage-600 hover:underline text-sm mt-2 inline-block">
+                    Browse products to save
+                  </a>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {savedProducts.map((product: any) => (
+                    <div key={product.id} className="flex items-center gap-4 p-3 bg-cream-50 rounded-xl">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-16 h-16 rounded-lg object-cover"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-gray-500">{product.brand}</p>
+                        <p className="font-medium text-forest-800 truncate">{product.name}</p>
+                        <p className="text-sm text-sage-600">{product.priceRange}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={`/product-detail?id=${product.id}`}
+                          className="p-2 text-forest-800 hover:bg-forest-800/10 rounded-lg transition-colors cursor-pointer"
+                          title="View Details"
+                        >
+                          <i className="ri-eye-line"></i>
+                        </a>
+                        <button
+                          onClick={() => handleRemoveSavedProduct(product.id)}
+                          className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
+                          title="Remove"
+                        >
+                          <i className="ri-delete-bin-line"></i>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -540,7 +540,7 @@ export default function ProductDetailPage() {
 
               <p className="text-base text-gray-700 leading-relaxed">{product.description}</p>
 
-              {/* Key Ingredients */}
+              {/* Key Ingredients - highlighted if matches user profile */}
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold text-gray-900">Key Ingredients</h3>
@@ -552,23 +552,45 @@ export default function ProductDetailPage() {
                   </button>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {keyIngredients.map((ingredient, index) => (
-                    <span
-                      key={index}
-                      className="px-4 py-2 bg-gray-50 text-gray-700 text-sm font-medium rounded-lg"
-                    >
-                      {ingredient}
-                    </span>
-                  ))}
+                  {keyIngredients.map((ingredient, index) => {
+                    // Check if ingredient matches user concerns
+                    const userConcerns = JSON.parse(localStorage.getItem('skinSurveyData') || '{}').concerns || [];
+                    const concernIngredientMap: Record<string, string[]> = {
+                      'Acne Prone': ['Salicylic Acid', 'Niacinamide', 'Tea Tree'],
+                      'Uneven Skin Tone': ['Vitamin C', 'Alpha Arbutin', 'Niacinamide'],
+                      'Signs of Aging': ['Retinol', 'Vitamin C', 'Vitamin E', 'Peptides'],
+                      'Lack of Hydration': ['Hyaluronic Acid', 'Glycerin', 'Vitamin E'],
+                    };
+                    const matchingIngredients = userConcerns.flatMap((c: string) => concernIngredientMap[c] || []);
+                    const isMatchingIngredient = matchingIngredients.some((mi: string) => 
+                      ingredient.toLowerCase().includes(mi.toLowerCase()) || mi.toLowerCase().includes(ingredient.toLowerCase())
+                    );
+                    
+                    return (
+                      <span
+                        key={index}
+                        className={`px-4 py-2 text-sm font-medium rounded-lg ${
+                          isMatchingIngredient
+                            ? 'bg-sage-100 text-sage-700 border border-sage-300'
+                            : 'bg-gray-50 text-gray-700'
+                        }`}
+                      >
+                        {ingredient}
+                        {isMatchingIngredient && <i className="ri-sparkling-fill ml-1 text-sage-500"></i>}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Suitable For */}
+              {/* Suitable For - highlighted if matches user profile */}
               <div className="mb-8">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Suitable For</h3>
                 <div className="flex flex-wrap gap-2">
                   {['Dry', 'Oily', 'Combination', 'Sensitive', 'Normal'].map((type) => {
-                    const isUserSkinType = userProfile?.skin_type?.toLowerCase() === type.toLowerCase();
+                    const savedSkinType = JSON.parse(localStorage.getItem('skinSurveyData') || '{}').skinType?.[0];
+                    const isUserSkinType = userProfile?.skin_type?.toLowerCase() === type.toLowerCase() || 
+                                          savedSkinType?.toLowerCase() === type.toLowerCase();
                     return (
                       <span
                         key={type}
@@ -579,6 +601,7 @@ export default function ProductDetailPage() {
                         }`}
                       >
                         {type}
+                        {isUserSkinType && <i className="ri-check-line ml-1"></i>}
                       </span>
                     );
                   })}

@@ -96,15 +96,17 @@ const AIChatPage = () => {
     loadUserProfile();
     loadChatSessions();
     loadAIInsights();
-    scrollToBottom();
+    // Auto-scroll disabled per requirement
   }, []);
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  // Auto-scroll disabled - user controls their own scroll position
+  // useEffect(() => {
+  //   scrollToBottom();
+  // }, [messages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Only scroll if explicitly called by user action, not automatically
+    // messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const loadUserProfile = () => {
@@ -584,8 +586,8 @@ const AIChatPage = () => {
                     >
                       {message.sender === 'ai' && (
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                            <i className="ri-robot-2-line text-forest-800 text-xs"></i>
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 flex items-center justify-center">
+                            <i className="ri-sparkling-2-fill text-white text-xs"></i>
                           </div>
                           <span className="text-xs font-medium text-forest-800">Curae</span>
                         </div>
@@ -605,8 +607,8 @@ const AIChatPage = () => {
                 <div className="flex justify-start">
                   <div className="bg-gray-100 rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                        <i className="ri-robot-2-line text-forest-800 text-xs"></i>
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 flex items-center justify-center">
+                        <i className="ri-sparkling-2-fill text-white text-xs"></i>
                       </div>
                       <div className="flex gap-1">
                         <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
@@ -674,6 +676,83 @@ const AIChatPage = () => {
           </div>
         </div>
       </main>
+
+      {/* AI Settings Popup */}
+      {showCustomize && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-forest-800">AI Settings</h3>
+              <button
+                onClick={() => setShowCustomize(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+
+            <div className="space-y-6">
+              {/* Tone */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Response Tone</label>
+                <select
+                  value={aiSettings.tone}
+                  onChange={(e) => setAiSettings({ ...aiSettings, tone: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                >
+                  <option value="friendly">Friendly & Casual</option>
+                  <option value="professional">Professional & Formal</option>
+                  <option value="encouraging">Encouraging & Supportive</option>
+                  <option value="direct">Direct & Concise</option>
+                </select>
+              </div>
+
+              {/* Detail Level */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Detail Level</label>
+                <select
+                  value={aiSettings.detailLevel}
+                  onChange={(e) => setAiSettings({ ...aiSettings, detailLevel: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                >
+                  <option value="brief">Brief - Quick answers</option>
+                  <option value="balanced">Balanced - Standard detail</option>
+                  <option value="detailed">Detailed - In-depth explanations</option>
+                </select>
+              </div>
+
+              {/* Response Style */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Response Style</label>
+                <select
+                  value={aiSettings.responseStyle}
+                  onChange={(e) => setAiSettings({ ...aiSettings, responseStyle: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                >
+                  <option value="conversational">Conversational</option>
+                  <option value="structured">Structured (with bullet points)</option>
+                  <option value="educational">Educational (with explanations)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="mt-8 flex gap-3">
+              <button
+                onClick={() => setShowCustomize(false)}
+                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveSettings}
+                className="flex-1 px-4 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium cursor-pointer"
+              >
+                Save Settings
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

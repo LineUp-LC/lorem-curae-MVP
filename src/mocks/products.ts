@@ -12,6 +12,16 @@ export interface Product {
   concerns: string[];
   keyIngredients: string[];
   inStock: boolean;
+  preferences?: {
+    vegan?: boolean;
+    crueltyFree?: boolean;
+    fragranceFree?: boolean;
+    glutenFree?: boolean;
+    alcoholFree?: boolean;
+    siliconeFree?: boolean;
+    plantBased?: boolean;
+    chemicalFree?: boolean;
+  };
 }
 
 export const productData: Product[] = [
@@ -29,6 +39,7 @@ export const productData: Product[] = [
     concerns: ['hydration', 'sensitivity'],
     keyIngredients: ['Hyaluronic Acid', 'Ceramides', 'Glycerin'],
     inStock: true,
+    preferences: { vegan: true, crueltyFree: true, fragranceFree: true, alcoholFree: true },
   },
   {
     id: 2,
@@ -44,6 +55,7 @@ export const productData: Product[] = [
     concerns: ['brightening', 'dark spots', 'dullness'],
     keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'],
     inStock: true,
+    preferences: { crueltyFree: true, plantBased: true, glutenFree: true },
   },
   {
     id: 3,

@@ -438,7 +438,7 @@ export default function CommunityPage() {
                       <p className="text-gray-600 mb-4">You haven't joined any communities yet</p>
                       <button
                         onClick={() => setActiveTab('discover')}
-                        className="px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium whitespace-nowrap"
+                        className="px-6 py-3 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors font-medium whitespace-nowrap"
                       >
                         Discover Communities
                       </button>
@@ -512,7 +512,7 @@ export default function CommunityPage() {
                   {['#RetinolRoutine', '#SensitiveSkin', '#KBeauty', '#CleanBeauty', '#AntiAging'].map((tag) => (
                     <button
                       key={tag}
-                      className="block w-full text-left px-3 py-2 text-teal-600 hover:bg-teal-50 rounded-lg transition-colors"
+                      className="block w-full text-left px-3 py-2 text-sage-600 hover:bg-sage-50 rounded-lg transition-colors font-medium"
                     >
                       {tag}
                     </button>

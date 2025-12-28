@@ -10,6 +10,7 @@ const RoutinesListPage = lazy(() => import('../pages/routines-list/page'));
 const MarketplacePage = lazy(() => import('../pages/marketplace/page'));
 const MarketplaceAllPage = lazy(() => import('../pages/marketplace/all/page'));
 const MarketplaceSuccessPage = lazy(() => import('../pages/marketplace/success/page'));
+const MarketplaceProductDetailPage = lazy(() => import('../pages/marketplace/product/page'));
 const CommunityPage = lazy(() => import('../pages/community/page'));
 const CommunityCreatePage = lazy(() => import('../pages/community/create/page'));
 const NutritionPage = lazy(() => import('../pages/nutrition/page'));
@@ -92,6 +93,14 @@ const routes: RouteObject[] = [
   {
     path: '/marketplace/success',
     element: <MarketplaceSuccessPage />,
+  },
+  {
+    path: '/marketplace/product',
+    element: <MarketplaceProductDetailPage />,
+  },
+  {
+    path: '/marketplace/product/:id',
+    element: <MarketplaceProductDetailPage />,
   },
   {
     path: '/community',

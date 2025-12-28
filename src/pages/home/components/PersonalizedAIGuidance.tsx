@@ -11,7 +11,7 @@ export default function PersonalizedAIGuidance() {
               Personalized AI Guidance
             </h2>
             <h3 className="text-xl text-slate-600 mb-6 leading-relaxed font-semibold">
-              Your personal skincare assistant
+              Your <span className="text-sage-600 bg-sage-50 px-1 rounded">personal skincare assistant</span>
             </h3>
             <p className="text-lg text-slate-600 mb-8 leading-relaxed">
               Get instant answers to your skincare questions with our <a href="/ai-chat" className="text-sage-600 hover:text-sage-700 font-medium underline" title="Chat with AI skincare assistant">AI-powered guidance system</a>. Ask about product compatibility, routine order, ingredient concerns, or get personalized recommendations based on your unique skin profile.

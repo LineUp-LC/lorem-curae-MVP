@@ -1,10 +1,46 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 
 const SettingsPage = () => {
+  const { i18n } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('user_language') || 'en';
+  });
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('user_theme') || 'light';
+  });
+
+  // Apply theme on mount and when changed
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else if (theme === 'light') {
+      root.classList.remove('dark');
+    } else {
+      // Auto mode - check system preference
+      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }, [theme]);
+
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    localStorage.setItem('user_language', newLanguage);
+    i18n.changeLanguage(newLanguage);
+  };
+
+  const handleThemeChange = (newTheme: string) => {
+    setTheme(newTheme);
+    localStorage.setItem('user_theme', newTheme);
+  };
 
   return (
     <div className="min-h-screen bg-cream-50">
@@ -199,19 +235,27 @@ const SettingsPage = () => {
                   
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
-                    <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer">
-                      <option>English</option>
-                      <option>Spanish</option>
-                      <option>French</option>
+                    <select 
+                      value={language}
+                      onChange={(e) => handleLanguageChange(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                    >
+                      <option value="en">English</option>
+                      <option value="es">Spanish</option>
+                      <option value="fr">French</option>
                     </select>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
-                    <select className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer">
-                      <option>Light</option>
-                      <option>Dark</option>
-                      <option>Auto</option>
+                    <select 
+                      value={theme}
+                      onChange={(e) => handleThemeChange(e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                    >
+                      <option value="light">Light</option>
+                      <option value="dark">Dark</option>
+                      <option value="auto">Auto</option>
                     </select>
                   </div>
                 </div>

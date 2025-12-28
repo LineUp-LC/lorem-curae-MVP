@@ -10,7 +10,7 @@ const SmartProductSearch = () => {
               Smart Product Finder
             </h2>
             <h3 className="text-xl text-slate-600 mb-6 leading-relaxed font-semibold">
-              Find exactly what your skin needs
+              Find <span className="text-sage-600 bg-sage-50 px-1 rounded">exactly what your skin needs</span>
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
               Our intelligent search understands your skin type, concerns, and preferences to recommend products from verified retailers. Compare options, read reviews from people with similar skin, and make confident decisions.

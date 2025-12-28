@@ -527,7 +527,7 @@ export default function MySkinPage() {
           {/* Skin Type Display */}
           {skinProfile.skinType && (
             <div className="mb-8">
-              <div className="bg-gradient-to-r from-[#2C5F4F] to-[#3D7A63] rounded-2xl p-6 text-white">
+              <div className="bg-gradient-to-r from-sage-600 to-sage-500 rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
                     <i className="ri-user-heart-line text-3xl"></i>
@@ -545,7 +545,7 @@ export default function MySkinPage() {
           <div className="mb-12">
             <div className="bg-white rounded-2xl shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#2C5F4F] to-[#3D7A63] flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center">
                   <i className="ri-line-chart-line text-white text-2xl"></i>
                 </div>
                 <div>
@@ -641,7 +641,7 @@ export default function MySkinPage() {
                 {/* AI Chat Box */}
                 <div className="lg:col-span-2 flex flex-col bg-gradient-to-br from-cream-100 to-white rounded-xl border-2 border-gray-200 overflow-hidden">
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-[#2C5F4F] to-[#3D7A63] text-white p-4">
+                  <div className="bg-gradient-to-r from-sage-600 to-sage-500 text-white p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center relative">
                         <i className="ri-sparkling-2-fill text-xl"></i>
@@ -676,7 +676,7 @@ export default function MySkinPage() {
                               <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
                                 <i className="ri-sparkling-2-fill text-forest-800 text-xs"></i>
                               </div>
-                              <span className="text-xs font-medium text-forest-800">AI Assistant</span>
+                              <span className="text-xs font-medium text-forest-800">Curae</span>
                             </div>
                           )}
                           <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>

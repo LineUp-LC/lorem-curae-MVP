@@ -54,6 +54,7 @@ export default function ProductCatalog({
   const [timeOfDay, setTimeOfDay] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [surveyCompleted, setSurveyCompleted] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
 
   // Safe fallback for compareList to prevent undefined errors
   const safeCompareList = compareList ?? [];
@@ -68,6 +69,34 @@ export default function ProductCatalog({
 
   // Safe fallback for userConcerns
   const safeUserConcerns = userConcerns ?? [];
+
+  // Load user preferences from skinSurveyData
+  useEffect(() => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.preferences) {
+        setUserPreferences(parsed.preferences);
+      }
+    }
+  }, []);
+
+  // Preference label mapping
+  const preferenceLabels: Record<string, string> = {
+    vegan: 'Vegan',
+    crueltyFree: 'Cruelty-Free',
+    fragranceFree: 'Fragrance-Free',
+    glutenFree: 'Gluten-Free',
+    alcoholFree: 'Alcohol-Free',
+    siliconeFree: 'Silicone-Free',
+    plantBased: 'Plant-Based',
+    chemicalFree: 'Chemical-Free',
+  };
+
+  // Check if a product preference matches user's preferences
+  const isPreferenceMatching = (prefKey: string): boolean => {
+    return userPreferences[prefKey] === true;
+  };
 
   // Detect scroll for translucent background effect
   useEffect(() => {
@@ -306,6 +335,32 @@ export default function ProductCatalog({
               )}
             </div>
           </div>
+
+          {/* Preference Tags - Task 9 */}
+          {product.preferences && Object.keys(product.preferences).some(k => product.preferences?.[k as keyof typeof product.preferences]) && (
+            <div className="mb-4">
+              <p className="text-xs font-semibold text-gray-700 mb-2">Product Preferences:</p>
+              <div className="flex flex-wrap gap-1">
+                {Object.entries(product.preferences).map(([key, value]) => {
+                  if (!value) return null;
+                  const isMatching = isPreferenceMatching(key);
+                  return (
+                    <span
+                      key={key}
+                      className={`px-2 py-1 text-xs rounded-full border ${
+                        isMatching
+                          ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
+                          : 'bg-cream-100 text-gray-600 border-gray-200'
+                      }`}
+                    >
+                      {isMatching && <i className="ri-check-line mr-0.5"></i>}
+                      {preferenceLabels[key] || key}
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           <div className="flex items-center justify-between pt-4 border-t border-gray-100">
             <div>

@@ -18,6 +18,22 @@ interface Review {
   routineLength: string;
 }
 
+interface UserProfileData {
+  skinType: string;
+  concerns: string[];
+  routine: {
+    morning: string[];
+    evening: string[];
+  };
+  routineNotes: string;
+  nutritionMealPlan: string[];
+  nutritionTracker: {
+    calories: number;
+    protein: number;
+    vitamins: string[];
+  };
+}
+
 interface ProductReviewsProps {
   productId: number;
 }
@@ -35,6 +51,30 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   });
 
   const [showPersonalized, setShowPersonalized] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedReviewer, setSelectedReviewer] = useState<Review | null>(null);
+
+  // Mock reviewer profile data
+  const getReviewerProfile = (review: Review): UserProfileData => ({
+    skinType: review.skinType,
+    concerns: review.skinConcerns,
+    routine: {
+      morning: ['Gentle Cleanser', 'Vitamin C Serum', 'Moisturizer', 'Sunscreen SPF 50'],
+      evening: ['Oil Cleanser', 'Gentle Cleanser', 'Retinol Serum', 'Night Cream']
+    },
+    routineNotes: `I've been focusing on ${review.skinConcerns[0]?.toLowerCase() || 'skincare'} for the past few months. Consistency is key!`,
+    nutritionMealPlan: ['Green smoothie', 'Salmon salad', 'Grilled chicken with veggies'],
+    nutritionTracker: {
+      calories: 1800,
+      protein: 65,
+      vitamins: ['Vitamin C', 'Vitamin E', 'Omega-3']
+    }
+  });
+
+  const handleReviewerClick = (review: Review) => {
+    setSelectedReviewer(review);
+    setShowProfileModal(true);
+  };
 
   // All reviews data with expanded skin profile information
   const allReviews: Review[] = [
@@ -315,18 +355,24 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
               <div key={review.id} className="bg-white rounded-2xl p-6 shadow-lg">
                 {/* Review Header */}
                 <div className="flex items-start space-x-3 mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0">
+                  <button
+                    onClick={() => handleReviewerClick(review)}
+                    className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-sage-500 transition-all"
+                  >
                     <img
                       src={review.userAvatar}
                       alt={review.userName}
                       className="w-full h-full object-cover"
                     />
-                  </div>
+                  </button>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-semibold text-gray-900 truncate">
+                      <button
+                        onClick={() => handleReviewerClick(review)}
+                        className="font-semibold text-gray-900 truncate hover:text-sage-600 cursor-pointer transition-colors"
+                      >
                         {review.userName}
-                      </h3>
+                      </button>
                       {review.verified && (
                         <span className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full flex-shrink-0">
                           <i className="ri-shield-check-fill"></i>
@@ -406,6 +452,144 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
           </Link>
         </div>
       </div>
+
+      {/* Reviewer Profile Modal */}
+      {showProfileModal && selectedReviewer && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <img
+                  src={selectedReviewer.userAvatar}
+                  alt={selectedReviewer.userName}
+                  className="w-16 h-16 rounded-full object-cover"
+                />
+                <div>
+                  <h3 className="text-xl font-bold text-gray-900">{selectedReviewer.userName}</h3>
+                  <p className="text-sm text-gray-500">{selectedReviewer.skinType} Skin • Age {selectedReviewer.age}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 space-y-6">
+              {/* My-Skin Profile */}
+              <div>
+                <h4 className="font-semibold text-forest-800 mb-3 flex items-center gap-2">
+                  <i className="ri-user-heart-line text-sage-600"></i>
+                  My-Skin Profile
+                </h4>
+                <div className="bg-sage-50 rounded-xl p-4">
+                  <p className="text-sm text-gray-700 mb-2"><span className="font-medium">Skin Type:</span> {getReviewerProfile(selectedReviewer).skinType}</p>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {getReviewerProfile(selectedReviewer).concerns.map((concern, idx) => (
+                      <span key={idx} className="px-3 py-1 bg-sage-100 text-sage-700 text-xs font-medium rounded-full">
+                        {concern}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Routine */}
+              <div>
+                <h4 className="font-semibold text-forest-800 mb-3 flex items-center gap-2">
+                  <i className="ri-calendar-check-line text-sage-600"></i>
+                  Daily Routine
+                </h4>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="bg-amber-50 rounded-xl p-4">
+                    <p className="font-medium text-amber-800 mb-2 flex items-center gap-2">
+                      <i className="ri-sun-line"></i> Morning
+                    </p>
+                    <ul className="space-y-1">
+                      {getReviewerProfile(selectedReviewer).routine.morning.map((step, idx) => (
+                        <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
+                          <span className="w-5 h-5 bg-amber-100 text-amber-700 rounded-full text-xs flex items-center justify-center">{idx + 1}</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="bg-indigo-50 rounded-xl p-4">
+                    <p className="font-medium text-indigo-800 mb-2 flex items-center gap-2">
+                      <i className="ri-moon-line"></i> Evening
+                    </p>
+                    <ul className="space-y-1">
+                      {getReviewerProfile(selectedReviewer).routine.evening.map((step, idx) => (
+                        <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
+                          <span className="w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full text-xs flex items-center justify-center">{idx + 1}</span>
+                          {step}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Routine Notes */}
+              <div>
+                <h4 className="font-semibold text-forest-800 mb-3 flex items-center gap-2">
+                  <i className="ri-sticky-note-line text-sage-600"></i>
+                  Routine Notes
+                </h4>
+                <div className="bg-cream-100 rounded-xl p-4">
+                  <p className="text-sm text-gray-700 italic">"{getReviewerProfile(selectedReviewer).routineNotes}"</p>
+                </div>
+              </div>
+
+              {/* Nutrition Meal Planner */}
+              <div>
+                <h4 className="font-semibold text-forest-800 mb-3 flex items-center gap-2">
+                  <i className="ri-restaurant-line text-sage-600"></i>
+                  Nutrition Meal Plan
+                </h4>
+                <div className="bg-green-50 rounded-xl p-4">
+                  <ul className="space-y-2">
+                    {getReviewerProfile(selectedReviewer).nutritionMealPlan.map((meal, idx) => (
+                      <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
+                        <i className="ri-checkbox-circle-fill text-green-500"></i>
+                        {meal}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Nutrition Tracker */}
+              <div>
+                <h4 className="font-semibold text-forest-800 mb-3 flex items-center gap-2">
+                  <i className="ri-bar-chart-box-line text-sage-600"></i>
+                  Nutrition Tracker
+                </h4>
+                <div className="bg-blue-50 rounded-xl p-4">
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div>
+                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.calories}</p>
+                      <p className="text-xs text-gray-600">Calories</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.protein}g</p>
+                      <p className="text-xs text-gray-600">Protein</p>
+                    </div>
+                    <div>
+                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.vitamins.length}</p>
+                      <p className="text-xs text-gray-600">Key Vitamins</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

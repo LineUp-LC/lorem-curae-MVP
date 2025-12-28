@@ -139,7 +139,16 @@ const savedProducts: Product[] = [
   },
 ];
 
-export default function RoutineBuilder() {
+interface RoutineBuilderProps {
+  steps?: any[];
+  onAddStep?: (step: any) => void;
+  onRemoveStep?: (stepId: string) => void;
+  onReorderSteps?: (steps: any[]) => void;
+  onSave?: () => void;
+  onBrowseClick?: () => void;
+}
+
+export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
   const navigate = useNavigate();
   const [timeFilter, setTimeFilter] = useState<'morning' | 'evening' | 'both'>('both');
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
@@ -177,7 +186,11 @@ export default function RoutineBuilder() {
   };
 
   const handleBrowseProducts = (category: string) => {
-    navigate('/discover', { state: { filterCategory: category } });
+    if (onBrowseClick) {
+      onBrowseClick();
+    } else {
+      navigate('/discover', { state: { filterCategory: category } });
+    }
   };
 
   const getExpirationStatus = (expirationDate?: Date) => {

@@ -12,4 +12,14 @@ export interface Product {
   concerns: string[];
   keyIngredients: string[];
   inStock: boolean;
+  preferences?: {
+    vegan?: boolean;
+    crueltyFree?: boolean;
+    fragranceFree?: boolean;
+    glutenFree?: boolean;
+    alcoholFree?: boolean;
+    siliconeFree?: boolean;
+    plantBased?: boolean;
+    chemicalFree?: boolean;
+  };
 }

@@ -22,4 +22,4 @@ Object.keys(modules).forEach((path) => {
   }
 });
 
-export default messages; 
+export default messages;
