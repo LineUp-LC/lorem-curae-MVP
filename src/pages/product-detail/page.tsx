@@ -5,6 +5,8 @@ import ProductOverview from './components/ProductOverview';
 import ProductReviews from './components/ProductReviews';
 import PurchaseOptions from './components/PurchaseOptions';
 import SimilarProducts from './components/SimilarProducts';
+import ProductComparison from '../discover/components/ProductComparison';
+import { productData } from '../../mocks/products';
 import { supabase } from '../../lib/supabase-browser';
 
 export default function ProductDetailPage() {
@@ -14,9 +16,22 @@ export default function ProductDetailPage() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
   const [showComparison, setShowComparison] = useState(false);
+  const [showProductComparison, setShowProductComparison] = useState(false);
   
   // State for product comparison feature
   const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Load user concerns on mount
+  useEffect(() => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
+    }
+  }, []);
 
   const product = {
     id: 1,
@@ -608,6 +623,47 @@ export default function ProductDetailPage() {
                 </div>
               </div>
 
+              {/* Product Preferences */}
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">Preferences</h3>
+                <div className="flex flex-wrap gap-2">
+                  {(() => {
+                    const userPrefs = JSON.parse(localStorage.getItem('skinSurveyData') || '{}').preferences || {};
+                    const productPreferences = [
+                      { key: 'chemicalFree', label: 'Chemical-Free', value: true },
+                      { key: 'vegan', label: 'Vegan', value: true },
+                      { key: 'plantBased', label: 'Plant-Based', value: true },
+                      { key: 'fragranceFree', label: 'Fragrance-Free', value: false },
+                      { key: 'glutenFree', label: 'Gluten-Free', value: true },
+                      { key: 'alcoholFree', label: 'Alcohol-Free', value: true },
+                      { key: 'siliconeFree', label: 'Silicone-Free', value: false },
+                      { key: 'crueltyFree', label: 'Cruelty-Free', value: true },
+                    ];
+                    
+                    return productPreferences.map((pref) => {
+                      const isMatching = userPrefs[pref.key] === true && pref.value === true;
+                      return (
+                        <span
+                          key={pref.key}
+                          className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            pref.value
+                              ? isMatching
+                                ? 'bg-sage-100 text-sage-700 border-2 border-sage-500'
+                                : 'bg-sage-50 text-sage-600'
+                              : 'bg-gray-100 text-gray-400 line-through'
+                          }`}
+                        >
+                          {pref.value && isMatching && <i className="ri-check-line mr-1"></i>}
+                          {pref.value && !isMatching && <i className="ri-leaf-line mr-1"></i>}
+                          {!pref.value && <i className="ri-close-line mr-1"></i>}
+                          {pref.label}
+                        </span>
+                      );
+                    });
+                  })()}
+                </div>
+              </div>
+
               {/* Personalized Location Info */}
               <div className="bg-gradient-to-br from-sage-50 to-teal-50 rounded-xl p-6">
                 <div className="flex items-start gap-3 mb-4">
@@ -769,8 +825,24 @@ export default function ProductDetailPage() {
           productId={product.id}
           onAddToComparison={handleAddToComparison}
           selectedForComparison={selectedForComparison}
+          onOpenComparison={() => setShowProductComparison(true)}
         />
       </main>
+
+      {/* Product Comparison Modal */}
+      {showProductComparison && selectedForComparison.length >= 2 && (
+        <ProductComparison
+          products={productData.filter(p => selectedForComparison.includes(p.id))}
+          userConcerns={userConcerns}
+          onClose={() => setShowProductComparison(false)}
+          onRemoveProduct={(id) => {
+            setSelectedForComparison(prev => prev.filter(pId => pId !== id));
+            if (selectedForComparison.length <= 2) {
+              setShowProductComparison(false);
+            }
+          }}
+        />
+      )}
 
       <Footer />
     </div>

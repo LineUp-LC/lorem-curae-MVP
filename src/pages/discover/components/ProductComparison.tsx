@@ -318,6 +318,50 @@ export default function ProductComparison({
                       </div>
                     </div>
 
+                    {/* Preferences */}
+                    {product.preferences && Object.values(product.preferences).some(v => v === true) && (
+                      <div className="bg-white p-2 sm:p-3 rounded-xl">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">Preferences:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {(() => {
+                            const userPrefs = JSON.parse(localStorage.getItem('skinSurveyData') || '{}').preferences || {};
+                            const prefLabels: Record<string, string> = {
+                              chemicalFree: 'Chemical-Free',
+                              vegan: 'Vegan',
+                              plantBased: 'Plant-Based',
+                              fragranceFree: 'Fragrance-Free',
+                              glutenFree: 'Gluten-Free',
+                              alcoholFree: 'Alcohol-Free',
+                              siliconeFree: 'Silicone-Free',
+                              crueltyFree: 'Cruelty-Free',
+                            };
+                            
+                            const productPrefs = product.preferences || {};
+                            
+                            // Only show preferences that the product has
+                            return Object.entries(productPrefs)
+                              .filter(([_, value]) => value === true)
+                              .map(([key]) => {
+                                const isMatching = userPrefs[key] === true;
+                                return (
+                                  <span
+                                    key={key}
+                                    className={
+                                      isMatching
+                                        ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full font-medium border border-sage-300'
+                                        : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full'
+                                    }
+                                  >
+                                    {isMatching && <i className="ri-check-line mr-0.5"></i>}
+                                    {prefLabels[key] || key}
+                                  </span>
+                                );
+                              });
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
                     {/* CTA */}
                     <button
                       onClick={() => handleViewProductDetail(product.id)}

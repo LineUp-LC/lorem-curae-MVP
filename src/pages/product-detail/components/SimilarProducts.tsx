@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { productData } from '../../../mocks/products';
 import { useNavigate } from 'react-router-dom';
 
@@ -6,15 +7,84 @@ interface SimilarProductsProps {
   productId: number;
   onAddToComparison?: (id: number) => void;
   selectedForComparison?: number[];
+  onOpenComparison?: () => void;
 }
 
 const SimilarProducts = ({ 
   productId, 
   onAddToComparison, 
-  selectedForComparison = [] // Default to empty array
+  selectedForComparison = [], // Default to empty array
+  onOpenComparison
 }: SimilarProductsProps) => {
   const navigate = useNavigate();
   const currentProduct = productData.find(p => p.id === productId);
+  const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Load user preferences and concerns
+  useEffect(() => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.preferences) {
+        setUserPreferences(parsed.preferences);
+      }
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
+    }
+  }, []);
+
+  // Check if preference matches user's preferences
+  const isPreferenceMatching = (prefKey: string): boolean => {
+    return userPreferences[prefKey] === true;
+  };
+
+  // Check if concern matches user's concerns
+  const isConcernMatching = (concern: string): boolean => {
+    return userConcerns.some(uc => 
+      concern.toLowerCase().includes(uc) || uc.includes(concern.toLowerCase())
+    );
+  };
+
+  // Check if ingredient is beneficial for user's concerns
+  const isIngredientMatching = (ingredient: string): boolean => {
+    const ingredientConcernMap: Record<string, string[]> = {
+      'hyaluronic acid': ['hydration', 'dryness', 'fine lines', 'aging'],
+      'vitamin c': ['brightening', 'dark spots', 'dullness', 'hyperpigmentation'],
+      'niacinamide': ['pores', 'oily', 'texture', 'acne', 'brightening'],
+      'retinol': ['aging', 'fine lines', 'wrinkles', 'texture', 'acne'],
+      'salicylic acid': ['acne', 'pores', 'oily', 'blackheads'],
+      'ceramides': ['hydration', 'barrier', 'sensitivity', 'dryness'],
+      'centella asiatica': ['sensitivity', 'redness', 'irritation', 'acne'],
+      'glycerin': ['hydration', 'dryness'],
+      'squalane': ['hydration', 'dryness', 'barrier'],
+      'peptides': ['aging', 'fine lines', 'firmness'],
+      'vitamin e': ['hydration', 'protection', 'aging'],
+      'zinc': ['acne', 'oily', 'inflammation'],
+      'azelaic acid': ['acne', 'redness', 'hyperpigmentation'],
+      'aha': ['texture', 'dullness', 'aging'],
+      'bha': ['acne', 'pores', 'oily'],
+    };
+    
+    const ingredientLower = ingredient.toLowerCase();
+    const relatedConcerns = ingredientConcernMap[ingredientLower] || [];
+    
+    return userConcerns.some(uc => 
+      relatedConcerns.some(rc => rc.includes(uc) || uc.includes(rc))
+    );
+  };
+
+  const preferenceLabels: Record<string, string> = {
+    vegan: 'Vegan',
+    crueltyFree: 'Cruelty-Free',
+    fragranceFree: 'Fragrance-Free',
+    glutenFree: 'Gluten-Free',
+    alcoholFree: 'Alcohol-Free',
+    siliconeFree: 'Silicone-Free',
+    plantBased: 'Plant-Based',
+    chemicalFree: 'Chemical-Free',
+  };
   
   if (!currentProduct) return null;
 
@@ -131,51 +201,106 @@ const SimilarProducts = ({
                       {renderStars(product.rating)}
                     </div>
                     <span className="text-sm font-medium text-gray-700">{product.rating}</span>
+                    <span className="text-sm text-gray-500">({product.reviewCount})</span>
+                  </div>
+
+                  {/* Concerns */}
+                  <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {product.concerns.slice(0, 3).map((concern, idx) => {
+                        const isMatch = isConcernMatching(concern);
+                        return (
+                          <span
+                            key={idx}
+                            className={`px-2 py-1 text-xs rounded-full capitalize border ${
+                              isMatch
+                                ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                : 'bg-cream-100 text-gray-700 border-gray-200'
+                            }`}
+                          >
+                            {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                            {concern}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Key Ingredients */}
                   <div className="mb-4">
+                    <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
                     <div className="flex flex-wrap gap-1">
-                      {product.keyIngredients.slice(0, 2).map((ingredient, idx) => (
-                        <span
-                          key={idx}
-                          className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full"
-                        >
-                          {ingredient}
-                        </span>
-                      ))}
+                      {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
+                        const isMatchingIngredient = isIngredientMatching(ingredient);
+                        return (
+                          <span
+                            key={idx}
+                            className={`px-2 py-1 text-xs rounded-full border ${
+                              isMatchingIngredient
+                                ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                : 'bg-cream-100 text-gray-700 border-gray-200'
+                            }`}
+                          >
+                            {ingredient}
+                          </span>
+                        );
+                      })}
                     </div>
                   </div>
 
-                  {/* Price Comparison */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                    <div>
-                      <span className="text-2xl font-bold text-forest-900">
-                        ${product.price.toFixed(2)}
-                      </span>
-                      {product.price !== currentProduct.price && (
-                        <p className="text-xs text-gray-500 mt-1">
-                          {product.price < currentProduct.price ? (
-                            <span className="text-green-600">
-                              <i className="ri-arrow-down-line"></i> 
-                              ${(currentProduct.price - product.price).toFixed(2)} less
-                            </span>
-                          ) : (
-                            <span className="text-red-600">
-                              <i className="ri-arrow-up-line"></i> 
-                              ${(product.price - currentProduct.price).toFixed(2)} more
-                            </span>
-                          )}
-                        </p>
-                      )}
+                  {/* Preferences */}
+                  {product.preferences && Object.values(product.preferences).some(v => v === true) && (
+                    <div className="mb-4">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Product Preferences:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {Object.entries(product.preferences)
+                          .filter(([_, value]) => value === true)
+                          .map(([key]) => {
+                            const isMatch = isPreferenceMatching(key);
+                            return (
+                              <span
+                                key={key}
+                                className={`px-2 py-1 text-xs rounded-full border ${
+                                  isMatch
+                                    ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                    : 'bg-cream-100 text-gray-600 border-gray-200'
+                                }`}
+                              >
+                                {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                {preferenceLabels[key] || key}
+                              </span>
+                            );
+                          })}
+                      </div>
                     </div>
-                    
-                    <button
-                      onClick={() => navigate(`/product-detail?id=${product.id}`)}
-                      className="px-4 py-2 bg-sage-600 text-white rounded-full font-semibold text-sm hover:bg-sage-700 transition-all shadow-md cursor-pointer whitespace-nowrap"
-                    >
-                      View
-                    </button>
+                  )}
+
+                  {/* Price Comparison */}
+                  <div className="pt-4 border-t border-gray-100">
+                    <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-xl font-bold text-forest-900">
+                          ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
+                        </span>
+                        {product.price !== currentProduct.price && (
+                          <p className="text-xs mt-1">
+                            {product.price < currentProduct.price ? (
+                              <span className="text-green-600 font-medium">
+                                <i className="ri-arrow-down-line"></i> 
+                                ${(currentProduct.price - product.price).toFixed(2)} less
+                              </span>
+                            ) : (
+                              <span className="text-red-600 font-medium">
+                                <i className="ri-arrow-up-line"></i> 
+                                ${(product.price - currentProduct.price).toFixed(2)} more
+                              </span>
+                            )}
+                          </p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -196,13 +321,22 @@ const SimilarProducts = ({
                     {selectedForComparison.length} product{selectedForComparison.length > 1 ? 's' : ''} selected for comparison
                   </h3>
                   <p className="text-sm text-gray-600">
-                    {selectedForComparison.length < 3 
-                      ? `Select up to ${3 - selectedForComparison.length} more to compare side-by-side`
+                    {selectedForComparison.length < 2 
+                      ? `Select at least ${2 - selectedForComparison.length} more to compare side-by-side`
                       : 'Click the compare button to view detailed comparison'
                     }
                   </p>
                 </div>
               </div>
+              {selectedForComparison.length >= 2 && onOpenComparison && (
+                <button
+                  onClick={onOpenComparison}
+                  className="px-6 py-3 bg-forest-800 text-white rounded-full font-semibold hover:bg-forest-900 transition-all cursor-pointer flex items-center gap-2"
+                >
+                  <i className="ri-scales-line text-lg"></i>
+                  Compare Products
+                </button>
+              )}
             </div>
           </div>
         )}

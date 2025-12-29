@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
@@ -6,6 +6,29 @@ import Footer from '../../../components/feature/Footer';
 const MarketplaceAllPage = () => {
   const [filterType, setFilterType] = useState<'all' | 'featured' | 'premium' | 'services' | 'products'>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Load user concerns for highlighting
+  useEffect(() => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
+    }
+  }, []);
+
+  // Check if storefront concerns match user's concerns
+  const matchesUserConcerns = (storefrontConcerns: string[] | undefined): boolean => {
+    if (!storefrontConcerns || !userConcerns.length) return false;
+    return storefrontConcerns.some(concern => 
+      userConcerns.some(userConcern => 
+        concern.toLowerCase().includes(userConcern) || 
+        userConcern.includes(concern.toLowerCase())
+      )
+    );
+  };
 
   const storefronts = [
     {
@@ -22,7 +45,8 @@ const MarketplaceAllPage = () => {
       reviews: 2341,
       featured: true,
       verified: true,
-      premiumVisibility: true
+      premiumVisibility: true,
+      concerns: ['brightening', 'hydration', 'anti-aging']
     },
     {
       id: 2,
@@ -38,7 +62,8 @@ const MarketplaceAllPage = () => {
       reviews: 1876,
       featured: true,
       verified: true,
-      premiumVisibility: false
+      premiumVisibility: false,
+      concerns: ['acne', 'oily skin', 'pores']
     },
     {
       id: 3,
@@ -54,7 +79,8 @@ const MarketplaceAllPage = () => {
       reviews: 3102,
       featured: true,
       verified: true,
-      premiumVisibility: true
+      premiumVisibility: true,
+      concerns: ['sensitivity', 'redness', 'natural']
     },
     {
       id: 4,
@@ -70,7 +96,8 @@ const MarketplaceAllPage = () => {
       reviews: 1543,
       featured: false,
       verified: true,
-      premiumVisibility: false
+      premiumVisibility: false,
+      concerns: ['acne', 'scarring', 'hyperpigmentation']
     },
     {
       id: 5,
@@ -86,7 +113,8 @@ const MarketplaceAllPage = () => {
       reviews: 2198,
       featured: false,
       verified: true,
-      premiumVisibility: false
+      premiumVisibility: false,
+      concerns: ['anti-aging', 'wrinkles', 'fine lines']
     },
     {
       id: 6,
@@ -102,7 +130,8 @@ const MarketplaceAllPage = () => {
       reviews: 1987,
       featured: false,
       verified: true,
-      premiumVisibility: false
+      premiumVisibility: false,
+      concerns: ['relaxation', 'stress', 'dullness']
     }
   ];
 
@@ -221,13 +250,27 @@ const MarketplaceAllPage = () => {
         <section className="py-16">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {filteredStorefronts.map((storefront) => (
+              {filteredStorefronts.map((storefront) => {
+                const isConcernMatch = matchesUserConcerns(storefront.concerns);
+                
+                return (
                 <Link
                   key={storefront.id}
                   to={storefront.type === 'services' ? `/services/${storefront.id}` : `/storefront/${storefront.id}`}
                   className="group cursor-pointer"
                 >
-                  <div className="bg-white rounded-2xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-xl transition-all">
+                  <div className={`bg-white rounded-2xl overflow-hidden border hover:shadow-xl transition-all ${
+                    isConcernMatch
+                      ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-sage-300'
+                      : 'border-gray-200 hover:border-sage-300'
+                  }`}>
+                    {/* Concern Match Badge */}
+                    {isConcernMatch && (
+                      <div className="bg-sage-50 px-4 py-2 flex items-center gap-2 border-b border-sage-200">
+                        <i className="ri-sparkling-2-fill text-sage-600 text-sm"></i>
+                        <span className="text-xs font-medium text-sage-700">Matches your skin concerns</span>
+                      </div>
+                    )}
                     {/* Banner */}
                     <div className="relative h-32 overflow-hidden">
                       <img 
@@ -316,7 +359,8 @@ const MarketplaceAllPage = () => {
                     </div>
                   </div>
                 </Link>
-              ))}
+              );
+              })}
             </div>
 
             {/* No Results */}

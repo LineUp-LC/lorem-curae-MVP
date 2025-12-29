@@ -410,7 +410,7 @@ const SurveyResultsPage = () => {
               <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Primary Concerns</h3>
               <div className="flex flex-wrap gap-2">
                 {recommendations.priorityConcerns.map((concern: string) => (
-                  <span key={concern} className="px-4 py-2 bg-amber-100 text-amber-700 rounded-full font-medium capitalize">
+                  <span key={concern} className="px-4 py-2 bg-sage-100 text-sage-700 rounded-full font-medium capitalize">
                     {concern}
                   </span>
                 ))}

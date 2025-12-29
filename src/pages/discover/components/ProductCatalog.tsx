@@ -308,6 +308,30 @@ export default function ProductCatalog({
 
           <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
 
+          {/* Concerns - with highlighting for matching concerns */}
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
+            <div className="flex flex-wrap gap-1">
+              {product.concerns.slice(0, 3).map((concern, idx) => {
+                const isMatchingConcern = productMatchesUserConcerns([concern], safeUserConcerns);
+                
+                return (
+                  <span
+                    key={idx}
+                    className={`px-2 py-1 text-xs rounded-full border capitalize ${
+                      isMatchingConcern
+                        ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
+                        : 'bg-cream-100 text-gray-700 border-gray-200'
+                    }`}
+                  >
+                    {isMatchingConcern && <i className="ri-check-line mr-0.5"></i>}
+                    {concern}
+                  </span>
+                );
+              })}
+            </div>
+          </div>
+
           {/* Key Ingredients - with highlighting for matching ingredients */}
           <div className="mb-4">
             <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>

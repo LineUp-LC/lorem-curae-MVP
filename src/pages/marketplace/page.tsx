@@ -10,6 +10,18 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
   const [purchasingProduct, setPurchasingProduct] = useState<string | null>(null);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
+  const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
+
+  const preferenceLabels: Record<string, string> = {
+    vegan: 'Vegan',
+    crueltyFree: 'Cruelty-Free',
+    fragranceFree: 'Fragrance-Free',
+    glutenFree: 'Gluten-Free',
+    alcoholFree: 'Alcohol-Free',
+    siliconeFree: 'Silicone-Free',
+    plantBased: 'Plant-Based',
+    chemicalFree: 'Chemical-Free',
+  };
 
   useEffect(() => {
     fetchUserTier();
@@ -24,6 +36,9 @@ const MarketplacePage = () => {
       if (parsed.concerns) {
         setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
       }
+      if (parsed.preferences) {
+        setUserPreferences(parsed.preferences);
+      }
     }
   };
 
@@ -36,6 +51,11 @@ const MarketplacePage = () => {
         userConcern.includes(concern.toLowerCase())
       )
     );
+  };
+
+  // Check if preference matches user's preferences
+  const isPreferenceMatching = (prefKey: string): boolean => {
+    return userPreferences[prefKey] === true;
   };
 
   const fetchUserTier = async () => {
@@ -372,6 +392,31 @@ const MarketplacePage = () => {
                             </span>
                           )}
                         </div>
+
+                        {/* Preferences */}
+                        {product.preferences && Object.values(product.preferences).some((v: unknown) => v === true) && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {Object.entries(product.preferences)
+                              .filter(([_, value]) => value === true)
+                              .slice(0, 3)
+                              .map(([key]) => {
+                                const isMatch = isPreferenceMatching(key);
+                                return (
+                                  <span
+                                    key={key}
+                                    className={`px-2 py-1 text-xs rounded-full ${
+                                      isMatch
+                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}
+                                  >
+                                    {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                    {preferenceLabels[key] || key}
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
 
                         {/* Pricing */}
                         <div className="mb-3">

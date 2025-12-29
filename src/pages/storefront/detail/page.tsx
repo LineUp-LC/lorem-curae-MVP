@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
@@ -7,6 +7,37 @@ const StorefrontDetailPage = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState('products');
   const [isFollowing, setIsFollowing] = useState(false);
+  const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Load user preferences and concerns
+  useEffect(() => {
+    const skinData = localStorage.getItem('skinSurveyData');
+    if (skinData) {
+      const parsed = JSON.parse(skinData);
+      if (parsed.preferences) {
+        setUserPreferences(parsed.preferences);
+      }
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
+    }
+  }, []);
+
+  const isPreferenceMatching = (prefKey: string): boolean => {
+    return userPreferences[prefKey] === true;
+  };
+
+  const preferenceLabels: Record<string, string> = {
+    vegan: 'Vegan',
+    crueltyFree: 'Cruelty-Free',
+    fragranceFree: 'Fragrance-Free',
+    glutenFree: 'Gluten-Free',
+    alcoholFree: 'Alcohol-Free',
+    siliconeFree: 'Silicone-Free',
+    plantBased: 'Plant-Based',
+    chemicalFree: 'Chemical-Free',
+  };
 
   const storefront = {
     id: 1,
@@ -39,7 +70,8 @@ const StorefrontDetailPage = () => {
         price: '$42.00',
         image: 'https://readdy.ai/api/search-image?query=vitamin%20c%20serum%20bottle%20amber%20glass%20minimalist%20packaging%20white%20background%20professional%20product%20photography&width=300&height=300&seq=bestseller-1&orientation=squarish',
         rating: 4.9,
-        reviews: 523
+        reviews: 523,
+        preferences: { vegan: true, crueltyFree: true, fragranceFree: false }
       },
       {
         id: 2,
@@ -47,7 +79,8 @@ const StorefrontDetailPage = () => {
         price: '$38.00',
         image: 'https://readdy.ai/api/search-image?query=natural%20face%20cream%20jar%20minimalist%20packaging%20white%20background%20professional%20product%20photography&width=300&height=300&seq=bestseller-2&orientation=squarish',
         rating: 4.8,
-        reviews: 412
+        reviews: 412,
+        preferences: { vegan: true, plantBased: true, alcoholFree: true }
       },
       {
         id: 3,
@@ -55,7 +88,8 @@ const StorefrontDetailPage = () => {
         price: '$32.00',
         image: 'https://readdy.ai/api/search-image?query=cleansing%20balm%20jar%20natural%20skincare%20minimalist%20packaging%20white%20background%20professional%20photography&width=300&height=300&seq=bestseller-3&orientation=squarish',
         rating: 4.7,
-        reviews: 389
+        reviews: 389,
+        preferences: { crueltyFree: true, fragranceFree: true, siliconeFree: true }
       }
     ],
     allProducts: [
@@ -65,7 +99,8 @@ const StorefrontDetailPage = () => {
         price: '$36.00',
         image: 'https://readdy.ai/api/search-image?query=niacinamide%20serum%20bottle%20minimalist%20packaging%20white%20background%20professional%20product%20photography&width=300&height=300&seq=product-4&orientation=squarish',
         rating: 4.8,
-        reviews: 298
+        reviews: 298,
+        preferences: { vegan: true, alcoholFree: true }
       },
       {
         id: 5,
@@ -73,7 +108,8 @@ const StorefrontDetailPage = () => {
         price: '$48.00',
         image: 'https://readdy.ai/api/search-image?query=retinol%20night%20cream%20jar%20luxury%20packaging%20white%20background%20professional%20product%20photography&width=300&height=300&seq=product-5&orientation=squarish',
         rating: 4.9,
-        reviews: 445
+        reviews: 445,
+        preferences: { crueltyFree: true, fragranceFree: true }
       },
       {
         id: 6,
@@ -81,7 +117,8 @@ const StorefrontDetailPage = () => {
         price: '$40.00',
         image: 'https://readdy.ai/api/search-image?query=hyaluronic%20acid%20moisturizer%20bottle%20minimalist%20packaging%20white%20background%20professional%20photography&width=300&height=300&seq=product-6&orientation=squarish',
         rating: 4.7,
-        reviews: 356
+        reviews: 356,
+        preferences: { vegan: true, plantBased: true, glutenFree: true }
       }
     ]
   };
@@ -251,6 +288,29 @@ const StorefrontDetailPage = () => {
                         <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-sage-600 transition-colors">
                           {product.name}
                         </h3>
+                        {/* Preference Tags */}
+                        {product.preferences && Object.values(product.preferences).some(v => v) && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {Object.entries(product.preferences)
+                              .filter(([_, value]) => value === true)
+                              .map(([key]) => {
+                                const isMatch = isPreferenceMatching(key);
+                                return (
+                                  <span
+                                    key={key}
+                                    className={`px-2 py-0.5 text-xs rounded-full ${
+                                      isMatch
+                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}
+                                  >
+                                    {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                    {preferenceLabels[key] || key}
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-sage-600">{product.price}</span>
                           <div className="flex items-center space-x-1 text-sm text-gray-600">
@@ -286,6 +346,29 @@ const StorefrontDetailPage = () => {
                         <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-sage-600 transition-colors">
                           {product.name}
                         </h3>
+                        {/* Preference Tags */}
+                        {product.preferences && Object.values(product.preferences).some(v => v) && (
+                          <div className="flex flex-wrap gap-1 mb-3">
+                            {Object.entries(product.preferences)
+                              .filter(([_, value]) => value === true)
+                              .map(([key]) => {
+                                const isMatch = isPreferenceMatching(key);
+                                return (
+                                  <span
+                                    key={key}
+                                    className={`px-2 py-0.5 text-xs rounded-full ${
+                                      isMatch
+                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
+                                        : 'bg-gray-100 text-gray-600'
+                                    }`}
+                                  >
+                                    {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                    {preferenceLabels[key] || key}
+                                  </span>
+                                );
+                              })}
+                          </div>
+                        )}
                         <div className="flex items-center justify-between">
                           <span className="text-lg font-bold text-sage-600">{product.price}</span>
                           <div className="flex items-center space-x-1 text-sm text-gray-600">

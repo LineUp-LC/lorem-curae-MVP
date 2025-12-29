@@ -71,6 +71,7 @@ export const productData: Product[] = [
     concerns: ['hydration', 'barrier repair', 'sensitivity'],
     keyIngredients: ['Ceramides', 'Niacinamide', 'Squalane'],
     inStock: true,
+    preferences: { vegan: true, fragranceFree: true, siliconeFree: true },
   },
   {
     id: 4,
@@ -86,6 +87,7 @@ export const productData: Product[] = [
     concerns: ['acne', 'texture', 'pores'],
     keyIngredients: ['Salicylic Acid', 'Niacinamide', 'Zinc'],
     inStock: true,
+    preferences: { crueltyFree: true, alcoholFree: true },
   },
   {
     id: 5,
@@ -101,6 +103,7 @@ export const productData: Product[] = [
     concerns: ['sun protection', 'anti-aging'],
     keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'],
     inStock: true,
+    preferences: { vegan: true, crueltyFree: true, chemicalFree: true },
   },
   {
     id: 6,
@@ -116,6 +119,7 @@ export const productData: Product[] = [
     concerns: ['anti-aging', 'fine lines', 'texture'],
     keyIngredients: ['Retinol', 'Peptides', 'Hyaluronic Acid'],
     inStock: true,
+    preferences: { crueltyFree: true, fragranceFree: true, glutenFree: true },
   },
   {
     id: 7,
@@ -131,6 +135,7 @@ export const productData: Product[] = [
     concerns: ['pores', 'texture', 'oil control'],
     keyIngredients: ['Kaolin Clay', 'Hyaluronic Acid', 'Aloe Vera'],
     inStock: true,
+    preferences: { vegan: true, plantBased: true, alcoholFree: true, siliconeFree: true },
   },
   {
     id: 8,
@@ -146,6 +151,7 @@ export const productData: Product[] = [
     concerns: ['pores', 'oil control', 'texture'],
     keyIngredients: ['Niacinamide', 'Zinc', 'Hyaluronic Acid'],
     inStock: true,
+    preferences: { vegan: true, crueltyFree: true, fragranceFree: true },
   },
   {
     id: 9,
@@ -161,6 +167,7 @@ export const productData: Product[] = [
     concerns: ['sensitivity', 'redness', 'hydration'],
     keyIngredients: ['Centella Asiatica', 'Ceramides', 'Panthenol'],
     inStock: true,
+    preferences: { vegan: true, fragranceFree: true, alcoholFree: true, plantBased: true },
   },
   {
     id: 10,
@@ -176,6 +183,7 @@ export const productData: Product[] = [
     concerns: ['texture', 'dullness', 'pores'],
     keyIngredients: ['Glycolic Acid', 'Salicylic Acid', 'Witch Hazel'],
     inStock: true,
+    preferences: { crueltyFree: true, siliconeFree: true },
   },
   {
     id: 11,
@@ -191,6 +199,7 @@ export const productData: Product[] = [
     concerns: ['anti-aging', 'dark circles', 'fine lines'],
     keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'],
     inStock: true,
+    preferences: { crueltyFree: true, fragranceFree: true },
   },
   {
     id: 12,
@@ -206,5 +215,6 @@ export const productData: Product[] = [
     concerns: ['cleansing', 'hydration'],
     keyIngredients: ['Hyaluronic Acid', 'Aloe Vera', 'Green Tea'],
     inStock: true,
+    preferences: { vegan: true, plantBased: true, glutenFree: true, alcoholFree: true },
   },
 ];

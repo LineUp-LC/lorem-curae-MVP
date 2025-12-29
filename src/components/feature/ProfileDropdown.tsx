@@ -215,7 +215,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             onClick={onClose}
           >
             <div className="w-7 h-7 flex items-center justify-center bg-gray-100 text-gray-600 rounded-md group-hover:bg-gray-200 transition-colors">
-              <i className="ri-robot-2-line text-sm"></i>
+              <i className="ri-sparkling-2-fill text-sm"></i>
             </div>
             <div className="ml-2.5 flex-1">
               <p className="text-xs font-medium text-gray-900">Curae AI</p>
@@ -258,6 +258,19 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             <i className="ri-logout-box-line text-sm"></i>
             <span className="ml-2.5 text-xs">Sign Out</span>
           </button>
+        </div>
+
+        {/* Curae AI Branding */}
+        <div className="px-4 py-3 border-t border-gray-50 bg-gray-50/50">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center">
+              <i className="ri-sparkling-2-fill text-white text-xs"></i>
+            </div>
+            <div>
+              <p className="text-[10px] font-medium text-gray-700">Logo by Curae AI</p>
+              <p className="text-[9px] text-gray-500">Your personalized skincare assistant</p>
+            </div>
+          </div>
         </div>
       </div>
     </>

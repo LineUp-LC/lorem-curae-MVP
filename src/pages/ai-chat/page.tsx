@@ -80,7 +80,9 @@ const AIChatPage = () => {
   const [aiSettings, setAiSettings] = useState({
     tone: 'friendly',
     detailLevel: 'balanced',
-    responseStyle: 'conversational'
+    responseStyle: 'conversational',
+    customInstructions: '',
+    moreAboutYou: ''
   });
 
   const quickPrompts = [
@@ -733,6 +735,32 @@ const AIChatPage = () => {
                   <option value="structured">Structured (with bullet points)</option>
                   <option value="educational">Educational (with explanations)</option>
                 </select>
+              </div>
+
+              {/* Custom Instructions */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Custom Instructions</label>
+                <p className="text-xs text-gray-500 mb-2">Tell Curae AI how you'd like it to behave</p>
+                <textarea
+                  value={aiSettings.customInstructions}
+                  onChange={(e) => setAiSettings({ ...aiSettings, customInstructions: e.target.value })}
+                  placeholder="E.g., Always suggest natural alternatives, focus on budget-friendly options, explain ingredients in simple terms..."
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* More About You */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">More About You</label>
+                <p className="text-xs text-gray-500 mb-2">Help Curae AI understand you better</p>
+                <textarea
+                  value={aiSettings.moreAboutYou}
+                  onChange={(e) => setAiSettings({ ...aiSettings, moreAboutYou: e.target.value })}
+                  placeholder="E.g., I'm new to skincare, I prefer Korean beauty products, I have a 5-minute morning routine, I'm on a tight budget..."
+                  rows={3}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent resize-none"
+                />
               </div>
             </div>
 

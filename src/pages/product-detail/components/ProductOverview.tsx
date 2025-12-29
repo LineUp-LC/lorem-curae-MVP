@@ -1,12 +1,9 @@
-import { useState } from 'react';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
 } from '../../../lib/utils/sessionState';
 
 export default function ProductOverview() {
-  const [selectedImage, setSelectedImage] = useState(0);
-
   const product = {
     id: 1,
     name: 'Hydrating Glow Serum',
@@ -14,11 +11,6 @@ export default function ProductOverview() {
     price: 29.99,
     rating: 4.5,
     reviews: 128,
-    images: [
-      '/images/products/serum-1.png',
-      '/images/products/serum-2.png',
-      '/images/products/serum-3.png',
-    ],
     description:
       'A lightweight serum designed to hydrate, brighten, and improve overall skin texture.',
     keyIngredients: ['Hyaluronic Acid', 'Vitamin C', 'Niacinamide'],
@@ -40,28 +32,6 @@ export default function ProductOverview() {
 
   return (
     <div className="product-overview">
-      <div className="image-gallery">
-        <img
-          src={product.images[selectedImage]}
-          alt={product.name}
-          className="main-image"
-        />
-
-        <div className="thumbnail-row">
-          {product.images.map((img, index) => (
-            <img
-              key={index}
-              src={img}
-              alt={`Thumbnail ${index}`}
-              className={`thumbnail ${
-                selectedImage === index ? 'active' : ''
-              }`}
-              onClick={() => setSelectedImage(index)}
-            />
-          ))}
-        </div>
-      </div>
-
       <div className="product-info">
         <p className="mt-4 text-gray-700">{product.description}</p>
 
