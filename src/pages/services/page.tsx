@@ -94,23 +94,10 @@ export default function ServicesPage() {
                 <i className="ri-star-fill text-sage-600"></i>
                 <span className="text-sm font-medium text-sage-600">Proudly Featured</span>
               </div>
-              <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">
-                Top-Rated Skincare Professionals
-              </h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-                Handpicked businesses with exceptional reviews and proven expertise in skincare treatments
-              </p>
-              <button
-                onClick={handleDiscoverBusinesses}
-                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-lg whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-compass-line mr-2"></i>
-                Discover All Businesses
-              </button>
             </div>
 
             {/* Featured Business Cards */}
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
               {businesses.map((business) => (
                 <div
                   key={business.id}
@@ -193,6 +180,20 @@ export default function ServicesPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Description and CTA - Now below cards */}
+            <div className="text-center">
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+                Handpicked businesses with exceptional reviews and proven expertise in skincare treatments
+              </p>
+              <button
+                onClick={handleDiscoverBusinesses}
+                className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-lg whitespace-nowrap cursor-pointer"
+              >
+                <i className="ri-compass-line mr-2"></i>
+                Discover All Businesses
+              </button>
             </div>
           </div>
 
