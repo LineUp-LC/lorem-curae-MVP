@@ -10,3 +10,8 @@ createRoot(document.getElementById('root')!).render(
     <App />
   </StrictMode>,
 )
+
+// Clear localStorage when user leaves/closes the page
+window.addEventListener("beforeunload", () => {
+  localStorage.clear();
+});
