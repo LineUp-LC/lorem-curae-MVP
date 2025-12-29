@@ -23,7 +23,7 @@ const Footer = () => {
                 href="https://instagram.com"
                 target="_blank"
                 rel="nofollow noopener noreferrer"
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 hover:scale-110 transition-all duration-200 cursor-pointer"
                 aria-label="Instagram"
               >
                 <i className="ri-instagram-line text-lg"></i>
@@ -32,7 +32,7 @@ const Footer = () => {
                 href="https://tiktok.com"
                 target="_blank"
                 rel="nofollow noopener noreferrer"
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 hover:scale-110 transition-all duration-200 cursor-pointer"
                 aria-label="TikTok"
               >
                 <i className="ri-tiktok-line text-lg"></i>
@@ -41,7 +41,7 @@ const Footer = () => {
                 href="https://youtube.com"
                 target="_blank"
                 rel="nofollow noopener noreferrer"
-                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-cream-100/10 text-cream-100 hover:bg-sage-600 hover:scale-110 transition-all duration-200 cursor-pointer"
                 aria-label="YouTube"
               >
                 <i className="ri-youtube-line text-lg"></i>
