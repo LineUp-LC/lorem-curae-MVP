@@ -7,13 +7,8 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12">
           {/* Column 1 - Brand */}
           <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <img 
-                src="https://public.readdy.ai/ai/img_res/a6b3db07-dc0c-42d0-89bb-a50a13cc2680.png" 
-                alt="Lorem Curae Logo" 
-                className="h-10 w-auto"
-              />
-              <span className="text-xl font-semibold text-cream-50">Lorem Curae</span>
+            <div className="flex items-center">
+              <span className="text-3xl font-serif text-cream-50">Lorem Curae</span>
             </div>
             <p className="text-sm text-cream-200 leading-relaxed">
               Empowering authentic skincare journeys through science-backed personalization, holistic wellness, and collective wisdom.

@@ -1,27 +1,64 @@
-import { useState, FormEvent } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../lib/auth/AuthContext';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { supabase } from '../../../lib/supabase';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { signIn } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const captchaRef = useRef<HCaptcha>(null);
+  
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    // Validate captcha
+    if (!captchaToken) {
+      setError('Please complete the captcha verification');
+      return;
+    }
+
     setIsLoading(true);
-  
+
     try {
-      await signIn(formData.email, formData.password);
-      navigate('/account'); // or router.push('/account') depending on your router
-    } catch (err: any) {
-      setError(err.message);
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          captchaToken,
+        },
+      });
+
+      if (signInError) {
+        setError(signInError.message);
+        // Reset captcha on error
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
+        return;
+      }
+
+      if (data.user) {
+        navigate('/account');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -31,104 +68,102 @@ const LoginPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <Link to="/" className="flex items-center justify-center space-x-3 mb-8 cursor-pointer">
-          <img 
-            src="https://public.readdy.ai/ai/img_res/a6b3db07-dc0c-42d0-89bb-a50a13cc2680.png" 
-            alt="Lorem Curae" 
-            className="h-12 w-auto"
-          />
-          <span className="text-2xl font-semibold text-gray-900">Lorem Curae</span>
+        <Link to="/" className="flex items-center justify-center mb-8 cursor-pointer">
+          <span className="text-4xl font-serif text-slate-900">Lorem Curae</span>
         </Link>
 
-{/* Card */}
-<div className="bg-white rounded-2xl shadow-xl p-8">
-  <div className="text-center mb-8">
-    <h1 className="text-3xl font-bold text-gray-900 mb-2">
-      Welcome back
-    </h1>
-    <p className="text-gray-600">
-      Sign in to continue your skincare journey
-    </p>
-  </div>
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              Welcome back
+            </h1>
+            <p className="text-gray-600">
+              Sign in to continue your skincare journey
+            </p>
+          </div>
 
-  {error && (
-    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-      {error}
-    </div>
-  )}
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600 flex items-center gap-2">
+                <i className="ri-error-warning-line"></i>
+                {error}
+              </p>
+            </div>
+          )}
 
-  <form onSubmit={handleSubmit} className="space-y-5">
-  <div>
-  <label
-    htmlFor="email"
-    className="block text-sm font-medium text-gray-700 mb-2"
-  >
-    Email Address
-  </label>
-
-  <input
-  id="email"
-  name="email"
-  type="email"
-  value={formData.email}
-  onChange={(e) =>
-    setFormData({ ...formData, email: e.target.value })
-  }
-  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-  placeholder="you@example.com"
-  autoComplete="email"
-  required
-/>
-</div>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+                placeholder="you@example.com"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
             <div>
-  <div className="flex items-center justify-between mb-2">
-    <label
-      htmlFor="password"
-      className="block text-sm font-medium text-gray-700"
-    >
-      Password
-    </label>
-
-    <a
-      href="/forgot-password"
-      className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer"
-    >
-      Forgot?
-    </a>
-  </div>
-
-  <input
-    id="password"
-    name="password"
-    type="password"
-    value={formData.password}
-    onChange={(e) =>
-      setFormData({ ...formData, password: e.target.value })
-    }
-    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-    placeholder="Enter your password"
-    required
-  />
-</div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <a href="/forgot-password" className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer">
+                  Forgot?
+                </a>
+              </div>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+                placeholder="Enter your password"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
             <div className="flex items-center">
               <input
                 type="checkbox"
                 id="remember"
                 className="w-4 h-4 text-sage-600 border-gray-300 rounded focus:ring-sage-500 cursor-pointer"
+                disabled={isLoading}
               />
               <label htmlFor="remember" className="ml-2 text-sm text-gray-700 cursor-pointer">
                 Remember me
               </label>
             </div>
 
+            {/* HCaptcha */}
+            <div className="flex justify-center">
+              <HCaptcha
+                ref={captchaRef}
+                sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY || ''}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
+              />
+            </div>
+
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !captchaToken}
+              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin"></i>
+                  Signing In...
+                </>
+              ) : (
+                'Sign In'
+              )}
             </button>
           </form>
 
@@ -144,11 +179,19 @@ const LoginPage = () => {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <button 
+              type="button"
+              disabled={isLoading}
+              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+            >
               <i className="ri-google-fill text-xl text-red-500 mr-2"></i>
               <span className="text-sm font-medium text-gray-700">Google</span>
             </button>
-            <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <button 
+              type="button"
+              disabled={isLoading}
+              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+            >
               <i className="ri-apple-fill text-xl text-gray-900 mr-2"></i>
               <span className="text-sm font-medium text-gray-700">Apple</span>
             </button>

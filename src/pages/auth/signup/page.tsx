@@ -1,47 +1,78 @@
-import { useState, FormEvent } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../../lib/auth/AuthContext';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
+import { supabase } from '../../../lib/supabase';
 
 const SignUpPage = () => {
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const captchaRef = useRef<HCaptcha>(null);
+  
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: ''
   });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-  
-    const email = formData.email;
-    const password = formData.password;
-  
-    if (password !== formData.confirmPassword) {
+
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-  
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters');
+
+    // Validate captcha
+    if (!captchaToken) {
+      setError('Please complete the captcha verification');
       return;
     }
-  
+
+    setIsLoading(true);
+
     try {
-      setIsLoading(true);
-  
-      await signUp(email, password); // now email/password exist
-  
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          captchaToken,
+          data: {
+            full_name: formData.name,
+          },
+        },
+      });
+
+      if (signUpError) {
+        setError(signUpError.message);
+        // Reset captcha on error
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
+        return;
+      }
+
+      if (data.user) {
+        // Success - navigate to account or show confirmation
+        navigate('/account');
+      }
+    } catch (err) {
+      setError('An unexpected error occurred. Please try again.');
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
+    } finally {
       setIsLoading(false);
-  
-      navigate('/account');
-    } catch (err: any) {
-      setIsLoading(false);
-      setError(err.message || 'Something went wrong during sign up');
     }
   };
 
@@ -49,13 +80,8 @@ const SignUpPage = () => {
     <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
-        <Link to="/" className="flex items-center justify-center space-x-3 mb-8 cursor-pointer">
-          <img 
-            src="https://public.readdy.ai/ai/img_res/a6b3db07-dc0c-42d0-89bb-a50a13cc2680.png" 
-            alt="Lorem Curae" 
-            className="h-12 w-auto"
-          />
-          <span className="text-2xl font-semibold text-gray-900">Lorem Curae</span>
+        <Link to="/" className="flex items-center justify-center mb-8 cursor-pointer">
+          <span className="text-4xl font-serif text-slate-900">Lorem Curae</span>
         </Link>
 
         {/* Card */}
@@ -69,9 +95,13 @@ const SignUpPage = () => {
             </p>
           </div>
 
+          {/* Error Message */}
           {error && (
-            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
-              {error}
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm text-red-600 flex items-center gap-2">
+                <i className="ri-error-warning-line"></i>
+                {error}
+              </p>
             </div>
           )}
 
@@ -87,31 +117,24 @@ const SignUpPage = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
                 placeholder="Enter your name"
                 required
+                disabled={isLoading}
               />
             </div>
 
             <div>
-  <label
-    htmlFor="email"
-    className="block text-sm font-medium text-gray-700 mb-2"
-  >
-    Email Address
-  </label>
-
-  <input
-  id="email"
-  name="email"
-  type="email"
-  value={formData.email}
-  onChange={(e) =>
-    setFormData({ ...formData, email: e.target.value })
-  }
-  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-  placeholder="you@example.com"
-  autoComplete="email"
-  required
-/>
-</div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email Address
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+                placeholder="you@example.com"
+                required
+                disabled={isLoading}
+              />
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -124,6 +147,8 @@ const SignUpPage = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
                 placeholder="Create a password"
                 required
+                disabled={isLoading}
+                minLength={6}
               />
             </div>
 
@@ -138,15 +163,34 @@ const SignUpPage = () => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
                 placeholder="Confirm your password"
                 required
+                disabled={isLoading}
+                minLength={6}
+              />
+            </div>
+
+            {/* HCaptcha */}
+            <div className="flex justify-center">
+              <HCaptcha
+                ref={captchaRef}
+                sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY || ''}
+                onVerify={handleCaptchaVerify}
+                onExpire={handleCaptchaExpire}
               />
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !captchaToken}
+              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {isLoading ? 'Creating Account...' : 'Create Account'}
+              {isLoading ? (
+                <>
+                  <i className="ri-loader-4-line animate-spin"></i>
+                  Creating Account...
+                </>
+              ) : (
+                'Create Account'
+              )}
             </button>
           </form>
 
@@ -162,11 +206,19 @@ const SignUpPage = () => {
 
           {/* Social Login */}
           <div className="grid grid-cols-2 gap-3">
-            <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <button 
+              type="button"
+              disabled={isLoading}
+              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+            >
               <i className="ri-google-fill text-xl text-red-500 mr-2"></i>
               <span className="text-sm font-medium text-gray-700">Google</span>
             </button>
-            <button className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+            <button 
+              type="button"
+              disabled={isLoading}
+              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+            >
               <i className="ri-apple-fill text-xl text-gray-900 mr-2"></i>
               <span className="text-sm font-medium text-gray-700">Apple</span>
             </button>
@@ -175,7 +227,7 @@ const SignUpPage = () => {
           {/* Login Link */}
           <p className="text-center text-sm text-gray-600 mt-6">
             Already have an account?{' '}
-            <Link to="/auth/login" className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer">
+            <Link to="/login" className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer">
               Sign in
             </Link>
           </p>

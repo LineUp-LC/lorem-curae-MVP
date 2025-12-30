@@ -72,9 +72,9 @@ const Navbar = () => {
             </button>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 cursor-pointer">
-              <span className={`text-lg sm:text-xl font-semibold tracking-wide transition-colors ${
-                isScrolled || !isHomePage || showMobileMenu ? 'text-black' : 'text-white'
+            <Link to="/" className="flex items-center cursor-pointer">
+              <span className={`text-3xl font-serif transition-colors ${
+                isScrolled || !isHomePage || showMobileMenu ? 'text-slate-900' : 'text-white'
               }`}>
                 Lorem Curae
               </span>
