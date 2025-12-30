@@ -1,54 +1,30 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../../../lib/supabase';
 
 const LoginPage = () => {
   const navigate = useNavigate();
-  const captchaRef = useRef<HCaptcha>(null);
   
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleCaptchaVerify = (token: string) => {
-    setCaptchaToken(token);
-  };
-
-  const handleCaptchaExpire = () => {
-    setCaptchaToken(null);
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    // Validate captcha
-    if (!captchaToken) {
-      setError('Please complete the captcha verification');
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
-        options: {
-          captchaToken,
-        },
       });
 
       if (signInError) {
         setError(signInError.message);
-        // Reset captcha on error
-        captchaRef.current?.resetCaptcha();
-        setCaptchaToken(null);
         return;
       }
 
@@ -57,8 +33,6 @@ const LoginPage = () => {
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
-      captchaRef.current?.resetCaptcha();
-      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
@@ -141,19 +115,9 @@ const LoginPage = () => {
               </label>
             </div>
 
-            {/* HCaptcha */}
-            <div className="flex justify-center">
-              <HCaptcha
-                ref={captchaRef}
-                sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY || ''}
-                onVerify={handleCaptchaVerify}
-                onExpire={handleCaptchaExpire}
-              />
-            </div>
-
             <button
               type="submit"
-              disabled={isLoading || !captchaToken}
+              disabled={isLoading}
               className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
