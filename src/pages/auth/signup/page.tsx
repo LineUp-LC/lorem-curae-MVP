@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useRef } from 'react';
+import { Link } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../../../lib/supabase';
 
 const SignUpPage = () => {
-  const navigate = useNavigate();
+  const captchaRef = useRef<HCaptcha>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -11,8 +12,23 @@ const SignUpPage = () => {
     password: '',
     confirmPassword: ''
   });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
+
+  const handleCaptchaError = () => {
+    setCaptchaToken(null);
+    setError('Captcha verification failed. Please try again.');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +40,17 @@ const SignUpPage = () => {
       return;
     }
 
+    // Validate password length
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+
+    if (!captchaToken) {
+      setError('Please complete the captcha verification');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -31,27 +58,102 @@ const SignUpPage = () => {
         email: formData.email,
         password: formData.password,
         options: {
+          captchaToken,
           data: {
             full_name: formData.name,
           },
+          // This tells Supabase where to redirect after email confirmation
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (signUpError) {
         setError(signUpError.message);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
         return;
       }
 
-      if (data.user) {
-        // Success - navigate to account or show confirmation
-        navigate('/account');
+      // Check if email confirmation is required
+      if (data.user && !data.session) {
+        // Email confirmation is enabled - show success message
+        setSuccess(true);
+      } else if (data.user && data.session) {
+        // Email confirmation is disabled - user is logged in directly
+        window.location.href = '/account';
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+
+  // If no site key, show warning in development
+  if (!siteKey) {
+    console.warn('VITE_HCAPTCHA_SITE_KEY is not set. Captcha will not work.');
+  }
+
+  // Success state - show email verification message
+  if (success) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
+        <div className="w-full max-w-md">
+          {/* Logo */}
+          <Link to="/" className="flex items-center justify-center mb-8 cursor-pointer">
+            <span className="text-4xl font-serif text-slate-900">Lorem Curae</span>
+          </Link>
+
+          {/* Success Card */}
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <i className="ri-mail-check-line text-3xl text-green-600"></i>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900 mb-4">
+              Check your email
+            </h1>
+            
+            <p className="text-gray-600 mb-6">
+              We've sent a verification link to <strong>{formData.email}</strong>. 
+              Please click the link in the email to verify your account.
+            </p>
+
+            <div className="bg-sage-50 rounded-lg p-4 mb-6">
+              <p className="text-sm text-sage-700">
+                <i className="ri-information-line mr-2"></i>
+                Didn't receive the email? Check your spam folder or wait a few minutes.
+              </p>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setSuccess(false);
+                  setFormData({ name: '', email: '', password: '', confirmPassword: '' });
+                  setCaptchaToken(null);
+                }}
+                className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer"
+              >
+                Try a different email
+              </button>
+              
+              <Link
+                to="/login"
+                className="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors text-center"
+              >
+                Back to Login
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
@@ -122,7 +224,7 @@ const SignUpPage = () => {
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
-                placeholder="Create a password"
+                placeholder="Create a password (min 6 characters)"
                 required
                 disabled={isLoading}
                 minLength={6}
@@ -145,9 +247,22 @@ const SignUpPage = () => {
               />
             </div>
 
+            {/* HCaptcha */}
+            {siteKey && (
+              <div className="flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={siteKey}
+                  onVerify={handleCaptchaVerify}
+                  onExpire={handleCaptchaExpire}
+                  onError={handleCaptchaError}
+                />
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (siteKey && !captchaToken)}
               className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (
@@ -203,9 +318,9 @@ const SignUpPage = () => {
         {/* Terms */}
         <p className="text-center text-xs text-gray-500 mt-6">
           By signing up, you agree to our{' '}
-          <a href="/terms" className="text-sage-600 hover:underline cursor-pointer">Terms of Service</a>
+          <Link to="/terms" className="text-sage-600 hover:underline cursor-pointer">Terms of Service</Link>
           {' '}and{' '}
-          <a href="/privacy" className="text-sage-600 hover:underline cursor-pointer">Privacy Policy</a>
+          <Link to="/privacy" className="text-sage-600 hover:underline cursor-pointer">Privacy Policy</Link>
         </p>
       </div>
     </div>

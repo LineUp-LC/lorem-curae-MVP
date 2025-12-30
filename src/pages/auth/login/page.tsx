@@ -1,30 +1,57 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../../../lib/supabase';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const captchaRef = useRef<HCaptcha>(null);
   
   const [formData, setFormData] = useState({
     email: '',
     password: ''
   });
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const handleCaptchaVerify = (token: string) => {
+    setCaptchaToken(token);
+  };
+
+  const handleCaptchaExpire = () => {
+    setCaptchaToken(null);
+  };
+
+  const handleCaptchaError = () => {
+    setCaptchaToken(null);
+    setError('Captcha verification failed. Please try again.');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!captchaToken) {
+      setError('Please complete the captcha verification');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
+        options: {
+          captchaToken,
+        },
       });
 
       if (signInError) {
         setError(signInError.message);
+        captchaRef.current?.resetCaptcha();
+        setCaptchaToken(null);
         return;
       }
 
@@ -33,10 +60,19 @@ const LoginPage = () => {
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');
+      captchaRef.current?.resetCaptcha();
+      setCaptchaToken(null);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
+
+  // If no site key, show warning in development
+  if (!siteKey) {
+    console.warn('VITE_HCAPTCHA_SITE_KEY is not set. Captcha will not work.');
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
@@ -88,9 +124,9 @@ const LoginPage = () => {
                 <label className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <a href="/forgot-password" className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer">
+                <Link to="/forgot-password" className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer">
                   Forgot?
-                </a>
+                </Link>
               </div>
               <input
                 type="password"
@@ -115,9 +151,22 @@ const LoginPage = () => {
               </label>
             </div>
 
+            {/* HCaptcha */}
+            {siteKey && (
+              <div className="flex justify-center">
+                <HCaptcha
+                  ref={captchaRef}
+                  sitekey={siteKey}
+                  onVerify={handleCaptchaVerify}
+                  onExpire={handleCaptchaExpire}
+                  onError={handleCaptchaError}
+                />
+              </div>
+            )}
+
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || (siteKey && !captchaToken)}
               className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isLoading ? (

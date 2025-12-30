@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 // Lazy load components
+const AuthCallbackPage = lazy(() => import('../pages/auth/callback/page'));
 const HomePage = lazy(() => import('../pages/home/page'));
 const DiscoverPage = lazy(() => import('../pages/discover/page'));
 const IngredientsPage = lazy(() => import('../pages/ingredients/page'));
@@ -65,6 +66,10 @@ const routes: RouteObject[] = [
   {
     path: '/',
     element: <HomePage />,
+  },
+  {
+  path: '/auth/callback',
+  element: <AuthCallbackPage />,
   },
   {
     path: '/discover',
