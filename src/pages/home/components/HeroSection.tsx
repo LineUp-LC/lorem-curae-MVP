@@ -17,8 +17,7 @@ export default function HeroSection() {
           Your Skin, Your Journey,<br />Personalized for You
         </h1>
         <p className="text-xl md:text-2xl text-white/90 mb-8 max-w-3xl mx-auto leading-relaxed">
-          Discover products perfect for your unique skin with our smart finder, ingredient intelligence, AI guidance, and rewards program
-        </p>
+          Discover products perfect for your unique skin with our smart product finder, ingredient library, AI guidance, and product comparison feature
       </div>
 
       {/* Scroll Indicator */}
