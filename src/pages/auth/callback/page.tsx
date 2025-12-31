@@ -121,13 +121,13 @@ const AuthCallbackPage = () => {
               </p>
               <div className="space-y-3">
                 <Link
-                  to="/signup"
+                  to="/auth/signup"
                   className="block w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors text-center"
                 >
                   Try signing up again
                 </Link>
                 <Link
-                  to="/login"
+                  to="/auth/login"
                   className="block w-full bg-gray-100 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-200 transition-colors text-center"
                 >
                   Back to Login
