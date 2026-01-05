@@ -243,13 +243,13 @@ export default function ProductCatalog({
           bg-white rounded-2xl overflow-hidden transition-[transform,box-shadow] duration-300 group cursor-pointer relative hover:-translate-y-1 transform-gpu
           ${
             isRecommended
-              ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
-              : 'shadow-md hover:shadow-xl border border-gray-100'
+              ? 'ring-2 ring-primary ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
+              : 'shadow-md hover:shadow-xl border border-blush'
           }
         `}
       >
         {isRecommended && (
-          <span className="absolute top-3 left-3 bg-sage-600 text-white text-xs px-2 py-1 rounded-full shadow z-10">
+          <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded-full shadow z-10">
             Best Match
           </span>
         )}
@@ -257,10 +257,10 @@ export default function ProductCatalog({
         {/* Comparison Button - WITH QA accessibility fixes */}
         <button
           onClick={(e) => handleAddToCompare(product, e)}
-          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
+          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
             isSelected
-              ? 'bg-sage-600 text-white'
-              : 'bg-white text-gray-700 hover:bg-sage-100'
+              ? 'bg-primary text-white'
+              : 'bg-white text-warm-gray hover:bg-light/30'
           }`}
           title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
           aria-label={isSelected ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
@@ -274,7 +274,7 @@ export default function ProductCatalog({
         </button>
 
         {/* Product Image */}
-        <div className="relative w-full h-80 overflow-hidden bg-gray-50">
+        <div className="relative w-full h-80 overflow-hidden bg-cream">
           <img
             src={product.image}
             alt={product.name}
@@ -283,7 +283,7 @@ export default function ProductCatalog({
           />
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="px-4 py-2 bg-white text-gray-900 font-semibold rounded-full text-sm">
+              <span className="px-4 py-2 bg-white text-deep font-semibold rounded-full text-sm">
                 Out of Stock
               </span>
             </div>
@@ -292,25 +292,25 @@ export default function ProductCatalog({
 
         {/* Product Info */}
         <div className="p-5">
-          <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
+          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">
             {product.brand}
           </p>
 
-          <h3 className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
+          <h3 className="text-lg font-semibold text-deep mb-2 line-clamp-2">
             {product.name}
           </h3>
 
           <div className="flex items-center space-x-2 mb-3">
             <div className="flex items-center space-x-1">{renderStars(product.rating)}</div>
-            <span className="text-sm font-medium text-gray-700">{product.rating}</span>
-            <span className="text-sm text-gray-500">({product.reviewCount})</span>
+            <span className="text-sm font-medium text-warm-gray">{product.rating}</span>
+            <span className="text-sm text-warm-gray/80">({product.reviewCount})</span>
           </div>
 
-          <p className="text-sm text-gray-600 mb-4 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-warm-gray mb-4 line-clamp-2">{product.description}</p>
 
           {/* Concerns - with highlighting for matching concerns */}
           <div className="mb-4">
-            <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
+            <p className="text-xs font-semibold text-warm-gray mb-2">Addresses:</p>
             <div className="flex flex-wrap gap-1">
               {product.concerns.slice(0, 3).map((concern, idx) => {
                 const isMatchingConcern = productMatchesUserConcerns([concern], safeUserConcerns);
@@ -320,8 +320,8 @@ export default function ProductCatalog({
                     key={idx}
                     className={`px-2 py-1 text-xs rounded-full border capitalize ${
                       isMatchingConcern
-                        ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
-                        : 'bg-cream-100 text-gray-700 border-gray-200'
+                        ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                        : 'bg-cream text-warm-gray border-blush'
                     }`}
                   >
                     {isMatchingConcern && <i className="ri-check-line mr-0.5"></i>}
@@ -334,7 +334,7 @@ export default function ProductCatalog({
 
           {/* Key Ingredients - with highlighting for matching ingredients */}
           <div className="mb-4">
-            <p className="text-xs font-semibold text-gray-700 mb-2">Key Ingredients:</p>
+            <p className="text-xs font-semibold text-warm-gray mb-2">Key Ingredients:</p>
             <div className="flex flex-wrap gap-1">
               {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
                 const isMatchingIngredient = matchesIngredient(ingredient, safeUserConcerns);
@@ -344,8 +344,8 @@ export default function ProductCatalog({
                     key={idx}
                     className={`px-2 py-1 text-xs rounded-full border ${
                       isMatchingIngredient
-                        ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
-                        : 'bg-cream-100 text-gray-700 border-gray-200'
+                        ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                        : 'bg-cream text-warm-gray border-blush'
                     }`}
                   >
                     {ingredient}
@@ -353,7 +353,7 @@ export default function ProductCatalog({
                 );
               })}
               {product.keyIngredients.length > 3 && (
-                <span className="px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full border border-gray-200">
+                <span className="px-2 py-1 bg-cream text-warm-gray text-xs rounded-full border border-blush">
                   +{product.keyIngredients.length - 3}
                 </span>
               )}
@@ -363,7 +363,7 @@ export default function ProductCatalog({
           {/* Preference Tags - Task 9 */}
           {product.preferences && Object.keys(product.preferences).some(k => product.preferences?.[k as keyof typeof product.preferences]) && (
             <div className="mb-4">
-              <p className="text-xs font-semibold text-gray-700 mb-2">Product Preferences:</p>
+              <p className="text-xs font-semibold text-warm-gray mb-2">Product Preferences:</p>
               <div className="flex flex-wrap gap-1">
                 {Object.entries(product.preferences).map(([key, value]) => {
                   if (!value) return null;
@@ -373,8 +373,8 @@ export default function ProductCatalog({
                       key={key}
                       className={`px-2 py-1 text-xs rounded-full border ${
                         isMatching
-                          ? 'bg-sage-100 text-sage-700 border-sage-300 font-medium'
-                          : 'bg-cream-100 text-gray-600 border-gray-200'
+                          ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                          : 'bg-cream text-warm-gray border-blush'
                       }`}
                     >
                       {isMatching && <i className="ri-check-line mr-0.5"></i>}
@@ -386,10 +386,10 @@ export default function ProductCatalog({
             </div>
           )}
 
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-4 border-t border-blush">
             <div>
-              <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
-              <span className="text-xl font-bold text-forest-900">
+              <p className="text-xs text-warm-gray/80 mb-1">Estimated price range</p>
+              <span className="text-xl font-bold text-deep">
                 ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
               </span>
             </div>
@@ -403,27 +403,27 @@ export default function ProductCatalog({
     <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
       {/* Hero Section */}
       <div className="text-center mb-12">
-        <h1 className="text-5xl lg:text-6xl font-serif text-forest-900 mb-6">
+        <h1 className="text-5xl lg:text-6xl font-serif text-deep mb-6">
           Discover Your Perfect Match
         </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+        <p className="text-xl text-warm-gray max-w-3xl mx-auto mb-8">
           Explore our curated collection of clean, science-backed skincare products tailored
           to your unique needs
         </p>
 
         {/* Quiz CTA Banner - Only show if survey not completed */}
         {!surveyCompleted && (
-          <div className="bg-gradient-to-r from-sage-600 to-sage-700 rounded-3xl p-8 mb-12 shadow-xl">
+          <div className="bg-gradient-to-r from-primary to-dark rounded-3xl p-8 mb-12 shadow-xl">
             <div className="flex flex-col md:flex-row items-center justify-between gap-6">
               <div className="text-left text-white">
                 <h3 className="text-2xl font-serif mb-2">Not sure where to start?</h3>
-                <p className="text-sage-100">
+                <p className="text-light">
                   Take our personalized skin quiz to find products perfect for you
                 </p>
               </div>
               <button
                 onClick={() => navigate('/skin-survey-account')}
-                className="px-8 py-4 bg-white text-sage-700 rounded-full font-semibold hover:bg-cream-50 transition-all shadow-lg whitespace-nowrap cursor-pointer flex items-center space-x-2"
+                className="px-8 py-4 bg-white text-primary-700 rounded-full font-semibold hover:bg-cream transition-all shadow-lg whitespace-nowrap cursor-pointer flex items-center space-x-2"
               >
                 <i className="ri-questionnaire-line text-xl"></i>
                 <span>Start Skin Quiz</span>
@@ -440,7 +440,7 @@ export default function ProductCatalog({
             Search products
           </label>
 
-          <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400"></i>
+          <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-warm-gray/60"></i>
 
           <input
             id="discover-search"
@@ -450,7 +450,7 @@ export default function ProductCatalog({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             autoComplete="off"
-            className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-gray-200 focus:border-sage-600 focus:outline-none text-sm transition-all"
+            className="w-full pl-12 pr-4 py-4 rounded-full border-2 border-blush focus:border-primary focus:outline-none text-sm transition-all"
           />
         </div>
       </div>
@@ -459,7 +459,7 @@ export default function ProductCatalog({
       <div className="mb-8">
         {/* Category Filter */}
         <div className="mb-6">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Categories</h3>
+          <h3 className="text-sm font-semibold text-warm-gray mb-3">Categories</h3>
           <div className="flex flex-wrap gap-3">
             {categories.map((category) => (
               <button
@@ -470,8 +470,8 @@ export default function ProductCatalog({
                 }}
                 className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                   selectedCategory === category.value
-                    ? 'bg-sage-600 text-white shadow-md'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                    ? 'bg-primary text-white shadow-md'
+                    : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                 }`}
               >
                 <i className={`${category.icon} text-base`}></i>
@@ -490,7 +490,7 @@ export default function ProductCatalog({
             {/* Skin Type */}
             <label
               htmlFor="filter-skin-type"
-              className="text-sm font-semibold text-gray-700"
+              className="text-sm font-semibold text-warm-gray"
             >
               Skin Type:
             </label>
@@ -503,7 +503,7 @@ export default function ProductCatalog({
                 setSelectedSkinType(e.target.value)
                 onFilterChange('skinType', e.target.value)
               }}
-              className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+              className="px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
             >
               {skinTypes.map((type) => (
                 <option key={type.value} value={type.value}>
@@ -515,7 +515,7 @@ export default function ProductCatalog({
             {/* Time of Day */}
             <label
               htmlFor="filter-time-of-day"
-              className="text-sm font-semibold text-gray-700 ml-4"
+              className="text-sm font-semibold text-warm-gray ml-4"
             >
               Time of Day:
             </label>
@@ -528,7 +528,7 @@ export default function ProductCatalog({
                 setTimeOfDay(e.target.value)
                 onFilterChange('timeOfDay', e.target.value)
               }}
-              className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+              className="px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
             >
               <option value="all">All</option>
               <option value="am">AM (Morning)</option>
@@ -540,7 +540,7 @@ export default function ProductCatalog({
           <div className="flex items-center space-x-3">
             <label
               htmlFor="filter-sort-by"
-              className="text-sm font-semibold text-gray-700"
+              className="text-sm font-semibold text-warm-gray"
             >
               Sort by:
             </label>
@@ -553,7 +553,7 @@ export default function ProductCatalog({
                 setSortBy(e.target.value)
                 onFilterChange('sortBy', e.target.value)
               }}
-              className="px-4 py-2 rounded-full border border-gray-200 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+              className="px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
             >
               <option value="popular">Most Popular</option>
               <option value="rating">Highest Rated</option>
@@ -566,14 +566,14 @@ export default function ProductCatalog({
 
       {/* Results Count */}
       <div className="mb-6">
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-warm-gray">
           Showing{' '}
-          <span className="font-semibold text-forest-900">
+          <span className="font-semibold text-deep">
             {sortedMatchedProducts.length + sortedOtherProducts.length}
           </span>{' '}
           products
           {safeUserConcerns.length > 0 && sortedMatchedProducts.length > 0 && (
-            <span className="text-sage-600 ml-2">
+            <span className="text-primary ml-2">
               ({sortedMatchedProducts.length} recommended for your concerns)
             </span>
           )}
@@ -584,8 +584,8 @@ export default function ProductCatalog({
       {sortedMatchedProducts.length > 0 && (
         <section className="mb-10">
           <div className="flex items-center gap-3 mb-4">
-            <h2 className="text-xl font-semibold text-sage-700">Recommended for You</h2>
-            <span className="px-3 py-1 bg-sage-100 text-sage-700 text-sm rounded-full">
+            <h2 className="text-xl font-semibold text-primary-700">Recommended for You</h2>
+            <span className="px-3 py-1 bg-light/30 text-primary-700 text-sm rounded-full">
               Based on your skin concerns
             </span>
           </div>
@@ -597,8 +597,8 @@ export default function ProductCatalog({
 
       {/* Divider between recommended and other products */}
       {sortedMatchedProducts.length > 0 && sortedOtherProducts.length > 0 && (
-        <div className="border-t border-gray-200 my-10 pt-6">
-          <h2 className="text-xl font-semibold text-gray-700 mb-4">More Products</h2>
+        <div className="border-t border-blush my-10 pt-6">
+          <h2 className="text-xl font-semibold text-warm-gray mb-4">More Products</h2>
         </div>
       )}
 
@@ -613,18 +613,18 @@ export default function ProductCatalog({
       {/* No Results */}
       {sortedMatchedProducts.length + sortedOtherProducts.length === 0 && (
         <div className="text-center py-16">
-          <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-full mx-auto mb-4">
-            <i className="ri-search-line text-4xl text-gray-400"></i>
+          <div className="w-20 h-20 flex items-center justify-center bg-cream rounded-full mx-auto mb-4">
+            <i className="ri-search-line text-4xl text-warm-gray/60"></i>
           </div>
-          <h3 className="text-2xl font-serif text-forest-900 mb-2">No products found</h3>
-          <p className="text-gray-600 mb-6">Try adjusting your filters or search query</p>
+          <h3 className="text-2xl font-serif text-deep mb-2">No products found</h3>
+          <p className="text-warm-gray mb-6">Try adjusting your filters or search query</p>
           <button
             onClick={() => {
               setSelectedCategory('all');
               setSelectedSkinType('all');
               setSearchQuery('');
             }}
-            className="px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all whitespace-nowrap cursor-pointer"
+            className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all whitespace-nowrap cursor-pointer"
           >
             Clear All Filters
           </button>
@@ -640,7 +640,7 @@ export default function ProductCatalog({
           aria-live="polite"
           className={`
             fixed bottom-0 left-0 right-0 z-50
-            border-t-2 border-sage-600 shadow-2xl
+            border-t-2 border-primary shadow-2xl
             transition-all duration-300 ease-out
             motion-safe:animate-slide-up
             ${isScrolled ? 'bg-white/90 backdrop-blur-md' : 'bg-white'}
@@ -653,7 +653,7 @@ export default function ProductCatalog({
             aria-expanded={!isCompareBarMinimized}
             aria-controls="compare-bar-content"
             aria-label={isCompareBarMinimized ? 'Expand comparison bar' : 'Minimize comparison bar'}
-            className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-6 bg-sage-600 hover:bg-sage-700 text-white rounded-t-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2"
+            className="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-6 bg-primary hover:bg-dark text-white rounded-t-lg flex items-center justify-center transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
           >
             <i className={`ri-arrow-${isCompareBarMinimized ? 'up' : 'down'}-s-line text-lg transition-transform`} aria-hidden="true"></i>
           </button>
@@ -670,8 +670,8 @@ export default function ProductCatalog({
             {isCompareBarMinimized ? (
               <div className="flex items-center justify-center space-x-4">
                 <div className="flex items-center space-x-2">
-                  <i className="ri-scales-3-line text-sage-600" aria-hidden="true"></i>
-                  <span className="text-sm font-medium text-forest-900">
+                  <i className="ri-scales-3-line text-primary" aria-hidden="true"></i>
+                  <span className="text-sm font-medium text-deep">
                     {safeCompareList.length} products to compare
                   </span>
                 </div>
@@ -679,10 +679,10 @@ export default function ProductCatalog({
                   onClick={onOpenComparison}
                   disabled={safeCompareList.length < 2}
                   aria-label={safeCompareList.length < 2 ? 'Select at least 2 products to compare' : `Compare ${safeCompareList.length} products`}
-                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                     safeCompareList.length >= 2
-                      ? 'bg-sage-600 text-white hover:bg-sage-700 cursor-pointer'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                      ? 'bg-primary text-white hover:bg-dark cursor-pointer'
+                      : 'bg-gray-300 text-warm-gray/80 cursor-not-allowed'
                   }`}
                 >
                   Compare
@@ -694,16 +694,16 @@ export default function ProductCatalog({
                 <div className="flex items-center space-x-4 min-w-0">
                   <div className="flex items-center space-x-2 flex-shrink-0">
                     <div 
-                      className="w-10 h-10 flex items-center justify-center bg-sage-100 rounded-full"
+                      className="w-10 h-10 flex items-center justify-center bg-light/30 rounded-full"
                       aria-hidden="true"
                     >
-                      <i className="ri-scales-3-line text-xl text-sage-600"></i>
+                      <i className="ri-scales-3-line text-xl text-primary"></i>
                     </div>
                     <div>
-                      <h3 id="compare-bar-title" className="font-semibold text-forest-900">
+                      <h3 id="compare-bar-title" className="font-semibold text-deep">
                         Compare Products
                       </h3>
-                      <p className="text-sm text-gray-600" aria-live="polite">
+                      <p className="text-sm text-warm-gray" aria-live="polite">
                         <span className="sr-only">Currently </span>
                         {safeCompareList.length} of 4 products selected
                       </p>
@@ -720,15 +720,15 @@ export default function ProductCatalog({
                       <div
                         key={product.id}
                         role="listitem"
-                        className="flex items-center space-x-2 px-3 py-2 bg-sage-50 rounded-full flex-shrink-0"
+                        className="flex items-center space-x-2 px-3 py-2 bg-light/20 rounded-full flex-shrink-0"
                       >
-                        <span className="text-sm font-medium text-forest-900 truncate max-w-[100px] sm:max-w-[150px]">
+                        <span className="text-sm font-medium text-deep truncate max-w-[100px] sm:max-w-[150px]">
                           {product.brand}
                         </span>
                         <button
                           onClick={(e) => handleAddToCompare(product, e)}
                           aria-label={`Remove ${product.brand} from comparison`}
-                          className="w-5 h-5 flex items-center justify-center text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                          className="w-5 h-5 flex items-center justify-center text-warm-gray/80 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors cursor-pointer focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                         >
                           <i className="ri-close-line text-base" aria-hidden="true"></i>
                         </button>
@@ -741,7 +741,7 @@ export default function ProductCatalog({
                   <button
                     onClick={handleClearCompare}
                     aria-label="Clear all products from comparison"
-                    className="px-3 sm:px-4 py-2 text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                    className="px-3 sm:px-4 py-2 text-warm-gray hover:text-deep hover:bg-cream rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
                   >
                     Clear All
                   </button>
@@ -750,10 +750,10 @@ export default function ProductCatalog({
                     disabled={safeCompareList.length < 2}
                     aria-label={safeCompareList.length < 2 ? 'Select at least 2 products to compare' : `Compare ${safeCompareList.length} products`}
                     aria-disabled={safeCompareList.length < 2}
-                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 ${
+                    className={`px-4 sm:px-6 py-2 sm:py-3 rounded-full font-semibold transition-all whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
                       safeCompareList.length >= 2
-                        ? 'bg-sage-600 text-white hover:bg-sage-700 shadow-md cursor-pointer'
-                        : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        ? 'bg-primary text-white hover:bg-dark shadow-md cursor-pointer'
+                        : 'bg-gray-300 text-warm-gray/80 cursor-not-allowed'
                     }`}
                   >
                     Compare Now ({safeCompareList.length})

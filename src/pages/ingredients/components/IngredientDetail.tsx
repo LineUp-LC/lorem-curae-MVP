@@ -47,8 +47,8 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
     reviews: 1243,
     safetyRating: 'Excellent',
     icon: 'ri-drop-line',
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-50',
+    color: 'text-primary',
+    bgColor: 'bg-light/20',
     description: 'Hyaluronic acid is a naturally occurring substance in the skin that has the remarkable ability to attract and hold vast amounts of moisture. It works as a humectant, drawing water from the environment and deeper layers of skin to hydrate the surface.',
     benefits: [
       'Provides intense hydration to all skin types',
@@ -214,7 +214,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center space-x-2 text-gray-600 hover:text-sage-600 mb-8 transition-colors cursor-pointer"
+          className="flex items-center space-x-2 text-warm-gray hover:text-primary mb-8 transition-colors cursor-pointer"
         >
           <i className="ri-arrow-left-line text-xl"></i>
           <span className="font-medium">Back to Library</span>
@@ -229,10 +229,10 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             <div className="flex-1">
               <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
                 <div>
-                  <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-2">
+                  <h1 className="text-4xl lg:text-5xl font-serif text-deep mb-2">
                     {ingredient.name}
                   </h1>
-                  <p className="text-xl text-gray-600">{ingredient.scientificName}</p>
+                  <p className="text-xl text-warm-gray">{ingredient.scientificName}</p>
                 </div>
                 <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
                   ingredient.safetyRating === 'Excellent' 
@@ -249,16 +249,16 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                       <i
                         key={star}
                         className={`ri-star-fill text-lg ${
-                          star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-gray-300'
+                          star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-blush'
                         }`}
                       ></i>
                     ))}
                   </div>
-                  <span className="text-lg font-semibold text-forest-900">{ingredient.rating}</span>
-                  <span className="text-gray-600">({ingredient.reviews} reviews)</span>
+                  <span className="text-lg font-semibold text-deep">{ingredient.rating}</span>
+                  <span className="text-warm-gray">({ingredient.reviews} reviews)</span>
                 </div>
               </div>
-              <p className="text-lg text-gray-700 leading-relaxed">
+              <p className="text-lg text-warm-gray leading-relaxed">
                 {ingredient.description}
               </p>
             </div>
@@ -270,40 +270,40 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
           <div className="lg:col-span-2 space-y-8">
             {/* Benefits */}
             <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-forest-900 mb-6">Key Benefits</h2>
+              <h2 className="text-2xl font-serif text-deep mb-6">Key Benefits</h2>
               <ul className="space-y-3">
                 {ingredient.benefits.map((benefit, index) => (
                   <li key={index} className="flex items-start space-x-3">
-                    <i className="ri-checkbox-circle-fill text-xl text-sage-600 flex-shrink-0 mt-0.5"></i>
-                    <span className="text-gray-700">{benefit}</span>
+                    <i className="ri-checkbox-circle-fill text-xl text-primary flex-shrink-0 mt-0.5"></i>
+                    <span className="text-warm-gray">{benefit}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* How to Use */}
-            <div className="bg-gradient-to-br from-sage-50 to-cream-100 rounded-2xl p-8">
-              <h2 className="text-2xl font-serif text-forest-900 mb-4">How to Use</h2>
-              <p className="text-gray-700 leading-relaxed mb-4">{ingredient.howToUse}</p>
-              <div className="bg-white rounded-xl p-4 border-l-4 border-sage-600">
-                <p className="text-sm font-semibold text-forest-900 mb-1">Optimal Concentration</p>
-                <p className="text-sm text-gray-600">{ingredient.concentration}</p>
+            <div className="bg-gradient-to-br from-light/20 to-cream rounded-2xl p-8">
+              <h2 className="text-2xl font-serif text-deep mb-4">How to Use</h2>
+              <p className="text-warm-gray leading-relaxed mb-4">{ingredient.howToUse}</p>
+              <div className="bg-white rounded-xl p-4 border-l-4 border-primary">
+                <p className="text-sm font-semibold text-deep mb-1">Optimal Concentration</p>
+                <p className="text-sm text-warm-gray">{ingredient.concentration}</p>
               </div>
             </div>
 
             {/* Myth Busting */}
             <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-forest-900 mb-6">Myth Busting</h2>
+              <h2 className="text-2xl font-serif text-deep mb-6">Myth Busting</h2>
               <div className="space-y-6">
                 {ingredient.myths.map((item, index) => (
-                  <div key={index} className="border-l-4 border-coral-500 pl-6">
+                  <div key={index} className="border-l-4 border-primary pl-6">
                     <div className="flex items-start space-x-2 mb-2">
-                      <i className="ri-close-circle-line text-xl text-coral-500 flex-shrink-0 mt-0.5"></i>
-                      <p className="font-semibold text-forest-900">{item.myth}</p>
+                      <i className="ri-close-circle-line text-xl text-primary flex-shrink-0 mt-0.5"></i>
+                      <p className="font-semibold text-deep">{item.myth}</p>
                     </div>
                     <div className="flex items-start space-x-2">
-                      <i className="ri-checkbox-circle-line text-xl text-sage-600 flex-shrink-0 mt-0.5"></i>
-                      <p className="text-gray-700">{item.truth}</p>
+                      <i className="ri-checkbox-circle-line text-xl text-primary flex-shrink-0 mt-0.5"></i>
+                      <p className="text-warm-gray">{item.truth}</p>
                     </div>
                   </div>
                 ))}
@@ -312,7 +312,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
 
             {/* Community Reviews */}
             <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-forest-900 mb-6">Community Reviews</h2>
+              <h2 className="text-2xl font-serif text-deep mb-6">Community Reviews</h2>
               
               {/* Reviews from Similar Profiles */}
               {userProfile && similarProfileReviews.length > 0 && (
@@ -320,31 +320,31 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                   {/* Similar Skin Reviews Label - Always at Top */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 flex items-center justify-center bg-emerald-500 rounded-full">
+                      <div className="w-8 h-8 flex items-center justify-center bg-sage rounded-full">
                         <i className="ri-user-heart-line text-white"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-emerald-600">Similar Skin Reviews</h3>
+                      <h3 className="text-lg font-semibold text-sage">Similar Skin Reviews</h3>
                     </div>
-                    <span className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-sage/20 text-sage px-3 py-1 rounded-full font-medium">
                       {similarProfileReviews.length} matches
                     </span>
                   </div>
                   
                   {/* Example Reviews Badge */}
-                  <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-blue-100 text-blue-700 rounded-full text-xs font-medium">
+                  <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-light/30 text-primary-700 rounded-full text-xs font-medium">
                     <i className="ri-information-line"></i>
                     Example reviews included - Remove when you say "Remove examples from /ingredients reviews page"
                   </div>
 
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-warm-gray mb-4">
                     These reviews are from users with similar skin type, concerns, and profile attributes as you.
                   </p>
                   <div className="space-y-6">
                     {similarProfileReviews.map((review) => (
-                      <div key={review.id} className="border-2 border-emerald-500/20 rounded-xl p-6 bg-emerald-50/30 relative">
+                      <div key={review.id} className="border-2 border-sage/20 rounded-xl p-6 bg-sage/10 relative">
                         {/* Similar Skin Badge */}
                         <div className="absolute top-4 right-4 z-10">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-semibold shadow-md">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sage text-white rounded-full text-xs font-semibold shadow-md">
                             <i className="ri-user-heart-line text-sm"></i>
                             Similar Skin
                           </span>
@@ -352,8 +352,8 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                         
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 pr-32">
-                            <p className="font-semibold text-forest-900">{review.author}</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                            <p className="font-semibold text-deep">{review.author}</p>
+                            <div className="flex items-center gap-2 text-sm text-warm-gray mt-1">
                               <span>{review.skinType}</span>
                               {review.fitzpatrickType && (
                                 <>
@@ -367,7 +367,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                                 {review.concerns.map((concern, idx) => (
                                   <span
                                     key={idx}
-                                    className="text-xs bg-white px-2 py-1 rounded-full text-gray-700"
+                                    className="text-xs bg-white px-2 py-1 rounded-full text-warm-gray"
                                   >
                                     {concern}
                                   </span>
@@ -380,19 +380,19 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                               <i
                                 key={star}
                                 className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-gray-300'
+                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
                                 }`}
                               ></i>
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-700 leading-relaxed mb-3">{review.comment}</p>
-                        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                          <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-sage-600 transition-colors cursor-pointer">
+                        <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
+                        <div className="flex items-center justify-between pt-3 border-t border-blush">
+                          <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
                             <i className="ri-thumb-up-line"></i>
                             <span>Helpful ({review.helpful})</span>
                           </button>
-                          <span className="text-xs text-gray-500">{review.date}</span>
+                          <span className="text-xs text-warm-gray/80">{review.date}</span>
                         </div>
                       </div>
                     ))}
@@ -404,29 +404,29 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
               {otherReviews.length > 0 && (
                 <div>
                   {userProfile && similarProfileReviews.length > 0 && (
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 mt-8">All Reviews</h3>
+                    <h3 className="text-lg font-semibold text-deep mb-4 mt-8">All Reviews</h3>
                   )}
                   <div className="space-y-6">
                     {otherReviews.map((review) => (
-                      <div key={review.id} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
+                      <div key={review.id} className="border-b border-blush last:border-0 pb-6 last:pb-0">
                         <div className="flex items-start justify-between mb-3">
                           <div>
-                            <p className="font-semibold text-forest-900">{review.author}</p>
-                            <p className="text-sm text-gray-600">{review.skinType} • {review.date}</p>
+                            <p className="font-semibold text-deep">{review.author}</p>
+                            <p className="text-sm text-warm-gray">{review.skinType} • {review.date}</p>
                           </div>
                           <div className="flex items-center">
                             {[1, 2, 3, 4, 5].map((star) => (
                               <i
                                 key={star}
                                 className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-gray-300'
+                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
                                 }`}
                               ></i>
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-700 leading-relaxed mb-3">{review.comment}</p>
-                        <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-sage-600 transition-colors cursor-pointer">
+                        <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
+                        <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
                           <i className="ri-thumb-up-line"></i>
                           <span>Helpful ({review.helpful})</span>
                         </button>
@@ -438,7 +438,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
 
               <button 
                 onClick={() => setShowAllReviewsModal(true)}
-                className="w-full mt-6 py-3 border-2 border-sage-600 text-sage-600 rounded-full font-semibold hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
+                className="w-full mt-6 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary-50 transition-colors whitespace-nowrap cursor-pointer"
               >
                 Read All Reviews
               </button>
@@ -449,15 +449,15 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
           <div className="space-y-6">
             {/* Best For */}
             <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-forest-900 mb-4">Best For</h3>
+              <h3 className="text-lg font-semibold text-deep mb-4">Best For</h3>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Skin Types</p>
+                  <p className="text-sm font-medium text-warm-gray mb-2">Skin Types</p>
                   <div className="flex flex-wrap gap-2">
                     {ingredient.skinTypes.map((type, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-sage-100 text-sage-700 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-light/30 text-primary-700 text-xs font-medium rounded-full"
                       >
                         {type}
                       </span>
@@ -465,12 +465,12 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-gray-600 mb-2">Concerns</p>
+                  <p className="text-sm font-medium text-warm-gray mb-2">Concerns</p>
                   <div className="flex flex-wrap gap-2">
                     {ingredient.concerns.map((concern, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-coral-100 text-coral-700 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-light/30 text-primary-700 text-xs font-medium rounded-full"
                       >
                         {concern}
                       </span>
@@ -481,14 +481,17 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             </div>
 
             {/* CTA */}
-            <div className="bg-gradient-to-br from-forest-800 to-forest-900 rounded-2xl p-6 text-white">
+            <div className="bg-gradient-to-br from-primary to-dark rounded-2xl p-6 text-white">
               <h3 className="text-xl font-serif mb-3">Find Products</h3>
-              <p className="text-cream-200 text-sm mb-6">
+              <p className="text-light text-sm mb-6">
                 Discover products featuring this ingredient in our curated marketplace.
               </p>
-              <button className="w-full py-3 bg-white text-forest-900 rounded-full font-semibold hover:bg-cream-100 transition-colors whitespace-nowrap cursor-pointer">
+              <a 
+                href="/marketplace"
+                className="block w-full py-3 bg-white text-deep rounded-full font-semibold hover:bg-cream transition-colors whitespace-nowrap cursor-pointer text-center"
+              >
                 Shop Now
-              </button>
+              </a>
             </div>
           </div>
         </div>
@@ -499,16 +502,16 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-blush">
               <div>
-                <h2 className="text-2xl font-serif text-forest-900">All Reviews</h2>
-                <p className="text-sm text-gray-600 mt-1">{allReviewsCombined.length} total reviews</p>
+                <h2 className="text-2xl font-serif text-deep">All Reviews</h2>
+                <p className="text-sm text-warm-gray mt-1">{allReviewsCombined.length} total reviews</p>
               </div>
               <button
                 onClick={() => setShowAllReviewsModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
               >
-                <i className="ri-close-line text-2xl text-gray-600"></i>
+                <i className="ri-close-line text-2xl text-warm-gray"></i>
               </button>
             </div>
 
@@ -519,24 +522,24 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                 <div className="mb-8">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 flex items-center justify-center bg-emerald-500 rounded-full">
+                      <div className="w-8 h-8 flex items-center justify-center bg-sage rounded-full">
                         <i className="ri-user-heart-line text-white"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-emerald-600">Similar Skin Reviews</h3>
+                      <h3 className="text-lg font-semibold text-sage">Similar Skin Reviews</h3>
                     </div>
-                    <span className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">
+                    <span className="text-xs bg-sage/20 text-sage px-3 py-1 rounded-full font-medium">
                       {similarProfileReviews.length} matches
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">
+                  <p className="text-sm text-warm-gray mb-4">
                     Reviews from users with similar skin type, concerns, and profile attributes as you.
                   </p>
                   <div className="space-y-6">
                     {similarProfileReviews.map((review) => (
-                      <div key={review.id} className="border-2 border-emerald-500/20 rounded-xl p-6 bg-emerald-50/30 hover:shadow-md transition-shadow relative">
+                      <div key={review.id} className="border-2 border-sage/20 rounded-xl p-6 bg-sage/10 hover:shadow-md transition-shadow relative">
                         {/* Similar Skin Badge */}
                         <div className="absolute top-4 right-4 z-10">
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500 text-white rounded-full text-xs font-semibold shadow-md">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-sage text-white rounded-full text-xs font-semibold shadow-md">
                             <i className="ri-user-heart-line text-sm"></i>
                             Similar Skin
                           </span>
@@ -544,8 +547,8 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                         
                         <div className="flex items-start justify-between mb-3">
                           <div className="flex-1 pr-32">
-                            <p className="font-semibold text-forest-900">{review.author}</p>
-                            <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                            <p className="font-semibold text-deep">{review.author}</p>
+                            <div className="flex items-center gap-2 text-sm text-warm-gray mt-1">
                               <span>{review.skinType}</span>
                               {review.fitzpatrickType && (
                                 <>
@@ -559,7 +562,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                                 {review.concerns.map((concern, idx) => (
                                   <span
                                     key={idx}
-                                    className="text-xs bg-white px-2 py-1 rounded-full text-gray-700"
+                                    className="text-xs bg-white px-2 py-1 rounded-full text-warm-gray"
                                   >
                                     {concern}
                                   </span>
@@ -572,19 +575,19 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                               <i
                                 key={star}
                                 className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-gray-300'
+                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
                                 }`}
                               ></i>
                             ))}
                           </div>
                         </div>
-                        <p className="text-gray-700 leading-relaxed mb-3">{review.comment}</p>
-                        <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                          <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-sage-600 transition-colors cursor-pointer">
+                        <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
+                        <div className="flex items-center justify-between pt-3 border-t border-blush">
+                          <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
                             <i className="ri-thumb-up-line"></i>
                             <span>Helpful ({review.helpful})</span>
                           </button>
-                          <span className="text-xs text-gray-500">{review.date}</span>
+                          <span className="text-xs text-warm-gray/80">{review.date}</span>
                         </div>
                       </div>
                     ))}
@@ -595,15 +598,15 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
               {/* All Other Reviews Section */}
               <div>
                 {userProfile && similarProfileReviews.length > 0 && (
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">All Reviews</h3>
+                  <h3 className="text-lg font-semibold text-deep mb-4">All Reviews</h3>
                 )}
                 <div className="space-y-6">
                   {allReviewsCombined.filter(r => !isSimilarSkinReview(r.id)).map((review) => (
-                    <div key={review.id} className="border border-gray-200 rounded-xl p-6 hover:shadow-md transition-shadow">
+                    <div key={review.id} className="border border-blush rounded-xl p-6 hover:shadow-md transition-shadow">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex-1">
-                          <p className="font-semibold text-forest-900">{review.author}</p>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                          <p className="font-semibold text-deep">{review.author}</p>
+                          <div className="flex items-center gap-2 text-sm text-warm-gray mt-1">
                             <span>{review.skinType}</span>
                             {review.fitzpatrickType && (
                               <>
@@ -617,7 +620,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                               {review.concerns.map((concern, idx) => (
                                 <span
                                   key={idx}
-                                  className="text-xs bg-gray-100 px-2 py-1 rounded-full text-gray-700"
+                                  className="text-xs bg-cream px-2 py-1 rounded-full text-warm-gray"
                                 >
                                   {concern}
                                 </span>
@@ -630,19 +633,19 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                             <i
                               key={star}
                               className={`ri-star-fill text-sm ${
-                                star <= review.rating ? 'text-amber-400' : 'text-gray-300'
+                                star <= review.rating ? 'text-amber-400' : 'text-blush'
                               }`}
                             ></i>
                           ))}
                         </div>
                       </div>
-                      <p className="text-gray-700 leading-relaxed mb-3">{review.comment}</p>
-                      <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                        <button className="flex items-center space-x-2 text-sm text-gray-600 hover:text-sage-600 transition-colors cursor-pointer">
+                      <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
+                      <div className="flex items-center justify-between pt-3 border-t border-blush">
+                        <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
                           <i className="ri-thumb-up-line"></i>
                           <span>Helpful ({review.helpful})</span>
                         </button>
-                        <span className="text-xs text-gray-500">{review.date}</span>
+                        <span className="text-xs text-warm-gray/80">{review.date}</span>
                       </div>
                     </div>
                   ))}
@@ -651,10 +654,10 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="p-6 border-t border-blush bg-cream">
               <button
                 onClick={() => setShowAllReviewsModal(false)}
-                className="w-full py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="w-full py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-colors cursor-pointer whitespace-nowrap"
               >
                 Close
               </button>

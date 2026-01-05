@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
@@ -82,28 +81,28 @@ const NutritionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">Nutrition Management</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <h1 className="text-4xl lg:text-6xl font-serif text-deep mb-6">Nutrition Management</h1>
+          <p className="text-xl text-warm-gray max-w-2xl mx-auto">
             Discover skin-beneficial foods, plan your meals, and track your nutrient intake
           </p>
         </div>
 
         {/* Tabs */}
-        <div className="flex items-center space-x-2 mb-8 border-b border-gray-200">
+        <div className="flex items-center space-x-2 mb-8 border-b border-blush">
           {tabs.map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex items-center space-x-2 px-6 py-3 font-medium transition-all whitespace-nowrap cursor-pointer ${
                 activeTab === tab.id
-                  ? 'text-sage-600 border-b-2 border-sage-600'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'text-primary border-b-2 border-primary'
+                  : 'text-warm-gray hover:text-deep'
               }`}
             >
               <i className={`${tab.icon} text-lg`}></i>
@@ -146,8 +145,8 @@ const NutritionPage = () => {
       {showAddToPlanModal && planningFood && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
-            <h3 className="text-xl font-bold text-gray-900 mb-4">Add to Meal Plan</h3>
-            <p className="text-gray-600 mb-6">{planningFood.name}</p>
+            <h3 className="text-xl font-bold text-deep mb-4">Add to Meal Plan</h3>
+            <p className="text-warm-gray mb-6">{planningFood.name}</p>
 
             <form
               onSubmit={(e) => {
@@ -164,11 +163,11 @@ const NutritionPage = () => {
               className="space-y-4"
             >
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Meal Type</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Meal Type</label>
                 <select
                   name="mealType"
                   required
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none cursor-pointer"
+                  className="w-full px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none cursor-pointer"
                 >
                   <option value="Breakfast">Breakfast</option>
                   <option value="Lunch">Lunch</option>
@@ -178,45 +177,45 @@ const NutritionPage = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Date</label>
                 <input
                   type="date"
                   name="date"
                   required
                   defaultValue={new Date().toISOString().split('T')[0]}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none"
+                  className="w-full px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Time</label>
                 <input
                   type="time"
                   name="time"
                   required
                   defaultValue="12:00"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none"
+                  className="w-full px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Servings</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Servings</label>
                 <input
                   type="number"
                   name="servings"
                   required
                   min="1"
                   defaultValue="1"
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none"
+                  className="w-full px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Notes (Optional)</label>
                 <textarea
                   name="notes"
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none resize-none"
+                  className="w-full px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none resize-none"
                   placeholder="Any special instructions or modifications..."
                 ></textarea>
               </div>
@@ -224,7 +223,7 @@ const NutritionPage = () => {
               <div className="flex items-center space-x-3 pt-4">
                 <button
                   type="submit"
-                  className="flex-1 px-6 py-3 bg-sage-600 text-white rounded-xl font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+                  className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-dark transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Add to Plan
                 </button>
@@ -234,7 +233,7 @@ const NutritionPage = () => {
                     setShowAddToPlanModal(false);
                     setPlanningFood(null);
                   }}
-                  className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-6 py-3 bg-cream text-warm-gray rounded-xl font-semibold hover:bg-blush transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Cancel
                 </button>

@@ -1,0 +1,90 @@
+import { ReactNode } from 'react';
+import Navbar from './Navbar';
+import Footer from './Footer';
+
+/**
+ * PageWrapper Component
+ * 
+ * Provides consistent Lorem Curae styling across all pages.
+ * 
+ * Color Scheme:
+ * - Primary: #C4704D (coral)
+ * - Light: #E8A888 (light coral)
+ * - Dark: #8B4D35 (dark coral)
+ * - Cream: #FDF8F5 (background)
+ * - Deep: #2D2A26 (text)
+ * - Sage: #7A8B7A (accents)
+ * - Warm Gray: #6B635A (body text)
+ * - Blush: #E8D4CC (subtle accents)
+ */
+
+interface PageWrapperProps {
+  children: ReactNode;
+  className?: string;
+}
+
+export default function PageWrapper({ children, className = '' }: PageWrapperProps) {
+  return (
+    <div className={`lc-page-wrapper ${className}`}>
+      <style>{`
+        .lc-page-wrapper {
+          min-height: 100vh;
+          background: linear-gradient(180deg, #FDF8F5 0%, #FFF9F5 50%, #FFFBF8 100%);
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          color: #2D2A26;
+        }
+        
+        .lc-page-wrapper h1,
+        .lc-page-wrapper h2,
+        .lc-page-wrapper h3,
+        .lc-page-wrapper h4 {
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
+          color: #2D2A26;
+        }
+        
+        .lc-page-content {
+          padding-top: 80px;
+          min-height: calc(100vh - 80px);
+        }
+        
+        /* Sage overrides */
+        .lc-page-wrapper .bg-sage-50 { background-color: rgba(122, 139, 122, 0.08) !important; }
+        .lc-page-wrapper .bg-sage-100 { background-color: rgba(122, 139, 122, 0.12) !important; }
+        .lc-page-wrapper .bg-sage-500 { background-color: #7A8B7A !important; }
+        .lc-page-wrapper .bg-sage-600 { background-color: #6A7B6A !important; }
+        .lc-page-wrapper .text-sage-600 { color: #7A8B7A !important; }
+        .lc-page-wrapper .text-sage-700 { color: #6A7B6A !important; }
+        .lc-page-wrapper .border-sage-200 { border-color: rgba(122, 139, 122, 0.2) !important; }
+        .lc-page-wrapper .hover\\:bg-sage-50:hover { background-color: rgba(122, 139, 122, 0.08) !important; }
+        .lc-page-wrapper .hover\\:bg-sage-700:hover { background-color: #5A6B5A !important; }
+        
+        /* Coral overrides */
+        .lc-page-wrapper .bg-coral-50 { background-color: rgba(196, 112, 77, 0.06) !important; }
+        .lc-page-wrapper .bg-coral-100 { background-color: rgba(196, 112, 77, 0.1) !important; }
+        .lc-page-wrapper .bg-coral-500 { background-color: #C4704D !important; }
+        .lc-page-wrapper .bg-coral-600 { background-color: #8B4D35 !important; }
+        .lc-page-wrapper .text-coral-500 { color: #C4704D !important; }
+        .lc-page-wrapper .text-coral-600 { color: #8B4D35 !important; }
+        .lc-page-wrapper .border-coral-200 { border-color: rgba(196, 112, 77, 0.2) !important; }
+        
+        /* Forest/Deep overrides */
+        .lc-page-wrapper .bg-forest-900 { background-color: #2D2A26 !important; }
+        .lc-page-wrapper .text-forest-800 { color: #3D3A36 !important; }
+        .lc-page-wrapper .text-forest-900 { color: #2D2A26 !important; }
+        
+        /* Cream overrides */
+        .lc-page-wrapper .bg-cream-50 { background-color: #FFFBF8 !important; }
+        .lc-page-wrapper .bg-cream-100 { background-color: #FDF8F5 !important; }
+        
+        /* Focus states */
+        .lc-page-wrapper .focus\\:ring-sage-500:focus { --tw-ring-color: #7A8B7A !important; }
+        .lc-page-wrapper .focus\\:ring-coral-500:focus { --tw-ring-color: #C4704D !important; }
+      `}</style>
+      <Navbar />
+      <div className="lc-page-content">
+        {children}
+      </div>
+      <Footer />
+    </div>
+  );
+}

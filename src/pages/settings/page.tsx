@@ -43,13 +43,13 @@ const SettingsPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Settings</h1>
-          <p className="text-gray-600">Manage your account preferences and settings</p>
+          <h1 className="text-3xl font-bold text-deep mb-2">Settings</h1>
+          <p className="text-warm-gray">Manage your account preferences and settings</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -59,7 +59,7 @@ const SettingsPage = () => {
               <button
                 onClick={() => setActiveTab('profile')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                  activeTab === 'profile' ? 'bg-sage-50 text-sage-700' : 'text-gray-700 hover:bg-gray-50'
+                  activeTab === 'profile' ? 'bg-primary-50 text-primary-700' : 'text-warm-gray hover:bg-cream'
                 }`}
               >
                 <i className="ri-user-line text-lg mr-3"></i>
@@ -68,7 +68,7 @@ const SettingsPage = () => {
               <button
                 onClick={() => setActiveTab('account')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                  activeTab === 'account' ? 'bg-sage-50 text-sage-700' : 'text-gray-700 hover:bg-gray-50'
+                  activeTab === 'account' ? 'bg-primary-50 text-primary-700' : 'text-warm-gray hover:bg-cream'
                 }`}
               >
                 <i className="ri-shield-user-line text-lg mr-3"></i>
@@ -77,7 +77,7 @@ const SettingsPage = () => {
               <button
                 onClick={() => setActiveTab('notifications')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                  activeTab === 'notifications' ? 'bg-sage-50 text-sage-700' : 'text-gray-700 hover:bg-gray-50'
+                  activeTab === 'notifications' ? 'bg-primary-50 text-primary-700' : 'text-warm-gray hover:bg-cream'
                 }`}
               >
                 <i className="ri-notification-line text-lg mr-3"></i>
@@ -86,7 +86,7 @@ const SettingsPage = () => {
               <button
                 onClick={() => setActiveTab('privacy')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                  activeTab === 'privacy' ? 'bg-sage-50 text-sage-700' : 'text-gray-700 hover:bg-gray-50'
+                  activeTab === 'privacy' ? 'bg-primary-50 text-primary-700' : 'text-warm-gray hover:bg-cream'
                 }`}
               >
                 <i className="ri-lock-line text-lg mr-3"></i>
@@ -95,7 +95,7 @@ const SettingsPage = () => {
               <button
                 onClick={() => setActiveTab('preferences')}
                 className={`w-full flex items-center px-4 py-3 rounded-lg transition-colors cursor-pointer ${
-                  activeTab === 'preferences' ? 'bg-sage-50 text-sage-700' : 'text-gray-700 hover:bg-gray-50'
+                  activeTab === 'preferences' ? 'bg-primary-50 text-primary-700' : 'text-warm-gray hover:bg-cream'
                 }`}
               >
                 <i className="ri-settings-3-line text-lg mr-3"></i>
@@ -109,36 +109,36 @@ const SettingsPage = () => {
             <div className="bg-white rounded-xl p-8">
               {activeTab === 'profile' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
-                  <h2 className="text-xl font-bold text-gray-900">Profile Information</h2>
+                  <h2 className="text-xl font-bold text-deep">Profile Information</h2>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Full Name</label>
                     <input
                       type="text"
                       defaultValue="Sarah Chen"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Username</label>
                     <input
                       type="text"
                       defaultValue="@skincare_enthusiast"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Bio</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Bio</label>
                     <textarea
                       rows={4}
                       defaultValue="Passionate about clean beauty and science-backed skincare. Always learning!"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
 
-                  <button className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                  <button className="px-6 py-3 bg-primary text-white rounded-lg font-medium hover:bg-dark transition-colors whitespace-nowrap cursor-pointer">
                     Save Changes
                   </button>
                 </div>
@@ -146,26 +146,26 @@ const SettingsPage = () => {
 
               {activeTab === 'account' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
-                  <h2 className="text-xl font-bold text-gray-900">Account Settings</h2>
+                  <h2 className="text-xl font-bold text-deep">Account Settings</h2>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Email Address</label>
                     <input
                       type="email"
                       defaultValue="sarah.chen@example.com"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Change Password</label>
-                    <button className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer">
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Change Password</label>
+                    <button className="px-6 py-3 border border-blush text-warm-gray rounded-lg font-medium hover:bg-cream transition-colors whitespace-nowrap cursor-pointer">
                       Update Password
                     </button>
                   </div>
 
-                  <div className="pt-6 border-t border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Danger Zone</h3>
+                  <div className="pt-6 border-t border-blush">
+                    <h3 className="text-lg font-semibold text-deep mb-4">Danger Zone</h3>
                     <button className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors whitespace-nowrap cursor-pointer">
                       Delete Account
                     </button>
@@ -175,31 +175,31 @@ const SettingsPage = () => {
 
               {activeTab === 'notifications' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
-                  <h2 className="text-xl font-bold text-gray-900">Notification Preferences</h2>
+                  <h2 className="text-xl font-bold text-deep">Notification Preferences</h2>
                   
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Email Notifications</p>
-                        <p className="text-sm text-gray-600">Receive updates via email</p>
+                        <p className="font-medium text-deep">Email Notifications</p>
+                        <p className="text-sm text-warm-gray">Receive updates via email</p>
                       </div>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 text-sage-600 rounded cursor-pointer" />
+                      <input type="checkbox" defaultChecked className="w-5 h-5 text-primary rounded cursor-pointer" />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Product Reminders</p>
-                        <p className="text-sm text-gray-600">Get notified about expiring products</p>
+                        <p className="font-medium text-deep">Product Reminders</p>
+                        <p className="text-sm text-warm-gray">Get notified about expiring products</p>
                       </div>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 text-sage-600 rounded cursor-pointer" />
+                      <input type="checkbox" defaultChecked className="w-5 h-5 text-primary rounded cursor-pointer" />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Community Updates</p>
-                        <p className="text-sm text-gray-600">Stay updated with community posts</p>
+                        <p className="font-medium text-deep">Community Updates</p>
+                        <p className="text-sm text-warm-gray">Stay updated with community posts</p>
                       </div>
-                      <input type="checkbox" className="w-5 h-5 text-sage-600 rounded cursor-pointer" />
+                      <input type="checkbox" className="w-5 h-5 text-primary rounded cursor-pointer" />
                     </div>
                   </div>
                 </div>
@@ -207,23 +207,23 @@ const SettingsPage = () => {
 
               {activeTab === 'privacy' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
-                  <h2 className="text-xl font-bold text-gray-900">Privacy Settings</h2>
+                  <h2 className="text-xl font-bold text-deep">Privacy Settings</h2>
                   
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Profile Visibility</p>
-                        <p className="text-sm text-gray-600">Make your profile visible to others</p>
+                        <p className="font-medium text-deep">Profile Visibility</p>
+                        <p className="text-sm text-warm-gray">Make your profile visible to others</p>
                       </div>
-                      <input type="checkbox" defaultChecked className="w-5 h-5 text-sage-600 rounded cursor-pointer" />
+                      <input type="checkbox" defaultChecked className="w-5 h-5 text-primary rounded cursor-pointer" />
                     </div>
 
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-gray-900">Show Routines</p>
-                        <p className="text-sm text-gray-600">Allow others to see your routines</p>
+                        <p className="font-medium text-deep">Show Routines</p>
+                        <p className="text-sm text-warm-gray">Allow others to see your routines</p>
                       </div>
-                      <input type="checkbox" className="w-5 h-5 text-sage-600 rounded cursor-pointer" />
+                      <input type="checkbox" className="w-5 h-5 text-primary rounded cursor-pointer" />
                     </div>
                   </div>
                 </div>
@@ -231,14 +231,14 @@ const SettingsPage = () => {
 
               {activeTab === 'preferences' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
-                  <h2 className="text-xl font-bold text-gray-900">App Preferences</h2>
+                  <h2 className="text-xl font-bold text-deep">App Preferences</h2>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Language</label>
                     <select 
                       value={language}
                       onChange={(e) => handleLanguageChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
                     >
                       <option value="en">English</option>
                       <option value="es">Spanish</option>
@@ -247,11 +247,11 @@ const SettingsPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Theme</label>
+                    <label className="block text-sm font-medium text-warm-gray mb-2">Theme</label>
                     <select 
                       value={theme}
                       onChange={(e) => handleThemeChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                      className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
                     >
                       <option value="light">Light</option>
                       <option value="dark">Dark</option>

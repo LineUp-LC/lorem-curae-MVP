@@ -12,8 +12,7 @@ const AccountPage = () => {
   const [recentSearches, setRecentSearches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Mock user data - add tier information
-  const userTier = 'basic'; // 'free', 'basic', 'premium'
+  const userTier = 'basic';
 
   const user = {
     name: 'Sarah Chen',
@@ -34,7 +33,6 @@ const AccountPage = () => {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        // Load recent marketplace purchases
         const { data: purchases } = await supabase
           .from('marketplace_transactions')
           .select(`
@@ -49,13 +47,11 @@ const AccountPage = () => {
         setRecentPurchases(purchases || []);
       }
       
-      // Load recent searches from localStorage
       const searches = localStorage.getItem('recent_searches');
       if (searches) {
         setRecentSearches(JSON.parse(searches));
       }
       
-      // Mock recent services (would come from database in production)
       setRecentServices([
         {
           id: 1,
@@ -80,16 +76,16 @@ const AccountPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
         {/* Profile Header */}
-        <div className="bg-white rounded-xl p-8 mb-8">
+        <div className="bg-white rounded-xl p-8 mb-8" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
           <div className="flex items-start justify-between">
             <div className="flex items-center space-x-6">
               <div className="relative">
-                <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-sage-200">
+                <div className="w-24 h-24 rounded-full overflow-hidden" style={{ boxShadow: '0 0 0 4px rgba(232, 168, 136, 0.3)' }}>
                   <img 
                     src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=user-avatar&orientation=squarish"
                     alt="Profile"
@@ -98,32 +94,34 @@ const AccountPage = () => {
                 </div>
                 <Link
                   to="/profile/edit"
-                  className="absolute bottom-0 right-0 w-8 h-8 flex items-center justify-center bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors cursor-pointer"
+                  className="absolute bottom-0 right-0 w-8 h-8 flex items-center justify-center text-white rounded-full transition-colors cursor-pointer"
+                  style={{ backgroundColor: '#C4704D' }}
                 >
                   <i className="ri-pencil-line text-sm"></i>
                 </Link>
               </div>
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <h1 className="text-2xl font-bold text-gray-900">Sarah Chen</h1>
+                  <h1 className="text-2xl font-bold" style={{ color: '#2D2A26' }}>Sarah Chen</h1>
                   {userTier === 'premium' && (
-                    <span className="px-3 py-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm rounded-full font-medium">
+                    <span className="px-3 py-1 text-white text-sm rounded-full font-medium" style={{ background: 'linear-gradient(135deg, #C4704D 0%, #8B4D35 100%)' }}>
                       Premium
                     </span>
                   )}
                   {userTier === 'basic' && (
-                    <span className="px-3 py-1 bg-sage-600 text-white text-sm rounded-full font-medium">
+                    <span className="px-3 py-1 text-white text-sm rounded-full font-medium" style={{ backgroundColor: '#C4704D' }}>
                       Plus
                     </span>
                   )}
                 </div>
-                <p className="text-gray-600 mb-1">@skincare_enthusiast</p>
-                <p className="text-sm text-gray-500">Member since January 2024</p>
+                <p style={{ color: '#6B635A' }} className="mb-1">@skincare_enthusiast</p>
+                <p className="text-sm" style={{ color: '#9A938A' }}>Member since January 2024</p>
               </div>
             </div>
             <Link
               to="/profile/customize"
-              className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+              className="px-6 py-3 text-white rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer"
+              style={{ backgroundColor: '#C4704D' }}
             >
               <i className="ri-palette-line mr-2"></i>
               Customize Profile
@@ -136,55 +134,59 @@ const AccountPage = () => {
           <Link
             to="/my-skin"
             className="bg-white rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
+            style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}
           >
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg mb-4 group-hover:bg-gray-200 transition-colors">
+            <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4 transition-colors" style={{ backgroundColor: 'rgba(196, 112, 77, 0.1)', color: '#C4704D' }}>
               <i className="ri-heart-pulse-line text-2xl"></i>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">My Skin</h3>
-            <p className="text-sm text-gray-600">View your profile</p>
+            <h3 className="font-semibold mb-1" style={{ color: '#2D2A26' }}>My Skin</h3>
+            <p className="text-sm" style={{ color: '#6B635A' }}>View your profile</p>
           </Link>
 
           <Link
             to="/routines-list"
             className="bg-white rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
+            style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}
           >
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg mb-4 group-hover:bg-gray-200 transition-colors">
+            <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4 transition-colors" style={{ backgroundColor: 'rgba(196, 112, 77, 0.1)', color: '#C4704D' }}>
               <i className="ri-calendar-check-line text-2xl"></i>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">My Routines</h3>
-            <p className="text-sm text-gray-600">Manage regimens</p>
+            <h3 className="font-semibold mb-1" style={{ color: '#2D2A26' }}>My Routines</h3>
+            <p className="text-sm" style={{ color: '#6B635A' }}>Manage regimens</p>
           </Link>
 
           <Link
             to="/marketplace"
             className="bg-white rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
+            style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}
           >
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg mb-4 group-hover:bg-gray-200 transition-colors">
+            <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4 transition-colors" style={{ backgroundColor: 'rgba(196, 112, 77, 0.1)', color: '#C4704D' }}>
               <i className="ri-store-2-line text-2xl"></i>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Marketplace</h3>
-            <p className="text-sm text-gray-600">Browse products</p>
+            <h3 className="font-semibold mb-1" style={{ color: '#2D2A26' }}>Marketplace</h3>
+            <p className="text-sm" style={{ color: '#6B635A' }}>Browse products</p>
           </Link>
 
           <Link
             to="/badges"
             className="bg-white rounded-xl p-6 hover:shadow-lg transition-all cursor-pointer group"
+            style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}
           >
-            <div className="w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-lg mb-4 group-hover:bg-gray-200 transition-colors">
+            <div className="w-12 h-12 flex items-center justify-center rounded-lg mb-4 transition-colors" style={{ backgroundColor: 'rgba(196, 112, 77, 0.1)', color: '#C4704D' }}>
               <i className="ri-medal-line text-2xl"></i>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">Badges</h3>
-            <p className="text-sm text-gray-600">View achievements</p>
+            <h3 className="font-semibold mb-1" style={{ color: '#2D2A26' }}>Badges</h3>
+            <p className="text-sm" style={{ color: '#6B635A' }}>View achievements</p>
           </Link>
         </div>
 
         {/* Recent Marketplace Purchases */}
         {recentPurchases.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: '#2D2A26' }}>
               Recent Marketplace Purchases
             </h2>
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-6" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {recentPurchases.map((purchase) => (
                   <Link
@@ -192,18 +194,18 @@ const AccountPage = () => {
                     to={`/storefront/${purchase.marketplace_products?.id}`}
                     className="group cursor-pointer"
                   >
-                    <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-50">
+                    <div className="aspect-square rounded-lg overflow-hidden mb-3" style={{ backgroundColor: '#F8F4F0' }}>
                       <img
                         src={purchase.marketplace_products?.image_url}
                         alt={purchase.marketplace_products?.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
-                    <h4 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2 group-hover:text-sage-600 transition-colors">
+                    <h4 className="text-sm font-medium mb-1 line-clamp-2 transition-colors" style={{ color: '#2D2A26' }}>
                       {purchase.marketplace_products?.name}
                     </h4>
-                    <p className="text-xs text-gray-600">{purchase.marketplace_storefronts?.business_name}</p>
-                    <p className="text-xs text-gray-500 mt-1">
+                    <p className="text-xs" style={{ color: '#6B635A' }}>{purchase.marketplace_storefronts?.business_name}</p>
+                    <p className="text-xs mt-1" style={{ color: '#9A938A' }}>
                       {new Date(purchase.created_at).toLocaleDateString()}
                     </p>
                   </Link>
@@ -216,18 +218,19 @@ const AccountPage = () => {
         {/* Recent Services Searched */}
         {recentServices.length > 0 && (
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 className="text-2xl font-bold mb-6" style={{ color: '#2D2A26' }}>
               Services Recently Searched
             </h2>
-            <div className="bg-white rounded-xl p-6">
+            <div className="bg-white rounded-xl p-6" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {recentServices.map((service) => (
                   <Link
                     key={service.id}
                     to={`/services/${service.id}`}
-                    className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-sage-300 hover:shadow-md transition-all cursor-pointer group"
+                    className="flex items-center gap-4 p-4 rounded-lg hover:shadow-md transition-all cursor-pointer group"
+                    style={{ border: '1px solid rgba(232, 212, 204, 0.5)' }}
                   >
-                    <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
+                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: '#F8F4F0' }}>
                       <img
                         src={service.image}
                         alt={service.serviceName}
@@ -235,15 +238,15 @@ const AccountPage = () => {
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-1 group-hover:text-sage-600 transition-colors">
+                      <h4 className="text-sm font-semibold mb-1 transition-colors" style={{ color: '#2D2A26' }}>
                         {service.serviceName}
                       </h4>
-                      <p className="text-xs text-gray-600 mb-1">{service.businessName}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs mb-1" style={{ color: '#6B635A' }}>{service.businessName}</p>
+                      <p className="text-xs" style={{ color: '#9A938A' }}>
                         Searched: {new Date(service.date).toLocaleDateString()}
                       </p>
                     </div>
-                    <i className="ri-arrow-right-line text-gray-400 group-hover:text-sage-600 transition-colors"></i>
+                    <i className="ri-arrow-right-line transition-colors" style={{ color: '#C4704D' }}></i>
                   </Link>
                 ))}
               </div>
@@ -253,20 +256,21 @@ const AccountPage = () => {
 
         {/* Products Recently Searched For */}
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <h2 className="text-2xl font-bold mb-6" style={{ color: '#2D2A26' }}>
             Products Recently Searched For
           </h2>
 
           <div className="space-y-8">
             {recentSearches.length > 0 ? recentSearches.map((search, idx) => (
-              <div key={idx} className="bg-white rounded-xl p-6">
+              <div key={idx} className="bg-white rounded-xl p-6" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold" style={{ color: '#2D2A26' }}>
                     {search.concern}
                   </h3>
                   <Link
                     to={`/discover?concern=${search.concern}`}
-                    className="text-sm text-sage-600 hover:text-sage-700 font-medium cursor-pointer"
+                    className="text-sm font-medium cursor-pointer"
+                    style={{ color: '#C4704D' }}
                   >
                     View All <i className="ri-arrow-right-line ml-1"></i>
                   </Link>
@@ -279,31 +283,32 @@ const AccountPage = () => {
                       to={`/product-search-detail?id=${pidx + 1}`}
                       className="group cursor-pointer"
                     >
-                      <div className="aspect-square rounded-lg overflow-hidden mb-3 bg-gray-50">
+                      <div className="aspect-square rounded-lg overflow-hidden mb-3" style={{ backgroundColor: '#F8F4F0' }}>
                         <img
                           src={product.image}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
-                      <h4 className="text-sm font-medium text-gray-900 mb-1 line-clamp-2 group-hover:text-sage-600 transition-colors">
+                      <h4 className="text-sm font-medium mb-1 line-clamp-2 transition-colors" style={{ color: '#2D2A26' }}>
                         {product.name}
                       </h4>
-                      <p className="text-xs text-gray-600">{product.brand}</p>
+                      <p className="text-xs" style={{ color: '#6B635A' }}>{product.brand}</p>
                     </Link>
                   ))}
                 </div>
               </div>
             )) : (
-              <div className="bg-white rounded-xl p-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-search-line text-3xl text-gray-400"></i>
+              <div className="bg-white rounded-xl p-12 text-center" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
+                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#F8F4F0' }}>
+                  <i className="ri-search-line text-3xl" style={{ color: '#9A938A' }}></i>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">No recent searches</h3>
-                <p className="text-gray-600 mb-6">Start exploring products to see your search history here</p>
+                <h3 className="text-lg font-semibold mb-2" style={{ color: '#2D2A26' }}>No recent searches</h3>
+                <p className="mb-6" style={{ color: '#6B635A' }}>Start exploring products to see your search history here</p>
                 <Link
                   to="/discover"
-                  className="inline-block px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer"
+                  className="inline-block px-6 py-3 text-white rounded-lg font-medium transition-colors cursor-pointer"
+                  style={{ backgroundColor: '#C4704D' }}
                 >
                   Discover Products
                 </Link>

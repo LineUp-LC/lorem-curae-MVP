@@ -1,6 +1,19 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+/**
+ * SearchOverlay Component
+ * 
+ * Color Scheme (Lorem Curae):
+ * - Primary: #C4704D (coral)
+ * - Light: #E8A888 (light coral)
+ * - Dark: #8B4D35 (dark coral)
+ * - Cream: #FDF8F5 (background)
+ * - Deep: #2D2A26 (text)
+ * - Sage: #7A8B7A (accents)
+ * - Warm Gray: #6B635A (body text)
+ */
+
 interface SearchResult {
   id: number;
   title: string;
@@ -166,32 +179,58 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
     setSearchQuery('');
   };
 
-  const handleQuickLinkClick = (link: string) => {
-    navigate(link);
+  const handleQuickLinkClick = (path: string) => {
+    navigate(path);
     onClose();
     setSearchQuery('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+    if (e.key === 'Enter' && results.length > 0) {
+      handleResultClick(results[0]);
       onClose();
     }
   };
 
   if (!isOpen) return null;
 
+  // Category badge colors using Lorem Curae palette
+  const getCategoryBadgeClass = (category: string) => {
+    switch (category) {
+      case 'Product':
+        return 'bg-[#C4704D]/10 text-[#C4704D]';
+      case 'Service':
+        return 'bg-[#7A8B7A]/10 text-[#7A8B7A]';
+      case 'Ingredient':
+        return 'bg-[#E8A888]/20 text-[#8B4D35]';
+      case 'Business':
+        return 'bg-[#E8D4CC] text-[#6B635A]';
+      default:
+        return 'bg-[#FDF8F5] text-[#6B635A]';
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm motion-safe:animate-enter-fade isolate" onClick={onClose}>
-      <div className="min-h-screen px-3 sm:px-4 pt-16 sm:pt-20 pb-6 sm:pb-10">
+    <div className="fixed inset-0 z-50 bg-[#2D2A26]/50 backdrop-blur-sm motion-safe:animate-enter-fade isolate" onClick={onClose}>
+      <style>{`
+        .lc-search {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+        }
+        .lc-search-input::placeholder {
+          color: #6B635A;
+          opacity: 0.6;
+        }
+      `}</style>
+      <div className="lc-search min-h-screen px-3 sm:px-4 pt-16 sm:pt-20 pb-6 sm:pb-10">
         <div 
-          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden motion-safe:animate-enter-up will-change-transform"
+          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden motion-safe:animate-enter-up will-change-transform border border-[#E8D4CC]/30"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Search Input */}
-          <div className="p-4 sm:p-6 border-b border-gray-200">
+          <div className="p-4 sm:p-6 border-b border-[#E8D4CC]/30 bg-gradient-to-b from-[#FDF8F5] to-white">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-sage-100 flex-shrink-0">
-                <i className="ri-search-line text-xl sm:text-2xl text-sage-700"></i>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center rounded-full bg-[#C4704D]/10 flex-shrink-0">
+                <i className="ri-search-line text-xl sm:text-2xl text-[#C4704D]"></i>
               </div>
               <input
                 ref={inputRef}
@@ -200,14 +239,14 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Search products, services..."
-                className="flex-1 text-base sm:text-lg outline-none text-gray-800 placeholder-gray-400 min-w-0"
+                className="lc-search-input flex-1 text-base sm:text-lg outline-none text-[#2D2A26] bg-transparent min-w-0"
               />
               <button
                 onClick={onClose}
-                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer flex-shrink-0"
+                className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full hover:bg-[#FDF8F5] transition-colors cursor-pointer flex-shrink-0"
                 aria-label="Close search"
               >
-                <i className="ri-close-line text-xl sm:text-2xl text-gray-600"></i>
+                <i className="ri-close-line text-xl sm:text-2xl text-[#6B635A]"></i>
               </button>
             </div>
 
@@ -219,8 +258,8 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                   onClick={() => setActiveCategory(category)}
                   className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
                     activeCategory === category
-                      ? 'bg-sage-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-[#C4704D] text-white'
+                      : 'bg-[#FDF8F5] text-[#6B635A] hover:bg-[#E8D4CC]/50'
                   }`}
                 >
                   {category}
@@ -233,32 +272,32 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
           <div className="max-h-[50vh] sm:max-h-[500px] overflow-y-auto">
             {searchQuery.trim() === '' ? (
               <div className="p-8 sm:p-12 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-sage-50">
-                  <i className="ri-search-2-line text-3xl sm:text-4xl text-sage-400"></i>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-[#C4704D]/10">
+                  <i className="ri-search-2-line text-3xl sm:text-4xl text-[#C4704D]/60"></i>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">Start Searching</h3>
-                <p className="text-sm sm:text-base text-gray-600">Find products, services, ingredients, and more</p>
+                <h3 className="text-base sm:text-lg font-semibold text-[#2D2A26] mb-2" style={{ fontFamily: 'var(--lc-font-serif)' }}>Start Searching</h3>
+                <p className="text-sm sm:text-base text-[#6B635A]">Find products, services, ingredients, and more</p>
               </div>
             ) : results.length === 0 ? (
               <div className="p-8 sm:p-12 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-gray-100">
-                  <i className="ri-file-search-line text-3xl sm:text-4xl text-gray-400"></i>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-[#E8D4CC]/50">
+                  <i className="ri-file-search-line text-3xl sm:text-4xl text-[#6B635A]/60"></i>
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2">No Results Found</h3>
-                <p className="text-sm sm:text-base text-gray-600">Try adjusting your search or filters</p>
+                <h3 className="text-base sm:text-lg font-semibold text-[#2D2A26] mb-2" style={{ fontFamily: 'var(--lc-font-serif)' }}>No Results Found</h3>
+                <p className="text-sm sm:text-base text-[#6B635A]">Try adjusting your search or filters</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100">
+              <div className="divide-y divide-[#E8D4CC]/30">
                 {results.map((result, index) => (
                   <div
                     key={result.id}
                     onClick={() => handleResultClick(result)}
-                    className="p-3 sm:p-4 hover:bg-sage-50 transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
+                    className="p-3 sm:p-4 hover:bg-[#FDF8F5] transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
                     style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
                   >
                     <div className="flex items-center space-x-3 sm:space-x-4">
                       {result.image ? (
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-gray-100">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex-shrink-0 rounded-lg overflow-hidden bg-[#FDF8F5]">
                           <img
                             src={result.image}
                             alt={result.title}
@@ -266,8 +305,8 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                           />
                         </div>
                       ) : (
-                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center flex-shrink-0 rounded-lg bg-sage-100">
-                          <i className={`text-xl sm:text-2xl text-sage-600 ${
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 flex items-center justify-center flex-shrink-0 rounded-lg bg-[#C4704D]/10">
+                          <i className={`text-xl sm:text-2xl text-[#C4704D] ${
                             result.category === 'Page' ? 'ri-file-text-line' :
                             result.category === 'Product' ? 'ri-shopping-bag-line' :
                             result.category === 'Service' ? 'ri-service-line' :
@@ -278,20 +317,14 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                       )}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center space-x-2 mb-1">
-                          <h4 className="font-semibold text-gray-900 truncate text-sm sm:text-base">{result.title}</h4>
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${
-                            result.category === 'Product' ? 'bg-blue-100 text-blue-700' :
-                            result.category === 'Service' ? 'bg-purple-100 text-purple-700' :
-                            result.category === 'Ingredient' ? 'bg-green-100 text-green-700' :
-                            result.category === 'Business' ? 'bg-orange-100 text-orange-700' :
-                            'bg-gray-100 text-gray-700'
-                          }`}>
+                          <h4 className="font-semibold text-[#2D2A26] truncate text-sm sm:text-base">{result.title}</h4>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap ${getCategoryBadgeClass(result.category)}`}>
                             {result.category}
                           </span>
                         </div>
-                        <p className="text-xs sm:text-sm text-gray-600 truncate">{result.description}</p>
+                        <p className="text-xs sm:text-sm text-[#6B635A] truncate">{result.description}</p>
                       </div>
-                      <i className="ri-arrow-right-line text-lg sm:text-xl text-gray-400"></i>
+                      <i className="ri-arrow-right-line text-lg sm:text-xl text-[#C4704D]/50"></i>
                     </div>
                   </div>
                 ))}
@@ -301,36 +334,36 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
 
           {/* Quick Links */}
           {searchQuery.trim() === '' && (
-            <div className="p-4 sm:p-6 bg-gray-50 border-t border-gray-200">
-              <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Quick Links</h4>
+            <div className="p-4 sm:p-6 bg-[#FDF8F5] border-t border-[#E8D4CC]/30">
+              <h4 className="text-xs sm:text-sm font-semibold text-[#6B635A] mb-2 sm:mb-3 uppercase tracking-wider">Quick Links</h4>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => handleQuickLinkClick('/discover')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
                 >
-                  <i className="ri-compass-line text-sage-600"></i>
-                  <span className="text-xs sm:text-sm font-medium text-gray-800">Discover</span>
+                  <i className="ri-compass-line text-[#C4704D]"></i>
+                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Discover</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/ingredients')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
                 >
-                  <i className="ri-flask-line text-sage-600"></i>
-                  <span className="text-xs sm:text-sm font-medium text-gray-800">Ingredients</span>
+                  <i className="ri-flask-line text-[#C4704D]"></i>
+                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Ingredients</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/services')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
                 >
-                  <i className="ri-service-line text-sage-600"></i>
-                  <span className="text-xs sm:text-sm font-medium text-gray-800">Services</span>
+                  <i className="ri-service-line text-[#C4704D]"></i>
+                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Services</span>
                 </button>
                 <button
                   onClick={() => handleQuickLinkClick('/marketplace')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-sage-50 transition-colors cursor-pointer text-left"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
                 >
-                  <i className="ri-store-line text-sage-600"></i>
-                  <span className="text-xs sm:text-sm font-medium text-gray-800">Marketplace</span>
+                  <i className="ri-store-line text-[#C4704D]"></i>
+                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Marketplace</span>
                 </button>
               </div>
             </div>

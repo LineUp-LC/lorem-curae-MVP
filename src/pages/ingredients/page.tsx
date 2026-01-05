@@ -8,7 +8,7 @@ const IngredientsPage = () => {
   const [selectedIngredient, setSelectedIngredient] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       <main className="pt-20">
         {!selectedIngredient ? (

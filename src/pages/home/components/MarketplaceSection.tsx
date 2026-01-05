@@ -1,184 +1,303 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { cartState } from '../../../lib/utils/cartState';
+import { motion } from 'framer-motion';
+import {
+  fadeInUpSoft,
+  slideInFromLeft,
+  slideInFromRight,
+  cardHover,
+  buttonHover,
+  buttonTap,
+  viewportOnce,
+  EASING,
+  TIMING,
+} from '../../../lib/motion/motionVariants';
 
-const MarketplaceSection = () => {
-  const handleAddToCart = (product: {
-    id: number;
-    name: string;
-    brand: string;
-    price: number;
-    image: string;
-  }) => {
-    cartState.addItem({
-      id: product.id,
-      name: product.name,
-      brand: product.brand,
-      price: product.price,
-      quantity: 1,
-      image: product.image,
-      inStock: true,
-    });
-  };
+/**
+ * MarketplaceSection Component
+ * 
+ * Motion design:
+ * - Creator cards: fade + slide from left
+ * - Content: slide from right
+ * - Product cards: hover lift + CTA slide-up
+ * - Quote: soft typewriter effect
+ */
 
-  return (
-    <section className="py-24 bg-cream-50">
-      <div className="max-w-7xl mx-auto px-6 lg:px-12">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
-            Marketplace
-          </h2>
-          <p className="text-xl text-slate-600 max-w-3xl mx-auto leading-relaxed">
-            Shop from verified brands and indie creators. Discover unique products curated for quality and effectiveness.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-6" data-product-shop>
-          {/* Featured Creator Spotlight - Wider */}
-          <article className="lg:col-span-4 bg-forest-900 rounded-3xl p-8 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-sage-600/20 rounded-full blur-3xl"></div>
-            <div className="relative z-10">
-              <div className="flex items-center space-x-3 mb-6">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white">
-                    <img
-                      src="https://readdy.ai/api/search-image?query=Portrait%20of%20confident%20diverse%20indie%20beauty%20entrepreneur%20with%20natural%20glowing%20skin%2C%20warm%20lighting%2C%20authentic%20smile%2C%20professional%20yet%20approachable%2C%20inclusive%20representation%2C%20soft%20neutral%20background&width=200&height=200&seq=creator-001&orientation=squarish"
-                      alt="Maya Chen - Indie Beauty Creator"
-                      className="w-full h-full object-cover object-top"
-                    />
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 flex items-center justify-center bg-sage-500 rounded-full border-2 border-forest-900">
-                    <i className="ri-check-line text-xs" aria-hidden="true"></i>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg">Maya Chen</h3>
-                  <p className="text-sm text-cream-200">Indie Beauty Creator</p>
-                </div>
-              </div>
-
-              <p className="text-cream-100 leading-relaxed mb-6">
-                "After years of struggling with sensitive skin, I created a line that celebrates gentle, effective ingredients. Every product is crafted with care and transparency."
-              </p>
-
-              <div className="mb-6">
-                <div className="w-full h-48 rounded-2xl overflow-hidden">
-                  <img
-                    src="https://readdy.ai/api/search-image?query=Elegant%20minimalist%20skincare%20product%20bottle%20with%20natural%20botanical%20ingredients%2C%20clean%20aesthetic%2C%20soft%20lighting%2C%20simple%20neutral%20background%2C%20high-end%20beauty%20photography%2C%20product%20showcase&width=400&height=300&seq=product-featured-001&orientation=squarish"
-                    alt="Featured skincare product from Maya Chen Naturals collection"
-                    className="w-full h-full object-cover object-top"
-                  />
-                </div>
-              </div>
-
-              <Link
-                to="/storefront/detail?brand=maya-chen-naturals"
-                className="block w-full py-3 border-2 border-white/30 text-white rounded-full font-medium hover:bg-white/10 transition-colors whitespace-nowrap cursor-pointer text-center"
-                aria-label="Explore Maya Chen Naturals collection"
-              >
-                Explore Collection
-              </Link>
-            </div>
-          </article>
-
-          {/* Product Card 1 */}
-          <article className="lg:col-span-3 bg-cream-50 rounded-3xl p-6 hover:shadow-xl transition-all">
-            <div className="relative mb-4">
-              <span className="absolute top-3 left-3 px-3 py-1 bg-coral-500 text-white text-xs font-semibold rounded-full">
-                Community Favorite
-              </span>
-              <div className="w-full h-64 rounded-2xl overflow-hidden">
-                <img
-                  src="https://readdy.ai/api/search-image?query=Premium%20skincare%20serum%20bottle%20with%20dropper%2C%20minimalist%20design%2C%20natural%20ingredients%20visible%2C%20soft%20lighting%2C%20clean%20white%20background%2C%20high-end%20beauty%20product%20photography&width=400&height=500&seq=product-001&orientation=portrait"
-                  alt="Radiance Hydrating Serum by Glow Naturals - Premium skincare serum with dropper"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <h3 className="font-semibold text-lg text-forest-900">Radiance Hydrating Serum</h3>
-                <p className="text-sm text-gray-600">by Glow Naturals</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center" aria-label="5 out of 5 stars">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <i key={star} className="ri-star-fill text-amber-400 text-sm" aria-hidden="true"></i>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">(248 reviews)</span>
-              </div>
-              <p className="text-2xl font-bold text-forest-900">$42</p>
-              <button
-                onClick={() => handleAddToCart({
-                  id: 1001,
-                  name: 'Radiance Hydrating Serum',
-                  brand: 'Glow Naturals',
-                  price: 42,
-                  image: 'https://readdy.ai/api/search-image?query=Premium%20skincare%20serum%20bottle%20with%20dropper%2C%20minimalist%20design%2C%20natural%20ingredients%20visible%2C%20soft%20lighting%2C%20clean%20white%20background%2C%20high-end%20beauty%20product%20photography&width=400&height=500&seq=product-001&orientation=portrait',
-                })}
-                className="w-full py-3 bg-sage-600 text-white rounded-full font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
-                aria-label="Add Radiance Hydrating Serum to cart"
-              >
-                Add to Cart
-              </button>
-            </div>
-          </article>
-
-          {/* Product Card 2 */}
-          <article className="lg:col-span-3 bg-cream-50 rounded-3xl p-6 hover:shadow-xl transition-all">
-            <div className="relative mb-4">
-              <div className="w-full h-64 rounded-2xl overflow-hidden">
-                <img
-                  src="https://readdy.ai/api/search-image?query=Luxury%20face%20cream%20jar%20with%20natural%20botanical%20ingredients%2C%20elegant%20packaging%2C%20soft%20lighting%2C%20clean%20white%20background%2C%20premium%20beauty%20product%20photography&width=400&height=500&seq=product-002&orientation=portrait"
-                  alt="Barrier Repair Night Cream by Pure Essence - Luxury face cream with botanical ingredients"
-                  className="w-full h-full object-cover object-top"
-                />
-              </div>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <h3 className="font-semibold text-lg text-forest-900">Barrier Repair Night Cream</h3>
-                <p className="text-sm text-gray-600">by Pure Essence</p>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="flex items-center" aria-label="5 out of 5 stars">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <i key={star} className="ri-star-fill text-amber-400 text-sm" aria-hidden="true"></i>
-                  ))}
-                </div>
-                <span className="text-sm text-gray-600">(192 reviews)</span>
-              </div>
-              <p className="text-2xl font-bold text-forest-900">$58</p>
-              <button
-                onClick={() => handleAddToCart({
-                  id: 1002,
-                  name: 'Barrier Repair Night Cream',
-                  brand: 'Pure Essence',
-                  price: 58,
-                  image: 'https://readdy.ai/api/search-image?query=Luxury%20face%20cream%20jar%20with%20natural%20botanical%20ingredients%2C%20elegant%20packaging%2C%20soft%20lighting%2C%20clean%20white%20background%2C%20premium%20beauty%20product%20photography&width=400&height=500&seq=product-002&orientation=portrait',
-                })}
-                className="w-full py-3 bg-sage-600 text-white rounded-full font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
-                aria-label="Add Barrier Repair Night Cream to cart"
-              >
-                Add to Cart
-              </button>
-            </div>
-          </article>
-        </div>
-
-        <div className="text-center mt-12">
-          <Link
-            to="/marketplace"
-            className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
-            aria-label="Explore full marketplace of curated skincare products"
-          >
-            <span>Explore Full Marketplace</span>
-            <i className="ri-arrow-right-line text-xl"></i>
-          </Link>
-        </div>
-      </div>
-    </section>
-  );
+const creatorCardVariants = {
+  hidden: { opacity: 0, x: -40 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: TIMING.slow,
+      ease: EASING.premium,
+    },
+  },
 };
 
-export default MarketplaceSection;
+// Typewriter hook for quote effect
+function useTypewriter(text: string, speed: number = 30, startDelay: number = 500) {
+  const [displayText, setDisplayText] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+
+  useEffect(() => {
+    setDisplayText('');
+    setIsComplete(false);
+    
+    const startTimeout = setTimeout(() => {
+      let i = 0;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayText(text.slice(0, i + 1));
+          i++;
+        } else {
+          setIsComplete(true);
+          clearInterval(interval);
+        }
+      }, speed);
+      
+      return () => clearInterval(interval);
+    }, startDelay);
+    
+    return () => clearTimeout(startTimeout);
+  }, [text, speed, startDelay]);
+
+  return { displayText, isComplete };
+}
+
+export default function MarketplaceSection() {
+  const quote = "After years of struggling with sensitive skin, I created a line that celebrates gentle, effective ingredients. Every formula is tested on real people with real concerns—not just in a lab.";
+  const { displayText, isComplete } = useTypewriter(quote, 25, 800);
+
+  return (
+    <section className="lc-marketplace-section" id="marketplace">
+      <style>{`
+        .lc-marketplace-section {
+          padding: 6rem 2rem;
+          background: linear-gradient(180deg, #F8F4F0 0%, #FFFBF8 100%);
+        }
+        
+        .lc-section-intro {
+          text-align: center;
+          max-width: 800px;
+          margin: 0 auto 4rem;
+        }
+        
+        .lc-section-label {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.75rem;
+          font-weight: 600;
+          letter-spacing: 0.15em;
+          text-transform: uppercase;
+          color: #C4704D;
+          margin-bottom: 1rem;
+          display: block;
+        }
+        
+        .lc-section-title {
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
+          font-size: clamp(2rem, 4vw, 3rem);
+          font-weight: 500;
+          margin-bottom: 1.25rem;
+          color: #2D2A26;
+        }
+        
+        .lc-section-description {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 1.0625rem;
+          color: #6B635A;
+          line-height: 1.7;
+        }
+        
+        .lc-marketplace-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 3rem;
+          max-width: 1000px;
+          margin: 0 auto;
+          align-items: center;
+        }
+        
+        .lc-creator-card {
+          background: white;
+          padding: 2rem;
+          border-radius: 20px;
+          border: 1px solid rgba(196, 112, 77, 0.08);
+        }
+        
+        .lc-creator-header {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+          margin-bottom: 1rem;
+        }
+        
+        .lc-creator-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #E8A888, #7A8B7A);
+        }
+        
+        .lc-creator-name {
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: #2D2A26;
+        }
+        
+        .lc-creator-title {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.8125rem;
+          color: #6B635A;
+        }
+        
+        .lc-creator-quote {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.9375rem;
+          color: #6B635A;
+          font-style: italic;
+          line-height: 1.7;
+          min-height: 100px;
+        }
+        
+        /* Cursor blink for typewriter */
+        .lc-cursor {
+          display: inline-block;
+          width: 2px;
+          height: 1em;
+          background: #C4704D;
+          margin-left: 2px;
+          animation: blink 1s infinite;
+          vertical-align: text-bottom;
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
+        }
+        
+        .lc-marketplace-content h3 {
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
+          font-size: 1.75rem;
+          font-weight: 500;
+          margin-bottom: 1rem;
+          color: #2D2A26;
+        }
+        
+        .lc-marketplace-content p {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 1rem;
+          color: #6B635A;
+          line-height: 1.7;
+          margin-bottom: 1.5rem;
+        }
+        
+        .lc-btn-primary {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.9375rem;
+          font-weight: 600;
+          padding: 1rem 2rem;
+          background: #C4704D;
+          color: white;
+          border: none;
+          border-radius: 100px;
+          cursor: pointer;
+          text-decoration: none;
+          display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+          .lc-marketplace-section {
+            padding: 4rem 1.5rem;
+          }
+          
+          .lc-marketplace-grid {
+            grid-template-columns: 1fr;
+            gap: 2rem;
+          }
+        }
+      `}</style>
+
+      <motion.div
+        initial="hidden"
+        whileInView="visible"
+        viewport={viewportOnce}
+      >
+        {/* Section intro */}
+        <motion.div className="lc-section-intro">
+          <motion.span 
+            className="lc-section-label"
+            variants={fadeInUpSoft}
+          >
+            Curated Marketplace
+          </motion.span>
+          <motion.h2 
+            className="lc-section-title"
+            variants={fadeInUpSoft}
+          >
+            Shop from creators who care as much as you do
+          </motion.h2>
+          <motion.p 
+            className="lc-section-description"
+            variants={fadeInUpSoft}
+          >
+            Our marketplace features verified indie brands and small-batch creators who prioritize transparency, efficacy, and ethics.
+          </motion.p>
+        </motion.div>
+        
+        <div className="lc-marketplace-grid">
+          {/* Creator card with typewriter quote */}
+          <motion.div
+            variants={creatorCardVariants}
+            whileHover={cardHover}
+          >
+            <div className="lc-creator-card">
+              <motion.div 
+                className="lc-creator-header"
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.3, duration: TIMING.normal }}
+              >
+                <motion.div 
+                  className="lc-creator-avatar"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
+                />
+                <div>
+                  <div className="lc-creator-name">Maya Chen</div>
+                  <div className="lc-creator-title">Founder, Gentle Glow Naturals</div>
+                </div>
+              </motion.div>
+              <p className="lc-creator-quote">
+                "{displayText}"
+                {!isComplete && <span className="lc-cursor" />}
+              </p>
+            </div>
+          </motion.div>
+          
+          {/* Content with slide from right */}
+          <motion.div 
+            className="lc-marketplace-content"
+            variants={slideInFromRight}
+          >
+            <h3>Not your average product shelf</h3>
+            <p>
+              Big-box retailers prioritize bestsellers. We prioritize fit. Our marketplace connects you directly with independent creators who formulate with intention.
+            </p>
+            <motion.div
+              whileHover={buttonHover}
+              whileTap={buttonTap}
+              style={{ display: 'inline-block' }}
+            >
+              <Link to="/marketplace" className="lc-btn-primary">
+                Explore Marketplace
+              </Link>
+            </motion.div>
+          </motion.div>
+        </div>
+      </motion.div>
+    </section>
+  );
+}

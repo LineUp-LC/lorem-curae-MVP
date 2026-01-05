@@ -245,14 +245,14 @@ const MarketplacePage = () => {
 
   const getDiscountBadge = () => {
     if (currentTier === 'premium') return { text: '20% OFF', color: 'bg-amber-500' };
-    if (currentTier === 'plus') return { text: '10% OFF', color: 'bg-sage-600' };
+    if (currentTier === 'plus') return { text: '10% OFF', color: 'bg-primary' };
     return null;
   };
 
   const discountBadge = getDiscountBadge();
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="pt-20">
@@ -260,10 +260,10 @@ const MarketplacePage = () => {
         <section className="py-12 px-6 lg:px-12">
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-12">
-              <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-4">
+              <h1 className="text-4xl lg:text-6xl font-serif text-deep mb-4">
                 Discover Authentic Brands
               </h1>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
+              <p className="text-lg text-warm-gray max-w-2xl mx-auto mb-8">
                 Shop from verified storefronts offering curated, high-quality skincare products and services.
               </p>
               {discountBadge && (
@@ -278,9 +278,9 @@ const MarketplacePage = () => {
                   <input
                     type="text"
                     placeholder="Search storefronts..."
-                    className="w-full px-6 py-4 pr-12 bg-white border-2 border-gray-200 rounded-2xl text-base focus:outline-none focus:border-sage-600 transition-colors"
+                    className="w-full px-6 py-4 pr-12 bg-white border-2 border-blush rounded-2xl text-base focus:outline-none focus:border-primary transition-colors"
                   />
-                  <button className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-gray-400 hover:text-sage-600 cursor-pointer transition-colors">
+                  <button className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-warm-gray/60 hover:text-primary cursor-pointer transition-colors">
                     <i className="ri-search-line text-xl"></i>
                   </button>
                 </div>
@@ -295,8 +295,8 @@ const MarketplacePage = () => {
             <div className="max-w-7xl mx-auto px-6 lg:px-12">
               <div className="flex items-center justify-between mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Products</h2>
-                  <p className="text-gray-600">Curated skincare from verified creators</p>
+                  <h2 className="text-3xl font-bold text-deep mb-2">Featured Products</h2>
+                  <p className="text-warm-gray">Curated skincare from verified creators</p>
                 </div>
               </div>
 
@@ -313,19 +313,19 @@ const MarketplacePage = () => {
                       key={product.id}
                       className={`bg-white rounded-xl overflow-hidden border hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group ${
                         isConcernMatch 
-                          ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-sage-300' 
-                          : 'border-gray-200 hover:border-sage-300'
+                          ? 'ring-2 ring-primary ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-primary-300' 
+                          : 'border-blush hover:border-primary-300'
                       }`}
                     >
                       {/* Concern Match Badge */}
                       {isConcernMatch && (
-                        <div className="bg-sage-50 px-3 py-1.5 flex items-center gap-2 border-b border-sage-200">
-                          <i className="ri-sparkling-2-fill text-sage-600 text-sm"></i>
-                          <span className="text-xs font-medium text-sage-700">Matches your skin concerns</span>
+                        <div className="bg-light/20 px-3 py-1.5 flex items-center gap-2 border-b border-blush">
+                          <i className="ri-sparkling-2-fill text-primary text-sm"></i>
+                          <span className="text-xs font-medium text-primary-700">Matches your skin concerns</span>
                         </div>
                       )}
                       {/* Product Image */}
-                      <div className="relative h-64 overflow-hidden bg-gray-50">
+                      <div className="relative h-64 overflow-hidden bg-cream">
                         <img
                           src={product.image_url}
                           alt={product.name}
@@ -340,7 +340,7 @@ const MarketplacePage = () => {
                         )}
                         {product.verified && (
                           <div className="absolute top-3 right-3">
-                            <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                            <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full flex items-center gap-1">
                               <i className="ri-verified-badge-fill"></i>
                               Verified
                             </div>
@@ -352,16 +352,16 @@ const MarketplacePage = () => {
                       <div className="p-4">
                         {/* Brand */}
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs text-sage-600 font-medium">
+                          <span className="text-xs text-primary font-medium">
                             {storefront?.business_name}
                           </span>
                           {storefront?.is_verified && (
-                            <i className="ri-verified-badge-fill text-sage-600 text-sm"></i>
+                            <i className="ri-verified-badge-fill text-primary text-sm"></i>
                           )}
                         </div>
 
                         {/* Product Name */}
-                        <h3 className="text-base font-bold text-gray-900 mb-2 line-clamp-2">
+                        <h3 className="text-base font-bold text-deep mb-2 line-clamp-2">
                           {product.name}
                         </h3>
 
@@ -369,11 +369,11 @@ const MarketplacePage = () => {
                         <div className="flex items-center gap-2 mb-3">
                           <div className="flex items-center gap-1">
                             <i className="ri-star-fill text-amber-500 text-sm"></i>
-                            <span className="text-sm font-semibold text-gray-900">
+                            <span className="text-sm font-semibold text-deep">
                               {product.rating?.toFixed(1) || '5.0'}
                             </span>
                           </div>
-                          <span className="text-xs text-gray-500">
+                          <span className="text-xs text-warm-gray/80">
                             ({product.review_count || 0} reviews)
                           </span>
                         </div>
@@ -387,7 +387,7 @@ const MarketplacePage = () => {
                             </span>
                           )}
                           {product.in_stock && (
-                            <span className="px-2 py-1 bg-sage-50 text-sage-700 text-xs rounded-full">
+                            <span className="px-2 py-1 bg-light/20 text-primary-700 text-xs rounded-full">
                               In Stock
                             </span>
                           )}
@@ -406,8 +406,8 @@ const MarketplacePage = () => {
                                     key={key}
                                     className={`px-2 py-1 text-xs rounded-full ${
                                       isMatch
-                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
-                                        : 'bg-gray-100 text-gray-600'
+                                        ? 'bg-light/30 text-primary-700 font-medium border border-primary-300'
+                                        : 'bg-cream text-warm-gray'
                                     }`}
                                   >
                                     {isMatch && <i className="ri-check-line mr-0.5"></i>}
@@ -422,15 +422,15 @@ const MarketplacePage = () => {
                         <div className="mb-3">
                           {hasDiscount ? (
                             <div className="flex items-center gap-2">
-                              <span className="text-xl font-bold text-sage-600">
+                              <span className="text-xl font-bold text-primary">
                                 ${pricing.discounted.toFixed(2)}
                               </span>
-                              <span className="text-sm text-gray-400 line-through">
+                              <span className="text-sm text-warm-gray/60 line-through">
                                 ${pricing.original.toFixed(2)}
                               </span>
                             </div>
                           ) : (
-                            <span className="text-xl font-bold text-gray-900">
+                            <span className="text-xl font-bold text-deep">
                               ${pricing.original.toFixed(2)}
                             </span>
                           )}
@@ -442,8 +442,8 @@ const MarketplacePage = () => {
                           disabled={!product.in_stock || purchasingProduct === product.id}
                           className={`w-full py-3 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer ${
                             product.in_stock
-                              ? 'bg-sage-600 text-white hover:bg-sage-700'
-                              : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              ? 'bg-primary text-white hover:bg-dark'
+                              : 'bg-gray-200 text-warm-gray/80 cursor-not-allowed'
                           }`}
                         >
                           {purchasingProduct === product.id ? (
@@ -460,7 +460,7 @@ const MarketplacePage = () => {
 
                         {/* Creator Payout Info */}
                         {isConnected && (
-                          <p className="text-xs text-gray-500 text-center mt-2">
+                          <p className="text-xs text-warm-gray/80 text-center mt-2">
                             90% goes directly to creator
                           </p>
                         )}
@@ -474,16 +474,16 @@ const MarketplacePage = () => {
         )}
 
         {/* Featured Storefronts */}
-        <section className="py-16 bg-cream-50">
+        <section className="py-16 bg-cream">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <h2 className="text-3xl font-bold text-gray-900 mb-2">Featured Storefronts</h2>
-                <p className="text-gray-600">Handpicked brands we're proud to showcase</p>
+                <h2 className="text-3xl font-bold text-deep mb-2">Featured Storefronts</h2>
+                <p className="text-warm-gray">Handpicked brands we're proud to showcase</p>
               </div>
               <Link
                 to="/marketplace/all"
-                className="px-6 py-3 border border-sage-600 text-sage-600 rounded-lg font-medium hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
+                className="px-6 py-3 border border-primary text-primary rounded-lg font-medium hover:bg-light/20 transition-colors whitespace-nowrap cursor-pointer"
               >
                 View All Storefronts
               </Link>
@@ -496,7 +496,7 @@ const MarketplacePage = () => {
                   to={storefront.type === 'services' ? `/services/${storefront.id}` : `/storefront/${storefront.id}`}
                   className="group cursor-pointer"
                 >
-                  <div className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
+                  <div className="bg-white rounded-xl overflow-hidden border border-blush hover:border-primary-300 hover:shadow-xl hover:-translate-y-1 transition-all duration-300">
                     {/* Banner */}
                     <div className="relative h-32 overflow-hidden">
                       <img 
@@ -506,12 +506,12 @@ const MarketplacePage = () => {
                       />
                       <div className="absolute top-3 right-3 flex items-center gap-2">
                         {storefront.featured && (
-                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full shadow">
+                          <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full shadow">
                             Featured
                           </div>
                         )}
                         {storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow">
+                          <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full flex items-center gap-1 shadow">
                             <i className="ri-vip-crown-line"></i>
                             Premium
                           </div>
@@ -524,7 +524,7 @@ const MarketplacePage = () => {
                           </span>
                         )}
                         <div className={`px-3 py-1 text-white text-xs font-semibold rounded-full flex items-center gap-1 ${
-                          storefront.type === 'products' ? 'bg-sage-600' : 'bg-coral-600'
+                          storefront.type === 'products' ? 'bg-primary' : 'bg-coral-600'
                         }`}>
                           <i className={storefront.type === 'products' ? 'ri-shopping-bag-line' : 'ri-service-line'}></i>
                           {storefront.type === 'products' ? 'Products' : 'Services'}
@@ -546,20 +546,20 @@ const MarketplacePage = () => {
                     {/* Content */}
                     <div className="p-6 pt-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-sage-600 transition-colors">
+                        <h3 className="text-xl font-bold text-deep group-hover:text-primary transition-colors">
                           {storefront.name}
                         </h3>
                         {storefront.verified && (
-                          <i className="ri-verified-badge-fill text-sage-600 text-xl" title="Verified"></i>
+                          <i className="ri-verified-badge-fill text-primary text-xl" title="Verified"></i>
                         )}
                       </div>
-                      <p className="text-gray-600 text-sm mb-4">{storefront.tagline}</p>
+                      <p className="text-warm-gray text-sm mb-4">{storefront.tagline}</p>
 
                       {/* Stats */}
-                      <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                      <div className="flex items-center justify-between text-sm text-warm-gray mb-4">
                         <div className="flex items-center space-x-1">
                           <i className="ri-star-fill text-amber-500"></i>
-                          <span className="font-semibold text-gray-900">{storefront.rating}</span>
+                          <span className="font-semibold text-deep">{storefront.rating}</span>
                           <span>({storefront.reviews})</span>
                         </div>
                         <div className="flex items-center space-x-1">
@@ -568,8 +568,8 @@ const MarketplacePage = () => {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-gray-100">
-                        <span className="text-sm text-gray-600">
+                      <div className="pt-4 border-t border-blush">
+                        <span className="text-sm text-warm-gray">
                           {storefront.type === 'products' 
                             ? `${storefront.products} Products` 
                             : `${storefront.services} Services`
@@ -587,43 +587,43 @@ const MarketplacePage = () => {
         {/* Trust & Security Section */}
         <section className="py-16 bg-white">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <h2 className="text-3xl font-bold text-gray-900 text-center mb-12">
+            <h2 className="text-3xl font-bold text-deep text-center mb-12">
               Shop with Confidence
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-shield-check-line text-3xl text-sage-600"></i>
+                <div className="w-16 h-16 bg-light/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-shield-check-line text-3xl text-primary"></i>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Secure Payments</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-bold text-deep mb-2">Secure Payments</h3>
+                <p className="text-sm text-warm-gray">
                   All transactions protected by Stripe
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-verified-badge-line text-3xl text-sage-600"></i>
+                <div className="w-16 h-16 bg-light/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-verified-badge-line text-3xl text-primary"></i>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Verified Creators</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-bold text-deep mb-2">Verified Creators</h3>
+                <p className="text-sm text-warm-gray">
                   All sellers thoroughly vetted
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-hand-coin-line text-3xl text-sage-600"></i>
+                <div className="w-16 h-16 bg-light/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-hand-coin-line text-3xl text-primary"></i>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Direct Payouts</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-bold text-deep mb-2">Direct Payouts</h3>
+                <p className="text-sm text-warm-gray">
                   90% goes directly to creators
                 </p>
               </div>
               <div className="text-center">
-                <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <i className="ri-discount-percent-line text-3xl text-sage-600"></i>
+                <div className="w-16 h-16 bg-light/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <i className="ri-discount-percent-line text-3xl text-primary"></i>
                 </div>
-                <h3 className="font-bold text-gray-900 mb-2">Member Discounts</h3>
-                <p className="text-sm text-gray-600">
+                <h3 className="font-bold text-deep mb-2">Member Discounts</h3>
+                <p className="text-sm text-warm-gray">
                   Up to 20% off with Premium
                 </p>
               </div>
@@ -634,15 +634,15 @@ const MarketplacePage = () => {
         {/* CTA Section */}
         <section className="py-16 px-6 lg:px-12">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-6">
+            <h2 className="text-4xl lg:text-5xl font-serif text-deep mb-6">
               Ready to Grow Your Brand?
             </h2>
-            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-warm-gray mb-8 max-w-2xl mx-auto">
               Join our marketplace and reach thousands of skincare enthusiasts
             </p>
             <Link
               to="/storefront/join"
-              className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer"
+              className="inline-block px-8 py-4 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-colors duration-fast shadow-lg whitespace-nowrap cursor-pointer"
             >
               Become an LC Storefront
             </Link>

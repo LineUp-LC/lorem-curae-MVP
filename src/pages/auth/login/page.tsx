@@ -69,34 +69,33 @@ const LoginPage = () => {
 
   const siteKey = import.meta.env.VITE_HCAPTCHA_SITE_KEY;
 
-  // If no site key, show warning in development
   if (!siteKey) {
     console.warn('VITE_HCAPTCHA_SITE_KEY is not set. Captcha will not work.');
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen flex items-center justify-center px-6 py-12" style={{ background: 'linear-gradient(135deg, #FDF8F5 0%, #F8F4F0 50%, #E8D4CC 100%)' }}>
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center mb-8 cursor-pointer">
-          <span className="text-4xl font-serif text-slate-900">Lorem Curae</span>
+          <span className="text-4xl font-serif" style={{ color: '#2D2A26' }}>Lorem Curae</span>
         </Link>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-xl p-8" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <h1 className="text-3xl font-serif mb-2" style={{ color: '#2D2A26' }}>
               Welcome back
             </h1>
-            <p className="text-gray-600">
+            <p style={{ color: '#6B635A' }}>
               Sign in to continue your skincare journey
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-sm text-red-600 flex items-center gap-2">
+            <div className="mb-6 p-4 rounded-lg" style={{ backgroundColor: 'rgba(139, 77, 53, 0.08)', border: '1px solid rgba(139, 77, 53, 0.2)' }}>
+              <p className="text-sm flex items-center gap-2" style={{ color: '#8B4D35' }}>
                 <i className="ri-error-warning-line"></i>
                 {error}
               </p>
@@ -105,14 +104,23 @@ const LoginPage = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#2D2A26' }}>
                 Email Address
               </label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-lg transition-all"
+                style={{ border: '1px solid #E8D4CC', outline: 'none' }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#C4704D';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(196, 112, 77, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E8D4CC';
+                  e.target.style.boxShadow = 'none';
+                }}
                 placeholder="you@example.com"
                 required
                 disabled={isLoading}
@@ -121,10 +129,10 @@ const LoginPage = () => {
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-medium text-gray-700">
+                <label className="block text-sm font-medium" style={{ color: '#2D2A26' }}>
                   Password
                 </label>
-                <Link to="/forgot-password" className="text-sm text-sage-600 hover:text-sage-700 cursor-pointer">
+                <Link to="/forgot-password" className="text-sm cursor-pointer" style={{ color: '#C4704D' }}>
                   Forgot?
                 </Link>
               </div>
@@ -132,7 +140,16 @@ const LoginPage = () => {
                 type="password"
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent transition-all"
+                className="w-full px-4 py-3 rounded-lg transition-all"
+                style={{ border: '1px solid #E8D4CC', outline: 'none' }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#C4704D';
+                  e.target.style.boxShadow = '0 0 0 3px rgba(196, 112, 77, 0.1)';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E8D4CC';
+                  e.target.style.boxShadow = 'none';
+                }}
                 placeholder="Enter your password"
                 required
                 disabled={isLoading}
@@ -143,10 +160,11 @@ const LoginPage = () => {
               <input
                 type="checkbox"
                 id="remember"
-                className="w-4 h-4 text-sage-600 border-gray-300 rounded focus:ring-sage-500 cursor-pointer"
+                className="w-4 h-4 rounded cursor-pointer"
+                style={{ accentColor: '#C4704D' }}
                 disabled={isLoading}
               />
-              <label htmlFor="remember" className="ml-2 text-sm text-gray-700 cursor-pointer">
+              <label htmlFor="remember" className="ml-2 text-sm cursor-pointer" style={{ color: '#6B635A' }}>
                 Remember me
               </label>
             </div>
@@ -167,7 +185,10 @@ const LoginPage = () => {
             <button
               type="submit"
               disabled={isLoading || (siteKey && !captchaToken)}
-              className="w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-white"
+              style={{ backgroundColor: '#C4704D' }}
+              onMouseOver={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#8B4D35')}
+              onMouseOut={(e) => !isLoading && (e.currentTarget.style.backgroundColor = '#C4704D')}
             >
               {isLoading ? (
                 <>
@@ -183,10 +204,10 @@ const LoginPage = () => {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-200"></div>
+              <div className="w-full" style={{ borderTop: '1px solid #E8D4CC' }}></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-gray-500">Or continue with</span>
+              <span className="px-4 bg-white" style={{ color: '#6B635A' }}>Or continue with</span>
             </div>
           </div>
 
@@ -195,25 +216,31 @@ const LoginPage = () => {
             <button 
               type="button"
               disabled={isLoading}
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center px-4 py-3 rounded-lg transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+              style={{ border: '1px solid #E8D4CC' }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#FDF8F5'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
             >
               <i className="ri-google-fill text-xl text-red-500 mr-2"></i>
-              <span className="text-sm font-medium text-gray-700">Google</span>
+              <span className="text-sm font-medium" style={{ color: '#2D2A26' }}>Google</span>
             </button>
             <button 
               type="button"
               disabled={isLoading}
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+              className="flex items-center justify-center px-4 py-3 rounded-lg transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50"
+              style={{ border: '1px solid #E8D4CC' }}
+              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#FDF8F5'}
+              onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
             >
-              <i className="ri-apple-fill text-xl text-gray-900 mr-2"></i>
-              <span className="text-sm font-medium text-gray-700">Apple</span>
+              <i className="ri-apple-fill text-xl mr-2" style={{ color: '#2D2A26' }}></i>
+              <span className="text-sm font-medium" style={{ color: '#2D2A26' }}>Apple</span>
             </button>
           </div>
 
           {/* Signup Link */}
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="text-center text-sm mt-6" style={{ color: '#6B635A' }}>
             Don't have an account?{' '}
-            <Link to="/signup" className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer">
+            <Link to="/auth/signup" className="font-medium cursor-pointer" style={{ color: '#C4704D' }}>
               Sign up
             </Link>
           </p>

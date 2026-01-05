@@ -5,18 +5,99 @@ export default {
   theme: {
     extend: {
       colors: {
-        sage: {
-          50: '#f6f8f6',
-          100: '#e3e9e3',
-          200: '#c7d3c7',
-          300: '#a1b5a1',
-          400: '#7a957a',
-          500: '#5f7a5f',
-          600: '#4a614a',
-          700: '#3d4f3d',
-          800: '#334133',
-          900: '#2b362b',
+        // Brand Primary - Buttons, primary accents, primary hovers
+        primary: {
+          DEFAULT: '#C4704D',
+          50: '#FDF8F5',
+          100: '#F9EDE6',
+          200: '#F2D5C7',
+          300: '#E8A888',
+          400: '#D4885F',
+          500: '#C4704D',
+          600: '#A85D3E',
+          700: '#8B4D35',
+          800: '#6E3D2A',
+          900: '#512D1F',
         },
+        // Light - Gradients, soft highlights, subtle backgrounds
+        light: {
+          DEFAULT: '#E8A888',
+        },
+        // Dark - Hover states, pressed states, strong accents
+        dark: {
+          DEFAULT: '#8B4D35',
+        },
+        // Cream - Page backgrounds, section backgrounds
+        cream: {
+          DEFAULT: '#FDF8F5',
+          50: '#FFFFFF',
+          100: '#FDF8F5',
+          200: '#F8F0EB',
+          300: '#F3E8E1',
+          400: '#EBD9CF',
+          500: '#E0C9BC',
+          600: '#D4B5A5',
+          700: '#C8A18E',
+          800: '#BC8D77',
+          900: '#B07960',
+        },
+        // Deep - Headings, strong text, titles
+        deep: {
+          DEFAULT: '#2D2A26',
+          50: '#F5F5F4',
+          100: '#E7E6E5',
+          200: '#CFCDCB',
+          300: '#A8A5A1',
+          400: '#7A7672',
+          500: '#5C5854',
+          600: '#4A4743',
+          700: '#3B3834',
+          800: '#2D2A26',
+          900: '#1F1D1A',
+        },
+        // Sage - Secondary accents, secondary buttons, supportive UI elements
+        sage: {
+          DEFAULT: '#7A8B7A',
+          50: '#F4F6F4',
+          100: '#E5EAE5',
+          200: '#CCD5CC',
+          300: '#A9B8A9',
+          400: '#8FA08F',
+          500: '#7A8B7A',
+          600: '#627062',
+          700: '#4F5A4F',
+          800: '#3D463D',
+          900: '#2B322B',
+        },
+        // Warm Gray - Body text, paragraph text, descriptions
+        'warm-gray': {
+          DEFAULT: '#6B635A',
+          50: '#F7F6F5',
+          100: '#EDECEA',
+          200: '#DBD8D4',
+          300: '#C0BBB4',
+          400: '#A59E95',
+          500: '#8A827A',
+          600: '#6B635A',
+          700: '#564F48',
+          800: '#413C36',
+          900: '#2C2924',
+        },
+        // Blush - Borders, dividers, subtle accents, card outlines
+        blush: {
+          DEFAULT: '#E8D4CC',
+          50: '#FDFBFA',
+          100: '#F8F3F0',
+          200: '#F1E7E2',
+          300: '#E8D4CC',
+          400: '#DBBFB3',
+          500: '#CEAA9A',
+          600: '#C19581',
+          700: '#B48068',
+          800: '#A76B4F',
+          900: '#9A5636',
+        },
+        // Legacy colors for backwards compatibility
         coral: {
           50: '#fef5f3',
           100: '#fde8e4',
@@ -40,18 +121,6 @@ export default {
           700: '#374940',
           800: '#2e3d36',
           900: '#28342f',
-        },
-        cream: {
-          50: '#fdfcfb',
-          100: '#faf8f5',
-          200: '#f5f1ea',
-          300: '#ede6da',
-          400: '#e3d7c5',
-          500: '#d4c3aa',
-          600: '#c0a989',
-          700: '#a88d6d',
-          800: '#8b745b',
-          900: '#72604c',
         },
       },
       fontFamily: {

@@ -403,7 +403,7 @@ const AIChatPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
@@ -411,7 +411,7 @@ const AIChatPage = () => {
           {/* Sidebar - Chat History */}
           <div className="lg:col-span-1 bg-white rounded-xl p-4 overflow-y-auto shadow-sm">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-bold text-gray-900">Conversations</h2>
+              <h2 className="font-bold text-deep">Conversations</h2>
               <button 
                 onClick={() => {
                   setMessages([
@@ -424,7 +424,7 @@ const AIChatPage = () => {
                   ]);
                   setCurrentSession('current');
                 }}
-                className="text-sm text-forest-800 font-medium cursor-pointer"
+                className="text-sm text-deep font-medium cursor-pointer"
               >
                 + New Chat
               </button>
@@ -436,31 +436,31 @@ const AIChatPage = () => {
                   key={session.id}
                   onClick={() => loadChatSession(session)}
                   className={`p-3 rounded-lg cursor-pointer transition-colors group ${
-                    currentSession === session.id ? 'bg-forest-800/10' : 'hover:bg-gray-100'
+                    currentSession === session.id ? 'bg-primary/10' : 'hover:bg-cream'
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <p className="text-sm font-medium text-gray-900 truncate">{session.title}</p>
+                    <p className="text-sm font-medium text-deep truncate">{session.title}</p>
                     <button
                       onClick={(e) => deleteSession(session.id, e)}
-                      className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity cursor-pointer"
+                      className="opacity-0 group-hover:opacity-100 text-warm-gray/60 hover:text-red-500 transition-opacity cursor-pointer"
                     >
                       <i className="ri-delete-bin-line text-sm"></i>
                     </button>
                   </div>
-                  <p className="text-xs text-gray-500">{session.date}</p>
+                  <p className="text-xs text-warm-gray/80">{session.date}</p>
                 </div>
               ))}
             </div>
 
             {/* Settings Button */}
-            <div className="mt-6 pt-4 border-t border-gray-200">
+            <div className="mt-6 pt-4 border-t border-blush">
               <button
                 onClick={() => setShowCustomize(!showCustomize)}
-                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-cream transition-colors cursor-pointer"
               >
-                <span className="text-sm font-medium text-gray-700">AI Settings</span>
-                <i className="ri-settings-3-line text-gray-500"></i>
+                <span className="text-sm font-medium text-warm-gray">AI Settings</span>
+                <i className="ri-settings-3-line text-warm-gray/80"></i>
               </button>
             </div>
           </div>
@@ -468,15 +468,15 @@ const AIChatPage = () => {
           {/* Main Chat Area */}
           <div className="lg:col-span-3 bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
             {/* Chat Header */}
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-6 border-b border-blush flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-forest-800 to-sage-600 rounded-full flex items-center justify-center relative">
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-dark rounded-full flex items-center justify-center relative">
                   <i className="ri-sparkling-2-fill text-white text-xl"></i>
                   <div className="absolute -top-1 -right-1 w-3 h-3 bg-coral-400 rounded-full border-2 border-white"></div>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Curae AI</h2>
-                  <p className="text-sm text-gray-500">Your personalized skincare assistant</p>
+                  <h2 className="text-lg font-semibold text-deep">Curae AI</h2>
+                  <p className="text-sm text-warm-gray/80">Your personalized skincare assistant</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -484,8 +484,8 @@ const AIChatPage = () => {
                   onClick={() => setShowInsights(!showInsights)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     showInsights
-                      ? 'bg-forest-800 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      ? 'bg-primary text-white'
+                      : 'bg-cream text-warm-gray hover:bg-gray-200'
                   }`}
                 >
                   <i className="ri-lightbulb-line mr-2"></i>
@@ -493,7 +493,7 @@ const AIChatPage = () => {
                 </button>
                 <Link
                   to="/my-skin"
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 bg-cream text-warm-gray rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
                 >
                   <i className="ri-calendar-check-line mr-1"></i>
                   View Progress
@@ -503,14 +503,14 @@ const AIChatPage = () => {
 
             {/* AI Journey Insights */}
             {showInsights && aiInsights.length > 0 && (
-              <div className="p-6 border-b border-gray-200 bg-gradient-to-br from-cream-100 to-white">
+              <div className="p-6 border-b border-blush bg-gradient-to-br from-cream to-white">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-forest-800">AI Journey Insights</h3>
-                  <span className="text-xs text-gray-500">{aiInsights.length} insights available</span>
+                  <h3 className="text-lg font-semibold text-deep">AI Journey Insights</h3>
+                  <span className="text-xs text-warm-gray/80">{aiInsights.length} insights available</span>
                 </div>
                 <div className="space-y-3 max-h-96 overflow-y-auto">
                   {aiInsights.map((insight) => (
-                    <div key={insight.id} className="bg-white rounded-lg p-4 shadow-sm border border-gray-100">
+                    <div key={insight.id} className="bg-white rounded-lg p-4 shadow-sm border border-blush">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
@@ -528,18 +528,18 @@ const AIChatPage = () => {
                               'ri-trophy-line text-purple-600'
                             } text-lg`}></i>
                           </div>
-                          <h4 className="font-semibold text-gray-900 text-sm">{insight.title}</h4>
+                          <h4 className="font-semibold text-deep text-sm">{insight.title}</h4>
                         </div>
-                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                        <span className="text-xs text-warm-gray/80 bg-cream px-2 py-1 rounded-full">
                           {insight.confidence}% confidence
                         </span>
                       </div>
-                      <p className="text-sm text-gray-700 leading-relaxed mb-3">{insight.description}</p>
+                      <p className="text-sm text-warm-gray leading-relaxed mb-3">{insight.description}</p>
                       
                       {/* Related Photos */}
                       {insight.relatedPhotos && insight.relatedPhotos.length > 0 && (
                         <div className="mt-3">
-                          <p className="text-xs font-medium text-gray-600 mb-2">Visual Evidence:</p>
+                          <p className="text-xs font-medium text-warm-gray mb-2">Visual Evidence:</p>
                           <div className="grid grid-cols-3 gap-2">
                             {insight.relatedPhotos.map((photo, idx) => (
                               <div key={idx} className="relative group">
@@ -558,8 +558,8 @@ const AIChatPage = () => {
                         </div>
                       )}
                       
-                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                        <span className="text-xs text-gray-500">
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-blush">
+                        <span className="text-xs text-warm-gray/80">
                           <i className="ri-database-2-line mr-1"></i>
                           {insight.dataSource}
                         </span>
@@ -582,22 +582,22 @@ const AIChatPage = () => {
                     <div
                       className={`rounded-2xl px-4 py-3 ${
                         message.sender === 'user'
-                          ? 'bg-forest-800 text-white'
-                          : 'bg-gray-100 text-gray-900'
+                          ? 'bg-primary text-white'
+                          : 'bg-cream text-deep'
                       }`}
                     >
                       {message.sender === 'ai' && (
                         <div className="flex items-center gap-2 mb-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 flex items-center justify-center">
+                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
                             <i className="ri-sparkling-2-fill text-white text-xs"></i>
                           </div>
-                          <span className="text-xs font-medium text-forest-800">Curae</span>
+                          <span className="text-xs font-medium text-deep">Curae</span>
                         </div>
                       )}
                       <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
                     </div>
                     <span className={`text-xs mt-1 block px-2 ${
-                      message.sender === 'user' ? 'text-right text-gray-400' : 'text-gray-500'
+                      message.sender === 'user' ? 'text-right text-warm-gray/60' : 'text-warm-gray/80'
                     }`}>
                       {message.timestamp}
                     </span>
@@ -607,15 +607,15 @@ const AIChatPage = () => {
               
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-100 rounded-2xl px-4 py-3">
+                  <div className="bg-cream rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-sage-500 to-sage-700 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
                         <i className="ri-sparkling-2-fill text-white text-xs"></i>
                       </div>
                       <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
-                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                        <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce"></div>
+                        <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
@@ -626,8 +626,8 @@ const AIChatPage = () => {
 
             {/* Quick Prompts */}
             {messages.length <= 1 && (
-              <div className="px-6 py-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">Quick questions:</p>
+              <div className="px-6 py-3 border-t border-blush">
+                <p className="text-xs text-warm-gray/80 mb-2">Quick questions:</p>
                 <div className="flex flex-wrap gap-2">
                   {quickPrompts.map((prompt, idx) => (
                     <button
@@ -636,7 +636,7 @@ const AIChatPage = () => {
                         setInputMessage(prompt);
                         sessionState.trackInteraction('click', 'quick-prompt', { prompt });
                       }}
-                      className="px-3 py-1.5 bg-cream-100 text-forest-800 text-sm rounded-full hover:bg-forest-800/10 transition-colors whitespace-nowrap cursor-pointer"
+                      className="px-3 py-1.5 bg-cream text-deep text-sm rounded-full hover:bg-primary/10 transition-colors whitespace-nowrap cursor-pointer"
                     >
                       {prompt}
                     </button>
@@ -646,7 +646,7 @@ const AIChatPage = () => {
             )}
 
             {/* Input Area */}
-            <div className="p-6 border-t border-gray-200">
+            <div className="p-6 border-t border-blush">
               <div className="flex items-end space-x-3">
                 <div className="flex-1">
                   <textarea
@@ -659,19 +659,19 @@ const AIChatPage = () => {
                       }
                     }}
                     placeholder="Ask Curae AI anything about skincare..."
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#2C5F4F]/20 focus:border-forest-800 resize-none"
+                    className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-[#2C5F4F]/20 focus:border-primary resize-none"
                     rows={1}
                   />
                 </div>
                 <button
                   onClick={() => handleSendMessage()}
                   disabled={!inputMessage.trim() || isTyping}
-                  className="w-12 h-12 flex items-center justify-center bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="w-12 h-12 flex items-center justify-center bg-primary text-white rounded-lg hover:bg-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <i className="ri-send-plane-fill text-xl"></i>
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2">
+              <p className="text-xs text-warm-gray/80 mt-2">
                 Press Enter to send, Shift+Enter for new line
               </p>
             </div>
@@ -684,10 +684,10 @@ const AIChatPage = () => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-bold text-forest-800">AI Settings</h3>
+              <h3 className="text-xl font-bold text-deep">AI Settings</h3>
               <button
                 onClick={() => setShowCustomize(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="text-warm-gray/60 hover:text-warm-gray transition-colors cursor-pointer"
               >
                 <i className="ri-close-line text-2xl"></i>
               </button>
@@ -696,11 +696,11 @@ const AIChatPage = () => {
             <div className="space-y-6">
               {/* Tone */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Response Tone</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Response Tone</label>
                 <select
                   value={aiSettings.tone}
                   onChange={(e) => setAiSettings({ ...aiSettings, tone: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
                 >
                   <option value="friendly">Friendly & Casual</option>
                   <option value="professional">Professional & Formal</option>
@@ -711,11 +711,11 @@ const AIChatPage = () => {
 
               {/* Detail Level */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Detail Level</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Detail Level</label>
                 <select
                   value={aiSettings.detailLevel}
                   onChange={(e) => setAiSettings({ ...aiSettings, detailLevel: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
                 >
                   <option value="brief">Brief - Quick answers</option>
                   <option value="balanced">Balanced - Standard detail</option>
@@ -725,11 +725,11 @@ const AIChatPage = () => {
 
               {/* Response Style */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Response Style</label>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Response Style</label>
                 <select
                   value={aiSettings.responseStyle}
                   onChange={(e) => setAiSettings({ ...aiSettings, responseStyle: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
                 >
                   <option value="conversational">Conversational</option>
                   <option value="structured">Structured (with bullet points)</option>
@@ -739,27 +739,27 @@ const AIChatPage = () => {
 
               {/* Custom Instructions */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Custom Instructions</label>
-                <p className="text-xs text-gray-500 mb-2">Tell Curae AI how you'd like it to behave</p>
+                <label className="block text-sm font-medium text-warm-gray mb-2">Custom Instructions</label>
+                <p className="text-xs text-warm-gray/80 mb-2">Tell Curae AI how you'd like it to behave</p>
                 <textarea
                   value={aiSettings.customInstructions}
                   onChange={(e) => setAiSettings({ ...aiSettings, customInstructions: e.target.value })}
                   placeholder="E.g., Always suggest natural alternatives, focus on budget-friendly options, explain ingredients in simple terms..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                 />
               </div>
 
               {/* More About You */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">More About You</label>
-                <p className="text-xs text-gray-500 mb-2">Help Curae AI understand you better</p>
+                <label className="block text-sm font-medium text-warm-gray mb-2">More About You</label>
+                <p className="text-xs text-warm-gray/80 mb-2">Help Curae AI understand you better</p>
                 <textarea
                   value={aiSettings.moreAboutYou}
                   onChange={(e) => setAiSettings({ ...aiSettings, moreAboutYou: e.target.value })}
                   placeholder="E.g., I'm new to skincare, I prefer Korean beauty products, I have a 5-minute morning routine, I'm on a tight budget..."
                   rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
                 />
               </div>
             </div>
@@ -767,13 +767,13 @@ const AIChatPage = () => {
             <div className="mt-8 flex gap-3">
               <button
                 onClick={() => setShowCustomize(false)}
-                className="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium cursor-pointer"
+                className="flex-1 px-4 py-3 border border-blush text-warm-gray rounded-lg hover:bg-cream transition-colors font-medium cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveSettings}
-                className="flex-1 px-4 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium cursor-pointer"
+                className="flex-1 px-4 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors font-medium cursor-pointer"
               >
                 Save Settings
               </button>

@@ -364,41 +364,41 @@ const SurveyResultsPage = () => {
 
   if (!surveyData || !recommendations) {
     return (
-      <div className="min-h-screen bg-cream-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-sage-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Analyzing your responses...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-warm-gray">Analyzing your responses...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="max-w-6xl mx-auto px-6 lg:px-12 py-24">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Your Personalized Skin Analysis</h1>
-          <p className="text-lg text-gray-600">Based on your responses, we've created a tailored skincare plan just for you</p>
+          <h1 className="text-4xl font-bold text-deep mb-4">Your Personalized Skin Analysis</h1>
+          <p className="text-lg text-warm-gray">Based on your responses, we've created a tailored skincare plan just for you</p>
         </div>
 
         {/* Skin Profile Summary */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 mb-8">
+        <div className="bg-white rounded-xl p-8 border border-blush mb-8">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center">
-              <i className="ri-user-heart-line text-2xl text-sage-600"></i>
+            <div className="w-12 h-12 bg-light/30 rounded-lg flex items-center justify-center">
+              <i className="ri-user-heart-line text-2xl text-primary"></i>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Your Skin Profile</h2>
+            <h2 className="text-2xl font-semibold text-deep">Your Skin Profile</h2>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Skin Type */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Skin Type</h3>
+              <h3 className="text-sm font-semibold text-warm-gray uppercase tracking-wide mb-2">Skin Type</h3>
               <div className="flex flex-wrap gap-2">
                 {surveyData.skinTypes?.map((type) => (
-                  <span key={type} className="px-4 py-2 bg-sage-100 text-sage-700 rounded-full font-medium capitalize">
+                  <span key={type} className="px-4 py-2 bg-primary-50 text-primary-700 rounded-full font-medium capitalize">
                     {type}
                   </span>
                 ))}
@@ -407,10 +407,10 @@ const SurveyResultsPage = () => {
             
             {/* Primary Concerns */}
             <div>
-              <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Primary Concerns</h3>
+              <h3 className="text-sm font-semibold text-warm-gray uppercase tracking-wide mb-2">Primary Concerns</h3>
               <div className="flex flex-wrap gap-2">
                 {recommendations.priorityConcerns.map((concern: string) => (
-                  <span key={concern} className="px-4 py-2 bg-sage-100 text-sage-700 rounded-full font-medium capitalize">
+                  <span key={concern} className="px-4 py-2 bg-primary-50 text-primary-700 rounded-full font-medium capitalize">
                     {concern}
                   </span>
                 ))}
@@ -420,33 +420,33 @@ const SurveyResultsPage = () => {
         </div>
 
         {/* Routine Recommendation */}
-        <div className="bg-gradient-to-br from-sage-50 to-cream-50 rounded-xl p-8 border border-sage-100 mb-8">
+        <div className="bg-gradient-to-br from-light/20 to-cream rounded-xl p-8 border border-blush mb-8">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Recommended Routine</h2>
-            <h3 className="text-2xl font-semibold text-sage-700 mb-4">{recommendations.routineType}</h3>
-            <p className="text-gray-600 max-w-3xl mx-auto">
+            <h2 className="text-3xl font-bold text-deep mb-4">Your Recommended Routine</h2>
+            <h3 className="text-2xl font-semibold text-primary mb-4">{recommendations.routineType}</h3>
+            <p className="text-warm-gray max-w-3xl mx-auto">
               {recommendations.routineDescription}
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {recommendations.recommendedProducts.map((product: any, index: number) => (
-              <div key={index} className="bg-white rounded-lg p-6 border border-gray-100">
+              <div key={index} className="bg-white rounded-lg p-6 border border-blush">
                 <div className="flex items-start justify-between mb-3">
                   <div>
-                    <span className="text-xs font-medium text-sage-600 uppercase tracking-wide">
+                    <span className="text-xs font-medium text-primary uppercase tracking-wide">
                       {product.category}
                     </span>
-                    <h4 className="text-lg font-semibold text-gray-900 mt-1">{product.name}</h4>
+                    <h4 className="text-lg font-semibold text-deep mt-1">{product.name}</h4>
                   </div>
                   {product.warning && (
                     <i className="ri-error-warning-line text-amber-500 text-xl"></i>
                   )}
                 </div>
-                <p className="text-sm text-gray-600 mb-3">{product.reason}</p>
+                <p className="text-sm text-warm-gray mb-3">{product.reason}</p>
                 <div className="flex flex-wrap gap-2">
                   {product.keyIngredients.map((ing: string) => (
-                    <span key={ing} className="text-xs px-2 py-1 bg-sage-50 text-sage-700 rounded">
+                    <span key={ing} className="text-xs px-2 py-1 bg-light/30 text-primary-700 rounded">
                       {ing}
                     </span>
                   ))}
@@ -460,17 +460,17 @@ const SurveyResultsPage = () => {
         </div>
 
         {/* Key Ingredients */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 mb-8">
+        <div className="bg-white rounded-xl p-8 border border-blush mb-8">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center">
-              <i className="ri-flask-line text-2xl text-sage-600"></i>
+            <div className="w-12 h-12 bg-light/30 rounded-lg flex items-center justify-center">
+              <i className="ri-flask-line text-2xl text-primary"></i>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Key Ingredients for You</h2>
+            <h2 className="text-2xl font-semibold text-deep">Key Ingredients for You</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {recommendations.keyIngredients.map((ingredient: string) => (
-              <div key={ingredient} className="bg-sage-50 rounded-lg p-4 text-center">
-                <span className="text-sm font-medium text-sage-700">{ingredient}</span>
+              <div key={ingredient} className="bg-light/20 rounded-lg p-4 text-center">
+                <span className="text-sm font-medium text-primary-700">{ingredient}</span>
               </div>
             ))}
           </div>
@@ -478,12 +478,12 @@ const SurveyResultsPage = () => {
 
         {/* Ingredients to Avoid */}
         {recommendations.avoidIngredients.length > 0 && (
-          <div className="bg-white rounded-xl p-8 border border-gray-100 mb-8">
+          <div className="bg-white rounded-xl p-8 border border-blush mb-8">
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
                 <i className="ri-alert-line text-2xl text-red-600"></i>
               </div>
-              <h2 className="text-2xl font-semibold text-gray-900">Ingredients to Avoid</h2>
+              <h2 className="text-2xl font-semibold text-deep">Ingredients to Avoid</h2>
             </div>
             <div className="flex flex-wrap gap-3">
               {recommendations.avoidIngredients.map((ingredient: string) => (
@@ -496,18 +496,18 @@ const SurveyResultsPage = () => {
         )}
 
         {/* Lifestyle Advice */}
-        <div className="bg-white rounded-xl p-8 border border-gray-100 mb-12">
+        <div className="bg-white rounded-xl p-8 border border-blush mb-12">
           <div className="flex items-center space-x-3 mb-6">
-            <div className="w-12 h-12 bg-sage-100 rounded-lg flex items-center justify-center">
-              <i className="ri-lightbulb-line text-2xl text-sage-600"></i>
+            <div className="w-12 h-12 bg-light/30 rounded-lg flex items-center justify-center">
+              <i className="ri-lightbulb-line text-2xl text-primary"></i>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900">Lifestyle Recommendations</h2>
+            <h2 className="text-2xl font-semibold text-deep">Lifestyle Recommendations</h2>
           </div>
           <div className="space-y-4">
             {recommendations.lifestyleAdvice.map((advice: string, index: number) => (
-              <div key={index} className="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
-                <i className="ri-arrow-right-s-line text-sage-600 mt-1"></i>
-                <span className="text-gray-700">{advice}</span>
+              <div key={index} className="flex items-start space-x-3 p-4 bg-cream rounded-lg">
+                <i className="ri-arrow-right-s-line text-primary mt-1"></i>
+                <span className="text-warm-gray">{advice}</span>
               </div>
             ))}
           </div>
@@ -517,7 +517,7 @@ const SurveyResultsPage = () => {
         <div className="text-center">
           <button
             onClick={() => navigate('/discover')}
-            className="bg-sage-600 text-white px-8 py-4 rounded-xl font-medium hover:bg-sage-700 transition-colors text-lg whitespace-nowrap cursor-pointer"
+            className="bg-primary text-white px-8 py-4 rounded-xl font-medium hover:bg-dark transition-colors text-lg whitespace-nowrap cursor-pointer"
           >
             Discover Products for You
             <i className="ri-arrow-right-line ml-2"></i>

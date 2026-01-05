@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase-browser';
 
@@ -142,7 +141,7 @@ const MealPlanner = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-sage-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -151,14 +150,14 @@ const MealPlanner = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Meal Planner</h2>
+        <h2 className="text-2xl font-bold text-deep">Meal Planner</h2>
         <div className="flex items-center space-x-3">
           <button
             onClick={() => setViewMode('day')}
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap cursor-pointer ${
               viewMode === 'day'
-                ? 'bg-sage-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-white'
+                : 'bg-cream text-warm-gray hover:bg-blush'
             }`}
           >
             Day
@@ -167,8 +166,8 @@ const MealPlanner = () => {
             onClick={() => setViewMode('week')}
             className={`px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap cursor-pointer ${
               viewMode === 'week'
-                ? 'bg-sage-600 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                ? 'bg-primary text-white'
+                : 'bg-cream text-warm-gray hover:bg-blush'
             }`}
           >
             Week
@@ -184,13 +183,13 @@ const MealPlanner = () => {
             newDate.setDate(newDate.getDate() - (viewMode === 'week' ? 7 : 1));
             setSelectedDate(newDate);
           }}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
         >
-          <i className="ri-arrow-left-line text-xl text-gray-700"></i>
+          <i className="ri-arrow-left-line text-xl text-warm-gray"></i>
         </button>
 
         <div className="text-center">
-          <h3 className="text-lg font-bold text-gray-900">
+          <h3 className="text-lg font-bold text-deep">
             {viewMode === 'week'
               ? `${getWeekStart(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${getWeekEnd(selectedDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`
               : selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
@@ -203,9 +202,9 @@ const MealPlanner = () => {
             newDate.setDate(newDate.getDate() + (viewMode === 'week' ? 7 : 1));
             setSelectedDate(newDate);
           }}
-          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+          className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
         >
-          <i className="ri-arrow-right-line text-xl text-gray-700"></i>
+          <i className="ri-arrow-right-line text-xl text-warm-gray"></i>
         </button>
       </div>
 
@@ -219,13 +218,13 @@ const MealPlanner = () => {
             return (
               <div
                 key={idx}
-                className={`bg-white rounded-xl p-4 ${isToday ? 'ring-2 ring-sage-600' : ''}`}
+                className={`bg-white rounded-xl p-4 ${isToday ? 'ring-2 ring-primary' : ''}`}
               >
                 <div className="text-center mb-3">
-                  <p className="text-xs font-semibold text-gray-500 uppercase">
+                  <p className="text-xs font-semibold text-warm-gray/80 uppercase">
                     {day.toLocaleDateString('en-US', { weekday: 'short' })}
                   </p>
-                  <p className={`text-2xl font-bold ${isToday ? 'text-sage-600' : 'text-gray-900'}`}>
+                  <p className={`text-2xl font-bold ${isToday ? 'text-primary' : 'text-deep'}`}>
                     {day.getDate()}
                   </p>
                 </div>
@@ -237,22 +236,22 @@ const MealPlanner = () => {
                       className={`p-2 rounded-lg border ${
                         meal.completed
                           ? 'bg-green-50 border-green-200'
-                          : 'bg-gray-50 border-gray-200'
+                          : 'bg-cream border-blush'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-1">
-                        <i className={`${getMealTypeIcon(meal.meal_type)} text-sm text-gray-600`}></i>
+                        <i className={`${getMealTypeIcon(meal.meal_type)} text-sm text-warm-gray`}></i>
                         <button
                           onClick={() => toggleComplete(meal.id, meal.completed)}
                           className="cursor-pointer"
                         >
-                          <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-gray-400'} text-lg`}></i>
+                          <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-lg`}></i>
                         </button>
                       </div>
-                      <p className="text-xs font-medium text-gray-900 line-clamp-2">
+                      <p className="text-xs font-medium text-deep line-clamp-2">
                         {meal.nutrition_foods.name}
                       </p>
-                      <p className="text-xs text-gray-500">{meal.nutrition_foods.calories} cal</p>
+                      <p className="text-xs text-warm-gray/80">{meal.nutrition_foods.calories} cal</p>
                     </div>
                   ))}
                 </div>
@@ -273,14 +272,14 @@ const MealPlanner = () => {
             return (
               <div key={mealType} className="bg-white rounded-xl p-6">
                 <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-10 h-10 flex items-center justify-center bg-sage-100 text-sage-600 rounded-lg">
+                  <div className="w-10 h-10 flex items-center justify-center bg-light/30 text-primary rounded-lg">
                     <i className={`${getMealTypeIcon(mealType)} text-lg`}></i>
                   </div>
-                  <h3 className="text-lg font-bold text-gray-900">{mealType}</h3>
+                  <h3 className="text-lg font-bold text-deep">{mealType}</h3>
                 </div>
 
                 {meals.length === 0 ? (
-                  <p className="text-sm text-gray-500 italic">No meals planned</p>
+                  <p className="text-sm text-warm-gray/80 italic">No meals planned</p>
                 ) : (
                   <div className="space-y-3">
                     {meals.map(meal => (
@@ -289,30 +288,30 @@ const MealPlanner = () => {
                         className={`border rounded-lg p-4 ${
                           meal.completed
                             ? 'bg-green-50 border-green-200'
-                            : 'border-gray-200'
+                            : 'border-blush'
                         }`}
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <h4 className="font-semibold text-gray-900 mb-1">
+                            <h4 className="font-semibold text-deep mb-1">
                               {meal.nutrition_foods.name}
                             </h4>
-                            <div className="flex items-center space-x-4 text-sm text-gray-600">
+                            <div className="flex items-center space-x-4 text-sm text-warm-gray">
                               <span>{meal.nutrition_foods.calories} cal</span>
                               <span>{meal.nutrition_foods.preparation_time} min</span>
                               <span>{meal.servings} serving(s)</span>
                             </div>
                             {meal.notes && (
-                              <p className="text-sm text-gray-600 mt-2">{meal.notes}</p>
+                              <p className="text-sm text-warm-gray mt-2">{meal.notes}</p>
                             )}
                           </div>
 
                           <div className="flex items-center space-x-2">
                             <button
                               onClick={() => toggleComplete(meal.id, meal.completed)}
-                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors cursor-pointer"
+                              className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
                             >
-                              <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-gray-400'} text-xl`}></i>
+                              <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-xl`}></i>
                             </button>
                             <button
                               onClick={() => deleteMealPlan(meal.id)}
@@ -334,9 +333,9 @@ const MealPlanner = () => {
 
       {mealPlans.length === 0 && (
         <div className="text-center py-16 bg-white rounded-xl">
-          <i className="ri-calendar-line text-6xl text-gray-300 mb-4"></i>
-          <p className="text-xl text-gray-600 mb-2">No meals planned yet</p>
-          <p className="text-sm text-gray-500">Browse the food library and add meals to your plan</p>
+          <i className="ri-calendar-line text-6xl text-blush mb-4"></i>
+          <p className="text-xl text-warm-gray mb-2">No meals planned yet</p>
+          <p className="text-sm text-warm-gray/80">Browse the food library and add meals to your plan</p>
         </div>
       )}
     </div>

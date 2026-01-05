@@ -1,6 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   LOREM CURAE DESIGN SYSTEM
+   Warm, elegant color palette
+   ============================================ */
+
+:root {
+  /* Lorem Curae Brand Colors */
+  --lc-primary: #C4704D;      /* Buttons, primary accents, primary hovers */
+  --lc-light: #E8A888;        /* Gradients, soft highlights, subtle backgrounds */
+  --lc-dark: #8B4D35;         /* Hover states, pressed states, strong accents */
+  --lc-cream: #FDF8F5;        /* Page backgrounds, section backgrounds */
+  --lc-deep: #2D2A26;         /* Headings, strong text, titles */
+  --lc-sage: #7A8B7A;         /* Secondary accents, secondary buttons, supportive UI */
+  --lc-warm-gray: #6B635A;    /* Body text, paragraph text, descriptions */
+  --lc-blush: #E8D4CC;        /* Borders, dividers, subtle accents, card outlines */
+  
+  /* Legacy aliases */
+  --lc-accent: #C4704D;
+  --lc-accent-light: #E8A888;
+  --lc-accent-dark: #8B4D35;
+  --lc-cream-dark: #F8F0EB;
+  
+  /* Typography */
+  --lc-font-serif: 'Cormorant Garamond', Georgia, serif;
+  --lc-font-sans: 'DM Sans', sans-serif;
+}
 
 /* ============================================
    LOREM CURAE MOTION DESIGN SYSTEM
@@ -267,11 +296,11 @@
 /* Smooth focus ring for accessibility */
 @layer utilities {
   .focus-ring {
-    @apply focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
   }
   
   .focus-ring-inset {
-    @apply focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-inset;
+    @apply focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-inset;
   }
 }
 
@@ -288,13 +317,13 @@
 
 /* Smooth text selection */
 ::selection {
-  background-color: rgba(95, 122, 95, 0.2);
+  background-color: rgba(196, 112, 77, 0.2);
   color: inherit;
 }
 
 /* Better focus visible styles */
 :focus-visible {
-  outline: 2px solid #5f7a5f;
+  outline: 2px solid #C4704D;
   outline-offset: 2px;
 }
 
@@ -321,6 +350,6 @@ img:not([loading]) {
 /* Gradient text utility */
 @layer utilities {
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-sage-600 to-forest-600;
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-700;
   }
 }

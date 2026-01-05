@@ -117,7 +117,7 @@ export default function BookingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       <Navbar />
       
       <main className="pt-24 pb-16">
@@ -126,16 +126,16 @@ export default function BookingPage() {
           <div className="mb-8">
             <button
               onClick={() => navigate(`/services/${id}`)}
-              className="flex items-center gap-2 text-forest-800 hover:text-forest-900 mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-deep hover:text-deep mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Business</span>
             </button>
 
-            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-3">
+            <h1 className="font-serif text-5xl font-bold text-deep mb-3">
               Book Your Appointment
             </h1>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-warm-gray">
               Radiance Skin Studio
             </p>
           </div>
@@ -153,8 +153,8 @@ export default function BookingPage() {
                     <div
                       className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg mb-2 transition-all ${
                         step >= item.num
-                          ? 'bg-forest-800 text-white'
-                          : 'bg-gray-200 text-gray-400'
+                          ? 'bg-primary text-white'
+                          : 'bg-blush text-warm-gray/60'
                       }`}
                     >
                       {step > item.num ? (
@@ -165,7 +165,7 @@ export default function BookingPage() {
                     </div>
                     <span
                       className={`text-sm font-medium ${
-                        step >= item.num ? 'text-forest-800' : 'text-gray-400'
+                        step >= item.num ? 'text-deep' : 'text-warm-gray/60'
                       }`}
                     >
                       {item.label}
@@ -174,7 +174,7 @@ export default function BookingPage() {
                   {idx < 2 && (
                     <div
                       className={`h-1 flex-1 mx-4 rounded transition-all ${
-                        step > item.num ? 'bg-forest-800' : 'bg-gray-200'
+                        step > item.num ? 'bg-primary' : 'bg-blush'
                       }`}
                     ></div>
                   )}
@@ -188,7 +188,7 @@ export default function BookingPage() {
             {/* Step 1: Select Service */}
             {step === 1 && (
               <div>
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-deep mb-6">
                   Select Your Service
                 </h2>
                 <div className="space-y-4">
@@ -198,21 +198,21 @@ export default function BookingPage() {
                       onClick={() => setSelectedTreatment(treatment)}
                       className={`p-6 border-2 rounded-xl cursor-pointer transition-all ${
                         selectedTreatment?.id === treatment.id
-                          ? 'border-forest-800 bg-cream-100'
-                          : 'border-gray-200 hover:border-forest-800/30'
+                          ? 'border-primary bg-cream'
+                          : 'border-blush hover:border-primary/30'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <h3 className="font-serif text-2xl font-bold text-forest-800 mb-2">
+                          <h3 className="font-serif text-2xl font-bold text-deep mb-2">
                             {treatment.name}
                           </h3>
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                          <div className="flex items-center gap-4 text-sm text-warm-gray">
                             <div className="flex items-center gap-1">
-                              <i className="ri-time-line text-forest-800"></i>
+                              <i className="ri-time-line text-deep"></i>
                               <span>{treatment.duration}</span>
                             </div>
-                            <span className="text-xl font-bold text-forest-800">
+                            <span className="text-xl font-bold text-deep">
                               {treatment.price}
                             </span>
                           </div>
@@ -220,8 +220,8 @@ export default function BookingPage() {
                         <div
                           className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
                             selectedTreatment?.id === treatment.id
-                              ? 'border-forest-800 bg-forest-800'
-                              : 'border-gray-300'
+                              ? 'border-primary bg-primary'
+                              : 'border-blush'
                           }`}
                         >
                           {selectedTreatment?.id === treatment.id && (
@@ -238,7 +238,7 @@ export default function BookingPage() {
             {/* Step 2: Choose Provider */}
             {step === 2 && (
               <div>
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-deep mb-6">
                   Choose Your Provider
                 </h2>
                 <div className="grid md:grid-cols-3 gap-6">
@@ -248,8 +248,8 @@ export default function BookingPage() {
                       onClick={() => setSelectedEmployee(employee)}
                       className={`p-6 border-2 rounded-xl cursor-pointer transition-all text-center ${
                         selectedEmployee?.id === employee.id
-                          ? 'border-forest-800 bg-cream-100'
-                          : 'border-gray-200 hover:border-forest-800/30'
+                          ? 'border-primary bg-cream'
+                          : 'border-blush hover:border-primary/30'
                       }`}
                     >
                       <div className="relative inline-block mb-4">
@@ -261,18 +261,18 @@ export default function BookingPage() {
                           />
                         </div>
                         {selectedEmployee?.id === employee.id && (
-                          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-forest-800 flex items-center justify-center">
+                          <div className="absolute -top-2 -right-2 w-8 h-8 rounded-full bg-primary flex items-center justify-center">
                             <i className="ri-check-line text-white"></i>
                           </div>
                         )}
                       </div>
-                      <h3 className="font-serif text-xl font-bold text-forest-800 mb-1">
+                      <h3 className="font-serif text-xl font-bold text-deep mb-1">
                         {employee.name}
                       </h3>
-                      <p className="text-sm text-gray-600 mb-2">{employee.title}</p>
+                      <p className="text-sm text-warm-gray mb-2">{employee.title}</p>
                       <div className="flex items-center justify-center gap-1">
-                        <i className="ri-star-fill text-coral-400"></i>
-                        <span className="font-medium text-forest-800">{employee.rating}</span>
+                        <i className="ri-star-fill text-amber-400"></i>
+                        <span className="font-medium text-deep">{employee.rating}</span>
                       </div>
                     </div>
                   ))}
@@ -283,13 +283,13 @@ export default function BookingPage() {
             {/* Step 3: Pick Date & Time */}
             {step === 3 && (
               <div>
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-deep mb-6">
                   Select Date &amp; Time
                 </h2>
                 
                 {/* Date Selection */}
                 <div className="mb-8">
-                  <h3 className="font-medium text-forest-800 mb-4">Choose a Date</h3>
+                  <h3 className="font-medium text-deep mb-4">Choose a Date</h3>
                   <div className="grid grid-cols-7 gap-2">
                     {availableDates.slice(0, 14).map((date, idx) => {
                       const isSelected = selectedDate?.toDateString() === date.toDateString();
@@ -301,8 +301,8 @@ export default function BookingPage() {
                           onClick={() => setSelectedDate(date)}
                           className={`p-3 rounded-lg border-2 transition-all cursor-pointer ${
                             isSelected
-                              ? 'border-forest-800 bg-forest-800 text-white'
-                              : 'border-gray-200 hover:border-forest-800/30'
+                              ? 'border-primary bg-primary text-white'
+                              : 'border-blush hover:border-primary/30'
                           }`}
                         >
                           <div className="text-xs mb-1">
@@ -312,7 +312,7 @@ export default function BookingPage() {
                             {date.getDate()}
                           </div>
                           {isToday && !isSelected && (
-                            <div className="text-xs text-forest-800 mt-1">Today</div>
+                            <div className="text-xs text-deep mt-1">Today</div>
                           )}
                         </button>
                       );
@@ -323,7 +323,7 @@ export default function BookingPage() {
                 {/* Time Selection */}
                 {selectedDate && (
                   <div>
-                    <h3 className="font-medium text-forest-800 mb-4">Choose a Time</h3>
+                    <h3 className="font-medium text-deep mb-4">Choose a Time</h3>
                     <div className="grid grid-cols-4 md:grid-cols-6 gap-3">
                       {timeSlots.map((slot, idx) => (
                         <button
@@ -332,10 +332,10 @@ export default function BookingPage() {
                           disabled={!slot.available}
                           className={`px-4 py-3 rounded-lg border-2 text-sm font-medium transition-all cursor-pointer ${
                             selectedTime === slot.time
-                              ? 'border-forest-800 bg-forest-800 text-white'
+                              ? 'border-primary bg-primary text-white'
                               : slot.available
-                              ? 'border-gray-200 hover:border-forest-800/30'
-                              : 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
+                              ? 'border-blush hover:border-primary/30'
+                              : 'border-blush bg-cream text-warm-gray/60 cursor-not-allowed'
                           }`}
                         >
                           {slot.time}
@@ -350,27 +350,27 @@ export default function BookingPage() {
 
           {/* Booking Summary */}
           {(selectedTreatment || selectedEmployee || (selectedDate && selectedTime)) && (
-            <div className="bg-cream-100 rounded-2xl p-6 mb-8">
-              <h3 className="font-serif text-2xl font-bold text-forest-800 mb-4">
+            <div className="bg-cream rounded-2xl p-6 mb-8">
+              <h3 className="font-serif text-2xl font-bold text-deep mb-4">
                 Booking Summary
               </h3>
               <div className="space-y-3">
                 {selectedTreatment && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Service:</span>
-                    <span className="font-medium text-forest-800">{selectedTreatment.name}</span>
+                    <span className="text-warm-gray">Service:</span>
+                    <span className="font-medium text-deep">{selectedTreatment.name}</span>
                   </div>
                 )}
                 {selectedEmployee && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Provider:</span>
-                    <span className="font-medium text-forest-800">{selectedEmployee.name}</span>
+                    <span className="text-warm-gray">Provider:</span>
+                    <span className="font-medium text-deep">{selectedEmployee.name}</span>
                   </div>
                 )}
                 {selectedDate && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Date:</span>
-                    <span className="font-medium text-forest-800">
+                    <span className="text-warm-gray">Date:</span>
+                    <span className="font-medium text-deep">
                       {selectedDate.toLocaleDateString('en-US', { 
                         weekday: 'long', 
                         year: 'numeric', 
@@ -382,14 +382,14 @@ export default function BookingPage() {
                 )}
                 {selectedTime && (
                   <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Time:</span>
-                    <span className="font-medium text-forest-800">{selectedTime}</span>
+                    <span className="text-warm-gray">Time:</span>
+                    <span className="font-medium text-deep">{selectedTime}</span>
                   </div>
                 )}
                 {selectedTreatment && (
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-300">
-                    <span className="font-bold text-forest-800">Total:</span>
-                    <span className="font-bold text-forest-800 text-xl">{selectedTreatment.price}</span>
+                  <div className="flex items-center justify-between pt-3 border-t border-blush">
+                    <span className="font-bold text-deep">Total:</span>
+                    <span className="font-bold text-deep text-xl">{selectedTreatment.price}</span>
                   </div>
                 )}
               </div>
@@ -401,7 +401,7 @@ export default function BookingPage() {
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="flex-1 px-8 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-lg hover:bg-cream-100 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
+                className="flex-1 px-8 py-4 bg-white border-2 border-primary text-deep rounded-lg hover:bg-cream transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-arrow-left-line mr-2"></i>
                 Back
@@ -410,7 +410,7 @@ export default function BookingPage() {
             <button
               onClick={handleNext}
               disabled={isNextDisabled()}
-              className="flex-1 px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex-1 px-8 py-4 bg-primary text-white rounded-lg hover:bg-dark transition-colors font-medium text-lg whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {step === 3 ? 'Confirm Booking' : 'Next'}
               <i className="ri-arrow-right-line ml-2"></i>

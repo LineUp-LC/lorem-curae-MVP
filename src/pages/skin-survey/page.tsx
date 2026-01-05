@@ -20,7 +20,7 @@ const SkinSurveyPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       <QuizFlow />
       <Footer />

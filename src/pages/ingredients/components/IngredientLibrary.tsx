@@ -38,8 +38,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Deep Hydration', 'Plumping', 'Anti-Aging'],
       description: 'A powerful humectant that attracts and retains moisture in the skin.',
       icon: 'ri-drop-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['dehydration', 'fine-lines', 'dullness'],
       priority: 1,
       hasSimilarReviews: true,
@@ -54,8 +54,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Brightening', 'Pore Minimizing', 'Barrier Support'],
       description: 'A versatile vitamin that improves skin tone and strengthens the barrier.',
       icon: 'ri-star-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['hyperpigmentation', 'large-pores', 'uneven-tone'],
       priority: 1,
       hasSimilarReviews: true,
@@ -70,8 +70,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Anti-Aging', 'Cell Turnover', 'Texture Improvement'],
       description: 'A gold-standard ingredient for reducing signs of aging and improving texture.',
       icon: 'ri-flashlight-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['wrinkles', 'fine-lines', 'texture'],
       priority: 1,
       hasSimilarReviews: true,
@@ -86,8 +86,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Brightening', 'Antioxidant', 'Collagen Support'],
       description: 'A powerful antioxidant that brightens and protects skin from damage.',
       icon: 'ri-sun-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['hyperpigmentation', 'dullness', 'sun-damage'],
       priority: 1,
       hasSimilarReviews: true,
@@ -102,8 +102,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Barrier Repair', 'Hydration', 'Protection'],
       description: 'Essential lipids that restore and maintain the skin\'s protective barrier.',
       icon: 'ri-shield-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['dehydration', 'sensitivity', 'barrier-damage'],
       priority: 2,
       hasSimilarReviews: false,
@@ -118,8 +118,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Collagen Support', 'Firming', 'Anti-Aging'],
       description: 'Amino acid chains that signal skin to produce more collagen.',
       icon: 'ri-links-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['wrinkles', 'sagging', 'loss-of-firmness'],
       priority: 2,
       hasSimilarReviews: false,
@@ -134,8 +134,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Soothing', 'Healing', 'Anti-Inflammatory'],
       description: 'A botanical extract known for its calming and healing properties.',
       icon: 'ri-leaf-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['sensitivity', 'redness', 'irritation'],
       priority: 1,
       hasSimilarReviews: true,
@@ -150,8 +150,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Exfoliation', 'Pore Clearing', 'Acne Treatment'],
       description: 'A BHA that penetrates pores to clear congestion and prevent breakouts.',
       icon: 'ri-contrast-drop-2-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['acne', 'blackheads', 'large-pores'],
       priority: 1,
       hasSimilarReviews: true,
@@ -166,8 +166,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       benefits: ['Exfoliation', 'Brightening', 'Texture Improvement'],
       description: 'An AHA that exfoliates the surface to reveal brighter, smoother skin.',
       icon: 'ri-contrast-line',
-      color: 'text-gray-600',
-      bgColor: 'bg-gray-50',
+      color: 'text-primary',
+      bgColor: 'bg-light/30',
       concerns: ['dullness', 'texture', 'hyperpigmentation'],
       priority: 2,
       hasSimilarReviews: false,
@@ -212,14 +212,14 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
   const userConcerns = userProfile?.concerns || [];
 
   return (
-    <div className="py-12 px-6 lg:px-12">
+    <div className="py-12 px-6 lg:px-12 bg-cream">
       <div className="max-w-7xl mx-auto">
         {/* Header - Clean style matching Marketplace */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-4">
+          <h1 className="text-4xl lg:text-6xl font-serif text-deep mb-4">
             Ingredient Library
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-warm-gray max-w-2xl mx-auto">
             Explore our comprehensive database of skincare ingredients with science-backed explanations, safety ratings, and community reviews.
           </p>
         </div>
@@ -227,13 +227,13 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
         {/* Search Bar */}
         <div className="max-w-2xl mx-auto mb-8">
           <div className="relative">
-            <i className="ri-search-line absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-gray-400"></i>
+            <i className="ri-search-line absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-warm-gray/60"></i>
             <input
               type="text"
               placeholder="Search ingredients by name or scientific name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-16 pr-6 py-4 bg-white border-2 border-gray-200 rounded-2xl text-base focus:outline-none focus:border-sage-600 transition-colors"
+              className="w-full pl-16 pr-6 py-4 bg-white border-2 border-blush rounded-2xl text-base focus:outline-none focus:border-primary transition-colors"
             />
           </div>
         </div>
@@ -242,7 +242,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
         {userConcerns.length > 0 && (
           <div className="mb-8">
             <div className="max-w-4xl mx-auto">
-              <p className="text-sm font-semibold text-gray-700 mb-3 text-center">
+              <p className="text-sm font-semibold text-warm-gray mb-3 text-center">
                 Filter by your skin concerns:
               </p>
               <div className="flex flex-wrap items-center justify-center gap-3">
@@ -250,8 +250,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                   onClick={() => setSelectedConcern(null)}
                   className={`px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     selectedConcern === null
-                      ? 'bg-sage-600 text-white shadow-lg'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-600 hover:text-sage-600'
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary hover:text-primary'
                   }`}
                 >
                   All Ingredients
@@ -262,8 +262,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                     onClick={() => setSelectedConcern(concern)}
                     className={`px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                       selectedConcern === concern
-                        ? 'bg-sage-600 text-white shadow-lg'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-600 hover:text-sage-600'
+                        ? 'bg-primary text-white shadow-lg'
+                        : 'bg-white text-warm-gray border border-blush hover:border-primary hover:text-primary'
                     }`}
                   >
                     {concern.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
@@ -282,8 +282,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
               onClick={() => setSelectedCategory(category.id)}
               className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap cursor-pointer ${
                 selectedCategory === category.id
-                  ? 'bg-sage-600 text-white shadow-lg'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-600 hover:text-sage-600'
+                  ? 'bg-primary text-white shadow-lg'
+                  : 'bg-white text-warm-gray border border-blush hover:border-primary hover:text-primary'
               }`}
             >
               <i className={`${category.icon} text-lg`}></i>
@@ -294,8 +294,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
 
         {/* Results Count */}
         <div className="mb-8">
-          <p className="text-gray-600">
-            Showing <strong>{sortedIngredients.length}</strong> ingredients
+          <p className="text-warm-gray">
+            Showing <strong className="text-deep">{sortedIngredients.length}</strong> ingredients
           </p>
         </div>
 
@@ -303,12 +303,12 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
         {selectedConcern && recommendedIngredients.length > 0 && (
           <div className="mb-12">
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-sage-100 flex items-center justify-center">
-                <i className="ri-star-fill text-sage-600 text-xl"></i>
+              <div className="w-10 h-10 rounded-xl bg-light/30 flex items-center justify-center">
+                <i className="ri-star-fill text-primary text-xl"></i>
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-gray-900">Recommended for You</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-2xl font-bold text-deep">Recommended for You</h2>
+                <p className="text-sm text-warm-gray">
                   Priority ingredients for {selectedConcern.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </p>
               </div>
@@ -319,15 +319,15 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 <div
                   key={ingredient.id}
                   onClick={() => onSelectIngredient(ingredient.id)}
-                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2 border-sage-600 ring-2 ring-sage-600/20 cursor-pointer group"
+                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2 border-primary ring-2 ring-primary/20 cursor-pointer group"
                 >
                   <div className="mb-3 flex items-center gap-2 flex-wrap">
-                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full">
+                    <span className="inline-flex items-center gap-1 px-3 py-1 bg-light/30 text-primary-700 text-xs font-semibold rounded-full">
                       <i className="ri-star-fill"></i>
                       Recommended for You
                     </span>
                     {ingredient.hasSimilarReviews && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full shadow-sm">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-light/30 text-primary-700 text-xs font-semibold rounded-full shadow-sm">
                         <i className="ri-user-heart-line"></i>
                         Similar Skin Reviews
                       </span>
@@ -340,12 +340,12 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-semibold text-forest-900 mb-1 group-hover:text-sage-600 transition-colors">
+                  <h3 className="text-xl font-semibold text-deep mb-1 group-hover:text-primary transition-colors">
                     {ingredient.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-3">{ingredient.scientificName}</p>
+                  <p className="text-sm text-warm-gray/80 mb-3">{ingredient.scientificName}</p>
 
-                  <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  <p className="text-sm text-warm-gray leading-relaxed mb-4">
                     {ingredient.description}
                   </p>
 
@@ -353,28 +353,28 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                     {ingredient.benefits.slice(0, 3).map((benefit, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-cream-100 text-forest-800 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-cream text-deep text-xs font-medium rounded-full"
                       >
                         {benefit}
                       </span>
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-4 border-t border-blush">
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <i
                             key={star}
                             className={`ri-star-fill text-sm ${
-                              star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-gray-300'
+                              star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-blush'
                             }`}
                           ></i>
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">({ingredient.reviews})</span>
+                      <span className="text-sm text-warm-gray">({ingredient.reviews})</span>
                     </div>
-                    <i className="ri-arrow-right-line text-xl text-sage-600 group-hover:translate-x-1 transition-transform"></i>
+                    <i className="ri-arrow-right-line text-xl text-primary group-hover:translate-x-1 transition-transform"></i>
                   </div>
                 </div>
               ))}
@@ -387,8 +387,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
           <div>
             {selectedConcern && recommendedIngredients.length > 0 && (
               <div className="mb-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-2">All Other Ingredients</h2>
-                <p className="text-sm text-gray-600">
+                <h2 className="text-2xl font-bold text-deep mb-2">All Other Ingredients</h2>
+                <p className="text-sm text-warm-gray">
                   Browse our complete ingredient library
                 </p>
               </div>
@@ -399,11 +399,11 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 <div
                   key={ingredient.id}
                   onClick={() => onSelectIngredient(ingredient.id)}
-                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-gray-100 cursor-pointer group"
+                  className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-blush cursor-pointer group"
                 >
                   {ingredient.hasSimilarReviews && (
                     <div className="mb-3">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full shadow-sm">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-light/30 text-primary-700 text-xs font-semibold rounded-full shadow-sm">
                         <i className="ri-user-heart-line"></i>
                         Similar Skin Reviews
                       </span>
@@ -416,12 +416,12 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                     </div>
                   </div>
 
-                  <h3 className="text-xl font-semibold text-forest-900 mb-1 group-hover:text-sage-600 transition-colors">
+                  <h3 className="text-xl font-semibold text-deep mb-1 group-hover:text-primary transition-colors">
                     {ingredient.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-3">{ingredient.scientificName}</p>
+                  <p className="text-sm text-warm-gray/80 mb-3">{ingredient.scientificName}</p>
 
-                  <p className="text-sm text-gray-600 leading-relaxed mb-4">
+                  <p className="text-sm text-warm-gray leading-relaxed mb-4">
                     {ingredient.description}
                   </p>
 
@@ -429,28 +429,28 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                     {ingredient.benefits.slice(0, 3).map((benefit, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-cream-100 text-forest-800 text-xs font-medium rounded-full"
+                        className="px-3 py-1 bg-cream text-deep text-xs font-medium rounded-full"
                       >
                         {benefit}
                       </span>
                     ))}
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-4 border-t border-blush">
                     <div className="flex items-center space-x-2">
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <i
                             key={star}
                             className={`ri-star-fill text-sm ${
-                              star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-gray-300'
+                              star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-blush'
                             }`}
                           ></i>
                         ))}
                       </div>
-                      <span className="text-sm text-gray-600">({ingredient.reviews})</span>
+                      <span className="text-sm text-warm-gray">({ingredient.reviews})</span>
                     </div>
-                    <i className="ri-arrow-right-line text-xl text-sage-600 group-hover:translate-x-1 transition-transform"></i>
+                    <i className="ri-arrow-right-line text-xl text-primary group-hover:translate-x-1 transition-transform"></i>
                   </div>
                 </div>
               ))}
@@ -460,8 +460,8 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
 
         {sortedIngredients.length === 0 && (
           <div className="text-center py-16">
-            <i className="ri-search-line text-6xl text-gray-300 mb-4"></i>
-            <p className="text-xl text-gray-600">No ingredients found matching your search.</p>
+            <i className="ri-search-line text-6xl text-blush mb-4"></i>
+            <p className="text-xl text-warm-gray">No ingredients found matching your search.</p>
           </div>
         )}
       </div>

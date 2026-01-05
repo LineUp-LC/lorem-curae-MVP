@@ -150,35 +150,35 @@ const MarketplaceAllPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="pt-20">
         {/* Header */}
-        <section className="py-16 bg-white border-b border-gray-200">
+        <section className="py-16 bg-white border-b border-blush">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
-            <h1 className="text-4xl lg:text-5xl font-serif text-gray-900 mb-4">
+            <h1 className="text-4xl lg:text-5xl font-serif text-deep mb-4">
               All Storefronts
             </h1>
-            <p className="text-lg text-gray-600 max-w-3xl">
+            <p className="text-lg text-warm-gray max-w-3xl">
               Browse all verified storefronts offering products and services
             </p>
           </div>
         </section>
 
         {/* Filters */}
-        <section className="py-8 bg-white border-b border-gray-200">
+        <section className="py-8 bg-white border-b border-blush">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
               {/* Search */}
               <div className="relative w-full lg:w-96">
-                <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400"></i>
+                <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-warm-gray/60"></i>
                 <input
                   type="text"
                   placeholder="Search storefronts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-gray-200 focus:border-sage-600 focus:outline-none text-sm transition-all"
+                  className="w-full pl-12 pr-4 py-3 rounded-full border-2 border-blush focus:border-primary focus:outline-none text-sm transition-all"
                 />
               </div>
 
@@ -188,8 +188,8 @@ const MarketplaceAllPage = () => {
                   onClick={() => setFilterType('all')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     filterType === 'all'
-                      ? 'bg-sage-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
                   All Storefronts
@@ -198,8 +198,8 @@ const MarketplaceAllPage = () => {
                   onClick={() => setFilterType('featured')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     filterType === 'featured'
-                      ? 'bg-sage-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
                   Featured
@@ -208,8 +208,8 @@ const MarketplaceAllPage = () => {
                   onClick={() => setFilterType('premium')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     filterType === 'premium'
-                      ? 'bg-sage-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
                   Premium Visibility
@@ -218,8 +218,8 @@ const MarketplaceAllPage = () => {
                   onClick={() => setFilterType('products')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     filterType === 'products'
-                      ? 'bg-sage-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
                   Products
@@ -228,8 +228,8 @@ const MarketplaceAllPage = () => {
                   onClick={() => setFilterType('services')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                     filterType === 'services'
-                      ? 'bg-sage-600 text-white shadow-md'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                      ? 'bg-primary text-white shadow-md'
+                      : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
                   Services
@@ -239,7 +239,7 @@ const MarketplaceAllPage = () => {
 
             {/* Results Count */}
             <div className="mt-6">
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-warm-gray">
                 Showing <strong>{filteredStorefronts.length}</strong> storefronts
               </p>
             </div>
@@ -261,14 +261,14 @@ const MarketplaceAllPage = () => {
                 >
                   <div className={`bg-white rounded-2xl overflow-hidden border hover:shadow-xl transition-all ${
                     isConcernMatch
-                      ? 'ring-2 ring-sage-500 ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-sage-300'
-                      : 'border-gray-200 hover:border-sage-300'
+                      ? 'ring-2 ring-primary ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)] border-primary-300'
+                      : 'border-blush hover:border-primary-300'
                   }`}>
                     {/* Concern Match Badge */}
                     {isConcernMatch && (
-                      <div className="bg-sage-50 px-4 py-2 flex items-center gap-2 border-b border-sage-200">
-                        <i className="ri-sparkling-2-fill text-sage-600 text-sm"></i>
-                        <span className="text-xs font-medium text-sage-700">Matches your skin concerns</span>
+                      <div className="bg-primary-50 px-4 py-2 flex items-center gap-2 border-b border-blush">
+                        <i className="ri-sparkling-2-fill text-primary text-sm"></i>
+                        <span className="text-xs font-medium text-primary-700">Matches your skin concerns</span>
                       </div>
                     )}
                     {/* Banner */}
@@ -281,22 +281,22 @@ const MarketplaceAllPage = () => {
                       <div className="absolute top-3 right-3 flex gap-2">
                         {storefront.featured && storefront.premiumVisibility && (
                           <>
-                            <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full">
+                            <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
                               Featured
                             </div>
-                            <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                            <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full flex items-center gap-1">
                               <i className="ri-vip-crown-line"></i>
                               Premium
                             </div>
                           </>
                         )}
                         {storefront.featured && !storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full">
+                          <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full">
                             Featured
                           </div>
                         )}
                         {!storefront.featured && storefront.premiumVisibility && (
-                          <div className="px-3 py-1 bg-sage-600 text-white text-xs font-semibold rounded-full flex items-center gap-1">
+                          <div className="px-3 py-1 bg-primary text-white text-xs font-semibold rounded-full flex items-center gap-1">
                             <i className="ri-vip-crown-line"></i>
                             Premium
                           </div>
@@ -304,7 +304,7 @@ const MarketplaceAllPage = () => {
                       </div>
                       <div className="absolute top-3 left-3">
                         <div className={`px-3 py-1 text-white text-xs font-semibold rounded-full flex items-center gap-1 ${
-                          storefront.type === 'products' ? 'bg-sage-600' : 'bg-coral-600'
+                          storefront.type === 'products' ? 'bg-primary' : 'bg-primary'
                         }`}>
                           <i className={storefront.type === 'products' ? 'ri-shopping-bag-line' : 'ri-service-line'}></i>
                           {storefront.type === 'products' ? 'Products' : 'Services'}
@@ -326,20 +326,20 @@ const MarketplaceAllPage = () => {
                     {/* Content */}
                     <div className="p-6 pt-4">
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="text-xl font-bold text-gray-900 group-hover:text-sage-600 transition-colors">
+                        <h3 className="text-xl font-bold text-deep group-hover:text-primary transition-colors">
                           {storefront.name}
                         </h3>
                         {storefront.verified && (
-                          <i className="ri-verified-badge-fill text-sage-600 text-xl" title="Verified"></i>
+                          <i className="ri-verified-badge-fill text-primary text-xl" title="Verified"></i>
                         )}
                       </div>
-                      <p className="text-gray-600 text-sm mb-4">{storefront.tagline}</p>
+                      <p className="text-warm-gray text-sm mb-4">{storefront.tagline}</p>
 
                       {/* Stats */}
-                      <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+                      <div className="flex items-center justify-between text-sm text-warm-gray mb-4">
                         <div className="flex items-center space-x-1">
                           <i className="ri-star-fill text-amber-500"></i>
-                          <span className="font-semibold text-gray-900">{storefront.rating}</span>
+                          <span className="font-semibold text-deep">{storefront.rating}</span>
                           <span>({storefront.reviews})</span>
                         </div>
                         <div className="flex items-center space-x-1">
@@ -348,8 +348,8 @@ const MarketplaceAllPage = () => {
                         </div>
                       </div>
 
-                      <div className="pt-4 border-t border-gray-100">
-                        <span className="text-sm text-gray-600">
+                      <div className="pt-4 border-t border-blush">
+                        <span className="text-sm text-warm-gray">
                           {storefront.type === 'products' 
                             ? `${storefront.products} Products` 
                             : `${storefront.services} Services`
@@ -366,11 +366,11 @@ const MarketplaceAllPage = () => {
             {/* No Results */}
             {filteredStorefronts.length === 0 && (
               <div className="text-center py-16">
-                <div className="w-20 h-20 flex items-center justify-center bg-gray-100 rounded-full mx-auto mb-4">
-                  <i className="ri-search-line text-4xl text-gray-400"></i>
+                <div className="w-20 h-20 flex items-center justify-center bg-cream rounded-full mx-auto mb-4">
+                  <i className="ri-search-line text-4xl text-warm-gray/60"></i>
                 </div>
-                <h3 className="text-2xl font-serif text-gray-900 mb-2">No storefronts found</h3>
-                <p className="text-gray-600 mb-6">
+                <h3 className="text-2xl font-serif text-deep mb-2">No storefronts found</h3>
+                <p className="text-warm-gray mb-6">
                   Try adjusting your filters or search query
                 </p>
                 <button
@@ -378,7 +378,7 @@ const MarketplaceAllPage = () => {
                     setFilterType('all');
                     setSearchQuery('');
                   }}
-                  className="px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all whitespace-nowrap cursor-pointer"
+                  className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all whitespace-nowrap cursor-pointer"
                 >
                   Clear Filters
                 </button>

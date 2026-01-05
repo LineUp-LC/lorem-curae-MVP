@@ -16,25 +16,26 @@ const CartPage = () => {
   const outOfStockItems = cartItems.filter(item => !item.inStock);
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
       <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Shopping Cart</h1>
-          <p className="text-gray-600">{cartItems.length} items in your cart</p>
+          <h1 className="text-4xl font-serif mb-2" style={{ color: '#2D2A26' }}>Shopping Cart</h1>
+          <p style={{ color: '#6B635A' }}>{cartItems.length} items in your cart</p>
         </div>
 
         {cartItems.length === 0 ? (
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <i className="ri-shopping-cart-line text-3xl text-gray-400"></i>
+            <div className="w-24 h-24 mx-auto mb-6 rounded-full flex items-center justify-center" style={{ backgroundColor: '#F8F4F0' }}>
+              <i className="ri-shopping-cart-line text-3xl" style={{ color: '#9A938A' }}></i>
             </div>
-            <h2 className="text-2xl font-semibold text-gray-900 mb-4">Your cart is empty</h2>
-            <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
+            <h2 className="text-2xl font-semibold mb-4" style={{ color: '#2D2A26' }}>Your cart is empty</h2>
+            <p className="mb-8" style={{ color: '#6B635A' }}>Looks like you haven't added any items to your cart yet.</p>
             <Link
               to="/marketplace"
-              className="inline-flex items-center space-x-2 bg-sage-600 hover:bg-sage-700 text-white px-8 py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center space-x-2 text-white px-8 py-3 rounded-lg font-semibold transition-colors cursor-pointer"
+              style={{ backgroundColor: '#C4704D' }}
             >
               <span>Continue Shopping</span>
               <i className="ri-arrow-right-line"></i>
@@ -44,93 +45,35 @@ const CartPage = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Cart Items */}
             <div className="lg:col-span-2 space-y-6">
-              {/* In Stock Items */}
               {inStockItems.length > 0 && (
-                <div className="bg-white rounded-xl p-6 border border-gray-100">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Available Items ({inStockItems.length})</h2>
+                <div className="bg-white rounded-xl p-6" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
+                  <h2 className="text-xl font-semibold mb-6" style={{ color: '#2D2A26' }}>Available Items ({inStockItems.length})</h2>
                   <div className="space-y-6">
                     {inStockItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
-                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
+                      <div key={item.id} className="flex items-center space-x-4 pb-6 last:pb-0" style={{ borderBottom: '1px solid rgba(232, 212, 204, 0.3)' }}>
+                        <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0" style={{ backgroundColor: '#F8F4F0' }}>
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         </div>
-                        
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                          <p className="text-sm text-gray-500 mb-2">{item.brand}</p>
+                          <h3 className="font-semibold truncate" style={{ color: '#2D2A26' }}>{item.name}</h3>
+                          <p className="text-sm mb-2" style={{ color: '#6B635A' }}>{item.brand}</p>
                           <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold text-gray-900">${item.price}</span>
+                            <span className="text-lg font-bold" style={{ color: '#2D2A26' }}>${item.price}</span>
                             {item.originalPrice && (
-                              <span className="text-sm text-gray-400 line-through">${item.originalPrice}</span>
+                              <span className="text-sm line-through" style={{ color: '#9A938A' }}>${item.originalPrice}</span>
                             )}
                           </div>
                         </div>
-
                         <div className="flex items-center space-x-3">
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                          >
-                            <i className="ri-subtract-line text-sm"></i>
+                          <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer" style={{ border: '1px solid #E8D4CC' }}>
+                            <i className="ri-subtract-line text-sm" style={{ color: '#6B635A' }}></i>
                           </button>
-                          <span className="w-12 text-center font-medium">{item.quantity}</span>
-                          <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="w-8 h-8 flex items-center justify-center border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
-                          >
-                            <i className="ri-add-line text-sm"></i>
+                          <span className="w-12 text-center font-medium" style={{ color: '#2D2A26' }}>{item.quantity}</span>
+                          <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="w-8 h-8 flex items-center justify-center rounded-lg cursor-pointer" style={{ border: '1px solid #E8D4CC' }}>
+                            <i className="ri-add-line text-sm" style={{ color: '#6B635A' }}></i>
                           </button>
                         </div>
-
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                        >
-                          <i className="ri-delete-bin-line text-lg"></i>
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Out of Stock Items */}
-              {outOfStockItems.length > 0 && (
-                <div className="bg-white rounded-xl p-6 border border-gray-100 opacity-60">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-6">Out of Stock ({outOfStockItems.length})</h2>
-                  <div className="space-y-6">
-                    {outOfStockItems.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 pb-6 border-b border-gray-100 last:border-b-0 last:pb-0">
-                        <div className="w-20 h-20 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0 relative">
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gray-900/50 flex items-center justify-center">
-                            <span className="text-white text-xs font-medium">Out of Stock</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-semibold text-gray-900 truncate">{item.name}</h3>
-                          <p className="text-sm text-gray-500 mb-2">{item.brand}</p>
-                          <div className="flex items-center space-x-2">
-                            <span className="text-lg font-bold text-gray-900">${item.price}</span>
-                            {item.originalPrice && (
-                              <span className="text-sm text-gray-400 line-through">${item.originalPrice}</span>
-                            )}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => removeItem(item.id)}
-                          className="p-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer"
-                        >
+                        <button onClick={() => removeItem(item.id)} className="p-2 cursor-pointer" style={{ color: '#8B4D35' }}>
                           <i className="ri-delete-bin-line text-lg"></i>
                         </button>
                       </div>
@@ -142,57 +85,34 @@ const CartPage = () => {
 
             {/* Order Summary */}
             <div className="lg:col-span-1">
-              <div className="bg-white rounded-xl p-6 border border-gray-100 sticky top-6">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">Order Summary</h2>
-                
+              <div className="bg-white rounded-xl p-6 sticky top-24" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
+                <h2 className="text-xl font-semibold mb-6" style={{ color: '#2D2A26' }}>Order Summary</h2>
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span style={{ color: '#6B635A' }}>Subtotal</span>
+                    <span className="font-medium" style={{ color: '#2D2A26' }}>${subtotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Shipping</span>
-                    <span className="font-medium">${shipping.toFixed(2)}</span>
+                    <span style={{ color: '#6B635A' }}>Shipping</span>
+                    <span className="font-medium" style={{ color: '#2D2A26' }}>${shipping.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Tax</span>
-                    <span className="font-medium">${tax.toFixed(2)}</span>
+                    <span style={{ color: '#6B635A' }}>Tax</span>
+                    <span className="font-medium" style={{ color: '#2D2A26' }}>${tax.toFixed(2)}</span>
                   </div>
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="pt-4" style={{ borderTop: '1px solid rgba(232, 212, 204, 0.5)' }}>
                     <div className="flex justify-between">
-                      <span className="text-lg font-semibold">Total</span>
-                      <span className="text-lg font-bold text-gray-900">${total.toFixed(2)}</span>
+                      <span className="font-semibold" style={{ color: '#2D2A26' }}>Total</span>
+                      <span className="font-bold text-xl" style={{ color: '#C4704D' }}>${total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
-
-                <button
-                  disabled={inStockItems.length === 0}
-                  className={`w-full py-3 px-6 rounded-lg font-semibold transition-colors whitespace-nowrap cursor-pointer ${
-                    inStockItems.length > 0
-                      ? 'bg-sage-600 hover:bg-sage-700 text-white'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
+                <button className="w-full py-3 rounded-lg font-semibold text-white transition-colors cursor-pointer" style={{ backgroundColor: '#C4704D' }}>
                   Proceed to Checkout
                 </button>
-
-                <div className="mt-4 text-center">
-                  <Link
-                    to="/marketplace"
-                    className="text-sage-600 hover:text-sage-700 font-medium text-sm transition-colors cursor-pointer"
-                  >
-                    Continue Shopping
-                  </Link>
-                </div>
-
-                {/* Security Badge */}
-                <div className="mt-6 pt-6 border-t border-gray-200">
-                  <div className="flex items-center justify-center space-x-2 text-sm text-gray-500">
-                    <i className="ri-shield-check-line"></i>
-                    <span>Secure Checkout</span>
-                  </div>
-                </div>
+                <Link to="/marketplace" className="block text-center mt-4 text-sm font-medium" style={{ color: '#C4704D' }}>
+                  Continue Shopping
+                </Link>
               </div>
             </div>
           </div>

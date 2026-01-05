@@ -4,6 +4,19 @@ import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
 
+/**
+ * Navbar Component
+ * 
+ * Color Scheme (Lorem Curae):
+ * - Primary: #C4704D (coral)
+ * - Light: #E8A888 (light coral)
+ * - Dark: #8B4D35 (dark coral)
+ * - Cream: #FDF8F5 (background)
+ * - Deep: #2D2A26 (text)
+ * - Sage: #7A8B7A (accents)
+ * - Warm Gray: #6B635A (body text)
+ */
+
 // Static data moved outside component to prevent recreation on each render
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -53,9 +66,55 @@ const Navbar = () => {
 
   return (
     <>
+      <style>{`
+        .lc-nav {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+        }
+        .lc-nav-scrolled {
+          background: rgba(253, 248, 245, 0.95) !important;
+          backdrop-filter: blur(10px);
+          border-bottom: 1px solid rgba(196, 112, 77, 0.1);
+        }
+        .lc-nav-link {
+          color: #6B635A !important;
+          font-weight: 500;
+          transition: color 0.3s ease;
+          position: relative;
+        }
+        .lc-nav-link:hover {
+          color: #C4704D !important;
+        }
+        .lc-nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: -4px;
+          left: 0;
+          width: 0;
+          height: 2px;
+          background: #C4704D;
+          transition: width 0.3s ease;
+        }
+        .lc-nav-link:hover::after {
+          width: 100%;
+        }
+        .lc-logo {
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif) !important;
+          font-weight: 600;
+          letter-spacing: 0.02em;
+          color: #2D2A26;
+        }
+        .lc-mobile-link {
+          color: #2D2A26;
+          transition: all 0.2s ease;
+        }
+        .lc-mobile-link:hover {
+          background: rgba(196, 112, 77, 0.08);
+          color: #C4704D;
+        }
+      `}</style>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || showMobileMenu ? 'bg-white shadow-md' : 'bg-transparent'
+        className={`lc-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+          isScrolled || showMobileMenu ? 'lc-nav-scrolled shadow-md' : 'bg-transparent'
         }`}
       >
         <div className="w-full px-4 sm:px-6 lg:px-12">
@@ -64,7 +123,9 @@ const Navbar = () => {
             <button
               onClick={() => setShowMobileMenu(!showMobileMenu)}
               className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
-                isScrolled || !isHomePage || showMobileMenu ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/20'
+                isScrolled || !isHomePage || showMobileMenu 
+                  ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
+                  : 'text-white hover:bg-white/20'
               }`}
               aria-label="Toggle menu"
             >
@@ -73,8 +134,8 @@ const Navbar = () => {
 
             {/* Logo */}
             <Link to="/" className="flex items-center cursor-pointer">
-              <span className={`text-3xl font-serif transition-colors ${
-                isScrolled || !isHomePage || showMobileMenu ? 'text-slate-900' : 'text-white'
+              <span className={`lc-logo text-3xl transition-colors ${
+                isScrolled || !isHomePage || showMobileMenu ? 'text-[#2D2A26]' : 'text-white'
               }`}>
                 Lorem Curae
               </span>
@@ -86,7 +147,7 @@ const Navbar = () => {
                 <Link 
                   key={link.path}
                   to={link.path} 
-                  className="text-forest-800 hover:text-sage-600 font-medium transition-colors cursor-pointer"
+                  className="lc-nav-link transition-colors cursor-pointer"
                 >
                   {link.name}
                 </Link>
@@ -98,7 +159,9 @@ const Navbar = () => {
               <button
                 onClick={() => setIsSearchOpen(true)}
                 className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
-                  isScrolled || !isHomePage || showMobileMenu ? 'text-black hover:bg-gray-100' : 'text-white hover:bg-white/20'
+                  isScrolled || !isHomePage || showMobileMenu 
+                    ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
+                    : 'text-white hover:bg-white/20'
                 }`}
                 aria-label="Search"
               >
@@ -110,14 +173,14 @@ const Navbar = () => {
                 to="/cart"
                 className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
                   isScrolled || !isHomePage || showMobileMenu
-                    ? 'text-black hover:bg-gray-100'
+                    ? 'text-[#2D2A26] hover:bg-[#C4704D]/10'
                     : 'text-white hover:bg-white/10'
                 }`}
                 aria-label="Shopping Cart"
               >
                 <i className="ri-shopping-cart-line text-xl"></i>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-coral-500 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C4704D] text-white text-xs rounded-full flex items-center justify-center font-medium">
                     {cartCount}
                   </span>
                 )}
@@ -128,7 +191,9 @@ const Navbar = () => {
                 <button
                   onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                   className={`w-10 h-10 rounded-full overflow-hidden ring-2 transition-all cursor-pointer ${
-                    isScrolled || !isHomePage || showMobileMenu ? 'ring-sage-200 hover:ring-sage-400' : 'ring-white/30 hover:ring-white/50'
+                    isScrolled || !isHomePage || showMobileMenu 
+                      ? 'ring-[#E8A888]/50 hover:ring-[#C4704D]' 
+                      : 'ring-white/30 hover:ring-white/50'
                   }`}
                   aria-label="Profile"
                 >
@@ -149,13 +214,13 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {showMobileMenu && (
-          <div className="lg:hidden bg-white border-t border-gray-100 motion-safe:animate-enter-down">
+          <div className="lg:hidden bg-white border-t border-[#E8D4CC]/30 motion-safe:animate-enter-down">
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link, index) => (
                 <Link
                   key={link.path}
                   to={link.path}
-                  className="block px-4 py-3 text-forest-800 hover:bg-sage-50 hover:text-sage-600 rounded-lg font-medium transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
+                  className="lc-mobile-link block px-4 py-3 rounded-lg font-medium transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
                   style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
                   onClick={() => setShowMobileMenu(false)}
                 >

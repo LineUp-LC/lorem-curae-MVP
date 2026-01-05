@@ -500,7 +500,7 @@ export default function MySkinPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       <Navbar />
       
       <main className="pt-24 pb-16">
@@ -508,18 +508,18 @@ export default function MySkinPage() {
           {/* Header */}
           <div className="mb-12">
             <div className="flex items-center justify-between mb-4">
-              <h1 className="font-serif text-5xl font-bold text-forest-800">
+              <h1 className="font-serif text-5xl font-bold text-deep">
                 My Skin Profile
               </h1>
               <button
                 onClick={handleRetakeQuiz}
-                className="px-6 py-3 bg-white border-2 border-forest-800 text-forest-800 rounded-lg hover:bg-cream-100 transition-colors font-medium whitespace-nowrap cursor-pointer"
+                className="px-6 py-3 bg-white border-2 border-primary text-deep rounded-lg hover:bg-cream transition-colors font-medium whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-refresh-line mr-2"></i>
                 Retake Skin Quiz
               </button>
             </div>
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-warm-gray">
               Your personalized skin analysis based on your quiz results
             </p>
           </div>
@@ -527,7 +527,7 @@ export default function MySkinPage() {
           {/* Skin Type Display */}
           {skinProfile.skinType && (
             <div className="mb-8">
-              <div className="bg-gradient-to-r from-sage-600 to-sage-500 rounded-2xl p-6 text-white">
+              <div className="bg-gradient-to-r from-primary to-cream0 rounded-2xl p-6 text-white">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
                     <i className="ri-user-heart-line text-3xl"></i>
@@ -545,14 +545,14 @@ export default function MySkinPage() {
           <div className="mb-12">
             <div className="bg-white rounded-2xl shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-sage-500 to-sage-600 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center">
                   <i className="ri-line-chart-line text-white text-2xl"></i>
                 </div>
                 <div>
-                  <h2 className="font-serif text-3xl font-bold text-forest-800">
+                  <h2 className="font-serif text-3xl font-bold text-deep">
                     Curae AI Assessment
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-warm-gray">
                     Track and analyze your skincare journey with AI insights
                   </p>
                 </div>
@@ -563,32 +563,32 @@ export default function MySkinPage() {
                 <div className="lg:col-span-1 space-y-4">
                   {/* Select Concern */}
                   <div>
-                    <label className="block text-sm font-medium text-forest-800 mb-2">
+                    <label className="block text-sm font-medium text-deep mb-2">
                       Select Your Concern
                     </label>
                     <div className="relative">
                       <button
                         onClick={() => setShowConcernDropdown(!showConcernDropdown)}
-                        className="w-full px-4 py-3 bg-cream-100 border-2 border-gray-200 rounded-lg text-left flex items-center justify-between hover:border-forest-800/30 transition-colors cursor-pointer"
+                        className="w-full px-4 py-3 bg-cream border-2 border-blush rounded-lg text-left flex items-center justify-between hover:border-primary/30 transition-colors cursor-pointer"
                       >
-                        <span className={selectedConcern ? 'text-forest-800 font-medium' : 'text-gray-500'}>
+                        <span className={selectedConcern ? 'text-deep font-medium' : 'text-warm-gray/80'}>
                           {selectedConcern || 'Choose a concern...'}
                         </span>
-                        <i className={`ri-arrow-${showConcernDropdown ? 'up' : 'down'}-s-line text-forest-800`}></i>
+                        <i className={`ri-arrow-${showConcernDropdown ? 'up' : 'down'}-s-line text-deep`}></i>
                       </button>
                       
                       {showConcernDropdown && (
-                        <div className="absolute z-10 w-full mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg max-h-64 overflow-y-auto">
+                        <div className="absolute z-10 w-full mt-2 bg-white border-2 border-blush rounded-lg shadow-lg max-h-64 overflow-y-auto">
                           {concerns.map((concern) => (
                             <button
                               key={concern.id}
                               onClick={() => handleSelectConcern(concern)}
-                              className="w-full px-4 py-3 text-left hover:bg-cream-100 transition-colors flex items-center gap-3 cursor-pointer"
+                              className="w-full px-4 py-3 text-left hover:bg-cream transition-colors flex items-center gap-3 cursor-pointer"
                             >
-                              <i className={`${concern.icon} text-forest-800 text-xl`}></i>
+                              <i className={`${concern.icon} text-deep text-xl`}></i>
                               <div>
-                                <p className="font-medium text-forest-800">{concern.name}</p>
-                                <p className="text-xs text-gray-500">Priority {concern.priority}</p>
+                                <p className="font-medium text-deep">{concern.name}</p>
+                                <p className="text-xs text-warm-gray/80">Priority {concern.priority}</p>
                               </div>
                             </button>
                           ))}
@@ -599,7 +599,7 @@ export default function MySkinPage() {
 
                   {/* Timeframe Selection */}
                   <div>
-                    <label className="block text-sm font-medium text-forest-800 mb-2">
+                    <label className="block text-sm font-medium text-deep mb-2">
                       Assessment Timeframe
                     </label>
                     <div className="grid grid-cols-2 gap-2">
@@ -609,8 +609,8 @@ export default function MySkinPage() {
                           onClick={() => handleTimeframeChange(timeframe.id)}
                           className={`px-4 py-3 rounded-lg font-medium transition-all cursor-pointer ${
                             selectedTimeframe === timeframe.id
-                              ? 'bg-forest-800 text-white shadow-md'
-                              : 'bg-cream-100 text-gray-700 hover:bg-gray-200'
+                              ? 'bg-primary text-white shadow-md'
+                              : 'bg-cream text-warm-gray hover:bg-blush'
                           }`}
                         >
                           {timeframe.label}
@@ -621,14 +621,14 @@ export default function MySkinPage() {
 
                   {/* Assessment Info */}
                   {selectedConcern && (
-                    <div className="p-4 bg-gradient-to-br from-[#2C5F4F]/5 to-[#E8956C]/5 rounded-lg border border-forest-800/20">
+                    <div className="p-4 bg-gradient-to-br from-[var(--lc-accent)]/5 to-[var(--lc-accent-light)]/5 rounded-lg border border-primary/20">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg bg-forest-800 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                           <i className="ri-information-line text-white text-xl"></i>
                         </div>
                         <div>
-                          <h4 className="font-medium text-forest-800 mb-1">Current Assessment</h4>
-                          <p className="text-sm text-gray-600">
+                          <h4 className="font-medium text-deep mb-1">Current Assessment</h4>
+                          <p className="text-sm text-warm-gray">
                             Analyzing <strong>{selectedConcern}</strong> progress over{' '}
                             <strong>{timeframes.find(t => t.id === selectedTimeframe)?.label.toLowerCase()}</strong>
                           </p>
@@ -639,18 +639,18 @@ export default function MySkinPage() {
                 </div>
 
                 {/* AI Chat Box */}
-                <div className="lg:col-span-2 flex flex-col bg-gradient-to-br from-cream-100 to-white rounded-xl border-2 border-gray-200 overflow-hidden">
+                <div className="lg:col-span-2 flex flex-col bg-gradient-to-br from-cream to-white rounded-xl border-2 border-blush overflow-hidden">
                   {/* Chat Header */}
-                  <div className="bg-gradient-to-r from-sage-600 to-sage-500 text-white p-4">
+                  <div className="bg-gradient-to-r from-primary to-cream0 text-white p-4">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center relative">
                         <i className="ri-sparkling-2-fill text-xl"></i>
-                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-coral-400 rounded-full border border-white"></div>
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-primary rounded-full border border-white"></div>
                       </div>
                       <div>
                         <h3 className="font-bold">Curae AI</h3>
                         <div className="flex items-center gap-1 text-xs text-white/80">
-                          <div className="w-2 h-2 rounded-full bg-green-400"></div>
+                          <div className="w-2 h-2 rounded-full bg-cream-400"></div>
                           <span>Curae AI Assessment</span>
                         </div>
                       </div>
@@ -667,20 +667,20 @@ export default function MySkinPage() {
                         <div
                           className={`max-w-[85%] rounded-2xl px-4 py-3 ${
                             message.type === 'user'
-                              ? 'bg-forest-800 text-white'
-                              : 'bg-white text-gray-800 shadow-sm border border-gray-200'
+                              ? 'bg-primary text-white'
+                              : 'bg-white text-deep shadow-sm border border-blush'
                           }`}
                         >
                           {message.type === 'ai' && (
                             <div className="flex items-center gap-2 mb-2">
-                              <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                                <i className="ri-sparkling-2-fill text-forest-800 text-xs"></i>
+                              <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                                <i className="ri-sparkling-2-fill text-deep text-xs"></i>
                               </div>
-                              <span className="text-xs font-medium text-forest-800">Curae</span>
+                              <span className="text-xs font-medium text-deep">Curae</span>
                             </div>
                           )}
                           <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
-                          <p className={`text-xs mt-2 ${message.type === 'user' ? 'text-white/70' : 'text-gray-400'}`}>
+                          <p className={`text-xs mt-2 ${message.type === 'user' ? 'text-white/70' : 'text-warm-gray/60'}`}>
                             {message.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
                           </p>
                         </div>
@@ -689,15 +689,15 @@ export default function MySkinPage() {
                     
                     {isAssessing && (
                       <div className="flex justify-start">
-                        <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-200">
+                        <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-blush">
                           <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 rounded-full bg-forest-800/10 flex items-center justify-center">
-                              <i className="ri-sparkling-2-fill text-forest-800 text-xs"></i>
+                            <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+                              <i className="ri-sparkling-2-fill text-deep text-xs"></i>
                             </div>
                             <div className="flex gap-1">
-                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce"></div>
-                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                              <div className="w-2 h-2 rounded-full bg-forest-800 motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce"></div>
+                              <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                              <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
                             </div>
                           </div>
                         </div>
@@ -706,7 +706,7 @@ export default function MySkinPage() {
                   </div>
 
                   {/* Input */}
-                  <div className="p-4 bg-white border-t-2 border-gray-200">
+                  <div className="p-4 bg-white border-t-2 border-blush">
                     <div className="flex gap-2">
                       <input
                         type="text"
@@ -715,12 +715,12 @@ export default function MySkinPage() {
                         onKeyPress={(e) => e.key === 'Enter' && handleSendAssessmentMessage()}
                         placeholder={selectedConcern ? 'Ask about your progress...' : 'Select a concern first...'}
                         disabled={!selectedConcern}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20 text-sm disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="flex-1 px-4 py-3 border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm disabled:bg-cream disabled:cursor-not-allowed"
                       />
                       <button
                         onClick={handleSendAssessmentMessage}
                         disabled={!assessmentInput.trim() || !selectedConcern}
-                        className="w-12 h-12 rounded-lg bg-forest-800 text-white flex items-center justify-center hover:bg-forest-900 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                        className="w-12 h-12 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                       >
                         <i className="ri-send-plane-fill text-xl"></i>
                       </button>
@@ -735,14 +735,14 @@ export default function MySkinPage() {
           <div className="mb-12">
             <div className="bg-white rounded-2xl shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-forest-800/10 flex items-center justify-center">
-                  <i className="ri-heart-pulse-line text-forest-800 text-2xl"></i>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <i className="ri-heart-pulse-line text-deep text-2xl"></i>
                 </div>
                 <div>
-                  <h2 className="font-serif text-3xl font-bold text-forest-800">
+                  <h2 className="font-serif text-3xl font-bold text-deep">
                     Your Skin Concerns
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-warm-gray">
                     Prioritized based on your skin quiz results
                   </p>
                 </div>
@@ -752,12 +752,12 @@ export default function MySkinPage() {
                 {concerns.map((concern, index) => (
                   <div
                     key={concern.id}
-                    className="border border-gray-200 rounded-xl p-6 hover:border-forest-800/30 transition-all"
+                    className="border border-blush rounded-xl p-6 hover:border-primary/30 transition-all"
                   >
                     <div className="flex items-start gap-4">
                       {/* Priority Badge */}
                       <div className="flex-shrink-0">
-                        <div className="w-12 h-12 rounded-full bg-forest-800 text-white flex items-center justify-center font-bold text-lg">
+                        <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg">
                           {concern.priority}
                         </div>
                       </div>
@@ -765,24 +765,24 @@ export default function MySkinPage() {
                       <div className="flex-1">
                         {/* Concern Header */}
                         <div className="flex items-center gap-3 mb-2">
-                          <i className={`${concern.icon} text-2xl text-forest-800`}></i>
-                          <h3 className="font-serif text-2xl font-bold text-forest-800">
+                          <i className={`${concern.icon} text-2xl text-deep`}></i>
+                          <h3 className="font-serif text-2xl font-bold text-deep">
                             {concern.name}
                           </h3>
                         </div>
                         
-                        <p className="text-gray-600 text-sm mb-4">{concern.description}</p>
+                        <p className="text-warm-gray text-sm mb-4">{concern.description}</p>
 
                         {/* Recommended Ingredients */}
                         <div className="mb-4">
-                          <h4 className="text-sm font-medium text-forest-800 mb-2">
+                          <h4 className="text-sm font-medium text-deep mb-2">
                             Look for these ingredients:
                           </h4>
                           <div className="flex flex-wrap gap-2">
                             {concern.recommendedIngredients.map((ingredient, idx) => (
                               <span
                                 key={idx}
-                                className="px-3 py-1 bg-cream-100 text-forest-800 text-xs font-medium rounded-full border border-forest-800/20"
+                                className="px-3 py-1 bg-cream text-deep text-xs font-medium rounded-full border border-primary/20"
                               >
                                 {ingredient}
                               </span>
@@ -794,14 +794,14 @@ export default function MySkinPage() {
                         <div className="flex gap-3">
                           <button
                             onClick={() => handlePrioritize(concern, 'products')}
-                            className="px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                           >
                             <i className="ri-shopping-bag-line mr-2"></i>
                             Find Products
                           </button>
                           <button
                             onClick={() => handlePrioritize(concern, 'services')}
-                            className="px-6 py-3 bg-white border-2 border-forest-800 text-forest-800 rounded-lg hover:bg-cream-100 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                            className="px-6 py-3 bg-white border-2 border-primary text-deep rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                           >
                             <i className="ri-store-line mr-2"></i>
                             Find Services
@@ -819,14 +819,14 @@ export default function MySkinPage() {
           <div className="mb-12">
             <div className="bg-white rounded-2xl shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-coral-400/10 flex items-center justify-center">
-                  <i className="ri-shield-check-line text-coral-400 text-2xl"></i>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <i className="ri-shield-check-line text-amber-400 text-2xl"></i>
                 </div>
                 <div>
-                  <h2 className="font-serif text-3xl font-bold text-forest-800">
+                  <h2 className="font-serif text-3xl font-bold text-deep">
                     Essential Basic Products
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-warm-gray">
                     The foundation of every healthy skincare routine
                   </p>
                 </div>
@@ -836,15 +836,15 @@ export default function MySkinPage() {
                 {basicProducts.map((product) => (
                   <div
                     key={product.id}
-                    className="p-6 bg-cream-100 rounded-xl border border-gray-200"
+                    className="p-6 bg-cream rounded-xl border border-blush"
                   >
-                    <div className="w-14 h-14 rounded-xl bg-white flex items-center justify-center mb-4">
-                      <i className={`${product.icon} text-3xl text-forest-800`}></i>
+                    <div className="w-14 h-14 rounded-xl bg-cream flex items-center justify-center mb-4">
+                      <i className={`${product.icon} text-3xl text-deep`}></i>
                     </div>
-                    <h3 className="font-medium text-forest-800 text-lg mb-2">
+                    <h3 className="font-medium text-deep text-lg mb-2">
                       {product.name}
                     </h3>
-                    <p className="text-sm text-gray-600">{product.description}</p>
+                    <p className="text-sm text-warm-gray">{product.description}</p>
                   </div>
                 ))}
               </div>
@@ -860,17 +860,17 @@ export default function MySkinPage() {
                     <i className="ri-alert-line text-red-600 text-2xl"></i>
                   </div>
                   <div>
-                    <h2 className="font-serif text-3xl font-bold text-forest-800">
+                    <h2 className="font-serif text-3xl font-bold text-deep">
                       Your Allergens
                     </h2>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-warm-gray">
                       Ingredients to avoid in your products
                     </p>
                   </div>
                 </div>
                 <button
                   onClick={() => setShowAddAllergen(true)}
-                  className="px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                  className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                 >
                   <i className="ri-add-line mr-2"></i>
                   Add Allergen
@@ -879,19 +879,19 @@ export default function MySkinPage() {
 
               {/* Add Allergen Form */}
               {showAddAllergen && (
-                <div className="mb-6 p-4 bg-cream-100 rounded-xl">
+                <div className="mb-6 p-4 bg-cream rounded-xl">
                   <div className="grid md:grid-cols-2 gap-4 mb-4">
                     <input
                       type="text"
                       placeholder="Allergen name"
                       value={newAllergen.name}
                       onChange={(e) => setNewAllergen({ ...newAllergen, name: e.target.value })}
-                      className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20"
+                      className="px-4 py-3 border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                     />
                     <select
                       value={newAllergen.category}
                       onChange={(e) => setNewAllergen({ ...newAllergen, category: e.target.value })}
-                      className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20 cursor-pointer"
+                      className="px-4 py-3 border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
                     >
                       <option value="Synthetic">Synthetic</option>
                       <option value="Natural">Natural</option>
@@ -902,13 +902,13 @@ export default function MySkinPage() {
                   <div className="flex gap-3">
                     <button
                       onClick={handleAddAllergen}
-                      className="px-6 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                     >
                       Add
                     </button>
                     <button
                       onClick={() => setShowAddAllergen(false)}
-                      className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="px-6 py-2 bg-blush text-warm-gray rounded-lg hover:bg-blush transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                     >
                       Cancel
                     </button>
@@ -936,7 +936,7 @@ export default function MySkinPage() {
                     </button>
                   </div>
                 )) : (
-                  <p className="text-gray-500 text-sm">No allergens added yet</p>
+                  <p className="text-warm-gray/80 text-sm">No allergens added yet</p>
                 )}
               </div>
             </div>
@@ -946,14 +946,14 @@ export default function MySkinPage() {
           <div>
             <div className="bg-white rounded-2xl shadow-sm p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-forest-800/10 flex items-center justify-center">
-                  <i className="ri-settings-3-line text-forest-800 text-2xl"></i>
+                <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <i className="ri-settings-3-line text-deep text-2xl"></i>
                 </div>
                 <div>
-                  <h2 className="font-serif text-3xl font-bold text-forest-800">
+                  <h2 className="font-serif text-3xl font-bold text-deep">
                     Your Preferences
                   </h2>
-                  <p className="text-sm text-gray-600">
+                  <p className="text-sm text-warm-gray">
                     Product preferences based on your lifestyle
                   </p>
                 </div>
@@ -963,10 +963,10 @@ export default function MySkinPage() {
                 {preferences.map((pref) => (
                   <div
                     key={pref.id}
-                    className="p-4 bg-cream-100 rounded-lg border border-gray-200"
+                    className="p-4 bg-cream rounded-lg border border-blush"
                   >
-                    <p className="text-xs text-gray-500 mb-1">{pref.category}</p>
-                    <p className="text-sm font-medium text-forest-800">{pref.value}</p>
+                    <p className="text-xs text-warm-gray/80 mb-1">{pref.category}</p>
+                    <p className="text-sm font-medium text-deep">{pref.value}</p>
                   </div>
                 ))}
               </div>
@@ -981,17 +981,17 @@ export default function MySkinPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
             <button
               onClick={() => setShowServicePopup(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-warm-gray/60 hover:text-warm-gray transition-colors"
             >
               <i className="ri-close-line text-2xl"></i>
             </button>
             
             <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-forest-800/10 flex items-center justify-center mx-auto mb-4">
-                <i className="ri-store-line text-forest-800 text-3xl"></i>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-store-line text-deep text-3xl"></i>
               </div>
-              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Find Services</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-2xl font-serif font-bold text-deep mb-2">Find Services</h3>
+              <p className="text-warm-gray text-sm">
                 {selectedConcernForService && `for ${selectedConcernForService.name}`}
               </p>
             </div>
@@ -1002,14 +1002,14 @@ export default function MySkinPage() {
                   navigate('/marketplace', { state: { concernFilter: selectedConcernForService?.name } });
                   setShowServicePopup(false);
                 }}
-                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4"
+                className="w-full px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors text-left flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
                   <i className="ri-shopping-bag-3-line text-2xl"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Marketplace</p>
-                  <p className="text-sm text-cream-100">Browse curated services and products</p>
+                  <p className="text-sm text-light">Browse curated services and products</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
               </button>
@@ -1019,14 +1019,14 @@ export default function MySkinPage() {
                   navigate('/services', { state: { concernFilter: selectedConcernForService?.name } });
                   setShowServicePopup(false);
                 }}
-                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4"
+                className="w-full px-6 py-4 bg-white border-2 border-primary text-deep rounded-xl hover:bg-cream transition-colors text-left flex items-center gap-4"
               >
-                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
-                  <i className="ri-search-line text-2xl text-forest-800"></i>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <i className="ri-search-line text-2xl text-deep"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Search for Services</p>
-                  <p className="text-sm text-gray-600">Find specific skincare services</p>
+                  <p className="text-sm text-warm-gray">Find specific skincare services</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
               </button>
@@ -1041,17 +1041,17 @@ export default function MySkinPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
             <button
               onClick={() => setShowProductPopup(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors"
+              className="absolute top-4 right-4 text-warm-gray/60 hover:text-warm-gray transition-colors"
             >
               <i className="ri-close-line text-2xl"></i>
             </button>
             
             <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-forest-800/10 flex items-center justify-center mx-auto mb-4">
-                <i className="ri-shopping-bag-line text-forest-800 text-3xl"></i>
+              <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-shopping-bag-line text-deep text-3xl"></i>
               </div>
-              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Find Products</h3>
-              <p className="text-gray-600 text-sm">
+              <h3 className="text-2xl font-serif font-bold text-deep mb-2">Find Products</h3>
+              <p className="text-warm-gray text-sm">
                 {selectedConcernForProduct && `for ${selectedConcernForProduct.name}`}
               </p>
             </div>
@@ -1062,14 +1062,14 @@ export default function MySkinPage() {
                   navigate('/marketplace', { state: { concernFilter: selectedConcernForProduct?.name } });
                   setShowProductPopup(false);
                 }}
-                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4"
+                className="w-full px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors text-left flex items-center gap-4"
               >
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
                   <i className="ri-shopping-bag-3-line text-2xl"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Marketplace</p>
-                  <p className="text-sm text-cream-100">Browse curated products and services</p>
+                  <p className="text-sm text-white">Browse curated products and services</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
               </button>
@@ -1079,14 +1079,14 @@ export default function MySkinPage() {
                   navigate('/discover', { state: { concernFilter: selectedConcernForProduct?.name } });
                   setShowProductPopup(false);
                 }}
-                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4"
+                className="w-full px-6 py-4 bg-white border-2 border-primary text-deep rounded-xl hover:bg-cream transition-colors text-left flex items-center gap-4"
               >
-                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
-                  <i className="ri-search-line text-2xl text-forest-800"></i>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <i className="ri-search-line text-2xl text-deep"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Search for Products</p>
-                  <p className="text-sm text-gray-600">Find specific skincare products</p>
+                  <p className="text-sm text-warm-gray">Find specific skincare products</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
               </button>

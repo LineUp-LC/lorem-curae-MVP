@@ -124,7 +124,7 @@ const StorefrontDetailPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-[#FDF8F5]">
       <Navbar />
       
       <main className="pt-20">
@@ -140,7 +140,7 @@ const StorefrontDetailPage = () => {
 
         {/* Storefront Header */}
         <div className="max-w-7xl mx-auto px-6 lg:px-12 -mt-20 relative z-10">
-          <div className="bg-white rounded-xl p-8 shadow-xl">
+          <div className="bg-white rounded-xl p-8 shadow-xl border border-[#E8A888]/20">
             <div className="flex items-start justify-between">
               <div className="flex items-start space-x-6">
                 {/* Logo */}
@@ -155,18 +155,18 @@ const StorefrontDetailPage = () => {
                 {/* Info */}
                 <div>
                   <div className="flex items-center space-x-3 mb-2">
-                    <h1 className="text-3xl font-bold text-gray-900">{storefront.name}</h1>
+                    <h1 className="text-3xl font-bold text-[#2D2A26]">{storefront.name}</h1>
                     {storefront.verified && (
-                      <i className="ri-verified-badge-fill text-sage-600 text-2xl" title="Verified"></i>
+                      <i className="ri-verified-badge-fill text-[#C4704D] text-2xl" title="Verified"></i>
                     )}
                   </div>
-                  <p className="text-lg text-gray-600 mb-4">{storefront.tagline}</p>
+                  <p className="text-lg text-[#6B635A] mb-4">{storefront.tagline}</p>
 
                   {/* Stats */}
-                  <div className="flex items-center space-x-6 text-sm text-gray-600">
+                  <div className="flex items-center space-x-6 text-sm text-[#6B635A]">
                     <div className="flex items-center space-x-1">
                       <i className="ri-star-fill text-amber-500"></i>
-                      <span className="font-semibold text-gray-900">{storefront.rating}</span>
+                      <span className="font-semibold text-[#2D2A26]">{storefront.rating}</span>
                       <span>({storefront.reviews} reviews)</span>
                     </div>
                     <div className="flex items-center space-x-1">
@@ -185,7 +185,7 @@ const StorefrontDetailPage = () => {
                       href={storefront.socials.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-sage-100 hover:text-sage-600 transition-colors cursor-pointer"
+                      className="w-10 h-10 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-lg hover:bg-[#E8A888]/20 hover:text-[#C4704D] transition-colors cursor-pointer"
                     >
                       <i className="ri-instagram-line text-lg"></i>
                     </a>
@@ -193,7 +193,7 @@ const StorefrontDetailPage = () => {
                       href={storefront.socials.tiktok}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-sage-100 hover:text-sage-600 transition-colors cursor-pointer"
+                      className="w-10 h-10 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-lg hover:bg-[#E8A888]/20 hover:text-[#C4704D] transition-colors cursor-pointer"
                     >
                       <i className="ri-tiktok-line text-lg"></i>
                     </a>
@@ -201,7 +201,7 @@ const StorefrontDetailPage = () => {
                       href={storefront.socials.website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-10 h-10 flex items-center justify-center bg-gray-100 text-gray-700 rounded-lg hover:bg-sage-100 hover:text-sage-600 transition-colors cursor-pointer"
+                      className="w-10 h-10 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-lg hover:bg-[#E8A888]/20 hover:text-[#C4704D] transition-colors cursor-pointer"
                     >
                       <i className="ri-global-line text-lg"></i>
                     </a>
@@ -214,8 +214,8 @@ const StorefrontDetailPage = () => {
                 onClick={() => setIsFollowing(!isFollowing)}
                 className={`px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                   isFollowing
-                    ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    : 'bg-sage-600 text-white hover:bg-sage-700'
+                    ? 'bg-[#FDF8F5] text-[#6B635A] hover:bg-[#E8A888]/20'
+                    : 'bg-[#C4704D] text-white hover:bg-[#8B4D35]'
                 }`}
               >
                 {isFollowing ? (
@@ -237,11 +237,11 @@ const StorefrontDetailPage = () => {
         {/* Content */}
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
           {/* Tabs */}
-          <div className="bg-white rounded-xl p-2 mb-8 flex items-center space-x-2">
+          <div className="bg-white rounded-xl p-2 mb-8 flex items-center space-x-2 border border-[#E8A888]/20">
             <button
               onClick={() => setActiveTab('products')}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'products' ? 'bg-sage-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                activeTab === 'products' ? 'bg-[#C4704D] text-white' : 'text-[#6B635A] hover:bg-[#FDF8F5]'
               }`}
             >
               Products
@@ -249,7 +249,7 @@ const StorefrontDetailPage = () => {
             <button
               onClick={() => setActiveTab('about')}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'about' ? 'bg-sage-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                activeTab === 'about' ? 'bg-[#C4704D] text-white' : 'text-[#6B635A] hover:bg-[#FDF8F5]'
               }`}
             >
               About
@@ -257,7 +257,7 @@ const StorefrontDetailPage = () => {
             <button
               onClick={() => setActiveTab('reviews')}
               className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'reviews' ? 'bg-sage-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                activeTab === 'reviews' ? 'bg-[#C4704D] text-white' : 'text-[#6B635A] hover:bg-[#FDF8F5]'
               }`}
             >
               Reviews
@@ -269,15 +269,15 @@ const StorefrontDetailPage = () => {
             <div className="space-y-12">
               {/* Best Sellers */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Best Sellers</h2>
+                <h2 className="text-2xl font-bold text-[#2D2A26] mb-6">Best Sellers</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {storefront.bestSellers.map((product) => (
                     <Link
                       key={product.id}
                       to={`/product/${product.id}`}
-                      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-lg transition-all group cursor-pointer"
+                      className="bg-white rounded-xl overflow-hidden border border-[#E8A888]/30 hover:border-[#C4704D] hover:shadow-lg transition-all group cursor-pointer"
                     >
-                      <div className="aspect-square overflow-hidden bg-gray-50">
+                      <div className="aspect-square overflow-hidden bg-[#FDF8F5]">
                         <img 
                           src={product.image}
                           alt={product.name}
@@ -285,7 +285,7 @@ const StorefrontDetailPage = () => {
                         />
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-sage-600 transition-colors">
+                        <h3 className="font-semibold text-[#2D2A26] mb-2 group-hover:text-[#C4704D] transition-colors">
                           {product.name}
                         </h3>
                         {/* Preference Tags */}
@@ -300,8 +300,8 @@ const StorefrontDetailPage = () => {
                                     key={key}
                                     className={`px-2 py-0.5 text-xs rounded-full ${
                                       isMatch
-                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
-                                        : 'bg-gray-100 text-gray-600'
+                                        ? 'bg-[#E8A888]/30 text-[#8B4D35] font-medium border border-[#C4704D]'
+                                        : 'bg-[#FDF8F5] text-[#6B635A]'
                                     }`}
                                   >
                                     {isMatch && <i className="ri-check-line mr-0.5"></i>}
@@ -312,8 +312,8 @@ const StorefrontDetailPage = () => {
                           </div>
                         )}
                         <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-sage-600">{product.price}</span>
-                          <div className="flex items-center space-x-1 text-sm text-gray-600">
+                          <span className="text-lg font-bold text-[#C4704D]">{product.price}</span>
+                          <div className="flex items-center space-x-1 text-sm text-[#6B635A]">
                             <i className="ri-star-fill text-amber-500"></i>
                             <span>{product.rating}</span>
                             <span>({product.reviews})</span>
@@ -327,15 +327,15 @@ const StorefrontDetailPage = () => {
 
               {/* All Products */}
               <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">All Products</h2>
+                <h2 className="text-2xl font-bold text-[#2D2A26] mb-6">All Products</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {storefront.allProducts.map((product) => (
                     <Link
                       key={product.id}
                       to={`/product/${product.id}`}
-                      className="bg-white rounded-xl overflow-hidden border border-gray-200 hover:border-sage-300 hover:shadow-lg transition-all group cursor-pointer"
+                      className="bg-white rounded-xl overflow-hidden border border-[#E8A888]/30 hover:border-[#C4704D] hover:shadow-lg transition-all group cursor-pointer"
                     >
-                      <div className="aspect-square overflow-hidden bg-gray-50">
+                      <div className="aspect-square overflow-hidden bg-[#FDF8F5]">
                         <img 
                           src={product.image}
                           alt={product.name}
@@ -343,7 +343,7 @@ const StorefrontDetailPage = () => {
                         />
                       </div>
                       <div className="p-4">
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-sage-600 transition-colors">
+                        <h3 className="font-semibold text-[#2D2A26] mb-2 line-clamp-2 group-hover:text-[#C4704D] transition-colors">
                           {product.name}
                         </h3>
                         {/* Preference Tags */}
@@ -358,8 +358,8 @@ const StorefrontDetailPage = () => {
                                     key={key}
                                     className={`px-2 py-0.5 text-xs rounded-full ${
                                       isMatch
-                                        ? 'bg-sage-100 text-sage-700 font-medium border border-sage-300'
-                                        : 'bg-gray-100 text-gray-600'
+                                        ? 'bg-[#E8A888]/30 text-[#8B4D35] font-medium border border-[#C4704D]'
+                                        : 'bg-[#FDF8F5] text-[#6B635A]'
                                     }`}
                                   >
                                     {isMatch && <i className="ri-check-line mr-0.5"></i>}
@@ -370,8 +370,8 @@ const StorefrontDetailPage = () => {
                           </div>
                         )}
                         <div className="flex items-center justify-between">
-                          <span className="text-lg font-bold text-sage-600">{product.price}</span>
-                          <div className="flex items-center space-x-1 text-sm text-gray-600">
+                          <span className="text-lg font-bold text-[#C4704D]">{product.price}</span>
+                          <div className="flex items-center space-x-1 text-sm text-[#6B635A]">
                             <i className="ri-star-fill text-amber-500"></i>
                             <span>{product.rating}</span>
                           </div>
@@ -388,17 +388,17 @@ const StorefrontDetailPage = () => {
           {activeTab === 'about' && (
             <div className="space-y-8">
               {/* Description */}
-              <div className="bg-white rounded-xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">About Us</h2>
-                <p className="text-gray-700 leading-relaxed">{storefront.description}</p>
+              <div className="bg-white rounded-xl p-8 border border-[#E8A888]/20">
+                <h2 className="text-2xl font-bold text-[#2D2A26] mb-4">About Us</h2>
+                <p className="text-[#6B635A] leading-relaxed">{storefront.description}</p>
               </div>
 
               {/* Photos */}
-              <div className="bg-white rounded-xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Gallery</h2>
+              <div className="bg-white rounded-xl p-8 border border-[#E8A888]/20">
+                <h2 className="text-2xl font-bold text-[#2D2A26] mb-6">Gallery</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {storefront.photos.map((photo, idx) => (
-                    <div key={idx} className="aspect-square rounded-lg overflow-hidden group cursor-pointer">
+                    <div key={idx} className="aspect-square rounded-lg overflow-hidden group cursor-pointer border border-[#E8A888]/20">
                       <img 
                         src={photo}
                         alt={`Gallery ${idx + 1}`}
@@ -410,8 +410,8 @@ const StorefrontDetailPage = () => {
               </div>
 
               {/* Video */}
-              <div className="bg-white rounded-xl p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Brand Story</h2>
+              <div className="bg-white rounded-xl p-8 border border-[#E8A888]/20">
+                <h2 className="text-2xl font-bold text-[#2D2A26] mb-6">Brand Story</h2>
                 <div className="relative rounded-xl overflow-hidden group cursor-pointer">
                   <div className="aspect-video">
                     <img 
@@ -422,7 +422,7 @@ const StorefrontDetailPage = () => {
                   </div>
                   <div className="absolute inset-0 bg-black/30 group-hover:bg-black/40 transition-all flex items-center justify-center">
                     <div className="w-20 h-20 flex items-center justify-center bg-white rounded-full shadow-xl group-hover:scale-110 transition-transform">
-                      <i className="ri-play-fill text-4xl text-sage-600 ml-1"></i>
+                      <i className="ri-play-fill text-4xl text-[#C4704D] ml-1"></i>
                     </div>
                   </div>
                 </div>
@@ -432,14 +432,14 @@ const StorefrontDetailPage = () => {
 
           {/* Reviews Tab */}
           {activeTab === 'reviews' && (
-            <div className="bg-white rounded-xl p-8">
+            <div className="bg-white rounded-xl p-8 border border-[#E8A888]/20">
               <div className="flex items-center justify-between mb-8">
-                <h2 className="text-2xl font-bold text-gray-900">Customer Reviews</h2>
-                <button className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                <h2 className="text-2xl font-bold text-[#2D2A26]">Customer Reviews</h2>
+                <button className="px-6 py-3 bg-[#C4704D] text-white rounded-lg font-medium hover:bg-[#8B4D35] transition-colors whitespace-nowrap cursor-pointer">
                   Write a Review
                 </button>
               </div>
-              <div className="text-center py-12 text-gray-500">
+              <div className="text-center py-12 text-[#6B635A]">
                 <i className="ri-chat-3-line text-5xl mb-4"></i>
                 <p>Reviews will be displayed here</p>
               </div>

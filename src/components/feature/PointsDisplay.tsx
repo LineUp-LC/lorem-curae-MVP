@@ -2,6 +2,19 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase-browser';
 import { getPointsAccount, CuraePointsAccount, getTierBenefits, getPointsToNextTier } from '../../lib/utils/curaePoints';
 
+/**
+ * PointsDisplay Component
+ * 
+ * Color Scheme (Lorem Curae):
+ * - Primary: #C4704D (coral)
+ * - Light: #E8A888 (light coral)
+ * - Dark: #8B4D35 (dark coral)
+ * - Cream: #FDF8F5 (background)
+ * - Deep: #2D2A26 (text)
+ * - Sage: #7A8B7A (accents)
+ * - Warm Gray: #6B635A (body text)
+ */
+
 const PointsDisplay = () => {
   const [pointsAccount, setPointsAccount] = useState<CuraePointsAccount | null>(null);
   const [loading, setLoading] = useState(true);
@@ -30,10 +43,10 @@ const PointsDisplay = () => {
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-[#E8D4CC]/30 p-6">
         <div className="motion-safe:animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/2 mb-4"></div>
-          <div className="h-8 bg-gray-200 rounded w-3/4"></div>
+          <div className="h-4 bg-[#E8D4CC]/50 rounded w-1/2 mb-4"></div>
+          <div className="h-8 bg-[#E8D4CC]/50 rounded w-3/4"></div>
         </div>
       </div>
     );
@@ -43,11 +56,12 @@ const PointsDisplay = () => {
     return null;
   }
 
+  // Lorem Curae tier colors
   const tierColors = {
-    Bronze: 'from-amber-700 to-amber-900',
-    Silver: 'from-gray-400 to-gray-600',
-    Gold: 'from-yellow-400 to-yellow-600',
-    Platinum: 'from-purple-400 to-purple-600',
+    Bronze: 'from-[#8B4D35] to-[#6B635A]',
+    Silver: 'from-[#7A8B7A] to-[#6B635A]',
+    Gold: 'from-[#C4704D] to-[#E8A888]',
+    Platinum: 'from-[#2D2A26] to-[#6B635A]',
   };
 
   const tierIcons = {
@@ -61,7 +75,7 @@ const PointsDisplay = () => {
   const tierBenefits = getTierBenefits(pointsAccount.tier);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-lg shadow-sm border border-[#E8D4CC]/30 overflow-hidden" style={{ fontFamily: 'var(--lc-font-sans, "DM Sans", sans-serif)' }}>
       {/* Header with gradient */}
       <div className={`bg-gradient-to-r ${tierColors[pointsAccount.tier]} p-6 text-white`}>
         <div className="flex items-center justify-between mb-4">
@@ -71,7 +85,7 @@ const PointsDisplay = () => {
             </div>
             <div>
               <p className="text-sm opacity-90">Your Tier</p>
-              <p className="text-2xl font-bold">{pointsAccount.tier}</p>
+              <p className="text-2xl font-bold" style={{ fontFamily: 'var(--lc-font-serif, "Cormorant Garamond", serif)' }}>{pointsAccount.tier}</p>
             </div>
           </div>
           <button
@@ -85,7 +99,7 @@ const PointsDisplay = () => {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <span className="text-sm opacity-90">Curae Points Balance</span>
-            <span className="text-3xl font-bold">{pointsAccount.points_balance.toLocaleString()}</span>
+            <span className="text-3xl font-bold" style={{ fontFamily: 'var(--lc-font-serif, "Cormorant Garamond", serif)' }}>{pointsAccount.points_balance.toLocaleString()}</span>
           </div>
           
           {pointsAccount.tier !== 'Platinum' && (
@@ -111,23 +125,23 @@ const PointsDisplay = () => {
 
       {/* Details section */}
       {showDetails && (
-        <div className="p-6 space-y-6">
+        <div className="p-6 space-y-6 bg-[#FDF8F5]">
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3">Your Benefits</h4>
+            <h4 className="font-semibold text-[#2D2A26] mb-3" style={{ fontFamily: 'var(--lc-font-serif, "Cormorant Garamond", serif)' }}>Your Benefits</h4>
             <ul className="space-y-2">
               {tierBenefits.map((benefit, index) => (
-                <li key={index} className="flex items-start space-x-2 text-sm text-gray-600">
-                  <i className="ri-check-line text-sage-600 mt-0.5"></i>
+                <li key={index} className="flex items-start space-x-2 text-sm text-[#6B635A]">
+                  <i className="ri-check-line text-[#7A8B7A] mt-0.5"></i>
                   <span>{benefit}</span>
                 </li>
               ))}
             </ul>
           </div>
 
-          <div className="border-t border-gray-200 pt-4">
+          <div className="border-t border-[#E8D4CC]/30 pt-4">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Lifetime Points Earned</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-[#6B635A]">Lifetime Points Earned</span>
+              <span className="font-semibold text-[#2D2A26]">
                 {pointsAccount.lifetime_points.toLocaleString()}
               </span>
             </div>
@@ -135,7 +149,7 @@ const PointsDisplay = () => {
 
           <a
             href="/account"
-            className="block w-full text-center bg-sage-600 hover:bg-sage-700 text-white py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
+            className="block w-full text-center bg-[#C4704D] hover:bg-[#8B4D35] text-white py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap"
           >
             View Full History
           </a>

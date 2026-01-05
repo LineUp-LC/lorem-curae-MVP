@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase-browser';
 
@@ -143,10 +142,10 @@ const NutrientTracker = () => {
 
   const getColorClasses = (color: string) => {
     const colors: Record<string, { bg: string; text: string; progress: string }> = {
-      blue: { bg: 'bg-blue-100', text: 'text-blue-600', progress: 'bg-blue-500' },
+      blue: { bg: 'bg-light/30', text: 'text-primary', progress: 'bg-light/200' },
       red: { bg: 'bg-red-100', text: 'text-red-600', progress: 'bg-red-500' },
       amber: { bg: 'bg-amber-100', text: 'text-amber-600', progress: 'bg-amber-500' },
-      teal: { bg: 'bg-teal-100', text: 'text-teal-600', progress: 'bg-teal-500' },
+      teal: { bg: 'bg-light/30', text: 'text-primary', progress: 'bg-primary' },
       green: { bg: 'bg-green-100', text: 'text-green-600', progress: 'bg-green-500' },
       indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600', progress: 'bg-indigo-600' },
     };
@@ -161,7 +160,7 @@ const NutrientTracker = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-sage-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -170,12 +169,12 @@ const NutrientTracker = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Daily Nutrient Tracker</h2>
+        <h2 className="text-2xl font-bold text-deep">Daily Nutrient Tracker</h2>
         <input
           type="date"
           value={selectedDate.toISOString().split('T')[0]}
           onChange={(e) => setSelectedDate(new Date(e.target.value))}
-          className="px-4 py-2 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+          className="px-4 py-2 border border-blush rounded-lg focus:border-primary focus:outline-none text-sm cursor-pointer"
         />
       </div>
 
@@ -197,8 +196,8 @@ const NutrientTracker = () => {
                     <i className={`${nutrientInfo?.icon || 'ri-heart-line'} text-xl`}></i>
                   </div>
                   <div>
-                    <h3 className="font-bold text-gray-900">{goal.nutrient_name}</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="font-bold text-deep">{goal.nutrient_name}</h3>
+                    <p className="text-sm text-warm-gray">
                       {current.toFixed(1)}/{goal.target_amount} {goal.unit}
                     </p>
                   </div>
@@ -206,7 +205,7 @@ const NutrientTracker = () => {
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
+              <div className="w-full bg-blush rounded-full h-3 mb-4">
                 <div
                   className={`${colors.progress} h-3 rounded-full transition-all`}
                   style={{ width: `${Math.min(percentage, 100)}%` }}
@@ -215,7 +214,7 @@ const NutrientTracker = () => {
 
               {/* Edit Goal */}
               <div className="flex items-center space-x-2">
-                <label className="text-xs text-gray-600">Daily Goal:</label>
+                <label className="text-xs text-warm-gray">Daily Goal:</label>
                 <input
                   type="number"
                   min="0.1"
@@ -227,9 +226,9 @@ const NutrientTracker = () => {
                       updateGoal(goal.id, value);
                     }
                   }}
-                  className="flex-1 px-3 py-1 border border-gray-200 rounded-lg focus:border-sage-600 focus:outline-none text-sm"
+                  className="flex-1 px-3 py-1 border border-blush rounded-lg focus:border-primary focus:outline-none text-sm"
                 />
-                <span className="text-xs text-gray-600">{goal.unit}</span>
+                <span className="text-xs text-warm-gray">{goal.unit}</span>
               </div>
             </div>
           );
@@ -237,7 +236,7 @@ const NutrientTracker = () => {
       </div>
 
       {/* Summary */}
-      <div className="bg-gradient-to-br from-sage-600 to-sage-700 rounded-xl p-6 text-white">
+      <div className="bg-gradient-to-br from-primary to-dark rounded-xl p-6 text-white">
         <h3 className="text-lg font-bold mb-4">💡 Today's Progress</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           {goals.map(goal => {

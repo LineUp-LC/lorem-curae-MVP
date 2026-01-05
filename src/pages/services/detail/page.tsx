@@ -116,7 +116,7 @@ export default function ServiceDetailPage() {
           <div className="mb-8">
             <button
               onClick={() => navigate('/services/search')}
-              className="flex items-center gap-2 text-forest-800 hover:text-forest-900 mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-cream-800 hover:text-coral-900 mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Search</span>
@@ -124,19 +124,19 @@ export default function ServiceDetailPage() {
 
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="font-serif text-5xl font-bold text-forest-800 mb-3">
+                <h1 className="font-serif text-5xl font-bold text-gray-800 mb-3">
                   {businessData.name}
                 </h1>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
                     <i className="ri-star-fill text-coral-400 text-xl"></i>
-                    <span className="font-bold text-forest-800 text-xl">{businessData.rating}</span>
-                    <span className="text-gray-600">({businessData.reviewCount} reviews)</span>
+                    <span className="font-bold text-gray-800 text-xl">{businessData.rating}</span>
+                    <span className="text-black-600">({businessData.reviewCount} reviews)</span>
                   </div>
-                  <span className="text-gray-400">•</span>
+                  <span className="text-coral-400">•</span>
                   <button
                     onClick={() => setShowReviewModal(true)}
-                    className="text-forest-800 hover:underline cursor-pointer"
+                    className="text-gray-800 hover:underline cursor-pointer"
                   >
                     Write a Review
                   </button>
@@ -144,7 +144,7 @@ export default function ServiceDetailPage() {
               </div>
               <button
                 onClick={handleBookNow}
-                className="px-8 py-4 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
+                className="px-8 py-4 bg-cream-800 text-white rounded-lg hover:bg-cream-900 transition-colors font-medium text-lg whitespace-nowrap cursor-pointer"
               >
                 <i className="ri-calendar-line mr-2"></i>
                 Book Now
@@ -153,13 +153,13 @@ export default function ServiceDetailPage() {
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mb-8 border-b border-gray-200">
+          <div className="flex gap-4 mb-8 border-b border-cream-200">
             <button
               onClick={() => setActiveTab('overview')}
               className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
                 activeTab === 'overview'
-                  ? 'text-forest-800 border-b-2 border-forest-800'
-                  : 'text-gray-500 hover:text-forest-800'
+                  ? 'text-cream-800 border-b-2 border-cream-800'
+                  : 'text-gray-500 hover:text-cream-800'
               }`}
             >
               Overview
@@ -168,8 +168,8 @@ export default function ServiceDetailPage() {
               onClick={() => setActiveTab('reviews')}
               className={`px-6 py-3 font-medium transition-colors cursor-pointer ${
                 activeTab === 'reviews'
-                  ? 'text-forest-800 border-b-2 border-forest-800'
-                  : 'text-gray-500 hover:text-forest-800'
+                  ? 'text-cream-800 border-b-2 border-cream-800'
+                  : 'text-gray-500 hover:text-cream-800'
               }`}
             >
               Reviews
@@ -180,7 +180,7 @@ export default function ServiceDetailPage() {
             <div className="space-y-8">
               {/* Media Gallery */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-gray-800 mb-6">
                   Gallery
                 </h2>
                 <div className="grid md:grid-cols-2 gap-4">
@@ -244,23 +244,23 @@ export default function ServiceDetailPage() {
 
               {/* Treatments */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-gray-800 mb-6">
                   Our Treatments
                 </h2>
                 <div className="space-y-4">
                   {mockTreatments.map((treatment) => (
                     <div
                       key={treatment.id}
-                      className="p-6 border border-gray-200 rounded-xl hover:border-forest-800/30 transition-all"
+                      className="p-6 border border-gray-200 rounded-xl hover:border-coral-800/30 transition-all"
                     >
                       <div className="flex items-start justify-between mb-2">
-                        <h3 className="font-serif text-2xl font-bold text-forest-800">
+                        <h3 className="font-serif text-2xl font-bold text-gray-800">
                           {treatment.name}
                         </h3>
                         <span className="text-xl font-bold text-forest-800">{treatment.price}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
-                        <i className="ri-time-line text-forest-800"></i>
+                        <i className="ri-time-line text-cream-800"></i>
                         <span>{treatment.duration}</span>
                       </div>
                       <p className="text-gray-600 text-sm">{treatment.description}</p>

@@ -157,17 +157,17 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
       'Breakfast': 'bg-amber-100 text-amber-700',
       'Main Dish': 'bg-rose-100 text-rose-700',
       'Salad': 'bg-green-100 text-green-700',
-      'Soup': 'bg-blue-100 text-blue-700',
+      'Soup': 'bg-light/30 text-primary-700',
       'Beverage': 'bg-purple-100 text-purple-700',
       'Dessert': 'bg-pink-100 text-pink-700',
     };
-    return colors[category] || 'bg-gray-100 text-gray-700';
+    return colors[category] || 'bg-cream text-warm-gray';
   };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-sage-600 border-t-transparent rounded-full"></div>
+        <div className="animate-spin w-12 h-12 flex items-center justify-center border-4 border-primary border-t-transparent rounded-full"></div>
       </div>
     );
   }
@@ -176,13 +176,13 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
     <div className="space-y-8">
       {/* Search */}
       <div className="relative">
-        <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-gray-400"></i>
+        <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-warm-gray/60"></i>
         <input
           type="text"
           placeholder="Search by name, ethnicity, or skin benefit..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-sage-600 focus:outline-none text-sm"
+          className="w-full pl-12 pr-4 py-3 rounded-xl border-2 border-blush focus:border-primary focus:outline-none text-sm"
         />
       </div>
 
@@ -197,8 +197,8 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
             }}
             className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
               selectedCategory === category.id
-                ? 'bg-sage-600 text-white shadow-md'
-                : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-300'
+                ? 'bg-primary text-white shadow-md'
+                : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
             }`}
           >
             <i className={`${category.icon} text-base`}></i>
@@ -209,8 +209,8 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
 
       {/* Subcategory Filter */}
       {selectedCategory !== 'all' && subcategories[selectedCategory] && (
-        <div className="bg-sage-50 rounded-xl p-4">
-          <p className="text-sm font-semibold text-gray-700 mb-3">
+        <div className="bg-primary-50 rounded-xl p-4">
+          <p className="text-sm font-semibold text-warm-gray mb-3">
             Filter by type:
           </p>
           <div className="flex flex-wrap gap-2">
@@ -218,8 +218,8 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
               onClick={() => setSelectedSubcategory(null)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                 selectedSubcategory === null
-                  ? 'bg-sage-600 text-white'
-                  : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-400'
+                  ? 'bg-primary text-white'
+                  : 'bg-white text-warm-gray border border-blush hover:border-primary'
               }`}
             >
               All {categories.find(c => c.id === selectedCategory)?.name}
@@ -230,8 +230,8 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
                 onClick={() => setSelectedSubcategory(sub)}
                 className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap cursor-pointer ${
                   selectedSubcategory === sub
-                    ? 'bg-sage-600 text-white'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:border-sage-400'
+                    ? 'bg-primary text-white'
+                    : 'bg-white text-warm-gray border border-blush hover:border-primary'
                 }`}
               >
                 {sub}
@@ -242,7 +242,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
       )}
 
       {/* Results Count */}
-      <p className="text-sm text-gray-600">
+      <p className="text-sm text-warm-gray">
         Showing <strong>{filteredFoods.length}</strong> meals
       </p>
 
@@ -251,12 +251,12 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
         {filteredFoods.map(food => (
           <div
             key={food.id}
-            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-gray-100 group"
+            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all border border-blush group"
           >
             {/* Image */}
-            <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-sage-100 to-cream-100">
+            <div className="relative w-full h-48 overflow-hidden bg-gradient-to-br from-light/20 to-cream">
               <div className="absolute inset-0 flex items-center justify-center">
-                <i className="ri-restaurant-2-line text-6xl text-sage-300"></i>
+                <i className="ri-restaurant-2-line text-6xl text-primary-300"></i>
               </div>
               
               {/* Save Button */}
@@ -268,7 +268,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
                 className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer ${
                   savedFoodIds.has(food.id)
                     ? 'bg-rose-500 text-white'
-                    : 'bg-white/90 text-gray-600 hover:bg-rose-500 hover:text-white'
+                    : 'bg-white/90 text-warm-gray hover:bg-rose-500 hover:text-white'
                 }`}
               >
                 <i className={`${savedFoodIds.has(food.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-lg`}></i>
@@ -283,25 +283,25 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
             {/* Content */}
             <div className="p-5">
               <div className="flex items-start justify-between mb-2">
-                <h3 className="text-lg font-semibold text-gray-900 flex-1">{food.name}</h3>
-                <span className="text-sm font-medium text-sage-600 ml-2">{food.calories} cal</span>
+                <h3 className="text-lg font-semibold text-deep flex-1">{food.name}</h3>
+                <span className="text-sm font-medium text-primary ml-2">{food.calories} cal</span>
               </div>
 
               {food.ethnicity && (
-                <p className="text-xs text-gray-500 mb-3">{food.ethnicity} Cuisine</p>
+                <p className="text-xs text-warm-gray/80 mb-3">{food.ethnicity} Cuisine</p>
               )}
 
               {/* Skin Benefits */}
               <div className="mb-4">
-                <p className="text-xs font-semibold text-gray-700 mb-2">Skin Benefits:</p>
+                <p className="text-xs font-semibold text-warm-gray mb-2">Skin Benefits:</p>
                 <div className="flex flex-wrap gap-1">
                   {food.skin_benefits.slice(0, 2).map((benefit, idx) => (
-                    <span key={idx} className="px-2 py-1 bg-sage-50 text-sage-700 text-xs rounded-full">
+                    <span key={idx} className="px-2 py-1 bg-primary-50 text-primary-700 text-xs rounded-full">
                       {benefit}
                     </span>
                   ))}
                   {food.skin_benefits.length > 2 && (
-                    <span className="px-2 py-1 bg-sage-50 text-sage-700 text-xs rounded-full">
+                    <span className="px-2 py-1 bg-primary-50 text-primary-700 text-xs rounded-full">
                       +{food.skin_benefits.length - 2}
                     </span>
                   )}
@@ -309,7 +309,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
               </div>
 
               {/* Meta Info */}
-              <div className="flex items-center justify-between text-xs text-gray-600 mb-4">
+              <div className="flex items-center justify-between text-xs text-warm-gray mb-4">
                 <div className="flex items-center space-x-3">
                   <span className="flex items-center">
                     <i className="ri-time-line mr-1"></i>
@@ -327,14 +327,14 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
               </div>
 
               {/* Creator */}
-              <p className="text-xs text-gray-500 mb-4">
-                Created by <span className="font-medium text-gray-700">{food.creator_name}</span>
+              <p className="text-xs text-warm-gray/80 mb-4">
+                Created by <span className="font-medium text-warm-gray">{food.creator_name}</span>
               </p>
 
               {/* View Details Button */}
               <button
                 onClick={() => onSelectFood(food)}
-                className="w-full px-4 py-2 bg-sage-600 text-white rounded-lg font-medium text-sm hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+                className="w-full px-4 py-2 bg-primary text-white rounded-lg font-medium text-sm hover:bg-dark transition-colors whitespace-nowrap cursor-pointer"
               >
                 View Recipe & Stores
               </button>
@@ -345,8 +345,8 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
 
       {filteredFoods.length === 0 && (
         <div className="text-center py-16">
-          <i className="ri-restaurant-line text-6xl text-gray-300 mb-4"></i>
-          <p className="text-xl text-gray-600">No meals found matching your criteria</p>
+          <i className="ri-restaurant-line text-6xl text-blush mb-4"></i>
+          <p className="text-xl text-warm-gray">No meals found matching your criteria</p>
         </div>
       )}
     </div>
