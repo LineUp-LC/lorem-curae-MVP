@@ -99,11 +99,11 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <span className="text-sm font-medium text-gray-600">
               Question {currentStep + 1} of {questions.length}
             </span>
-            <span className="text-sm font-medium text-sage-600">{Math.round(progress)}%</span>
+            <span className="text-sm font-medium text-taupe">{Math.round(progress)}%</span>
           </div>
           <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-sage-600 rounded-full transition-all duration-500"
+              className="h-full bg-taupe rounded-full transition-all duration-500"
               style={{ width: `${progress}%` }}
             ></div>
           </div>
@@ -111,7 +111,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
 
         {/* Question */}
         <div className="mb-12 text-center">
-          <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">
+          <h1 className="text-4xl lg:text-5xl font-serif text-deep-900 mb-4">
             {currentQuestion.question}
           </h1>
           <p className="text-lg text-gray-600">{currentQuestion.subtitle}</p>
@@ -130,18 +130,18 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 onClick={() => handleAnswer(currentQuestion.id, option.value)}
                 className={`p-6 rounded-2xl border-2 transition-all text-left cursor-pointer ${
                   isSelected
-                    ? 'border-sage-600 bg-sage-50 shadow-lg'
-                    : 'border-gray-200 bg-white hover:border-sage-300 hover:shadow-md'
+                    ? 'border-taupe bg-taupe-50 shadow-lg'
+                    : 'border-gray-200 bg-white hover:border-taupe-300 hover:shadow-md'
                 }`}
               >
                 <div className="flex items-start space-x-4">
                   <div className={`w-12 h-12 flex items-center justify-center rounded-full flex-shrink-0 ${
-                    isSelected ? 'bg-sage-600 text-white' : 'bg-gray-100 text-gray-600'
+                    isSelected ? 'bg-taupe text-white' : 'bg-gray-100 text-gray-600'
                   }`}>
                     <i className={`${option.icon} text-2xl`}></i>
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-lg text-forest-900 mb-1">
+                    <h3 className="font-semibold text-lg text-deep-900 mb-1">
                       {option.label}
                     </h3>
                     {option.description && (
@@ -149,7 +149,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                     )}
                   </div>
                   {isSelected && (
-                    <i className="ri-checkbox-circle-fill text-2xl text-sage-600"></i>
+                    <i className="ri-checkbox-circle-fill text-2xl text-taupe"></i>
                   )}
                 </div>
               </button>
@@ -165,7 +165,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             className={`flex items-center space-x-2 px-6 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
               currentStep === 0
                 ? 'text-gray-400 cursor-not-allowed'
-                : 'text-forest-800 hover:bg-gray-100 cursor-pointer'
+                : 'text-deep hover:bg-gray-100 cursor-pointer'
             }`}
           >
             <i className="ri-arrow-left-line text-xl"></i>
@@ -178,7 +178,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
               disabled={!canProceed}
               className={`flex items-center space-x-2 px-8 py-3 rounded-full font-semibold transition-all whitespace-nowrap ${
                 canProceed
-                  ? 'bg-sage-600 text-white hover:bg-sage-700 shadow-md hover:shadow-lg cursor-pointer'
+                  ? 'bg-taupe text-white hover:bg-taupe-700 shadow-md hover:shadow-lg cursor-pointer'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >

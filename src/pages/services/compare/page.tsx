@@ -122,7 +122,7 @@ export default function ServicesComparePage() {
   };
 
   const getMatchColor = (match: string) => {
-    if (match === 'Excellent Match') return 'bg-green-100 text-green-700 border-green-300';
+    if (match === 'Excellent Match') return 'bg-taupe-100 text-taupe-700 border-taupe-300';
     if (match === 'Good Match') return 'bg-blue-100 text-blue-700 border-blue-300';
     if (match === 'Popular Choice') return 'bg-purple-100 text-purple-700 border-purple-300';
     return 'bg-gray-100 text-gray-700 border-gray-300';
@@ -189,7 +189,7 @@ export default function ServicesComparePage() {
             <p className="text-gray-600 mb-8">Please select at least 2 services to compare</p>
             <button
               onClick={() => navigate('/services/search')}
-              className="px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors cursor-pointer"
+              className="px-6 py-3 bg-deep text-white rounded-lg hover:bg-deep-900 transition-colors cursor-pointer"
             >
               Back to Search
             </button>
@@ -210,12 +210,12 @@ export default function ServicesComparePage() {
           <div className="mb-8">
             <button
               onClick={() => navigate('/services/search')}
-              className="flex items-center gap-2 text-forest-800 hover:text-forest-900 mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-deep hover:text-deep-900 mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Search</span>
             </button>
-            <h1 className="font-serif text-5xl font-bold text-forest-800 mb-3">
+            <h1 className="font-serif text-5xl font-bold text-deep mb-3">
               Compare Services
             </h1>
             <p className="text-gray-600">
@@ -236,18 +236,18 @@ export default function ServicesComparePage() {
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <h3 className="font-serif text-2xl font-bold text-forest-800 mb-2">
+                  <h3 className="font-serif text-2xl font-bold text-deep mb-2">
                     {business.name}
                   </h3>
                   <div className="flex items-center gap-2 mb-3">
-                    <i className="ri-star-fill text-coral-400"></i>
-                    <span className="font-bold text-forest-800">{business.rating}</span>
+                    <i className="ri-star-fill text-primary"></i>
+                    <span className="font-bold text-deep">{business.rating}</span>
                     <span className="text-sm text-gray-600">({business.reviewCount})</span>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">{business.location}</p>
                   <button
                     onClick={() => navigate(`/services/${business.id}`)}
-                    className="w-full px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium cursor-pointer"
+                    className="w-full px-4 py-2 bg-deep text-white rounded-lg hover:bg-deep-900 transition-colors text-sm font-medium cursor-pointer"
                   >
                     View Details
                   </button>
@@ -257,7 +257,7 @@ export default function ServicesComparePage() {
 
             {/* Best Match for You */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Best Match for You
               </div>
               {businesses.map((business) => {
@@ -277,12 +277,12 @@ export default function ServicesComparePage() {
 
             {/* Price Range */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Price Range
               </div>
               {businesses.map((business) => (
                 <div key={business.id} className="bg-white p-4">
-                  <span className="text-2xl font-bold text-forest-800">
+                  <span className="text-2xl font-bold text-deep">
                     {business.priceRange}
                   </span>
                 </div>
@@ -291,7 +291,7 @@ export default function ServicesComparePage() {
 
             {/* Specialties */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Specialties
               </div>
               {businesses.map((business) => (
@@ -300,7 +300,7 @@ export default function ServicesComparePage() {
                     {business.specialties.map((specialty, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-1 bg-cream-100 text-forest-800 text-xs rounded-full"
+                        className="px-2 py-1 bg-cream-100 text-deep text-xs rounded-full"
                       >
                         {specialty}
                       </span>
@@ -312,7 +312,7 @@ export default function ServicesComparePage() {
 
             {/* Key Benefits */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Key Benefits
               </div>
               {businesses.map((business) => (
@@ -320,7 +320,7 @@ export default function ServicesComparePage() {
                   <ul className="space-y-2">
                     {business.benefits.map((benefit, idx) => (
                       <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                        <i className="ri-check-line text-green-600 mt-0.5"></i>
+                        <i className="ri-check-line text-taupe mt-0.5"></i>
                         <span>{benefit}</span>
                       </li>
                     ))}
@@ -331,7 +331,7 @@ export default function ServicesComparePage() {
 
             {/* Best For */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Best For
               </div>
               {businesses.map((business) => (
@@ -339,7 +339,7 @@ export default function ServicesComparePage() {
                   <div className="space-y-2">
                     {business.bestFor.map((item, idx) => (
                       <div key={idx} className="flex items-center gap-2 text-sm text-gray-700">
-                        <i className="ri-user-heart-line text-forest-800"></i>
+                        <i className="ri-user-heart-line text-deep"></i>
                         <span>{item}</span>
                       </div>
                     ))}
@@ -350,15 +350,15 @@ export default function ServicesComparePage() {
 
             {/* Reviews from Similar Profiles */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-forest-800">
+              <div className="bg-gray-50 p-4 font-semibold text-deep">
                 Reviews from Similar Skin Profiles
               </div>
               {businesses.map((business) => (
                 <div key={business.id} className="bg-white p-4">
                   <div className="flex items-center gap-2 mb-3">
-                    <i className="ri-group-line text-2xl text-forest-800"></i>
+                    <i className="ri-group-line text-2xl text-deep"></i>
                     <div>
-                      <p className="text-2xl font-bold text-forest-800">
+                      <p className="text-2xl font-bold text-deep">
                         {business.similarProfileReviews}
                       </p>
                       <p className="text-xs text-gray-600">
@@ -368,7 +368,7 @@ export default function ServicesComparePage() {
                   </div>
                   <button
                     onClick={() => handleViewReviews(business.id, business.name)}
-                    className="w-full px-4 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors text-sm font-medium cursor-pointer"
+                    className="w-full px-4 py-2 bg-taupe text-white rounded-lg hover:bg-taupe-700 transition-colors text-sm font-medium cursor-pointer"
                   >
                     <i className="ri-eye-line mr-2"></i>
                     View Reviews
@@ -425,14 +425,14 @@ export default function ServicesComparePage() {
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-10 h-10 rounded-full bg-sage-100 flex items-center justify-center">
-                            <i className="ri-user-line text-sage-600"></i>
+                          <div className="w-10 h-10 rounded-full bg-taupe-100 flex items-center justify-center">
+                            <i className="ri-user-line text-taupe"></i>
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
                               <h4 className="font-semibold text-gray-900">{review.author}</h4>
                               {review.verified && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                                <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-medium rounded-full">
                                   Verified
                                 </span>
                               )}
@@ -457,7 +457,7 @@ export default function ServicesComparePage() {
                     </div>
                     <p className="text-gray-700 leading-relaxed mb-4 ml-13">{review.comment}</p>
                     <div className="flex items-center gap-4 ml-13">
-                      <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-sage-600 cursor-pointer">
+                      <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-taupe cursor-pointer">
                         <i className="ri-thumb-up-line"></i>
                         <span>Helpful ({review.helpful})</span>
                       </button>
@@ -470,7 +470,7 @@ export default function ServicesComparePage() {
             {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 bg-gray-50">
               <div className="flex items-center gap-3">
-                <i className="ri-information-line text-sage-600 text-xl"></i>
+                <i className="ri-information-line text-taupe text-xl"></i>
                 <p className="text-sm text-gray-600">
                   These reviews are from verified users with similar skin profiles to yours ({userProfile.skinType} skin with {userProfile.concerns.join(', ')} concerns).
                 </p>

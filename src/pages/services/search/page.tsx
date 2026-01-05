@@ -381,7 +381,7 @@ export default function ServicesSearchPage() {
                           <span className="text-sm font-medium text-deep">{business.priceRange}</span>
                         </div>
                       </div>
-                      <div className="px-3 py-1 bg-green-50 text-green-700 rounded-full text-xs font-medium">
+                      <div className="px-3 py-1 bg-taupe-50 text-taupe-700 rounded-full text-xs font-medium">
                         {business.availability}
                       </div>
                     </div>

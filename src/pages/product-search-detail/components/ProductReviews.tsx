@@ -194,8 +194,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   };
 
   const getSimilarityBadge = (score: number) => {
-    if (score >= 70) return { label: 'Very Similar Profile', color: 'bg-green-100 text-green-800', icon: 'ri-user-heart-line' };
-    if (score >= 50) return { label: 'Similar Profile', color: 'bg-sage-100 text-sage-800', icon: 'ri-user-line' };
+    if (score >= 70) return { label: 'Very Similar Profile', color: 'bg-taupe-100 text-taupe-800', icon: 'ri-user-heart-line' };
+    if (score >= 50) return { label: 'Similar Profile', color: 'bg-taupe-100 text-taupe-800', icon: 'ri-user-line' };
     return { label: 'Related', color: 'bg-gray-100 text-gray-700', icon: 'ri-user-shared-line' };
   };
 
@@ -209,11 +209,11 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
           <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center">
-              <i className="ri-chat-3-line text-2xl text-sage-600"></i>
+            <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center">
+              <i className="ri-chat-3-line text-2xl text-taupe"></i>
             </div>
             <div>
-              <h2 className="text-3xl font-serif font-bold text-forest-900">
+              <h2 className="text-3xl font-serif font-bold text-deep-900">
                 Community Reviews
               </h2>
               <p className="text-gray-600 mt-1">Real experiences from verified buyers</p>
@@ -223,14 +223,14 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
         {/* Personalization Banner */}
         {personalizedReviews.length > 0 && (
-          <div className="bg-sage-50 rounded-2xl p-6 mb-8 border border-sage-200">
+          <div className="bg-taupe-50 rounded-2xl p-6 mb-8 border border-taupe-200">
             <div className="flex items-start justify-between">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-sage-100 rounded-full flex items-center justify-center">
-                  <i className="ri-user-heart-line text-xl text-sage-600"></i>
+                <div className="w-12 h-12 bg-taupe-100 rounded-full flex items-center justify-center">
+                  <i className="ri-user-heart-line text-xl text-taupe"></i>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-forest-900 mb-1">
+                  <h3 className="text-lg font-semibold text-deep-900 mb-1">
                     Personalized for Your Skin
                   </h3>
                   <p className="text-gray-600 text-sm mb-3">
@@ -243,11 +243,11 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                         type="checkbox"
                         checked={showPersonalized}
                         onChange={(e) => setShowPersonalized(e.target.checked)}
-                        className="w-4 h-4 text-sage-600 border-gray-300 rounded focus:ring-sage-500"
+                        className="w-4 h-4 text-taupe border-gray-300 rounded focus:ring-taupe-500"
                       />
                       <span className="text-sm text-gray-700">Show reviews from similar skin profiles</span>
                     </label>
-                    <span className="text-xs text-sage-600 bg-sage-50 px-2 py-1 rounded-full">
+                    <span className="text-xs text-taupe bg-taupe-50 px-2 py-1 rounded-full">
                       {personalizedReviews.length} matching reviews found
                     </span>
                   </div>
@@ -255,7 +255,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
               </div>
               <Link
                 to="/my-skin"
-                className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer flex items-center space-x-1"
+                className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer flex items-center space-x-1"
               >
                 <i className="ri-settings-3-line"></i>
                 <span>Update Profile</span>
@@ -269,7 +269,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {/* Overall Rating */}
             <div className="text-center lg:col-span-2">
-              <div className="text-6xl font-bold text-forest-900 mb-2">
+              <div className="text-6xl font-bold text-deep-900 mb-2">
                 {averageRating}
               </div>
               <div className="flex items-center justify-center space-x-1 mb-2">
@@ -333,7 +333,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                         {review.userName}
                       </h3>
                       {review.verified && (
-                        <span className="flex items-center space-x-1 px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full flex-shrink-0">
+                        <span className="flex items-center space-x-1 px-2 py-1 bg-taupe-100 text-taupe-800 text-xs font-medium rounded-full flex-shrink-0">
                           <i className="ri-shield-check-fill"></i>
                           <span>Verified</span>
                         </span>
@@ -364,7 +364,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                         key={idx}
                         className={`px-2 py-1 text-xs rounded-full ${
                           userSkinProfile.primaryConcerns.includes(concern)
-                            ? 'bg-sage-100 text-sage-800 font-medium'
+                            ? 'bg-taupe-100 text-taupe-800 font-medium'
                             : 'bg-gray-100 text-gray-600'
                         }`}
                       >
@@ -400,7 +400,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   </div>
                   <Link
                     to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-                    className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer"
+                    className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
                   >
                     Read full review
                   </Link>
@@ -414,7 +414,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         <div className="text-center mt-8">
           <Link
             to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-            className="inline-flex items-center space-x-2 px-8 py-4 bg-forest-900 text-white rounded-full font-semibold text-lg hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center space-x-2 px-8 py-4 bg-deep-900 text-white rounded-full font-semibold text-lg hover:bg-deep transition-all shadow-lg hover:shadow-xl cursor-pointer whitespace-nowrap"
           >
             <i className="ri-chat-3-line text-xl"></i>
             <span>Read All {totalReviews} Reviews</span>

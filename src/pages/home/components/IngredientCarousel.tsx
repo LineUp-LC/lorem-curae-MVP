@@ -69,7 +69,7 @@ export default function IngredientCarousel() {
   };
 
   return (
-    <section className="py-24 bg-gradient-to-b from-white to-sage-50/30">
+    <section className="py-24 bg-gradient-to-b from-white to-taupe-50/30">
       <div className="max-w-7xl mx-auto px-6">
         {/* Header */}
         <div className="text-center mb-6">
@@ -78,21 +78,21 @@ export default function IngredientCarousel() {
             <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wide">Ingredient Transparency</span>
           </div>
 
-          <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">
+          <h2 className="text-4xl lg:text-5xl font-serif text-deep-900 mb-4">
             Knowledge is your best skincare product
           </h2>
           
           {/* Pain Point */}
-          <p className="text-xl text-coral-700 font-medium mb-4 max-w-2xl mx-auto">
+          <p className="text-xl text-dark font-medium mb-4 max-w-2xl mx-auto">
             The pain: You've avoided products because ingredient lists looked like chemistry exams.
           </p>
         </div>
 
         {/* Why It Matters Box */}
         <div className="max-w-3xl mx-auto mb-12">
-          <div className="bg-gradient-to-r from-emerald-50 to-sage-50 rounded-2xl p-6 border border-emerald-100">
+          <div className="bg-gradient-to-r from-emerald-50 to-taupe-50 rounded-2xl p-6 border border-emerald-100">
             <p className="text-lg text-gray-700 leading-relaxed text-center">
-              Understanding ingredients means you stop buying on hype and start buying on science. Our <Link to="/ingredients" className="text-sage-600 hover:text-sage-700 font-medium underline">ingredient library</Link> gives you the truth about every ingredient—what it does, who it's for, and what to watch out for.
+              Understanding ingredients means you stop buying on hype and start buying on science. Our <Link to="/ingredients" className="text-taupe hover:text-taupe-700 font-medium underline">ingredient library</Link> gives you the truth about every ingredient—what it does, who it's for, and what to watch out for.
             </p>
           </div>
         </div>
@@ -105,14 +105,14 @@ export default function IngredientCarousel() {
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-100"
             aria-label="Scroll left"
           >
-            <i className="ri-arrow-left-s-line text-2xl text-forest-800"></i>
+            <i className="ri-arrow-left-s-line text-2xl text-deep"></i>
           </button>
           <button
             onClick={() => handleScroll('right')}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 w-12 h-12 flex items-center justify-center bg-white rounded-full shadow-lg hover:shadow-xl transition-all cursor-pointer border border-gray-100"
             aria-label="Scroll right"
           >
-            <i className="ri-arrow-right-s-line text-2xl text-forest-800"></i>
+            <i className="ri-arrow-right-s-line text-2xl text-deep"></i>
           </button>
 
           {/* Cards */}
@@ -129,18 +129,18 @@ export default function IngredientCarousel() {
                 <div className={`w-14 h-14 flex items-center justify-center ${ingredient.color} rounded-2xl mb-4 group-hover:scale-110 transition-transform`}>
                   <i className={`${ingredient.icon} text-2xl`}></i>
                 </div>
-                <h3 className="text-xl font-semibold text-forest-900 mb-2">
+                <h3 className="text-xl font-semibold text-deep-900 mb-2">
                   {ingredient.name}
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed mb-3">
                   {ingredient.benefit}
                 </p>
-                <p className="text-xs text-sage-600 font-medium mb-4">
+                <p className="text-xs text-taupe font-medium mb-4">
                   Best for: {ingredient.forWhom}
                 </p>
                 <Link
                   to="/ingredients"
-                  className="inline-flex items-center space-x-1 text-sage-600 hover:text-sage-700 font-medium text-sm transition-colors"
+                  className="inline-flex items-center space-x-1 text-taupe hover:text-taupe-700 font-medium text-sm transition-colors"
                 >
                   <span>Learn More</span>
                   <i className="ri-arrow-right-line group-hover:translate-x-1 transition-transform"></i>
@@ -158,7 +158,7 @@ export default function IngredientCarousel() {
         <div className="text-center mt-10">
           <Link
             to="/ingredients"
-            className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg"
+            className="inline-flex items-center space-x-3 bg-taupe hover:bg-taupe-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg"
           >
             <span>Explore Full Ingredient Library</span>
             <i className="ri-microscope-line text-xl"></i>

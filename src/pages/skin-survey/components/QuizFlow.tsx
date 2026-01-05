@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 
 interface SurveyData {
+  sexAtBirth: string;
   skinType: string[];
   concerns: string[];
   acneType: string[];
@@ -11,6 +12,13 @@ interface SurveyData {
   preferences: string[];
   lifestyle: string[];
   routine: string[];
+  // Extended lifestyle factors
+  sleepPattern: string;
+  stressLevel: string;
+  dietPattern: string;
+  waterIntake: string;
+  exerciseFrequency: string;
+  environmentalExposure: string[];
 }
 
 // FIXED: Added props interface for onComplete callback
@@ -21,6 +29,7 @@ interface QuizFlowProps {
 const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   const [currentStep, setCurrentStep] = useState(1);
   const [surveyData, setSurveyData] = useState<SurveyData>({
+    sexAtBirth: '',
     skinType: [],
     concerns: [],
     acneType: [],
@@ -29,12 +38,18 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     allergens: [],
     preferences: [],
     lifestyle: [],
-    routine: []
+    routine: [],
+    sleepPattern: '',
+    stressLevel: '',
+    dietPattern: '',
+    waterIntake: '',
+    exerciseFrequency: '',
+    environmentalExposure: []
   });
   const [allergenInput, setAllergenInput] = useState('');
   const [allergenSuggestions, setAllergenSuggestions] = useState<string[]>([]);
 
-  const totalSteps = 8;
+  const totalSteps = 14; // Updated total steps to include new lifestyle questions
 
   const allergensList = [
     'Fragrance', 'Parabens', 'Sulfates', 'Alcohol', 'Silicones', 'Essential oils',
@@ -98,23 +113,23 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   };
 
   const getNextStep = () => {
-    if (currentStep === 2) {
-      // If concerns include acne or scarring, go to specific questions
+    if (currentStep === 3) {
+      // After concerns, check for scarring or acne
       if (surveyData.concerns.includes('Scarring') || 
           (surveyData.concerns.includes('Acne Prone') && surveyData.concerns.includes('Scarring'))) {
-        return 3; // Scarring type question
+        return 4; // Scarring type question
       } else if (surveyData.concerns.includes('Acne Prone')) {
-        return 4; // Acne type question
+        return 5; // Acne type question
       } else {
-        return 5; // Skip to complexion
+        return 6; // Skip to complexion
       }
     }
-    if (currentStep === 3) {
+    if (currentStep === 4) {
       // After scarring, check if acne was also selected
       if (surveyData.concerns.includes('Acne Prone')) {
-        return 4; // Acne type question
+        return 5; // Acne type question
       } else {
-        return 5; // Skip to complexion
+        return 6; // Skip to complexion
       }
     }
     return currentStep + 1;
@@ -122,21 +137,51 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
 
   const canProceed = () => {
     switch (currentStep) {
-      case 1: return surveyData.skinType.length > 0;
-      case 2: return surveyData.concerns.length > 0;
-      case 3: return surveyData.scarringType.length > 0;
-      case 4: return surveyData.acneType.length > 0;
-      case 5: return surveyData.complexion !== '';
-      case 6: return true; // Allergens are optional
-      case 7: return surveyData.preferences.length > 0;
-      case 8: return surveyData.lifestyle.length > 0;
+      case 1: return surveyData.sexAtBirth !== '';
+      case 2: return surveyData.skinType.length > 0;
+      case 3: return surveyData.concerns.length > 0;
+      case 4: return surveyData.scarringType.length > 0;
+      case 5: return surveyData.acneType.length > 0;
+      case 6: return surveyData.complexion !== '';
+      case 7: return true; // Allergens are optional
+      case 8: return surveyData.preferences.length > 0;
+      case 9: return surveyData.lifestyle.length > 0;
+      case 10: return surveyData.sleepPattern !== '';
+      case 11: return surveyData.stressLevel !== '';
+      case 12: return surveyData.dietPattern !== '';
+      case 13: return surveyData.waterIntake !== '';
+      case 14: return surveyData.exerciseFrequency !== '';
       default: return false;
     }
   };
 
   const renderStep = () => {
     switch (currentStep) {
+      // NEW FIRST QUESTION: Sex at Birth
       case 1:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">What is your sex assigned at birth?</h2>
+            <p className="text-warm-gray mb-8">This helps us tailor recommendations based on biological skin differences</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['Male', 'Female'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('sexAtBirth', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.sexAtBirth === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 2:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What's your skin type?</h2>
@@ -159,7 +204,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 2:
+      case 3:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What are your skin concerns?</h2>
@@ -187,7 +232,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 3:
+      case 4:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What type of scarring?</h2>
@@ -210,13 +255,13 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 4:
+      case 5:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What type of acne?</h2>
             <p className="text-warm-gray mb-8">Select all that apply</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {['Blackheads', 'Whiteheads', 'Pustule', 'Papule', 'Cystic', 'Nodule', 'Fungal'].map((type) => (
+              {['Blackheads', 'Whiteheads', 'Papules', 'Pustules', 'Nodules', 'Cysts'].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleMultiSelect('acneType', type)}
@@ -233,13 +278,20 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 5:
+      case 6:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What's your skin complexion?</h2>
-            <p className="text-warm-gray mb-8">Select your skin tone</p>
+            <h2 className="text-3xl font-bold text-deep mb-4">What's your skin tone?</h2>
+            <p className="text-warm-gray mb-8">Select your Fitzpatrick skin type</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {['Very Fair', 'Fair', 'Light', 'Medium', 'Olive', 'Dark', 'Very Dark'].map((tone) => (
+              {[
+                'Type I - Very Fair',
+                'Type II - Fair',
+                'Type III - Medium',
+                'Type IV - Olive',
+                'Type V - Brown',
+                'Type VI - Dark Brown/Black'
+              ].map((tone) => (
                 <button
                   key={tone}
                   onClick={() => handleSingleSelect('complexion', tone)}
@@ -256,7 +308,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 6:
+      case 7:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">Any known allergens?</h2>
@@ -316,7 +368,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 7:
+      case 8:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">Product preferences</h2>
@@ -342,11 +394,11 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      case 8:
+      case 9:
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">Lifestyle factors</h2>
-            <p className="text-warm-gray mb-8">Tell us about your routine</p>
+            <p className="text-warm-gray mb-8">Tell us about your routine preferences</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Active lifestyle', 'Indoor work environment', 'Frequent travel',
@@ -363,6 +415,151 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                   }`}
                 >
                   {factor}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // NEW LIFESTYLE QUESTIONS
+      case 10:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">How would you describe your sleep patterns?</h2>
+            <p className="text-warm-gray mb-8">Sleep significantly impacts skin health and recovery</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Less than 5 hours',
+                '5-6 hours',
+                '7-8 hours',
+                'More than 8 hours',
+                'Irregular/Inconsistent'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('sleepPattern', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.sleepPattern === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 11:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">How would you rate your stress levels?</h2>
+            <p className="text-warm-gray mb-8">Stress can trigger various skin conditions and affect healing</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Low - Generally calm',
+                'Moderate - Occasional stress',
+                'High - Frequently stressed',
+                'Very High - Chronic stress'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('stressLevel', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.stressLevel === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 12:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">How would you describe your diet?</h2>
+            <p className="text-warm-gray mb-8">Nutrition plays a key role in skin health</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Balanced - Variety of whole foods',
+                'Plant-based/Vegetarian',
+                'High protein focus',
+                'Processed/Fast food heavy',
+                'Limited/Restricted diet',
+                'Variable/Inconsistent'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('dietPattern', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.dietPattern === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 13:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">How much water do you typically drink daily?</h2>
+            <p className="text-warm-gray mb-8">Hydration is essential for healthy, glowing skin</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Less than 4 glasses',
+                '4-6 glasses',
+                '7-8 glasses',
+                'More than 8 glasses'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('waterIntake', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.waterIntake === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 14:
+        return (
+          <div>
+            <h2 className="text-3xl font-bold text-deep mb-4">How often do you exercise?</h2>
+            <p className="text-warm-gray mb-8">Exercise affects circulation and skin health</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Rarely/Never',
+                '1-2 times per week',
+                '3-4 times per week',
+                '5+ times per week',
+                'Daily'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('exerciseFrequency', option)}
+                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                    surveyData.exerciseFrequency === option
+                      ? 'border-primary bg-primary-50 text-primary-700'
+                      : 'border-blush hover:border-primary-300'
+                  }`}
+                >
+                  {option}
                 </button>
               ))}
             </div>

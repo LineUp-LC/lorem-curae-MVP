@@ -135,7 +135,7 @@ export default function ServicesPage() {
                         target.src = 'https://via.placeholder.com/600x400?text=Image+Not+Available';
                       }}
                     />
-                    {/* Fix 3: Featured label now uses sage-600 to match Best Match */}
+                    {/* Fix 3: Featured label now uses taupe to match Best Match */}
                     {business.featured && (
                       <div className="absolute top-4 left-4">
                         <div className="px-3 py-1 bg-primary text-white rounded-full text-xs font-medium flex items-center gap-1 shadow">

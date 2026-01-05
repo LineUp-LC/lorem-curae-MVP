@@ -14,14 +14,14 @@ const RewardsSection = () => {
               Get rewarded for your skincare journey
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              Earn Curae Points when you shop, review products, complete your <a href="/skin-survey" className="text-sage-600 hover:text-sage-700 font-medium underline" title="Take skin assessment">skin assessment</a>, and engage with our community. Redeem points for exclusive perks, early access to features, and future discounts.
+              Earn Curae Points when you shop, review products, complete your <a href="/skin-survey" className="text-taupe hover:text-taupe-700 font-medium underline" title="Take skin assessment">skin assessment</a>, and engage with our community. Redeem points for exclusive perks, early access to features, and future discounts.
             </p>
             
             {/* Points earning examples */}
             <div className="space-y-3 mb-8">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                  <i className="ri-shopping-bag-line text-sage-600" aria-hidden="true"></i>
+                <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                  <i className="ri-shopping-bag-line text-taupe" aria-hidden="true"></i>
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Shop Smart</p>
@@ -30,8 +30,8 @@ const RewardsSection = () => {
               </div>
               
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                  <i className="ri-star-line text-sage-600" aria-hidden="true"></i>
+                <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                  <i className="ri-star-line text-taupe" aria-hidden="true"></i>
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Share Reviews</p>
@@ -40,8 +40,8 @@ const RewardsSection = () => {
               </div>
               
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                  <i className="ri-user-heart-line text-sage-600" aria-hidden="true"></i>
+                <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                  <i className="ri-user-heart-line text-taupe" aria-hidden="true"></i>
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">Complete Your Profile</p>
@@ -53,7 +53,7 @@ const RewardsSection = () => {
             <div className="flex items-center space-x-4">
               <Link
                 to="/discover"
-                className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
+                className="inline-flex items-center space-x-3 bg-taupe hover:bg-taupe-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
                 aria-label="Start earning Curae Points"
               >
                 <span>Start Earning</span>
@@ -62,7 +62,7 @@ const RewardsSection = () => {
               
               <Link
                 to="/account"
-                className="text-sage-600 hover:text-sage-700 font-medium cursor-pointer whitespace-nowrap"
+                className="text-taupe hover:text-taupe-700 font-medium cursor-pointer whitespace-nowrap"
                 title="Check your Curae Points balance"
               >
                 View My Points →
@@ -94,7 +94,7 @@ const RewardsSection = () => {
             </div>
             
             {/* Floating Points Badge */}
-            <div className="absolute -top-6 -right-6 bg-gradient-to-br from-sage-500 to-sage-700 rounded-2xl shadow-xl p-6">
+            <div className="absolute -top-6 -right-6 bg-gradient-to-br from-taupe-500 to-taupe-700 rounded-2xl shadow-xl p-6">
               <div className="text-center">
                 <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
                   <i className="ri-coin-line text-2xl text-white" aria-hidden="true"></i>

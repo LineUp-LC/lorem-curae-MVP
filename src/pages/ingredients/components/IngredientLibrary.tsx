@@ -403,7 +403,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                 >
                   {ingredient.hasSimilarReviews && (
                     <div className="mb-3">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-light/30 text-primary-700 text-xs font-semibold rounded-full shadow-sm">
+                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-sage/20 text-sage-700 text-xs font-semibold rounded-full shadow-sm">
                         <i className="ri-user-heart-line"></i>
                         Similar Skin Reviews
                       </span>

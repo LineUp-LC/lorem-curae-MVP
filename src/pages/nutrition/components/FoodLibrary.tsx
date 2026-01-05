@@ -156,7 +156,7 @@ const FoodLibrary = ({ onSelectFood, onSaveFood }: FoodLibraryProps) => {
     const colors: Record<string, string> = {
       'Breakfast': 'bg-amber-100 text-amber-700',
       'Main Dish': 'bg-rose-100 text-rose-700',
-      'Salad': 'bg-green-100 text-green-700',
+      'Salad': 'bg-taupe-100 text-taupe-700',
       'Soup': 'bg-light/30 text-primary-700',
       'Beverage': 'bg-purple-100 text-purple-700',
       'Dessert': 'bg-pink-100 text-pink-700',

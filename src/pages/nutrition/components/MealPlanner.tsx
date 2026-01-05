@@ -235,7 +235,7 @@ const MealPlanner = () => {
                       key={meal.id}
                       className={`p-2 rounded-lg border ${
                         meal.completed
-                          ? 'bg-green-50 border-green-200'
+                          ? 'bg-taupe-50 border-taupe-200'
                           : 'bg-cream border-blush'
                       }`}
                     >
@@ -245,7 +245,7 @@ const MealPlanner = () => {
                           onClick={() => toggleComplete(meal.id, meal.completed)}
                           className="cursor-pointer"
                         >
-                          <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-lg`}></i>
+                          <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-taupe' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-lg`}></i>
                         </button>
                       </div>
                       <p className="text-xs font-medium text-deep line-clamp-2">
@@ -287,7 +287,7 @@ const MealPlanner = () => {
                         key={meal.id}
                         className={`border rounded-lg p-4 ${
                           meal.completed
-                            ? 'bg-green-50 border-green-200'
+                            ? 'bg-taupe-50 border-taupe-200'
                             : 'border-blush'
                         }`}
                       >
@@ -311,7 +311,7 @@ const MealPlanner = () => {
                               onClick={() => toggleComplete(meal.id, meal.completed)}
                               className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
                             >
-                              <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-green-600' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-xl`}></i>
+                              <i className={`${meal.completed ? 'ri-checkbox-circle-fill text-taupe' : 'ri-checkbox-blank-circle-line text-warm-gray/60'} text-xl`}></i>
                             </button>
                             <button
                               onClick={() => deleteMealPlan(meal.id)}

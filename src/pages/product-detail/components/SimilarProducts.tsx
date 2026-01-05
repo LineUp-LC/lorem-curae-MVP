@@ -123,7 +123,7 @@ const SimilarProducts = ({
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-serif text-forest-900 mb-3">Similar Products</h2>
+          <h2 className="text-3xl font-serif text-deep-900 mb-3">Similar Products</h2>
           <p className="text-gray-600">
             Compare alternatives based on your skin type, concerns, and budget
           </p>
@@ -139,7 +139,7 @@ const SimilarProducts = ({
               <div
                 key={product.id}
                 className={`bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 group ${
-                  isSelected ? 'border-forest-900' : 'border-gray-100'
+                  isSelected ? 'border-cream-900' : 'border-gray-100'
                 }`}
               >
                 {/* Product Image */}
@@ -165,10 +165,10 @@ const SimilarProducts = ({
                       disabled={!canSelect}
                       className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all ${
                         isSelected
-                          ? 'bg-forest-900 text-white'
+                          ? 'bg-cream-900 text-white'
                           : canSelect
-                          ? 'bg-white/90 text-gray-700 hover:bg-forest-900 hover:text-white'
-                          : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          ? 'bg-white/90 text-gray-700 hover:bg-cream-900 hover:text-white'
+                          : 'bg-cream-300 text-gray-500 cursor-not-allowed'
                       }`}
                     >
                       {isSelected ? (
@@ -183,14 +183,14 @@ const SimilarProducts = ({
                 {/* Product Info */}
                 <div className="p-5">
                   {/* Brand */}
-                  <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
+                  <p className="text-xs font-semibold text-taupe uppercase tracking-wide mb-2">
                     {product.brand}
                   </p>
 
                   {/* Product Name */}
                   <h3 
                     onClick={() => navigate(`/product-detail?id=${product.id}`)}
-                    className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2 cursor-pointer hover:text-sage-600 transition-colors"
+                    className="text-lg font-semibold text-deep-900 mb-2 line-clamp-2 cursor-pointer hover:text-taupe transition-colors"
                   >
                     {product.name}
                   </h3>
@@ -215,7 +215,7 @@ const SimilarProducts = ({
                             key={idx}
                             className={`px-2 py-1 text-xs rounded-full capitalize border ${
                               isMatch
-                                ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                ? 'bg-taupe-100 text-taupe-700 font-medium border-taupe-300'
                                 : 'bg-cream-100 text-gray-700 border-gray-200'
                             }`}
                           >
@@ -238,7 +238,7 @@ const SimilarProducts = ({
                             key={idx}
                             className={`px-2 py-1 text-xs rounded-full border ${
                               isMatchingIngredient
-                                ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                ? 'bg-taupe-100 text-taupe-700 font-medium border-taupe-300'
                                 : 'bg-cream-100 text-gray-700 border-gray-200'
                             }`}
                           >
@@ -263,7 +263,7 @@ const SimilarProducts = ({
                                 key={key}
                                 className={`px-2 py-1 text-xs rounded-full border ${
                                   isMatch
-                                    ? 'bg-sage-100 text-sage-700 font-medium border-sage-300'
+                                    ? 'bg-taupe-100 text-taupe-700 font-medium border-taupe-300'
                                     : 'bg-cream-100 text-gray-600 border-gray-200'
                                 }`}
                               >
@@ -281,13 +281,13 @@ const SimilarProducts = ({
                     <p className="text-xs text-gray-500 mb-1">Estimated price range</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <span className="text-xl font-bold text-forest-900">
+                        <span className="text-xl font-bold text-deep-900">
                           ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
                         </span>
                         {product.price !== currentProduct.price && (
                           <p className="text-xs mt-1">
                             {product.price < currentProduct.price ? (
-                              <span className="text-green-600 font-medium">
+                              <span className="text-taupe font-medium">
                                 <i className="ri-arrow-down-line"></i> 
                                 ${(currentProduct.price - product.price).toFixed(2)} less
                               </span>
@@ -310,14 +310,14 @@ const SimilarProducts = ({
 
         {/* FIXED: Only show comparison hint if comparison is enabled AND items are selected */}
         {comparisonEnabled && selectedForComparison.length > 0 && (
-          <div className="mt-8 p-6 bg-sage-50 border border-sage-200 rounded-xl">
+          <div className="mt-8 p-6 bg-taupe-50 border border-taupe-200 rounded-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-sage-100 rounded-full">
-                  <i className="ri-scales-line text-2xl text-sage-600"></i>
+                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 rounded-full">
+                  <i className="ri-scales-line text-2xl text-taupe"></i>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-forest-900">
+                  <h3 className="text-lg font-semibold text-deep-900">
                     {selectedForComparison.length} product{selectedForComparison.length > 1 ? 's' : ''} selected for comparison
                   </h3>
                   <p className="text-sm text-gray-600">
@@ -331,7 +331,7 @@ const SimilarProducts = ({
               {selectedForComparison.length >= 2 && onOpenComparison && (
                 <button
                   onClick={onOpenComparison}
-                  className="px-6 py-3 bg-forest-800 text-white rounded-full font-semibold hover:bg-forest-900 transition-all cursor-pointer flex items-center gap-2"
+                  className="px-6 py-3 bg-deep text-white rounded-full font-semibold hover:bg-light-30 transition-all cursor-pointer flex items-center gap-2"
                 >
                   <i className="ri-scales-line text-lg"></i>
                   Compare Products

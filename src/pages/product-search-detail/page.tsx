@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
@@ -216,9 +215,9 @@ const ProductSearchDetailPage = () => {
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <button onClick={() => navigate('/')} className="hover:text-sage-600 cursor-pointer transition-colors">Home</button>
+            <button onClick={() => navigate('/')} className="hover:text-taupe cursor-pointer transition-colors">Home</button>
             <i className="ri-arrow-right-s-line"></i>
-            <button onClick={() => navigate('/discover')} className="hover:text-sage-600 cursor-pointer transition-colors">Products</button>
+            <button onClick={() => navigate('/discover')} className="hover:text-taupe cursor-pointer transition-colors">Products</button>
             <i className="ri-arrow-right-s-line"></i>
             <span className="text-gray-900 font-medium">{product.name}</span>
           </div>
@@ -242,7 +241,7 @@ const ProductSearchDetailPage = () => {
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
                     className={`w-full h-28 bg-white rounded-2xl overflow-hidden border-2 transition-all cursor-pointer hover:scale-105 ${
-                      selectedImage === idx ? 'border-sage-600 shadow-md' : 'border-gray-200 hover:border-sage-300'
+                      selectedImage === idx ? 'border-taupe shadow-md' : 'border-gray-200 hover:border-taupe-300'
                     }`}
                   >
                     <img src={image} alt={`View ${idx + 1}`} className="w-full h-full object-contain p-3" />
@@ -254,7 +253,7 @@ const ProductSearchDetailPage = () => {
             {/* Product Info */}
             <div className="space-y-6">
               <div>
-                <p className="text-sage-600 font-semibold text-sm uppercase tracking-wider mb-2">{product.brand}</p>
+                <p className="text-taupe font-semibold text-sm uppercase tracking-wider mb-2">{product.brand}</p>
                 <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4 leading-tight">{product.name}</h1>
                 
                 {/* Rating */}
@@ -277,7 +276,7 @@ const ProductSearchDetailPage = () => {
                       const reviewsSection = document.getElementById('reviews-section');
                       reviewsSection?.scrollIntoView({ behavior: 'smooth' });
                     }}
-                    className="text-gray-600 hover:text-sage-600 cursor-pointer transition-colors"
+                    className="text-gray-600 hover:text-taupe cursor-pointer transition-colors"
                   >
                     ({product.reviewCount.toLocaleString()} reviews)
                   </button>
@@ -295,8 +294,8 @@ const ProductSearchDetailPage = () => {
                 {/* Stock & Features */}
                 <div className="flex flex-wrap gap-3 mb-6">
                   {product.inStock && (
-                    <div className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-full">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="flex items-center gap-2 px-4 py-2 bg-taupe-50 text-taupe-700 rounded-full">
+                      <div className="w-2 h-2 bg-taupe-500 rounded-full"></div>
                       <span className="text-sm font-semibold">In Stock</span>
                     </div>
                   )}
@@ -320,8 +319,8 @@ const ProductSearchDetailPage = () => {
               {/* Size */}
               <div>
                 <p className="text-sm font-bold text-gray-900 mb-3">Size</p>
-                <div className="inline-flex items-center gap-2 px-5 py-3 bg-sage-50 border-2 border-sage-600 rounded-xl">
-                  <i className="ri-drop-line text-sage-600"></i>
+                <div className="inline-flex items-center gap-2 px-5 py-3 bg-taupe-50 border-2 border-taupe rounded-xl">
+                  <i className="ri-drop-line text-taupe"></i>
                   <span className="text-sm font-semibold text-gray-900">{product.size}</span>
                 </div>
               </div>
@@ -348,29 +347,29 @@ const ProductSearchDetailPage = () => {
 
               {/* Buttons */}
               <div className="flex gap-4">
-                <button className="flex-1 px-8 py-4 bg-sage-600 text-white rounded-xl font-bold text-lg hover:bg-sage-700 transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer">
+                <button className="flex-1 px-8 py-4 bg-taupe text-white rounded-xl font-bold text-lg hover:bg-taupe-700 transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer">
                   <i className="ri-shopping-cart-line mr-2"></i>
                   Add to Cart
                 </button>
-                <button className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:border-sage-600 hover:text-sage-600 transition-all cursor-pointer">
+                <button className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:border-taupe hover:text-taupe transition-all cursor-pointer">
                   <i className="ri-heart-line text-2xl"></i>
                 </button>
-                <button className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:border-sage-600 hover:text-sage-600 transition-all cursor-pointer">
+                <button className="w-16 h-16 flex items-center justify-center bg-white border-2 border-gray-300 rounded-xl hover:border-taupe hover:text-taupe transition-all cursor-pointer">
                   <i className="ri-share-line text-2xl"></i>
                 </button>
               </div>
 
               {/* Skin Types & Concerns */}
-              <div className="p-6 bg-gradient-to-br from-sage-50 to-emerald-50 rounded-2xl border border-sage-200">
+              <div className="p-6 bg-gradient-to-br from-taupe-50 to-emerald-50 rounded-2xl border border-taupe-200">
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                      <i className="ri-user-line text-sage-600"></i>
+                      <i className="ri-user-line text-taupe"></i>
                       Suitable for
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {product.skinTypes.map((type, idx) => (
-                        <span key={idx} className="px-3 py-1.5 bg-white text-sage-700 text-sm font-medium rounded-full border border-sage-300 shadow-sm">
+                        <span key={idx} className="px-3 py-1.5 bg-white text-taupe-700 text-sm font-medium rounded-full border border-taupe-300 shadow-sm">
                           {type}
                         </span>
                       ))}
@@ -378,12 +377,12 @@ const ProductSearchDetailPage = () => {
                   </div>
                   <div>
                     <p className="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                      <i className="ri-heart-pulse-line text-sage-600"></i>
+                      <i className="ri-heart-pulse-line text-taupe"></i>
                       Addresses
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {product.concerns.map((concern, idx) => (
-                        <span key={idx} className="px-3 py-1.5 bg-white text-sage-700 text-sm font-medium rounded-full border border-sage-300 shadow-sm">
+                        <span key={idx} className="px-3 py-1.5 bg-white text-taupe-700 text-sm font-medium rounded-full border border-taupe-300 shadow-sm">
                           {concern}
                         </span>
                       ))}
@@ -405,7 +404,7 @@ const ProductSearchDetailPage = () => {
                   onClick={() => setActiveTab(tab)}
                   className={`py-4 px-2 font-semibold text-sm uppercase tracking-wider whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
                     activeTab === tab
-                      ? 'border-sage-600 text-sage-600'
+                      ? 'border-taupe text-taupe'
                       : 'border-transparent text-gray-600 hover:text-gray-900'
                   }`}
                 >
@@ -426,9 +425,9 @@ const ProductSearchDetailPage = () => {
                 <h2 className="text-3xl font-bold text-gray-900 mb-6">Key Benefits</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   {product.benefits.map((benefit, idx) => (
-                    <div key={idx} className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-sage-300 transition-colors">
-                      <div className="w-8 h-8 flex items-center justify-center bg-sage-100 rounded-full flex-shrink-0">
-                        <i className="ri-check-line text-sage-600 font-bold"></i>
+                    <div key={idx} className="flex items-start gap-4 p-4 bg-white rounded-xl border border-gray-200 hover:border-taupe-300 transition-colors">
+                      <div className="w-8 h-8 flex items-center justify-center bg-taupe-100 rounded-full flex-shrink-0">
+                        <i className="ri-check-line text-taupe font-bold"></i>
                       </div>
                       <span className="text-gray-700 leading-relaxed">{benefit}</span>
                     </div>
@@ -447,7 +446,7 @@ const ProductSearchDetailPage = () => {
                   <div key={idx} className="p-6 bg-white rounded-2xl border border-gray-200 hover:shadow-lg transition-all">
                     <div className="flex items-start justify-between mb-3">
                       <h3 className="font-bold text-gray-900 text-lg">{ingredient.name}</h3>
-                      <span className="px-3 py-1 bg-sage-100 text-sage-700 text-sm font-bold rounded-full">
+                      <span className="px-3 py-1 bg-taupe-100 text-taupe-700 text-sm font-bold rounded-full">
                         {ingredient.percentage}
                       </span>
                     </div>
@@ -466,7 +465,7 @@ const ProductSearchDetailPage = () => {
                 <div className="space-y-6">
                   {product.howToUse.map((step, idx) => (
                     <div key={idx} className="flex items-start gap-4">
-                      <div className="w-10 h-10 flex items-center justify-center bg-sage-600 text-white rounded-full font-bold flex-shrink-0">
+                      <div className="w-10 h-10 flex items-center justify-center bg-taupe text-white rounded-full font-bold flex-shrink-0">
                         {idx + 1}
                       </div>
                       <p className="text-gray-700 text-lg leading-relaxed pt-1">{step}</p>
@@ -485,7 +484,7 @@ const ProductSearchDetailPage = () => {
                   <h2 className="text-3xl font-bold text-gray-900 mb-2">Customer Reviews</h2>
                   <p className="text-gray-600">Based on {product.reviewCount.toLocaleString()} verified reviews</p>
                 </div>
-                <button className="px-6 py-3 bg-sage-600 text-white rounded-xl font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                <button className="px-6 py-3 bg-taupe text-white rounded-xl font-semibold hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer">
                   Write a Review
                 </button>
               </div>
@@ -507,14 +506,14 @@ const ProductSearchDetailPage = () => {
                       
                       <div className="pr-32">
                         <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-sage-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          <div className="w-12 h-12 bg-gradient-to-br from-taupe-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
                             {review.author.charAt(0)}
                           </div>
                           <div>
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-bold text-gray-900">{review.author}</h3>
                               {review.verified && (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex items-center gap-1">
+                                <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full flex items-center gap-1">
                                   <i className="ri-shield-check-fill"></i>
                                   Verified
                                 </span>
@@ -552,7 +551,7 @@ const ProductSearchDetailPage = () => {
                         
                         <p className="text-gray-700 leading-relaxed mb-4">{review.comment}</p>
                         
-                        <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-sage-600 transition-colors cursor-pointer">
+                        <button className="flex items-center gap-2 text-sm text-gray-600 hover:text-taupe transition-colors cursor-pointer">
                           <i className="ri-thumb-up-line"></i>
                           <span>Helpful ({review.helpful})</span>
                         </button>
@@ -598,8 +597,8 @@ const ProductSearchDetailPage = () => {
                     />
                   </div>
                   <div className="p-5">
-                    <p className="text-xs text-sage-600 font-semibold uppercase tracking-wider mb-1">{item.brand}</p>
-                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-sage-600 transition-colors">
+                    <p className="text-xs text-taupe font-semibold uppercase tracking-wider mb-1">{item.brand}</p>
+                    <h3 className="font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-taupe transition-colors">
                       {item.name}
                     </h3>
                     <div className="flex items-center justify-between">

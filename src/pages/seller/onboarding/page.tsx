@@ -90,8 +90,8 @@ export default function SellerOnboardingPage() {
           }`}
         >
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <i className="ri-shopping-bag-line text-green-600 text-xl"></i>
+            <div className="w-12 h-12 bg-taupe-100 rounded-lg flex items-center justify-center">
+              <i className="ri-shopping-bag-line text-taupe text-xl"></i>
             </div>
             <h3 className="text-lg font-medium text-gray-900 ml-4">Physical Products</h3>
           </div>
@@ -109,8 +109,8 @@ export default function SellerOnboardingPage() {
           }`}
         >
           <div className="flex items-center mb-4">
-            <div className="w-12 h-12 bg-coral-100 rounded-lg flex items-center justify-center">
-              <i className="ri-service-line text-coral-600 text-xl"></i>
+            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
+              <i className="ri-service-line text-primary-600 text-xl"></i>
             </div>
             <h3 className="text-lg font-medium text-gray-900 ml-4">Professional Services</h3>
           </div>

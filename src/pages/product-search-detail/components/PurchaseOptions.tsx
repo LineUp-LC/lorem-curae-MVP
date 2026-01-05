@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -133,7 +132,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
   const renderTrustScore = (score: number) => {
     const percentage = (score / 10) * 100;
-    let color = 'bg-green-500';
+    let color = 'bg-taupe-500';
     if (score < 8) color = 'bg-yellow-500';
     if (score < 7) color = 'bg-red-500';
 
@@ -155,7 +154,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-serif text-forest-900 mb-3">Where to Buy</h2>
+          <h2 className="text-3xl font-serif text-deep-900 mb-3">Where to Buy</h2>
           <p className="text-gray-600">
             Compare prices from trusted retailers. All prices include estimated shipping and taxes.
           </p>
@@ -168,7 +167,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 rounded-full border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+              className="px-4 py-2 rounded-full border border-gray-300 focus:border-taupe focus:outline-none text-sm cursor-pointer"
             >
               <option value="trust">Trust Score</option>
               <option value="price-low">Price: Low to High</option>
@@ -179,7 +178,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
           <button
             onClick={() => setShowTaxInfo(!showTaxInfo)}
-            className="flex items-center space-x-2 text-sm text-sage-600 hover:text-sage-700 cursor-pointer"
+            className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer"
           >
             <i className="ri-information-line text-lg"></i>
             <span className="font-medium">About Pricing</span>
@@ -194,24 +193,24 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                 <i className="ri-information-line text-xl text-blue-600"></i>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-forest-900 mb-2">
+                <h3 className="text-lg font-semibold text-deep-900 mb-2">
                   Understanding Total Costs
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-700">
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Estimated taxes</strong> are calculated based on your location and may vary at checkout</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Shipping costs</strong> are provided by each retailer and may change based on delivery speed</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Total price</strong> includes product price + shipping + estimated tax for easy comparison</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span>Final price will be confirmed at the retailer's checkout</span>
                   </li>
                 </ul>
@@ -227,7 +226,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
               key={retailer.id}
               className={`bg-cream-50 rounded-2xl p-6 border-2 transition-all ${
                 retailer.inStock
-                  ? 'border-gray-200 hover:border-sage-300 hover:shadow-lg'
+                  ? 'border-gray-200 hover:border-taupe-300 hover:shadow-lg'
                   : 'border-gray-200 opacity-60'
               }`}
             >
@@ -244,7 +243,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold text-forest-900">
+                      <h3 className="text-xl font-semibold text-deep-900">
                         {retailer.name}
                       </h3>
                       
@@ -258,7 +257,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       
                       {/* Affiliate Partner Badge */}
                       {retailer.isAffiliate && (
-                        <span className="flex items-center space-x-1 px-3 py-1 bg-sage-100 text-sage-800 text-xs font-semibold rounded-full border border-sage-300">
+                        <span className="flex items-center space-x-1 px-3 py-1 bg-taupe-100 text-taupe-800 text-xs font-semibold rounded-full border border-taupe-300">
                           <i className="ri-shield-check-fill"></i>
                           <span>Partner</span>
                         </span>
@@ -278,7 +277,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                           key={idx}
                           className="flex items-center space-x-1 px-3 py-1 bg-white text-gray-700 text-xs rounded-full border border-gray-200"
                         >
-                          <i className="ri-check-line text-sage-600"></i>
+                          <i className="ri-check-line text-taupe"></i>
                           <span>{feature}</span>
                         </span>
                       ))}
@@ -309,7 +308,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                     </div>
                     <div className="flex items-center justify-between gap-8 pt-2 border-t border-gray-300">
                       <span className="text-base font-semibold text-gray-900">Total:</span>
-                      <span className="text-2xl font-bold text-forest-900">
+                      <span className="text-2xl font-bold text-deep-900">
                         ${retailer.totalPrice.toFixed(2)}
                       </span>
                     </div>
@@ -326,14 +325,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                           href={retailer.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
+                          className="flex items-center space-x-2 px-6 py-3 bg-taupe text-white rounded-full font-semibold hover:bg-taupe-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
                         >
                           <span>Visit Store</span>
                           <i className="ri-external-link-line"></i>
                         </a>
                         <Link
                           to={`/reviews?id=${productId}&retailer=${encodeURIComponent(retailer.name)}`}
-                          className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer underline"
+                          className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer underline"
                         >
                           View Reviews
                         </Link>
@@ -348,14 +347,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                         </button>
                         <Link
                           to={`/reviews?id=${productId}&retailer=${encodeURIComponent(retailer.name)}`}
-                          className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer underline"
+                          className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer underline"
                         >
                           View Reviews
                         </Link>
                       </>
                     )}
                     <p className="text-xs text-gray-500">
-                      <i className="ri-shield-check-line text-sage-600"></i> Secure checkout
+                      <i className="ri-shield-check-line text-taupe"></i> Secure checkout
                     </p>
                   </div>
                 </div>

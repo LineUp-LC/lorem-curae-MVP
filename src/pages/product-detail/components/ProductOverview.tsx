@@ -61,7 +61,7 @@ export default function ProductOverview() {
                 key={concern}
                 className={
                   product.concerns.includes(concern)
-                    ? 'text-green-600'
+                    ? 'text-taupe'
                     : 'text-gray-500'
                 }
               >
@@ -71,7 +71,7 @@ export default function ProductOverview() {
           </ul>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-md">
+        <div className="mt-6 p-4 bg-cream-100 rounded-md">
           <h3 className="font-semibold">Your Environment</h3>
           <p className="text-sm text-gray-700">
             Location: {userProfile.location}

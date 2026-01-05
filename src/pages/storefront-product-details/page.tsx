@@ -113,7 +113,7 @@ export default function StorefrontProductDetailsPage() {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-taupe mb-4"></div>
           <p className="text-gray-600">Loading product...</p>
         </div>
       </div>
@@ -126,7 +126,7 @@ export default function StorefrontProductDetailsPage() {
         <Navbar />
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Not Found</h1>
-          <Link to="/marketplace" className="text-sage-600 hover:text-sage-700 cursor-pointer">
+          <Link to="/marketplace" className="text-taupe hover:text-taupe-700 cursor-pointer">
             Return to Marketplace
           </Link>
         </div>
@@ -145,15 +145,15 @@ export default function StorefrontProductDetailsPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           {/* Breadcrumb */}
           <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-            <Link to="/" className="hover:text-sage-600 cursor-pointer">Home</Link>
+            <Link to="/" className="hover:text-taupe cursor-pointer">Home</Link>
             <i className="ri-arrow-right-s-line"></i>
-            <Link to="/marketplace" className="hover:text-sage-600 cursor-pointer">Marketplace</Link>
+            <Link to="/marketplace" className="hover:text-taupe cursor-pointer">Marketplace</Link>
             <i className="ri-arrow-right-s-line"></i>
-            <Link to={`/storefront/${storefront.id}`} className="hover:text-sage-600 cursor-pointer">
+            <Link to={`/storefront/${storefront.id}`} className="hover:text-taupe cursor-pointer">
               {storefront.business_name}
             </Link>
             <i className="ri-arrow-right-s-line"></i>
-            <span className="text-sage-600">{product.name}</span>
+            <span className="text-taupe">{product.name}</span>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mb-16">
@@ -184,11 +184,11 @@ export default function StorefrontProductDetailsPage() {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-gray-900 group-hover:text-sage-600 transition-colors">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-taupe transition-colors">
                       {storefront.business_name}
                     </h3>
                     {storefront.is_verified && (
-                      <i className="ri-verified-badge-fill text-sage-600"></i>
+                      <i className="ri-verified-badge-fill text-taupe"></i>
                     )}
                   </div>
                   <div className="flex items-center gap-1 text-sm">
@@ -244,8 +244,8 @@ export default function StorefrontProductDetailsPage() {
                         onClick={() => setSelectedVariant(variant)}
                         className={`px-4 py-2 rounded-lg border-2 transition-all cursor-pointer ${
                           selectedVariant?.id === variant.id
-                            ? 'border-sage-600 bg-sage-50 text-sage-700'
-                            : 'border-gray-200 hover:border-sage-300'
+                            ? 'border-taupe bg-taupe-50 text-taupe-700'
+                            : 'border-gray-200 hover:border-taupe-300'
                         }`}
                       >
                         {variant.name}
@@ -279,7 +279,7 @@ export default function StorefrontProductDetailsPage() {
 
               {/* Stock Status */}
               {product.in_stock ? (
-                <div className="flex items-center gap-2 text-green-600 mb-6">
+                <div className="flex items-center gap-2 text-taupe mb-6">
                   <i className="ri-checkbox-circle-fill"></i>
                   <span className="font-medium">In Stock</span>
                 </div>
@@ -295,7 +295,7 @@ export default function StorefrontProductDetailsPage() {
                 <button
                   onClick={handlePurchase}
                   disabled={!product.in_stock || purchasing}
-                  className="flex-1 py-4 bg-sage-600 text-white rounded-lg font-semibold hover:bg-sage-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="flex-1 py-4 bg-taupe text-white rounded-lg font-semibold hover:bg-taupe-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   {purchasing ? (
                     <span className="flex items-center justify-center gap-2">
@@ -309,7 +309,7 @@ export default function StorefrontProductDetailsPage() {
                 <button
                   onClick={handleAddToCart}
                   disabled={!product.in_stock}
-                  className="px-6 py-4 border-2 border-sage-600 text-sage-600 rounded-lg font-semibold hover:bg-sage-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                  className="px-6 py-4 border-2 border-taupe text-taupe rounded-lg font-semibold hover:bg-taupe-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                 >
                   <i className="ri-shopping-cart-line text-xl"></i>
                 </button>
@@ -319,11 +319,11 @@ export default function StorefrontProductDetailsPage() {
               {isConnected && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <i className="ri-shield-check-line text-green-600"></i>
+                    <i className="ri-shield-check-line text-taupe"></i>
                     <span>Secure checkout powered by Stripe</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <i className="ri-hand-coin-line text-sage-600"></i>
+                    <i className="ri-hand-coin-line text-taupe"></i>
                     <span>90% goes directly to the creator</span>
                   </div>
                 </div>
@@ -337,7 +337,7 @@ export default function StorefrontProductDetailsPage() {
             <p className="text-gray-600 mb-6">{storefront.description}</p>
             <Link
               to={`/storefront/${storefront.id}`}
-              className="inline-block px-6 py-3 bg-sage-600 text-white rounded-lg font-semibold hover:bg-sage-700 transition-colors cursor-pointer"
+              className="inline-block px-6 py-3 bg-taupe text-white rounded-lg font-semibold hover:bg-taupe-700 transition-colors cursor-pointer"
             >
               View All Products from {storefront.business_name}
             </Link>

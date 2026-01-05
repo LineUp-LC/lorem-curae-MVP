@@ -67,7 +67,7 @@ const AuthCallbackPage = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-coral-50 flex items-center justify-center px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-taupe-50 via-cream-50 to-primary-50 flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-md">
         {/* Logo */}
         <Link to="/" className="flex items-center justify-center mb-8 cursor-pointer">
@@ -78,8 +78,8 @@ const AuthCallbackPage = () => {
         <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
           {status === 'loading' && (
             <>
-              <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="ri-loader-4-line text-3xl text-sage-600 animate-spin"></i>
+              <div className="w-16 h-16 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i className="ri-loader-4-line text-3xl text-taupe animate-spin"></i>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 Verifying your email...
@@ -92,8 +92,8 @@ const AuthCallbackPage = () => {
 
           {status === 'success' && (
             <>
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <i className="ri-check-line text-3xl text-green-600"></i>
+              <div className="w-16 h-16 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i className="ri-check-line text-3xl text-taupe"></i>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
                 Email verified!
@@ -101,7 +101,7 @@ const AuthCallbackPage = () => {
               <p className="text-gray-600 mb-6">
                 Your account has been verified successfully. Redirecting you to your account...
               </p>
-              <div className="flex items-center justify-center gap-2 text-sage-600">
+              <div className="flex items-center justify-center gap-2 text-taupe">
                 <i className="ri-loader-4-line animate-spin"></i>
                 <span>Redirecting...</span>
               </div>
@@ -122,7 +122,7 @@ const AuthCallbackPage = () => {
               <div className="space-y-3">
                 <Link
                   to="/auth/signup"
-                  className="block w-full bg-sage-600 text-white py-3 rounded-lg font-medium hover:bg-sage-700 transition-colors text-center"
+                  className="block w-full bg-taupe text-white py-3 rounded-lg font-medium hover:bg-taupe-700 transition-colors text-center"
                 >
                   Try signing up again
                 </Link>

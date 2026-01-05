@@ -144,9 +144,9 @@ export default function MarketplaceProductDetailPage() {
           {/* Breadcrumb */}
           <nav className="mb-8 text-sm">
             <ol className="flex items-center gap-2 text-gray-500">
-              <li><Link to="/marketplace" className="hover:text-sage-600">Marketplace</Link></li>
+              <li><Link to="/marketplace" className="hover:text-taupe">Marketplace</Link></li>
               <li>/</li>
-              <li><Link to={`/storefront/${product.storefrontId}`} className="hover:text-sage-600">{product.storefrontName}</Link></li>
+              <li><Link to={`/storefront/${product.storefrontId}`} className="hover:text-taupe">{product.storefrontName}</Link></li>
               <li>/</li>
               <li className="text-gray-900">{product.name}</li>
             </ol>
@@ -168,7 +168,7 @@ export default function MarketplaceProductDetailPage() {
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`aspect-square rounded-xl overflow-hidden bg-white transition-all ${
-                      selectedImage === index ? 'ring-2 ring-sage-500' : 'hover:ring-2 hover:ring-gray-300'
+                      selectedImage === index ? 'ring-2 ring-taupe-500' : 'hover:ring-2 hover:ring-gray-300'
                     }`}
                   >
                     <img src={image} alt={`${product.name} view ${index + 1}`} className="w-full h-full object-cover" />
@@ -182,7 +182,7 @@ export default function MarketplaceProductDetailPage() {
               <div className="mb-6">
                 <Link 
                   to={`/storefront/${product.storefrontId}`}
-                  className="text-sm font-medium text-sage-600 hover:text-sage-700 mb-2 inline-block"
+                  className="text-sm font-medium text-taupe hover:text-taupe-700 mb-2 inline-block"
                 >
                   {product.brand}
                 </Link>
@@ -200,7 +200,7 @@ export default function MarketplaceProductDetailPage() {
                     <span className="text-lg text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
                   )}
                   {product.originalPrice && (
-                    <span className="px-2 py-1 bg-coral-100 text-coral-700 text-sm font-medium rounded-full">
+                    <span className="px-2 py-1 bg-primary-100 text-dark text-sm font-medium rounded-full">
                       Save ${(product.originalPrice - product.price).toFixed(2)}
                     </span>
                   )}
@@ -221,7 +221,7 @@ export default function MarketplaceProductDetailPage() {
                         key={key}
                         className={`px-3 py-1.5 text-sm font-medium rounded-full ${
                           isMatching
-                            ? 'bg-sage-100 text-sage-700 border border-sage-300'
+                            ? 'bg-taupe-100 text-taupe-700 border border-taupe-300'
                             : 'bg-gray-100 text-gray-600'
                         }`}
                       >
@@ -274,7 +274,7 @@ export default function MarketplaceProductDetailPage() {
                   disabled={!product.inStock || addingToCart}
                   className={`w-full py-4 px-6 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
                     product.inStock
-                      ? 'bg-sage-600 hover:bg-sage-700 text-white cursor-pointer'
+                      ? 'bg-taupe hover:bg-taupe-700 text-white cursor-pointer'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                 >
@@ -292,14 +292,14 @@ export default function MarketplaceProductDetailPage() {
                 </button>
 
                 {showAddedToCart && (
-                  <div className="mt-4 p-4 bg-sage-50 border border-sage-200 rounded-xl flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sage-700">
+                  <div className="mt-4 p-4 bg-taupe-50 border border-taupe-200 rounded-xl flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-taupe-700">
                       <i className="ri-check-line text-xl"></i>
                       <span className="font-medium">Added to cart!</span>
                     </div>
                     <Link
                       to="/cart"
-                      className="text-sage-600 hover:text-sage-700 font-medium text-sm"
+                      className="text-taupe hover:text-taupe-700 font-medium text-sm"
                     >
                       View Cart →
                     </Link>
@@ -317,8 +317,8 @@ export default function MarketplaceProductDetailPage() {
               {/* Store Info */}
               <div className="mt-6 p-4 bg-white rounded-xl border border-gray-200">
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-sage-100 rounded-xl flex items-center justify-center">
-                    <i className="ri-store-2-line text-sage-600 text-2xl"></i>
+                  <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center">
+                    <i className="ri-store-2-line text-taupe text-2xl"></i>
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-gray-900">{product.storefrontName}</p>
@@ -326,7 +326,7 @@ export default function MarketplaceProductDetailPage() {
                   </div>
                   <Link
                     to={`/storefront/${product.storefrontId}`}
-                    className="px-4 py-2 border border-sage-600 text-sage-600 rounded-lg hover:bg-sage-50 transition-colors text-sm font-medium"
+                    className="px-4 py-2 border border-taupe text-taupe rounded-lg hover:bg-taupe-50 transition-colors text-sm font-medium"
                   >
                     Visit Store
                   </Link>

@@ -1,4 +1,3 @@
-
 const EducationHub = () => {
   const articles = [
     {
@@ -8,19 +7,19 @@ const EducationHub = () => {
       type: 'Guide',
       readTime: '12 min read',
       icon: 'ri-flask-line',
-      color: 'bg-sage-100 text-sage-700',
+      color: 'bg-taupe-100 text-taupe-700',
       link: '/ingredients'
     }
   ];
 
   return (
-    <section className="py-24 px-6 lg:px-12 bg-gradient-to-br from-sage-50 via-cream-50 to-terracotta-50">
+    <section className="py-24 px-6 lg:px-12 bg-gradient-to-br from-taupe-50 via-cream-50 to-terracotta-50">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16">
-          <div className="w-20 h-20 bg-gradient-to-br from-sage-600 to-forest-700 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+          <div className="w-20 h-20 bg-gradient-to-br from-taupe to-taupe-700 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-lg">
             <i className="ri-book-open-line text-3xl text-white"></i>
           </div>
-          <h2 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-6">
+          <h2 className="text-4xl lg:text-5xl font-serif text-deep-900 mb-6">
             Learn At Your Own Pace
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed">
@@ -44,18 +43,18 @@ const EducationHub = () => {
                     <span className="text-sm font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
                       {article.type}
                     </span>
-                    <span className="text-sm text-sage-600 font-medium">
+                    <span className="text-sm text-taupe font-medium">
                       {article.readTime}
                     </span>
                   </div>
                 </div>
-                <h3 className="text-2xl font-bold text-forest-900 mb-4 group-hover:text-sage-700 transition-colors">
+                <h3 className="text-2xl font-bold text-deep-900 mb-4 group-hover:text-taupe-700 transition-colors">
                   {article.title}
                 </h3>
                 <p className="text-gray-600 leading-relaxed mb-6">
                   {article.excerpt}
                 </p>
-                <div className="flex items-center text-sage-600 font-medium group-hover:text-sage-700 transition-colors">
+                <div className="flex items-center text-taupe font-medium group-hover:text-taupe-700 transition-colors">
                   <span className="mr-2">Explore</span>
                   <i className="ri-arrow-right-line text-lg group-hover:translate-x-1 transition-transform"></i>
                 </div>
@@ -67,7 +66,7 @@ const EducationHub = () => {
         <div className="text-center">
           <Link
             to="/about"
-            className="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-sage-600 to-forest-700 text-white rounded-full font-medium hover:from-sage-700 hover:to-forest-800 transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer"
+            className="inline-flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-taupe to-taupe-700 text-white rounded-full font-medium hover:from-taupe-700 hover:to-deep transition-all shadow-lg hover:shadow-xl whitespace-nowrap cursor-pointer"
           >
             <span>Explore All Resources</span>
             <i className="ri-arrow-right-up-line text-xl"></i>

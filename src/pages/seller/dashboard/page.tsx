@@ -44,7 +44,7 @@ export default function SellerDashboardPage() {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
       case 'shipped': return 'bg-blue-100 text-blue-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
+      case 'delivered': return 'bg-taupe-100 text-taupe-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -79,12 +79,12 @@ export default function SellerDashboardPage() {
                 <p className="text-sm font-medium text-gray-600">Total Sales</p>
                 <p className="text-2xl font-bold text-gray-900">{stats.totalSales}</p>
               </div>
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <i className="ri-line-chart-line text-green-600 text-xl"></i>
+              <div className="w-12 h-12 bg-taupe-100 rounded-lg flex items-center justify-center">
+                <i className="ri-line-chart-line text-taupe text-xl"></i>
               </div>
             </div>
             <div className="mt-2 flex items-center text-sm">
-              <span className="text-green-600 font-medium">+12%</span>
+              <span className="text-taupe font-medium">+12%</span>
               <span className="text-gray-600 ml-1">from last month</span>
             </div>
           </div>
@@ -100,7 +100,7 @@ export default function SellerDashboardPage() {
               </div>
             </div>
             <div className="mt-2 flex items-center text-sm">
-              <span className="text-green-600 font-medium">+8%</span>
+              <span className="text-taupe font-medium">+8%</span>
               <span className="text-gray-600 ml-1">from last month</span>
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function SellerDashboardPage() {
               </div>
             </div>
             <div className="mt-2 flex items-center text-sm">
-              <span className="text-green-600 font-medium">+15%</span>
+              <span className="text-taupe font-medium">+15%</span>
               <span className="text-gray-600 ml-1">from last week</span>
             </div>
           </div>
@@ -162,7 +162,7 @@ export default function SellerDashboardPage() {
               </div>
             </div>
             <div className="mt-2 flex items-center text-sm">
-              <span className="text-green-600 font-medium">+0.3%</span>
+              <span className="text-taupe font-medium">+0.3%</span>
               <span className="text-gray-600 ml-1">from last month</span>
             </div>
           </div>
@@ -251,7 +251,7 @@ export default function SellerDashboardPage() {
             </div>
 
             {/* Performance Tips */}
-            <div className="bg-gradient-to-br from-teal-50 to-green-50 rounded-lg p-6 border border-teal-200">
+            <div className="bg-gradient-to-br from-teal-50 to-taupe-50 rounded-lg p-6 border border-teal-200">
               <div className="flex items-center mb-4">
                 <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center mr-3">
                   <i className="ri-lightbulb-line text-white text-sm"></i>

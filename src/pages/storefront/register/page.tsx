@@ -184,7 +184,7 @@ const StorefrontRegisterPage = () => {
                   <div
                     className={`w-12 h-12 flex items-center justify-center rounded-full font-bold transition-all ${
                       currentStep >= step.number
-                        ? 'bg-sage-600 text-white'
+                        ? 'bg-taupe text-white'
                         : 'bg-gray-200 text-gray-500'
                     }`}
                   >
@@ -195,14 +195,14 @@ const StorefrontRegisterPage = () => {
                     )}
                   </div>
                   <span className={`text-xs mt-2 text-center ${
-                    currentStep >= step.number ? 'text-sage-600 font-medium' : 'text-gray-500'
+                    currentStep >= step.number ? 'text-taupe font-medium' : 'text-gray-500'
                   }`}>
                     {step.title}
                   </span>
                 </div>
                 {idx < steps.length - 1 && (
                   <div className={`h-1 flex-1 mx-2 ${
-                    currentStep > step.number ? 'bg-sage-600' : 'bg-gray-200'
+                    currentStep > step.number ? 'bg-taupe' : 'bg-gray-200'
                   }`}></div>
                 )}
               </div>
@@ -231,11 +231,11 @@ const StorefrontRegisterPage = () => {
                   onClick={() => setSellingType('products')}
                   className={`p-8 border-2 rounded-xl transition-all cursor-pointer ${
                     sellingType === 'products'
-                      ? 'border-sage-600 bg-sage-50'
-                      : 'border-gray-200 hover:border-sage-300'
+                      ? 'border-taupe bg-taupe-50'
+                      : 'border-gray-200 hover:border-taupe-300'
                   }`}
                 >
-                  <div className="w-16 h-16 flex items-center justify-center bg-sage-100 text-sage-600 rounded-full mx-auto mb-4">
+                  <div className="w-16 h-16 flex items-center justify-center bg-taupe-100 text-taupe rounded-full mx-auto mb-4">
                     <i className="ri-shopping-bag-line text-3xl"></i>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Products</h3>
@@ -248,11 +248,11 @@ const StorefrontRegisterPage = () => {
                   onClick={() => setSellingType('services')}
                   className={`p-8 border-2 rounded-xl transition-all cursor-pointer ${
                     sellingType === 'services'
-                      ? 'border-sage-600 bg-sage-50'
-                      : 'border-gray-200 hover:border-sage-300'
+                      ? 'border-taupe bg-taupe-50'
+                      : 'border-gray-200 hover:border-taupe-300'
                   }`}
                 >
-                  <div className="w-16 h-16 flex items-center justify-center bg-coral-100 text-coral-600 rounded-full mx-auto mb-4">
+                  <div className="w-16 h-16 flex items-center justify-center bg-primary-100 text-primary-600 rounded-full mx-auto mb-4">
                     <i className="ri-spa-line text-3xl"></i>
                   </div>
                   <h3 className="text-xl font-bold text-gray-900 mb-2">Services</h3>
@@ -277,7 +277,7 @@ const StorefrontRegisterPage = () => {
                   type="email"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                   placeholder="your@email.com"
                 />
               </div>
@@ -290,7 +290,7 @@ const StorefrontRegisterPage = () => {
                   type="text"
                   value={formData.businessName}
                   onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                   placeholder="Enter legal business name"
                 />
               </div>
@@ -302,7 +302,7 @@ const StorefrontRegisterPage = () => {
                 <select
                   value={formData.businessType}
                   onChange={(e) => setFormData({ ...formData, businessType: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent cursor-pointer"
                 >
                   <option value="">Select business type</option>
                   <option value="individual">Individual / Sole Proprietor</option>
@@ -317,7 +317,7 @@ const StorefrontRegisterPage = () => {
                 <select
                   value={formData.country}
                   onChange={(e) => setFormData({ ...formData, country: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent cursor-pointer"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent cursor-pointer"
                 >
                   <option value="US">United States</option>
                   <option value="CA">Canada</option>
@@ -350,7 +350,7 @@ const StorefrontRegisterPage = () => {
                   <input type="file" multiple className="hidden" id="documents-upload" />
                   <label
                     htmlFor="documents-upload"
-                    className="inline-block px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap"
+                    className="inline-block px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     Choose Files
                   </label>
@@ -384,7 +384,7 @@ const StorefrontRegisterPage = () => {
                   type="text"
                   value={formData.brandName}
                   onChange={(e) => setFormData({ ...formData, brandName: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                   placeholder="Enter your brand name"
                 />
               </div>
@@ -400,7 +400,7 @@ const StorefrontRegisterPage = () => {
                   <input type="file" accept="image/*" className="hidden" id="logo-upload" />
                   <label
                     htmlFor="logo-upload"
-                    className="inline-block px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap"
+                    className="inline-block px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     Choose Logo
                   </label>
@@ -416,7 +416,7 @@ const StorefrontRegisterPage = () => {
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   rows={6}
                   maxLength={500}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent resize-none"
                   placeholder="Tell customers about your brand, mission, and what makes your products/services special..."
                 />
                 <p className="text-sm text-gray-500 mt-1">{formData.description.length}/500 characters</p>
@@ -443,7 +443,7 @@ const StorefrontRegisterPage = () => {
                     <input
                       type="checkbox"
                       id="disclosure"
-                      className="w-5 h-5 text-sage-600 border-gray-300 rounded focus:ring-sage-500 cursor-pointer"
+                      className="w-5 h-5 text-taupe border-gray-300 rounded focus:ring-taupe-500 cursor-pointer"
                     />
                     <label htmlFor="disclosure" className="ml-3 text-sm text-gray-700 cursor-pointer">
                       I agree to provide complete and accurate information
@@ -464,7 +464,7 @@ const StorefrontRegisterPage = () => {
                     <input
                       type="checkbox"
                       id="standards"
-                      className="w-5 h-5 text-sage-600 border-gray-300 rounded focus:ring-sage-500 cursor-pointer"
+                      className="w-5 h-5 text-taupe border-gray-300 rounded focus:ring-taupe-500 cursor-pointer"
                     />
                     <label htmlFor="standards" className="ml-3 text-sm text-gray-700 cursor-pointer">
                       I agree to maintain quality standards
@@ -483,7 +483,7 @@ const StorefrontRegisterPage = () => {
                       id="guidelines"
                       checked={formData.agreedToTerms}
                       onChange={(e) => setFormData({ ...formData, agreedToTerms: e.target.checked })}
-                      className="w-5 h-5 text-sage-600 border-gray-300 rounded focus:ring-sage-500 cursor-pointer"
+                      className="w-5 h-5 text-taupe border-gray-300 rounded focus:ring-taupe-500 cursor-pointer"
                     />
                     <label htmlFor="guidelines" className="ml-3 text-sm text-gray-700 cursor-pointer">
                       I accept and agree to follow all community guidelines
@@ -499,10 +499,10 @@ const StorefrontRegisterPage = () => {
             <div className="space-y-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">Payment & Logistics</h2>
               
-              <div className="bg-gradient-to-br from-sage-50 to-sage-100 rounded-xl p-8 border-2 border-sage-200">
+              <div className="bg-gradient-to-br from-taupe-50 to-taupe-100 rounded-xl p-8 border-2 border-taupe-200">
                 <div className="flex items-start space-x-4 mb-6">
                   <div className="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-md">
-                    <i className="ri-bank-card-line text-3xl text-sage-600"></i>
+                    <i className="ri-bank-card-line text-3xl text-taupe"></i>
                   </div>
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Stripe Connect</h3>
@@ -516,19 +516,19 @@ const StorefrontRegisterPage = () => {
                   <div className="space-y-4">
                     <div className="bg-white rounded-lg p-4 space-y-3">
                       <div className="flex items-center space-x-3">
-                        <i className="ri-check-line text-sage-600 text-xl"></i>
+                        <i className="ri-check-line text-taupe text-xl"></i>
                         <span className="text-sm text-gray-700">Secure payment processing</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <i className="ri-check-line text-sage-600 text-xl"></i>
+                        <i className="ri-check-line text-taupe text-xl"></i>
                         <span className="text-sm text-gray-700">Automatic payouts to your bank account</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <i className="ri-check-line text-sage-600 text-xl"></i>
+                        <i className="ri-check-line text-taupe text-xl"></i>
                         <span className="text-sm text-gray-700">Real-time transaction tracking</span>
                       </div>
                       <div className="flex items-center space-x-3">
-                        <i className="ri-check-line text-sage-600 text-xl"></i>
+                        <i className="ri-check-line text-taupe text-xl"></i>
                         <span className="text-sm text-gray-700">Support for multiple currencies</span>
                       </div>
                     </div>
@@ -536,7 +536,7 @@ const StorefrontRegisterPage = () => {
                     <button
                       onClick={handleStripeConnect}
                       disabled={loading}
-                      className="w-full px-6 py-4 bg-sage-600 text-white rounded-lg font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                      className="w-full px-6 py-4 bg-taupe text-white rounded-lg font-semibold hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                     >
                       {loading ? (
                         <>
@@ -560,8 +560,8 @@ const StorefrontRegisterPage = () => {
                     <div className="bg-white rounded-lg p-6">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center space-x-3">
-                          <div className="w-10 h-10 flex items-center justify-center bg-green-100 rounded-full">
-                            <i className="ri-check-line text-green-600 text-xl"></i>
+                          <div className="w-10 h-10 flex items-center justify-center bg-taupe-100 rounded-full">
+                            <i className="ri-check-line text-taupe text-xl"></i>
                           </div>
                           <div>
                             <h4 className="font-semibold text-gray-900">Stripe Connected</h4>
@@ -574,19 +574,19 @@ const StorefrontRegisterPage = () => {
                         <div className="space-y-2 mb-4">
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Charges Enabled:</span>
-                            <span className={`font-medium ${stripeAccountStatus.chargesEnabled ? 'text-green-600' : 'text-orange-600'}`}>
+                            <span className={`font-medium ${stripeAccountStatus.chargesEnabled ? 'text-taupe' : 'text-orange-600'}`}>
                               {stripeAccountStatus.chargesEnabled ? 'Yes' : 'Pending'}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Payouts Enabled:</span>
-                            <span className={`font-medium ${stripeAccountStatus.payoutsEnabled ? 'text-green-600' : 'text-orange-600'}`}>
+                            <span className={`font-medium ${stripeAccountStatus.payoutsEnabled ? 'text-taupe' : 'text-orange-600'}`}>
                               {stripeAccountStatus.payoutsEnabled ? 'Yes' : 'Pending'}
                             </span>
                           </div>
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Details Submitted:</span>
-                            <span className={`font-medium ${stripeAccountStatus.detailsSubmitted ? 'text-green-600' : 'text-orange-600'}`}>
+                            <span className={`font-medium ${stripeAccountStatus.detailsSubmitted ? 'text-taupe' : 'text-orange-600'}`}>
                               {stripeAccountStatus.detailsSubmitted ? 'Complete' : 'Incomplete'}
                             </span>
                           </div>
@@ -626,7 +626,7 @@ const StorefrontRegisterPage = () => {
                   <p className="text-sm text-gray-700 mb-4">
                     Set up your shipping preferences and connect with shipping carriers for automated label generation.
                   </p>
-                  <button className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                  <button className="px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer">
                     <i className="ri-truck-line mr-2"></i>
                     Configure Shipping
                   </button>
@@ -637,7 +637,7 @@ const StorefrontRegisterPage = () => {
                   <p className="text-sm text-gray-700 mb-4">
                     Connect your calendar to manage appointments and availability for your services.
                   </p>
-                  <button className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                  <button className="px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer">
                     <i className="ri-calendar-line mr-2"></i>
                     Connect Calendar
                   </button>
@@ -674,7 +674,7 @@ const StorefrontRegisterPage = () => {
               className={`px-6 py-3 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer ${
                 ((currentStep === 1 && !sellingType) || (currentStep === 6 && !stripeConnected))
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  : 'bg-sage-600 text-white hover:bg-sage-700'
+                  : 'bg-taupe text-white hover:bg-taupe-700'
               }`}
             >
               {currentStep === steps.length ? 'Complete Registration' : 'Continue'}

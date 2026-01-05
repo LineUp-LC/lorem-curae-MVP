@@ -69,7 +69,7 @@ const ProductComparison = ({
                 Skin Type Match:
               </p>
               <p className="text-sm">
-                {product.skin_types?.includes(userProfile.skinType)
+                {product.skinTypes?.includes(userProfile.skinType)
                   ? '✔ Good match'
                   : '⚠ Not ideal'}
               </p>
@@ -85,7 +85,7 @@ const ProductComparison = ({
                     key={concern}
                     className={
                       product.concerns?.includes(concern)
-                        ? 'text-green-600'
+                        ? 'text-taupe'
                         : 'text-gray-500'
                     }
                   >
@@ -100,7 +100,7 @@ const ProductComparison = ({
                 Key Ingredients:
               </p>
               <ul className="text-sm list-disc ml-4">
-                {product.key_ingredients?.map((ing) => (
+                {product.keyIngredients?.map((ing) => (
                   <li key={ing}>{ing}</li>
                 ))}
               </ul>

@@ -40,7 +40,7 @@ const WaitlistLandingPage = () => {
           </Link>
           <a 
             href="#waitlist" 
-            className="px-6 py-2.5 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-sm font-medium whitespace-nowrap"
+            className="px-6 py-2.5 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Join Waitlist
           </a>
@@ -48,21 +48,21 @@ const WaitlistLandingPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-sage-50 via-white to-cream-50">
+      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-taupe-50 via-white to-cream-50">
         <div className="max-w-4xl mx-auto text-center">
           {/* Creator Waitlist Link */}
           <div className="mb-8">
             <Link
               to="/preview-of-waitlist-early-access-2025-marketplace"
-              className="inline-flex items-center space-x-2 text-sage-600 hover:text-sage-700 font-medium transition-colors"
+              className="inline-flex items-center space-x-2 text-taupe hover:text-taupe-700 font-medium transition-colors"
             >
               <span>Are you a creator? Join the Marketplace waitlist</span>
               <i className="ri-arrow-right-line"></i>
             </Link>
           </div>
 
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-sage-100 rounded-full mb-8">
-            <i className="ri-sparkling-2-line text-3xl text-sage-600"></i>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-taupe-100 rounded-full mb-8">
+            <i className="ri-sparkling-2-line text-3xl text-taupe"></i>
           </div>
           <h1 className="text-5xl lg:text-6xl font-serif text-slate-900 mb-6 leading-tight">
             Skincare clarity, powered by science and personalization
@@ -73,13 +73,13 @@ const WaitlistLandingPage = () => {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <a 
               href="#waitlist" 
-              className="px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap w-full sm:w-auto"
+              className="px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap w-full sm:w-auto"
             >
               Join the waitlist
             </a>
             <a 
               href="#how-it-works" 
-              className="px-8 py-4 bg-white text-sage-600 border-2 border-sage-600 rounded-full hover:bg-sage-50 transition-colors text-lg font-medium whitespace-nowrap w-full sm:w-auto"
+              className="px-8 py-4 bg-white text-taupe border-2 border-taupe rounded-full hover:bg-taupe-50 transition-colors text-lg font-medium whitespace-nowrap w-full sm:w-auto"
             >
               See how it works
             </a>
@@ -100,9 +100,9 @@ const WaitlistLandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 mb-12">
-            <div className="bg-sage-50 rounded-2xl p-8">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-search-line text-2xl text-sage-600"></i>
+            <div className="bg-taupe-50 rounded-2xl p-8">
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mb-6">
+                <i className="ri-search-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">
                 Trusted product discovery
@@ -114,7 +114,7 @@ const WaitlistLandingPage = () => {
 
             <div className="bg-cream-50 rounded-2xl p-8">
               <div className="w-14 h-14 bg-cream-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-flask-line text-2xl text-sage-600"></i>
+                <i className="ri-flask-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">
                 Ingredient transparency
@@ -126,7 +126,7 @@ const WaitlistLandingPage = () => {
 
             <div className="bg-cream-50 rounded-2xl p-8">
               <div className="w-14 h-14 bg-cream-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-robot-2-line text-2xl text-sage-600"></i>
+                <i className="ri-robot-2-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">
                 Personalized AI guidance
@@ -136,9 +136,9 @@ const WaitlistLandingPage = () => {
               </p>
             </div>
 
-            <div className="bg-sage-50 rounded-2xl p-8">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-book-open-line text-2xl text-sage-600"></i>
+            <div className="bg-taupe-50 rounded-2xl p-8">
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mb-6">
+                <i className="ri-book-open-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">
                 Clear, science-backed explanations
@@ -152,7 +152,7 @@ const WaitlistLandingPage = () => {
           <div className="text-center">
             <a 
               href="#waitlist" 
-              className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+              className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
             >
               Join the waitlist
             </a>
@@ -161,12 +161,12 @@ const WaitlistLandingPage = () => {
       </section>
 
       {/* Smart Product Search */}
-      <section className="py-20 px-6 bg-gradient-to-br from-sage-50 to-cream-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-taupe-50 to-cream-50">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-sage-100 rounded-full mb-6">
-                <i className="ri-shopping-bag-3-line text-2xl text-sage-600"></i>
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-taupe-100 rounded-full mb-6">
+                <i className="ri-shopping-bag-3-line text-2xl text-taupe"></i>
               </div>
               <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
                 Find the right product — and the best place to buy it
@@ -179,7 +179,7 @@ const WaitlistLandingPage = () => {
               </p>
               <a 
                 href="#waitlist" 
-                className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
               >
                 Get early access
               </a>
@@ -194,8 +194,8 @@ const WaitlistLandingPage = () => {
               </div>
               <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                    <i className="ri-gift-line text-sage-600"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                    <i className="ri-gift-line text-taupe"></i>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-900">Earn rewards</p>
@@ -223,7 +223,7 @@ const WaitlistLandingPage = () => {
               <div className="absolute -top-6 -left-6 bg-white rounded-xl shadow-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-cream-100 rounded-full flex items-center justify-center">
-                    <i className="ri-flask-line text-sage-600"></i>
+                    <i className="ri-flask-line text-taupe"></i>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-900">Science-backed</p>
@@ -234,7 +234,7 @@ const WaitlistLandingPage = () => {
             </div>
             <div className="order-1 lg:order-2">
               <div className="inline-flex items-center justify-center w-14 h-14 bg-cream-100 rounded-full mb-6">
-                <i className="ri-microscope-line text-2xl text-sage-600"></i>
+                <i className="ri-microscope-line text-2xl text-taupe"></i>
               </div>
               <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
                 Understand what's inside your products
@@ -247,7 +247,7 @@ const WaitlistLandingPage = () => {
               </p>
               <a 
                 href="#waitlist" 
-                className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
               >
                 Join the waitlist
               </a>
@@ -257,12 +257,12 @@ const WaitlistLandingPage = () => {
       </section>
 
       {/* Personalized AI Guidance */}
-      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-sage-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-taupe-50">
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-sage-100 rounded-full mb-6">
-                <i className="ri-chat-smile-3-line text-2xl text-sage-600"></i>
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-taupe-100 rounded-full mb-6">
+                <i className="ri-chat-smile-3-line text-2xl text-taupe"></i>
               </div>
               <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
                 Guidance tailored to your skin
@@ -275,7 +275,7 @@ const WaitlistLandingPage = () => {
               </p>
               <a 
                 href="#waitlist" 
-                className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
               >
                 Get early access
               </a>
@@ -290,8 +290,8 @@ const WaitlistLandingPage = () => {
               </div>
               <div className="absolute -bottom-6 -right-6 bg-white rounded-xl shadow-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                    <i className="ri-user-heart-line text-sage-600"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                    <i className="ri-user-heart-line text-taupe"></i>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-900">Personalized</p>
@@ -318,8 +318,8 @@ const WaitlistLandingPage = () => {
               </div>
               <div className="absolute -top-6 -left-6 bg-white rounded-xl shadow-lg p-4 border border-slate-200">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-sage-100 rounded-full flex items-center justify-center">
-                    <i className="ri-coin-line text-sage-600"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-full flex items-center justify-center">
+                    <i className="ri-coin-line text-taupe"></i>
                   </div>
                   <div>
                     <p className="text-sm font-medium text-slate-900">+250 points</p>
@@ -329,8 +329,8 @@ const WaitlistLandingPage = () => {
               </div>
             </div>
             <div className="order-1 lg:order-2">
-              <div className="inline-flex items-center justify-center w-14 h-14 bg-sage-100 rounded-full mb-6">
-                <i className="ri-gift-2-line text-2xl text-sage-600"></i>
+              <div className="inline-flex items-center justify-center w-14 h-14 bg-taupe-100 rounded-full mb-6">
+                <i className="ri-gift-2-line text-2xl text-taupe"></i>
               </div>
               <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
                 Earn rewards for smart shopping
@@ -343,7 +343,7 @@ const WaitlistLandingPage = () => {
               </p>
               <a 
                 href="#waitlist" 
-                className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
               >
                 Join the waitlist
               </a>
@@ -353,7 +353,7 @@ const WaitlistLandingPage = () => {
       </section>
 
       {/* Social Proof / Credibility */}
-      <section className="py-20 px-6 bg-gradient-to-br from-sage-50 to-cream-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-taupe-50 to-cream-50">
         <div className="max-w-5xl mx-auto text-center">
           <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
             Built with science. Designed for real skin.
@@ -364,8 +364,8 @@ const WaitlistLandingPage = () => {
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-test-tube-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-test-tube-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-xl font-serif text-slate-900 mb-3">
                 Science-backed approach
@@ -377,7 +377,7 @@ const WaitlistLandingPage = () => {
 
             <div className="bg-white rounded-2xl p-8 shadow-sm">
               <div className="w-14 h-14 bg-cream-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-eye-line text-2xl text-sage-600"></i>
+                <i className="ri-eye-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-xl font-serif text-slate-900 mb-3">
                 Transparent ingredients
@@ -388,8 +388,8 @@ const WaitlistLandingPage = () => {
             </div>
 
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-heart-3-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-heart-3-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-xl font-serif text-slate-900 mb-3">
                 User-centric design
@@ -406,8 +406,8 @@ const WaitlistLandingPage = () => {
       <section id="waitlist" className="py-24 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-sage-100 rounded-full mb-8">
-              <i className="ri-seedling-line text-4xl text-sage-600"></i>
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-taupe-100 rounded-full mb-8">
+              <i className="ri-seedling-line text-4xl text-taupe"></i>
             </div>
             <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
               Be part of the future of skincare
@@ -431,7 +431,7 @@ const WaitlistLandingPage = () => {
                     <input 
                       type="email" 
                       name="EMAIL" 
-                      className="required email w-full px-6 py-4 border-2 border-slate-200 rounded-full focus:border-sage-600 focus:outline-none text-lg" 
+                      className="required email w-full px-6 py-4 border-2 border-slate-200 rounded-full focus:border-taupe focus:outline-none text-lg" 
                       id="mce-EMAIL" 
                       required 
                       placeholder="Your email address *"
@@ -459,7 +459,7 @@ const WaitlistLandingPage = () => {
                         type="submit"
                         name="subscribe"
                         id="mc-embedded-subscribe"
-                        className="w-full px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                        className="w-full px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
                       >
                         Join the waitlist
                       </button>

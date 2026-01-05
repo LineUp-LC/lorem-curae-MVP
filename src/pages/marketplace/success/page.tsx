@@ -21,7 +21,7 @@ const MarketplaceSuccessPage = () => {
     return (
       <div className="min-h-screen bg-cream-50 flex items-center justify-center">
         <div className="text-center">
-          <i className="ri-loader-4-line text-5xl text-sage-600 animate-spin mb-4"></i>
+          <i className="ri-loader-4-line text-5xl text-taupe animate-spin mb-4"></i>
           <p className="text-gray-600">Confirming your purchase...</p>
         </div>
       </div>
@@ -35,8 +35,8 @@ const MarketplaceSuccessPage = () => {
       <main className="pt-32 pb-20">
         <div className="max-w-2xl mx-auto px-6 text-center">
           {/* Success Icon */}
-          <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="ri-check-line text-5xl text-green-600"></i>
+          <div className="w-24 h-24 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="ri-check-line text-5xl text-taupe"></i>
           </div>
 
           {/* Success Message */}
@@ -52,8 +52,8 @@ const MarketplaceSuccessPage = () => {
             <h2 className="text-lg font-bold text-gray-900 mb-4">What's Next?</h2>
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className="ri-mail-line text-sage-600"></i>
+                <div className="w-8 h-8 bg-taupe-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i className="ri-mail-line text-taupe"></i>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Check Your Email</h3>
@@ -63,8 +63,8 @@ const MarketplaceSuccessPage = () => {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className="ri-hand-coin-line text-sage-600"></i>
+                <div className="w-8 h-8 bg-taupe-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i className="ri-hand-coin-line text-taupe"></i>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Creator Payout</h3>
@@ -74,8 +74,8 @@ const MarketplaceSuccessPage = () => {
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-8 h-8 bg-sage-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <i className="ri-shield-check-line text-sage-600"></i>
+                <div className="w-8 h-8 bg-taupe-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i className="ri-shield-check-line text-taupe"></i>
                 </div>
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-1">Secure Transaction</h3>
@@ -91,13 +91,13 @@ const MarketplaceSuccessPage = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               to="/marketplace"
-              className="px-8 py-4 bg-sage-600 text-white rounded-lg font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+              className="px-8 py-4 bg-taupe text-white rounded-lg font-semibold hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer"
             >
               Continue Shopping
             </Link>
             <Link
               to="/account"
-              className="px-8 py-4 border border-sage-600 text-sage-600 rounded-lg font-semibold hover:bg-sage-50 transition-colors whitespace-nowrap cursor-pointer"
+              className="px-8 py-4 border border-taupe text-taupe rounded-lg font-semibold hover:bg-taupe-50 transition-colors whitespace-nowrap cursor-pointer"
             >
               View Orders
             </Link>
@@ -110,7 +110,7 @@ const MarketplaceSuccessPage = () => {
             </p>
             <Link
               to="/contact"
-              className="text-sage-600 font-medium hover:text-sage-700 cursor-pointer"
+              className="text-taupe font-medium hover:text-taupe-700 cursor-pointer"
             >
               Contact Support
             </Link>

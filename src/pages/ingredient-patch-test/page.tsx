@@ -82,7 +82,7 @@ const IngredientPatchTestPage = () => {
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Breadcrumb */}
         <div className="flex items-center space-x-2 text-sm text-gray-600 mb-8">
-          <Link to="/ingredients" className="hover:text-sage-600 cursor-pointer">Ingredients</Link>
+          <Link to="/ingredients" className="hover:text-taupe cursor-pointer">Ingredients</Link>
           <i className="ri-arrow-right-s-line"></i>
           <span className="text-gray-900 font-medium">{ingredient.name}</span>
         </div>
@@ -104,7 +104,7 @@ const IngredientPatchTestPage = () => {
                   <div className="flex items-start justify-between mb-3">
                     <div>
                       <h1 className="text-3xl font-bold text-gray-900 mb-2">{ingredient.name}</h1>
-                      <span className="inline-block px-3 py-1 bg-sage-100 text-sage-700 text-sm rounded-full">
+                      <span className="inline-block px-3 py-1 bg-taupe-100 text-taupe-700 text-sm rounded-full">
                         {ingredient.type}
                       </span>
                     </div>
@@ -141,7 +141,7 @@ const IngredientPatchTestPage = () => {
               <div className="space-y-3">
                 {ingredient.suitableFor.map((item, idx) => (
                   <div key={idx} className="flex items-start space-x-3">
-                    <div className="w-6 h-6 flex items-center justify-center bg-green-100 text-green-600 rounded-full flex-shrink-0 mt-0.5">
+                    <div className="w-6 h-6 flex items-center justify-center bg-taupe-100 text-taupe rounded-full flex-shrink-0 mt-0.5">
                       <i className="ri-check-line text-sm"></i>
                     </div>
                     <span className="text-gray-700">{item}</span>
@@ -166,7 +166,7 @@ const IngredientPatchTestPage = () => {
             </div>
 
             {/* How to Patch Test */}
-            <div className="bg-gradient-to-br from-sage-600 to-sage-700 rounded-xl p-8 text-white">
+            <div className="bg-gradient-to-br from-taupe to-taupe-700 rounded-xl p-8 text-white">
               <h2 className="text-2xl font-bold mb-6">How to Patch Test</h2>
               <div className="space-y-4">
                 {ingredient.patchTestSteps.map((step, idx) => (
@@ -174,7 +174,7 @@ const IngredientPatchTestPage = () => {
                     <div className="w-8 h-8 flex items-center justify-center bg-white/20 rounded-full flex-shrink-0 font-bold">
                       {idx + 1}
                     </div>
-                    <p className="text-sage-50 pt-1">{step}</p>
+                    <p className="text-taupe-50 pt-1">{step}</p>
                   </div>
                 ))}
               </div>
@@ -193,7 +193,7 @@ const IngredientPatchTestPage = () => {
                     to={product.link}
                     className="block group cursor-pointer"
                   >
-                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:border-sage-300 transition-all">
+                    <div className="flex items-center space-x-3 p-3 border border-gray-200 rounded-lg hover:border-taupe-300 transition-all">
                       <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-50 flex-shrink-0">
                         <img 
                           src={product.image}
@@ -202,11 +202,11 @@ const IngredientPatchTestPage = () => {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-sage-600 transition-colors">
+                        <h4 className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-taupe transition-colors">
                           {product.name}
                         </h4>
                         <p className="text-xs text-gray-600">{product.brand}</p>
-                        <p className="text-sm font-semibold text-sage-600 mt-1">{product.price}</p>
+                        <p className="text-sm font-semibold text-taupe mt-1">{product.price}</p>
                       </div>
                     </div>
                   </Link>
@@ -214,7 +214,7 @@ const IngredientPatchTestPage = () => {
               </div>
               <Link
                 to="/discover"
-                className="block w-full mt-4 px-4 py-3 bg-sage-600 text-white text-center rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+                className="block w-full mt-4 px-4 py-3 bg-taupe text-white text-center rounded-lg font-medium hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer"
               >
                 View All Products
               </Link>
@@ -239,7 +239,7 @@ const IngredientPatchTestPage = () => {
               <div className="space-y-2">
                 {ingredient.howToUse.map((step, idx) => (
                   <div key={idx} className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 text-sm mt-1"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe text-sm mt-1"></i>
                     <span className="text-sm text-gray-700">{step}</span>
                   </div>
                 ))}

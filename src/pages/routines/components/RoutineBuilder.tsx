@@ -206,7 +206,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
     } else if (daysUntilExpiration <= 90) {
       return { status: 'valid', color: 'text-blue-600 bg-blue-50', text: `Expires in ${Math.ceil(daysUntilExpiration / 30)} months`, icon: 'ri-calendar-line' };
     }
-    return { status: 'fresh', color: 'text-green-600 bg-green-50', text: 'Fresh', icon: 'ri-checkbox-circle-line' };
+    return { status: 'fresh', color: 'text-sage bg-sage/10', text: 'Fresh', icon: 'ri-checkbox-circle-line' };
   };
 
   return (
@@ -214,22 +214,22 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="font-serif text-3xl font-bold text-forest-800 mb-2">
+          <h2 className="font-serif text-3xl font-bold text-deep mb-2">
             Build Your Routine
           </h2>
-          <p className="text-gray-600 text-sm">
+          <p className="text-warm-gray text-sm">
             Follow our expert-guided template for a successful skincare routine
           </p>
         </div>
 
         {/* Time Filter */}
-        <div className="flex bg-cream-100 rounded-full p-1">
+        <div className="flex bg-cream rounded-full p-1">
           <button
             onClick={() => setTimeFilter('morning')}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
               timeFilter === 'morning'
-                ? 'bg-white text-forest-800 shadow-sm'
-                : 'text-gray-600'
+                ? 'bg-white text-deep shadow-sm'
+                : 'text-warm-gray'
             }`}
           >
             <i className="ri-sun-line mr-2"></i>
@@ -239,8 +239,8 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
             onClick={() => setTimeFilter('evening')}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
               timeFilter === 'evening'
-                ? 'bg-white text-forest-800 shadow-sm'
-                : 'text-gray-600'
+                ? 'bg-white text-deep shadow-sm'
+                : 'text-warm-gray'
             }`}
           >
             <i className="ri-moon-line mr-2"></i>
@@ -250,8 +250,8 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
             onClick={() => setTimeFilter('both')}
             className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
               timeFilter === 'both'
-                ? 'bg-white text-forest-800 shadow-sm'
-                : 'text-gray-600'
+                ? 'bg-white text-deep shadow-sm'
+                : 'text-warm-gray'
             }`}
           >
             <i className="ri-time-line mr-2"></i>
@@ -291,27 +291,27 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
             {filteredSteps.map((step, index) => (
               <div
                 key={step.id}
-                className="border border-gray-200 rounded-xl p-6 hover:border-forest-800/30 transition-all bg-white"
+                className="border border-blush rounded-xl p-6 hover:border-primary/30 transition-all bg-white"
                 style={{ width: '380px', flexShrink: 0 }}
               >
                 {/* Step Number & Title */}
                 <div className="flex items-start gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-forest-800 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
                     {index + 1}
                   </div>
                   <div className="flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="font-serif text-2xl font-bold text-forest-800">
+                      <h3 className="font-serif text-2xl font-bold text-deep">
                         {step.title}
                       </h3>
                       {step.recommended && (
-                        <span className="px-3 py-1 bg-coral-400/10 text-coral-400 text-xs font-medium rounded-full whitespace-nowrap">
+                        <span className="px-3 py-1 bg-light/20 text-primary text-xs font-medium rounded-full whitespace-nowrap">
                           Recommended
                         </span>
                       )}
                     </div>
                     {step.timeOfDay !== 'both' && (
-                      <span className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full whitespace-nowrap mb-2">
+                      <span className="inline-flex items-center px-3 py-1 bg-blush/50 text-warm-gray text-xs font-medium rounded-full whitespace-nowrap mb-2">
                         <i className={`${step.timeOfDay === 'morning' ? 'ri-sun-line' : 'ri-moon-line'} mr-1`}></i>
                         {step.timeOfDay === 'morning' ? 'Morning Only' : 'Evening Only'}
                       </span>
@@ -319,11 +319,11 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                   </div>
                 </div>
 
-                <p className="text-gray-600 text-sm mb-4">{step.description}</p>
+                <p className="text-warm-gray text-sm mb-4">{step.description}</p>
 
                 {/* Product Display or Add Button */}
                 {step.product ? (
-                  <div className="bg-cream-100 rounded-lg p-4">
+                  <div className="bg-cream rounded-lg p-4">
                     <div className="flex flex-col gap-3 mb-3">
                       <div 
                         className="w-full h-32 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
@@ -336,9 +336,9 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                         />
                       </div>
                       <div>
-                        <p className="text-xs text-gray-500 mb-1">{step.product.brand}</p>
+                        <p className="text-xs text-warm-gray/80 mb-1">{step.product.brand}</p>
                         <h4 
-                          className="font-medium text-forest-800 mb-2 cursor-pointer hover:underline"
+                          className="font-medium text-deep mb-2 cursor-pointer hover:underline"
                           onClick={() => handleProductClick(step.product!)}
                         >
                           {step.product.name}
@@ -346,7 +346,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => handleProductClick(step.product!)}
-                            className="text-sm text-forest-800 hover:underline font-medium cursor-pointer"
+                            className="text-sm text-primary hover:underline font-medium cursor-pointer"
                           >
                             View Details →
                           </button>
@@ -361,7 +361,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                     </div>
 
                     {/* Expiration Date & Purchase Info */}
-                    <div className="pt-3 border-t border-gray-200 space-y-2">
+                    <div className="pt-3 border-t border-blush space-y-2">
                       {step.product.expirationDate && (
                         <div>
                           {(() => {
@@ -376,7 +376,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                         </div>
                       )}
                       {step.product.purchaseDate && (
-                        <p className="text-xs text-gray-500">
+                        <p className="text-xs text-warm-gray/80">
                           <i className="ri-shopping-bag-line mr-1"></i>
                           Purchased {step.product.purchaseDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </p>
@@ -384,7 +384,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                       {step.product.purchasedFrom && (
                         <button
                           onClick={() => handlePurchaseAgain(step.product!)}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                         >
                           <i className="ri-refresh-line"></i>
                           Purchase Again
@@ -397,14 +397,14 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                     <div className="space-y-3">
                       <button
                         onClick={() => setShowProductSelector(step.id)}
-                        className="w-full px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                       >
                         <i className="ri-add-line mr-2"></i>
                         Add from Saved
                       </button>
                       <button
                         onClick={() => handleBrowseProducts(step.title)}
-                        className="w-full px-6 py-3 bg-white border-2 border-forest-800 text-forest-800 rounded-lg hover:bg-cream-100 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                        className="w-full px-6 py-3 bg-white border-2 border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                       >
                         <i className="ri-search-line mr-2"></i>
                         Browse {step.title}s
@@ -413,12 +413,12 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
 
                     {/* Product Selector Modal */}
                     {showProductSelector === step.id && (
-                      <div className="mt-4 p-4 bg-white border border-gray-200 rounded-lg max-h-96 overflow-y-auto">
+                      <div className="mt-4 p-4 bg-white border border-blush rounded-lg max-h-96 overflow-y-auto">
                         <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-medium text-forest-800 text-sm">Select Product</h4>
+                          <h4 className="font-medium text-deep text-sm">Select Product</h4>
                           <button
                             onClick={() => setShowProductSelector(null)}
-                            className="text-gray-400 hover:text-gray-600 cursor-pointer"
+                            className="text-warm-gray/60 hover:text-warm-gray cursor-pointer"
                           >
                             <i className="ri-close-line text-xl"></i>
                           </button>
@@ -430,7 +430,7 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                               <div
                                 key={product.id}
                                 onClick={() => handleAddProduct(step.id, product)}
-                                className="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:border-forest-800 hover:bg-cream-100 transition-all cursor-pointer"
+                                className="flex items-center gap-3 p-3 border border-blush rounded-lg hover:border-primary hover:bg-cream transition-all cursor-pointer"
                               >
                                 <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
                                   <img
@@ -440,20 +440,20 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
                                   />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
-                                  <p className="text-sm font-medium text-forest-800 truncate">
+                                  <p className="text-xs text-warm-gray/80 mb-1">{product.brand}</p>
+                                  <p className="text-sm font-medium text-deep truncate">
                                     {product.name}
                                   </p>
                                 </div>
                               </div>
                             ))}
                           {savedProducts.filter(p => p.category === step.title).length === 0 && (
-                            <div className="text-center py-6 text-gray-500 text-sm">
+                            <div className="text-center py-6 text-warm-gray text-sm">
                               No saved products for this category.
                               <br />
                               <button
                                 onClick={() => handleBrowseProducts(step.title)}
-                                className="text-forest-800 hover:underline mt-2 cursor-pointer whitespace-nowrap"
+                                className="text-primary hover:underline mt-2 cursor-pointer whitespace-nowrap"
                               >
                                 Browse {step.title}s →
                               </button>
@@ -474,21 +474,21 @@ export default function RoutineBuilder({ onBrowseClick }: RoutineBuilderProps) {
           {filteredSteps.map((_, index) => (
             <div
               key={index}
-              className="w-2 h-2 rounded-full bg-gray-300"
+              className="w-2 h-2 rounded-full bg-blush"
             ></div>
           ))}
         </div>
       </div>
 
       {/* Tips Section */}
-      <div className="p-6 bg-cream-100 rounded-xl">
+      <div className="p-6 bg-cream rounded-xl">
         <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-coral-400/20 flex items-center justify-center flex-shrink-0">
-            <i className="ri-lightbulb-line text-coral-400 text-xl"></i>
+          <div className="w-10 h-10 rounded-full bg-light/30 flex items-center justify-center flex-shrink-0">
+            <i className="ri-lightbulb-line text-primary text-xl"></i>
           </div>
           <div>
-            <h4 className="font-medium text-forest-800 mb-2">Pro Tips for Success</h4>
-            <ul className="text-sm text-gray-600 space-y-1">
+            <h4 className="font-medium text-deep mb-2">Pro Tips for Success</h4>
+            <ul className="text-sm text-warm-gray space-y-1">
               <li>• Wait 30-60 seconds between each step for better absorption</li>
               <li>• Apply products from thinnest to thickest consistency</li>
               <li>• Always use sunscreen as your final morning step</li>

@@ -25,6 +25,15 @@ interface UserPreference {
   value: string;
 }
 
+interface LifestyleFactors {
+  sleepPattern: string;
+  stressLevel: string;
+  dietPattern: string;
+  waterIntake: string;
+  exerciseFrequency: string;
+  environmentalExposure: string;
+}
+
 interface Message {
   id: string;
   type: 'user' | 'ai';
@@ -43,6 +52,7 @@ export default function MySkinPage() {
   const [concerns, setConcerns] = useState<SkinConcern[]>([]);
   const [allergens, setAllergens] = useState<Allergen[]>([]);
   const [preferences, setPreferences] = useState<UserPreference[]>([]);
+  const [lifestyleFactors, setLifestyleFactors] = useState<LifestyleFactors | null>(null);
   const [showAddAllergen, setShowAddAllergen] = useState(false);
   const [newAllergen, setNewAllergen] = useState({ name: '', category: 'Synthetic' });
   
@@ -102,6 +112,19 @@ export default function MySkinPage() {
         setConcerns(mappedConcerns);
         setAllergens(mappedAllergens);
         setPreferences(mappedPreferences);
+
+        // Extract lifestyle factors from survey data
+        if (surveyData.sleepPattern || surveyData.stressLevel || surveyData.dietPattern || 
+            surveyData.waterIntake || surveyData.exerciseFrequency || surveyData.environmentalExposure) {
+          setLifestyleFactors({
+            sleepPattern: surveyData.sleepPattern || '',
+            stressLevel: surveyData.stressLevel || '',
+            dietPattern: surveyData.dietPattern || '',
+            waterIntake: surveyData.waterIntake || '',
+            exerciseFrequency: surveyData.exerciseFrequency || '',
+            environmentalExposure: surveyData.environmentalExposure || '',
+          });
+        }
 
         // Sync with session state
         sessionState.updatePreferences({
@@ -972,6 +995,101 @@ export default function MySkinPage() {
               </div>
             </div>
           </div>
+
+          {/* Lifestyle Factors Section */}
+          {lifestyleFactors && (
+            <div>
+              <div className="bg-white rounded-2xl shadow-sm p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+                    <i className="ri-heart-pulse-line text-deep text-2xl"></i>
+                  </div>
+                  <div>
+                    <h2 className="font-serif text-3xl font-bold text-deep">
+                      Lifestyle Factors
+                    </h2>
+                    <p className="text-sm text-warm-gray">
+                      How your daily habits influence your skin health
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {lifestyleFactors.sleepPattern && (
+                    <div className="p-5 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-indigo-100 flex items-center justify-center">
+                          <i className="ri-moon-line text-indigo-600 text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">Sleep Pattern</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.sleepPattern}</p>
+                    </div>
+                  )}
+
+                  {lifestyleFactors.stressLevel && (
+                    <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl border border-amber-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-amber-100 flex items-center justify-center">
+                          <i className="ri-mental-health-line text-amber-600 text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-amber-600 uppercase tracking-wide">Stress Level</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.stressLevel}</p>
+                    </div>
+                  )}
+
+                  {lifestyleFactors.dietPattern && (
+                    <div className="p-5 bg-gradient-to-br from-taupe-50 to-emerald-50 rounded-xl border border-taupe-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-taupe-100 flex items-center justify-center">
+                          <i className="ri-restaurant-line text-taupe text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-taupe uppercase tracking-wide">Diet Pattern</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.dietPattern}</p>
+                    </div>
+                  )}
+
+                  {lifestyleFactors.waterIntake && (
+                    <div className="p-5 bg-gradient-to-br from-cyan-50 to-sky-50 rounded-xl border border-cyan-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-cyan-100 flex items-center justify-center">
+                          <i className="ri-drop-line text-cyan-600 text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-cyan-600 uppercase tracking-wide">Water Intake</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.waterIntake}</p>
+                    </div>
+                  )}
+
+                  {lifestyleFactors.exerciseFrequency && (
+                    <div className="p-5 bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl border border-rose-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-rose-100 flex items-center justify-center">
+                          <i className="ri-run-line text-rose-600 text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-rose-600 uppercase tracking-wide">Exercise</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.exerciseFrequency}</p>
+                    </div>
+                  )}
+
+                  {lifestyleFactors.environmentalExposure && (
+                    <div className="p-5 bg-gradient-to-br from-slate-50 to-gray-50 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
+                          <i className="ri-sun-foggy-line text-slate-600 text-xl"></i>
+                        </div>
+                        <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">Environment</p>
+                      </div>
+                      <p className="text-base font-semibold text-deep">{lifestyleFactors.environmentalExposure}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </main>
 

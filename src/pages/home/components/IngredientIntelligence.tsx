@@ -9,7 +9,7 @@ const IngredientIntelligence = () => {
       <div className="max-w-7xl mx-auto px-6 lg:px-12">
         {/* Pain Point Callout */}
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-dark rounded-full text-sm font-medium mb-4">
             <i className="ri-error-warning-line"></i>
             Ingredient Overload
           </span>
@@ -73,7 +73,7 @@ const IngredientIntelligence = () => {
 
             <Link
               to="/ingredients"
-              className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center space-x-3 bg-taupe hover:bg-taupe-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
               aria-label="Explore comprehensive ingredient library"
             >
               <span>Explore Ingredients</span>

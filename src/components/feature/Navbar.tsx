@@ -24,7 +24,7 @@ const navLinks = [
   { name: 'Skin Survey', path: '/skin-survey-account' },
   { name: 'Ingredients', path: '/ingredients' },
   { name: 'Marketplace', path: '/marketplace' },
-  { name: 'Community', path: '/community' },
+  { name: 'Nutrire', path: '/community' },
   { name: 'About', path: '/about' },
 ];
 

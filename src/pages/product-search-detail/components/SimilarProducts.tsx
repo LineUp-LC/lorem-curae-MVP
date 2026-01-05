@@ -1,4 +1,3 @@
-
 import { productData } from '../../../mocks/products';
 import { useNavigate } from 'react-router-dom';
 
@@ -46,7 +45,7 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-serif text-forest-900 mb-3">Similar Products</h2>
+          <h2 className="text-3xl font-serif text-deep-900 mb-3">Similar Products</h2>
           <p className="text-gray-600">
             Compare alternatives based on your skin type, concerns, and budget
           </p>
@@ -62,7 +61,7 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
               <div
                 key={product.id}
                 className={`bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 group ${
-                  isSelected ? 'border-forest-900' : 'border-gray-100'
+                  isSelected ? 'border-deep-900' : 'border-gray-100'
                 }`}
               >
                 {/* Product Image */}
@@ -87,9 +86,9 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
                     disabled={!canSelect}
                     className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all ${
                       isSelected
-                        ? 'bg-forest-900 text-white'
+                        ? 'bg-deep-900 text-white'
                         : canSelect
-                        ? 'bg-white/90 text-gray-700 hover:bg-forest-900 hover:text-white'
+                        ? 'bg-white/90 text-gray-700 hover:bg-deep-900 hover:text-white'
                         : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     }`}
                   >
@@ -104,14 +103,14 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
                 {/* Product Info */}
                 <div className="p-5">
                   {/* Brand */}
-                  <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-2">
+                  <p className="text-xs font-semibold text-taupe uppercase tracking-wide mb-2">
                     {product.brand}
                   </p>
 
                   {/* Product Name */}
                   <h3 
                     onClick={() => navigate(`/product-search-detail/${product.id}`)}
-                    className="text-lg font-semibold text-forest-900 mb-2 line-clamp-2 cursor-pointer hover:text-sage-600 transition-colors"
+                    className="text-lg font-semibold text-deep-900 mb-2 line-clamp-2 cursor-pointer hover:text-taupe transition-colors"
                   >
                     {product.name}
                   </h3>
@@ -141,13 +140,13 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
                   {/* Price Comparison */}
                   <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                     <div>
-                      <span className="text-2xl font-bold text-forest-900">
+                      <span className="text-2xl font-bold text-deep-900">
                         ${product.price.toFixed(2)}
                       </span>
                       {product.price !== currentProduct.price && (
                         <p className="text-xs text-gray-500 mt-1">
                           {product.price < currentProduct.price ? (
-                            <span className="text-green-600">
+                            <span className="text-taupe">
                               <i className="ri-arrow-down-line"></i> 
                               ${(currentProduct.price - product.price).toFixed(2)} less
                             </span>
@@ -163,7 +162,7 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
                     
                     <button
                       onClick={() => navigate(`/product-search-detail/${product.id}`)}
-                      className="px-4 py-2 bg-sage-600 text-white rounded-full font-semibold text-sm hover:bg-sage-700 transition-all shadow-md cursor-pointer whitespace-nowrap"
+                      className="px-4 py-2 bg-taupe text-white rounded-full font-semibold text-sm hover:bg-taupe-700 transition-all shadow-md cursor-pointer whitespace-nowrap"
                     >
                       View
                     </button>
@@ -176,14 +175,14 @@ const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }
 
         {/* Comparison Hint */}
         {selectedForComparison.length > 0 && (
-          <div className="mt-8 p-6 bg-sage-50 border border-sage-200 rounded-xl">
+          <div className="mt-8 p-6 bg-taupe-50 border border-taupe-200 rounded-xl">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-sage-100 rounded-full">
-                  <i className="ri-scales-line text-2xl text-sage-600"></i>
+                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 rounded-full">
+                  <i className="ri-scales-line text-2xl text-taupe"></i>
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-forest-900">
+                  <h3 className="text-lg font-semibold text-deep-900">
                     {selectedForComparison.length} product{selectedForComparison.length > 1 ? 's' : ''} selected for comparison
                   </h3>
                   <p className="text-sm text-gray-600">

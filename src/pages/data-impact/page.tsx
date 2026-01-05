@@ -93,7 +93,7 @@ export default function DataImpactPage() {
   const getTierBadge = (tier: string) => {
     const badges = {
       free: { text: 'Free', color: 'bg-gray-100 text-gray-700' },
-      plus: { text: 'Plus', color: 'bg-sage-100 text-sage-700' },
+      plus: { text: 'Plus', color: 'bg-taupe-100 text-taupe-700' },
       premium: { text: 'Premium', color: 'bg-amber-100 text-amber-700' }
     };
     return badges[tier as keyof typeof badges] || badges.free;
@@ -105,7 +105,7 @@ export default function DataImpactPage() {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-taupe mb-4"></div>
           <p className="text-gray-600">Loading...</p>
         </div>
       </div>
@@ -134,10 +134,10 @@ export default function DataImpactPage() {
           </div>
 
           {/* Opt-In Section */}
-          <div className="bg-gradient-to-br from-sage-50 to-white border border-sage-200 rounded-2xl p-8 mb-8">
+          <div className="bg-gradient-to-br from-taupe-50 to-white border border-taupe-200 rounded-2xl p-8 mb-8">
             <div className="flex items-start gap-6">
-              <div className="w-16 h-16 bg-sage-100 rounded-2xl flex items-center justify-center flex-shrink-0">
-                <i className="ri-shield-check-line text-3xl text-sage-600"></i>
+              <div className="w-16 h-16 bg-taupe-100 rounded-2xl flex items-center justify-center flex-shrink-0">
+                <i className="ri-shield-check-line text-3xl text-taupe"></i>
               </div>
               <div className="flex-1">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Contribute to Change</h2>
@@ -151,7 +151,7 @@ export default function DataImpactPage() {
                     onClick={handleOptInToggle}
                     disabled={optingIn}
                     className={`relative w-16 h-9 rounded-full transition-colors ${
-                      contribution?.opted_in ? 'bg-sage-600' : 'bg-gray-300'
+                      contribution?.opted_in ? 'bg-taupe' : 'bg-gray-300'
                     } ${optingIn ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                   >
                     <span
@@ -180,8 +180,8 @@ export default function DataImpactPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center">
-                    <i className="ri-database-2-line text-sage-600 text-xl"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
+                    <i className="ri-database-2-line text-taupe text-xl"></i>
                   </div>
                   <h3 className="font-semibold text-gray-900">Total Users</h3>
                 </div>
@@ -191,8 +191,8 @@ export default function DataImpactPage() {
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center">
-                    <i className="ri-bar-chart-line text-sage-600 text-xl"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
+                    <i className="ri-bar-chart-line text-taupe text-xl"></i>
                   </div>
                   <h3 className="font-semibold text-gray-900">Data Points</h3>
                 </div>
@@ -202,8 +202,8 @@ export default function DataImpactPage() {
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center">
-                    <i className="ri-trophy-line text-sage-600 text-xl"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
+                    <i className="ri-trophy-line text-taupe text-xl"></i>
                   </div>
                   <h3 className="font-semibold text-gray-900">Campaigns</h3>
                 </div>
@@ -213,8 +213,8 @@ export default function DataImpactPage() {
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-2">
-                  <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center">
-                    <i className="ri-gift-line text-sage-600 text-xl"></i>
+                  <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
+                    <i className="ri-gift-line text-taupe text-xl"></i>
                   </div>
                   <h3 className="font-semibold text-gray-900">Your Impact</h3>
                 </div>
@@ -232,13 +232,13 @@ export default function DataImpactPage() {
                 <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Impact Stories</h2>
                 <div className="space-y-6">
                   <div className="flex gap-4 pb-6 border-b border-gray-200 last:border-0 last:pb-0">
-                    <div className="w-12 h-12 bg-sage-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i className="ri-flask-line text-sage-600 text-xl"></i>
+                    <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <i className="ri-flask-line text-taupe text-xl"></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">Microplastic Ban Success</h3>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                        <span className="px-2 py-1 bg-taupe-100 text-taupe-700 rounded-full text-xs font-medium">
                           Completed
                         </span>
                       </div>
@@ -260,8 +260,8 @@ export default function DataImpactPage() {
                   </div>
 
                   <div className="flex gap-4 pb-6 border-b border-gray-200 last:border-0 last:pb-0">
-                    <div className="w-12 h-12 bg-sage-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i className="ri-leaf-line text-sage-600 text-xl"></i>
+                    <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <i className="ri-leaf-line text-taupe text-xl"></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -288,13 +288,13 @@ export default function DataImpactPage() {
                   </div>
 
                   <div className="flex gap-4 pb-6 border-b border-gray-200 last:border-0 last:pb-0">
-                    <div className="w-12 h-12 bg-sage-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i className="ri-test-tube-line text-sage-600 text-xl"></i>
+                    <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <i className="ri-test-tube-line text-taupe text-xl"></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <h3 className="font-semibold text-gray-900">Ingredient Transparency Standards</h3>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                        <span className="px-2 py-1 bg-taupe-100 text-taupe-700 rounded-full text-xs font-medium">
                           Completed
                         </span>
                       </div>
@@ -316,8 +316,8 @@ export default function DataImpactPage() {
                   </div>
 
                   <div className="flex gap-4">
-                    <div className="w-12 h-12 bg-sage-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i className="ri-heart-pulse-line text-sage-600 text-xl"></i>
+                    <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <i className="ri-heart-pulse-line text-taupe text-xl"></i>
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -375,28 +375,28 @@ export default function DataImpactPage() {
               {/* Privacy & Security */}
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
                 <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
-                  <i className="ri-lock-line text-sage-600"></i>
+                  <i className="ri-lock-line text-taupe"></i>
                   Privacy & Security
                 </h3>
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex items-start gap-2">
-                    <i className="ri-check-line text-sage-600 flex-shrink-0 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe flex-shrink-0 mt-0.5"></i>
                     <p>All data is fully anonymized before sharing</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <i className="ri-check-line text-sage-600 flex-shrink-0 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe flex-shrink-0 mt-0.5"></i>
                     <p>No personal information ever shared</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <i className="ri-check-line text-sage-600 flex-shrink-0 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe flex-shrink-0 mt-0.5"></i>
                     <p>You can opt out anytime</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <i className="ri-check-line text-sage-600 flex-shrink-0 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe flex-shrink-0 mt-0.5"></i>
                     <p>Full transparency on data usage</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <i className="ri-check-line text-sage-600 flex-shrink-0 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe flex-shrink-0 mt-0.5"></i>
                     <p>GDPR & CCPA compliant</p>
                   </div>
                 </div>
@@ -407,8 +407,8 @@ export default function DataImpactPage() {
                 <h3 className="font-bold text-gray-900 mb-4">Partner Organizations</h3>
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="ri-building-line text-sage-600"></i>
+                    <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i className="ri-building-line text-taupe"></i>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Clean Beauty Coalition</p>
@@ -416,8 +416,8 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="ri-microscope-line text-sage-600"></i>
+                    <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i className="ri-microscope-line text-taupe"></i>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Dermatology Research Institute</p>
@@ -425,8 +425,8 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="ri-leaf-line text-sage-600"></i>
+                    <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i className="ri-leaf-line text-taupe"></i>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Sustainability Alliance</p>
@@ -434,8 +434,8 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-sage-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <i className="ri-government-line text-sage-600"></i>
+                    <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <i className="ri-government-line text-taupe"></i>
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Consumer Safety Board</p>
@@ -446,11 +446,11 @@ export default function DataImpactPage() {
               </div>
 
               {/* How It Works */}
-              <div className="bg-gradient-to-br from-sage-50 to-white rounded-xl p-6 border border-sage-200">
+              <div className="bg-gradient-to-br from-taupe-50 to-white rounded-xl p-6 border border-taupe-200">
                 <h3 className="font-bold text-gray-900 mb-4">How It Works</h3>
                 <div className="space-y-4">
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-sage-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    <div className="w-8 h-8 bg-taupe text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
                       1
                     </div>
                     <div>
@@ -459,7 +459,7 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-sage-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    <div className="w-8 h-8 bg-taupe text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
                       2
                     </div>
                     <div>
@@ -468,7 +468,7 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-sage-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    <div className="w-8 h-8 bg-taupe text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
                       3
                     </div>
                     <div>
@@ -477,7 +477,7 @@ export default function DataImpactPage() {
                     </div>
                   </div>
                   <div className="flex gap-3">
-                    <div className="w-8 h-8 bg-sage-600 text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
+                    <div className="w-8 h-8 bg-taupe text-white rounded-full flex items-center justify-center flex-shrink-0 font-bold text-sm">
                       4
                     </div>
                     <div>

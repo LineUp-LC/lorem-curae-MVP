@@ -95,11 +95,11 @@ export default function ProductComparison({
         {/* Modal Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 md:px-8 py-4 sm:py-6 flex items-center justify-between rounded-t-2xl sm:rounded-t-3xl z-10 shadow-sm">
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-sage-100 rounded-full">
-              <i className="ri-scales-3-line text-xl sm:text-2xl text-sage-600"></i>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-taupe-100 rounded-full">
+              <i className="ri-scales-3-line text-xl sm:text-2xl text-taupe"></i>
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-forest-900">Product Comparison</h2>
+              <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-deep-900">Product Comparison</h2>
               <p className="text-xs sm:text-sm text-gray-600">
                 Compare {safeProducts.length} products side by side
               </p>
@@ -135,7 +135,7 @@ export default function ProductComparison({
               return (
                 <div
                   key={product.id}
-                  className="bg-cream-50 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-sage-200"
+                  className="bg-cream-50 rounded-xl sm:rounded-2xl overflow-hidden border-2 border-taupe-200"
                 >
                   {/* Product Image */}
                   <div className="relative w-full h-48 sm:h-56 md:h-64 bg-white">
@@ -158,10 +158,10 @@ export default function ProductComparison({
                   {/* Product Info */}
                   <div className="p-4 sm:p-5 space-y-3 sm:space-y-4">
                     <div>
-                      <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-1">
+                      <p className="text-xs font-semibold text-taupe uppercase tracking-wide mb-1">
                         {product.brand}
                       </p>
-                      <h3 className="text-base sm:text-lg font-semibold text-forest-900 mb-2 line-clamp-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-deep-900 mb-2 line-clamp-2">
                         {product.name}
                       </h3>
                     </div>
@@ -170,7 +170,7 @@ export default function ProductComparison({
                     <div
                       className={`p-2 sm:p-3 rounded-xl transition-all ${
                         isHighestRating
-                          ? 'bg-sage-100 ring-2 ring-sage-600'
+                          ? 'bg-taupe-100 ring-2 ring-taupe'
                           : isLowestRating
                             ? 'bg-orange-50 ring-2 ring-orange-400'
                             : 'bg-white'
@@ -179,7 +179,7 @@ export default function ProductComparison({
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-semibold text-gray-700">Rating</p>
                         {isHighestRating && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
+                          <span className="px-2 py-0.5 bg-taupe text-white text-xs rounded-full font-semibold">
                             Highest
                           </span>
                         )}
@@ -203,7 +203,7 @@ export default function ProductComparison({
                     <div
                       className={`p-2 sm:p-3 rounded-xl transition-all ${
                         hasMostReviews
-                          ? 'bg-sage-100 ring-2 ring-sage-600'
+                          ? 'bg-taupe-100 ring-2 ring-taupe'
                           : hasLeastReviews
                             ? 'bg-orange-50 ring-2 ring-orange-400'
                             : 'bg-white'
@@ -212,7 +212,7 @@ export default function ProductComparison({
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-semibold text-gray-700">Reviews</p>
                         {hasMostReviews && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
+                          <span className="px-2 py-0.5 bg-taupe text-white text-xs rounded-full font-semibold">
                             Most
                           </span>
                         )}
@@ -222,7 +222,7 @@ export default function ProductComparison({
                           </span>
                         )}
                       </div>
-                      <p className="text-base sm:text-lg font-bold text-forest-900">
+                      <p className="text-base sm:text-lg font-bold text-deep-900">
                         {product.reviewCount.toLocaleString()}
                       </p>
                     </div>
@@ -231,7 +231,7 @@ export default function ProductComparison({
                     <div
                       className={`p-2 sm:p-3 rounded-xl transition-all ${
                         isLowestPrice
-                          ? 'bg-sage-100 ring-2 ring-sage-600'
+                          ? 'bg-taupe-100 ring-2 ring-taupe'
                           : isHighestPrice
                             ? 'bg-orange-50 ring-2 ring-orange-400'
                             : 'bg-white'
@@ -240,7 +240,7 @@ export default function ProductComparison({
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-semibold text-gray-700">Price</p>
                         {isLowestPrice && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
+                          <span className="px-2 py-0.5 bg-taupe text-white text-xs rounded-full font-semibold">
                             Best
                           </span>
                         )}
@@ -250,7 +250,7 @@ export default function ProductComparison({
                           </span>
                         )}
                       </div>
-                      <span className="text-lg sm:text-xl font-bold text-forest-900">
+                      <span className="text-lg sm:text-xl font-bold text-deep-900">
                         ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
                       </span>
                     </div>
@@ -284,7 +284,7 @@ export default function ProductComparison({
                               key={idx}
                               className={
                                 isRecommended
-                                  ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full font-medium'
+                                  ? 'px-2 py-1 bg-taupe-100 text-taupe-700 text-xs rounded-full font-medium'
                                   : 'px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full'
                               }
                             >
@@ -307,7 +307,7 @@ export default function ProductComparison({
                               key={idx}
                               className={
                                 isMatch
-                                  ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full capitalize font-medium'
+                                  ? 'px-2 py-1 bg-taupe-100 text-taupe-700 text-xs rounded-full capitalize font-medium'
                                   : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize'
                               }
                             >
@@ -348,7 +348,7 @@ export default function ProductComparison({
                                     key={key}
                                     className={
                                       isMatching
-                                        ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full font-medium border border-sage-300'
+                                        ? 'px-2 py-1 bg-taupe-100 text-taupe-700 text-xs rounded-full font-medium border border-taupe-300'
                                         : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full'
                                     }
                                   >
@@ -365,7 +365,7 @@ export default function ProductComparison({
                     {/* CTA */}
                     <button
                       onClick={() => handleViewProductDetail(product.id)}
-                      className="w-full px-4 py-2.5 sm:py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all cursor-pointer whitespace-nowrap text-sm sm:text-base"
+                      className="w-full px-4 py-2.5 sm:py-3 bg-taupe text-white rounded-full font-semibold hover:bg-taupe-700 transition-all cursor-pointer whitespace-nowrap text-sm sm:text-base"
                     >
                       View Details
                     </button>
@@ -380,7 +380,7 @@ export default function ProductComparison({
             <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Legend:</h4>
             <div className="flex flex-wrap gap-3 sm:gap-4">
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-sage-600 rounded"></div>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-taupe rounded"></div>
                 <span className="text-xs sm:text-sm text-gray-700">Best Value / Matches Profile</span>
               </div>
               <div className="flex items-center space-x-2">

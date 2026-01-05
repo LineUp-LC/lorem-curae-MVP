@@ -22,7 +22,7 @@ export default function SellerApplicationStatusPage() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'under_review': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'approved': return 'bg-green-100 text-green-800 border-green-200';
+      case 'approved': return 'bg-taupe-100 text-taupe-800 border-taupe-200';
       case 'rejected': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
     }
@@ -108,7 +108,7 @@ export default function SellerApplicationStatusPage() {
                 <div key={index} className="flex items-center">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     step.completed 
-                      ? 'bg-green-100 text-green-600' 
+                      ? 'bg-taupe-100 text-taupe' 
                       : index === 2 
                         ? 'bg-yellow-100 text-yellow-600'
                         : 'bg-gray-100 text-gray-400'
@@ -144,7 +144,7 @@ export default function SellerApplicationStatusPage() {
                   
                   {index < application.reviewSteps.length - 1 && (
                     <div className={`w-px h-8 ml-4 ${
-                      step.completed ? 'bg-green-200' : 'bg-gray-200'
+                      step.completed ? 'bg-taupe-200' : 'bg-gray-200'
                     }`} />
                   )}
                 </div>
@@ -190,13 +190,13 @@ export default function SellerApplicationStatusPage() {
 
             {application.status === 'approved' && (
               <div className="space-y-4">
-                <div className="flex items-start p-4 bg-green-50 rounded-lg">
-                  <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-4 mt-0.5">
-                    <i className="ri-check-line text-green-600"></i>
+                <div className="flex items-start p-4 bg-taupe-50 rounded-lg">
+                  <div className="w-8 h-8 bg-taupe-100 rounded-lg flex items-center justify-center mr-4 mt-0.5">
+                    <i className="ri-check-line text-taupe"></i>
                   </div>
                   <div>
-                    <h4 className="font-medium text-green-900 mb-1">Congratulations!</h4>
-                    <p className="text-green-700 text-sm">
+                    <h4 className="font-medium text-taupe-900 mb-1">Congratulations!</h4>
+                    <p className="text-taupe-700 text-sm">
                       Your seller application has been approved. You can now start setting up 
                       your store and adding products.
                     </p>

@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
@@ -26,13 +25,13 @@ const CommunityGuidelinesPage = () => {
         <div className="max-w-4xl mx-auto px-6 lg:px-12">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 lg:p-12">
             <header className="mb-12 text-center">
-              <h1 className="text-3xl lg:text-4xl font-light text-forest-900 mb-4">Community Guidelines</h1>
+              <h1 className="text-3xl lg:text-4xl font-light text-deep-900 mb-4">Community Guidelines</h1>
               <p className="text-gray-600 text-lg">Building a supportive and inclusive skincare community</p>
             </header>
 
             <div className="prose prose-lg max-w-none space-y-8">
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Our Community Values</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Our Community Values</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   <p>
                     Lorem Curae is built on the belief that everyone deserves to feel confident in their skin. 
@@ -42,26 +41,26 @@ const CommunityGuidelinesPage = () => {
                   
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-heart-line text-sage-600 text-2xl"></i>
+                      <div className="w-16 h-16 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i className="ri-heart-line text-taupe text-2xl"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-forest-900 mb-2">Inclusivity</h3>
+                      <h3 className="text-lg font-semibold text-deep-900 mb-2">Inclusivity</h3>
                       <p className="text-sm text-gray-600">All skin types, tones, and concerns are welcome and celebrated.</p>
                     </div>
                     
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-shield-check-line text-sage-600 text-2xl"></i>
+                      <div className="w-16 h-16 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i className="ri-shield-check-line text-taupe text-2xl"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-forest-900 mb-2">Safety</h3>
+                      <h3 className="text-lg font-semibold text-deep-900 mb-2">Safety</h3>
                       <p className="text-sm text-gray-600">Evidence-based advice and responsible sharing of skincare information.</p>
                     </div>
                     
                     <div className="text-center">
-                      <div className="w-16 h-16 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i className="ri-group-line text-sage-600 text-2xl"></i>
+                      <div className="w-16 h-16 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i className="ri-group-line text-taupe text-2xl"></i>
                       </div>
-                      <h3 className="text-lg font-semibold text-forest-900 mb-2">Support</h3>
+                      <h3 className="text-lg font-semibold text-deep-900 mb-2">Support</h3>
                       <p className="text-sm text-gray-600">Encouraging and constructive interactions that help everyone succeed.</p>
                     </div>
                   </div>
@@ -69,15 +68,15 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Community Standards</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Community Standards</h2>
                 <div className="space-y-6 text-gray-700 leading-relaxed">
                   
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-                    <h3 className="text-xl font-medium text-green-800 mb-3 flex items-center">
+                  <div className="bg-taupe-50 border border-taupe-200 rounded-lg p-6">
+                    <h3 className="text-xl font-medium text-taupe-800 mb-3 flex items-center">
                       <i className="ri-check-line mr-2"></i>
                       What We Encourage
                     </h3>
-                    <ul className="list-disc pl-6 space-y-2 text-green-700">
+                    <ul className="list-disc pl-6 space-y-2 text-taupe-700">
                       <li>Sharing personal experiences with products and routines</li>
                       <li>Asking questions and seeking advice from the community</li>
                       <li>Supporting others with encouragement and helpful tips</li>
@@ -107,10 +106,10 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Content Guidelines</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Content Guidelines</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   
-                  <h3 className="text-xl font-medium text-forest-800">Photos and Images</h3>
+                  <h3 className="text-xl font-medium text-deep">Photos and Images</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Progress photos are welcome and encouraged</li>
                     <li>Include content warnings for severe skin conditions</li>
@@ -118,7 +117,7 @@ const CommunityGuidelinesPage = () => {
                     <li>Avoid heavily filtered or edited images when showing results</li>
                   </ul>
 
-                  <h3 className="text-xl font-medium text-forest-800 mt-6">Product Discussions</h3>
+                  <h3 className="text-xl font-medium text-deep mt-6">Product Discussions</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Provide context when recommending products (skin type, concerns, etc.)</li>
                     <li>Disclose any affiliations or sponsored content</li>
@@ -126,7 +125,7 @@ const CommunityGuidelinesPage = () => {
                     <li>Remember that what works for you may not work for everyone</li>
                   </ul>
 
-                  <h3 className="text-xl font-medium text-forest-800 mt-6">Advice and Recommendations</h3>
+                  <h3 className="text-xl font-medium text-deep mt-6">Advice and Recommendations</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Share personal experiences rather than medical advice</li>
                     <li>Encourage consulting professionals for serious concerns</li>
@@ -137,14 +136,14 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Reporting and Moderation</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Reporting and Moderation</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   <p>
                     Our moderation team works to maintain a positive environment for all community members. 
                     We review reported content and take appropriate action when guidelines are violated.
                   </p>
 
-                  <h3 className="text-xl font-medium text-forest-800">How to Report</h3>
+                  <h3 className="text-xl font-medium text-deep">How to Report</h3>
                   <p>If you encounter content that violates our guidelines:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Use the "Report" button on posts or comments</li>
@@ -152,7 +151,7 @@ const CommunityGuidelinesPage = () => {
                     <li>Provide specific details about the violation</li>
                   </ul>
 
-                  <h3 className="text-xl font-medium text-forest-800 mt-6">Enforcement Actions</h3>
+                  <h3 className="text-xl font-medium text-deep mt-6">Enforcement Actions</h3>
                   <p>Depending on the severity and frequency of violations, actions may include:</p>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Content removal</li>
@@ -165,7 +164,7 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Professional Boundaries</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Professional Boundaries</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-yellow-800 mb-3">Important Reminder</h3>
@@ -176,7 +175,7 @@ const CommunityGuidelinesPage = () => {
                     </p>
                   </div>
 
-                  <h3 className="text-xl font-medium text-forest-800">When to Seek Professional Help</h3>
+                  <h3 className="text-xl font-medium text-deep">When to Seek Professional Help</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Sudden or severe skin changes</li>
                     <li>Persistent rashes or irritation</li>
@@ -188,9 +187,9 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Privacy and Safety</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Privacy and Safety</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
-                  <h3 className="text-xl font-medium text-forest-800">Protecting Your Privacy</h3>
+                  <h3 className="text-xl font-medium text-deep">Protecting Your Privacy</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Don't share personal information like addresses or phone numbers</li>
                     <li>Use privacy settings to control who can see your posts</li>
@@ -198,7 +197,7 @@ const CommunityGuidelinesPage = () => {
                     <li>Report any attempts to solicit personal information</li>
                   </ul>
 
-                  <h3 className="text-xl font-medium text-forest-800 mt-6">Safe Interactions</h3>
+                  <h3 className="text-xl font-medium text-deep mt-6">Safe Interactions</h3>
                   <ul className="list-disc pl-6 space-y-2">
                     <li>Keep conversations public when possible</li>
                     <li>Be wary of users offering "exclusive" products or treatments</li>
@@ -209,7 +208,7 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Appeals Process</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Appeals Process</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   <p>
                     If you believe your content was removed or your account was restricted in error, 
@@ -225,7 +224,7 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold text-forest-900 mb-4">Contact Us</h2>
+                <h2 className="text-2xl font-semibold text-deep-900 mb-4">Contact Us</h2>
                 <div className="space-y-4 text-gray-700 leading-relaxed">
                   <p>
                     Have questions about these guidelines or need to report an issue? 
@@ -233,7 +232,7 @@ const CommunityGuidelinesPage = () => {
                   </p>
                   
                   <div className="bg-gray-50 p-6 rounded-lg">
-                    <h4 className="font-semibold text-forest-900 mb-3">Community Support</h4>
+                    <h4 className="font-semibold text-deep-900 mb-3">Community Support</h4>
                     <div className="space-y-2 text-sm">
                       <p><strong>Email:</strong> community@loremcurae.com</p>
                       <p><strong>Response Time:</strong> 24-48 hours</p>
@@ -244,9 +243,9 @@ const CommunityGuidelinesPage = () => {
               </section>
 
               <section>
-                <div className="bg-sage-50 border border-sage-200 rounded-lg p-6">
-                  <h3 className="text-lg font-semibold text-sage-800 mb-3">Thank You</h3>
-                  <p className="text-sage-700">
+                <div className="bg-taupe-50 border border-taupe-200 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-taupe-800 mb-3">Thank You</h3>
+                  <p className="text-taupe-700">
                     Thank you for being part of the Lorem Curae community. Together, we're building 
                     a space where everyone can learn, grow, and feel confident in their skincare journey. 
                     Your participation helps make this community a welcoming place for all.

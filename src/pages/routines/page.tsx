@@ -23,6 +23,11 @@ export default function RoutinesPage() {
     // Load routine name from URL params or localStorage
     const routineId = searchParams.get('id');
     if (routineId) {
+      // If coming from footer link (id=1), switch to notes tab
+      if (routineId === '1') {
+        setActiveTab('notes');
+      }
+      
       const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
       const routine = savedRoutines.find((r: any) => r.id === routineId);
       if (routine) {
@@ -102,7 +107,7 @@ export default function RoutinesPage() {
                     type="text"
                     value={routineName}
                     onChange={(e) => setRoutineName(e.target.value)}
-                    className="text-4xl lg:text-6xl font-serif text-forest-900 bg-transparent border-b-2 border-forest-800 focus:outline-none text-center"
+                    className="text-4xl lg:text-6xl font-serif text-deep-900 bg-transparent border-b-2 border-deep focus:outline-none text-center"
                     autoFocus
                     onBlur={handleSaveRoutineName}
                     onKeyDown={(e) => e.key === 'Enter' && handleSaveRoutineName()}
@@ -110,11 +115,11 @@ export default function RoutinesPage() {
                 </div>
               ) : (
                 <h1 
-                  className="text-4xl lg:text-6xl font-serif text-forest-900 cursor-pointer hover:text-forest-700 transition-colors flex items-center gap-3"
+                  className="text-4xl lg:text-6xl font-serif text-deep-900 cursor-pointer hover:text-taupe-700 transition-colors flex items-center gap-3"
                   onClick={() => setIsEditingName(true)}
                 >
                   {routineName}
-                  <button className="text-gray-400 hover:text-forest-800 transition-colors">
+                  <button className="text-gray-400 hover:text-deep transition-colors">
                     <i className="ri-pencil-line text-2xl"></i>
                   </button>
                 </h1>
@@ -126,7 +131,7 @@ export default function RoutinesPage() {
           <div className="flex justify-center mb-6">
             <button
               onClick={() => setShowSavedProductsPopup(true)}
-              className="px-4 py-2 bg-sage-100 text-sage-700 rounded-full text-sm font-medium hover:bg-sage-200 transition-colors cursor-pointer flex items-center gap-2"
+              className="px-4 py-2 bg-taupe-100 text-taupe-700 rounded-full text-sm font-medium hover:bg-taupe-200 transition-colors cursor-pointer flex items-center gap-2"
             >
               <i className="ri-bookmark-line"></i>
               View Saved Products ({savedProducts.length})
@@ -140,8 +145,8 @@ export default function RoutinesPage() {
                 onClick={() => setActiveTab('routine')}
                 className={`px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'routine'
-                    ? 'bg-forest-800 text-white'
-                    : 'text-gray-600 hover:text-forest-800'
+                    ? 'bg-deep text-white'
+                    : 'text-gray-600 hover:text-deep'
                 }`}
               >
                 Routine Builder
@@ -150,8 +155,8 @@ export default function RoutinesPage() {
                 onClick={() => setActiveTab('notes')}
                 className={`px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'notes'
-                    ? 'bg-forest-800 text-white'
-                    : 'text-gray-600 hover:text-forest-800'
+                    ? 'bg-deep text-white'
+                    : 'text-gray-600 hover:text-deep'
                 }`}
               >
                 Routine Notes
@@ -190,17 +195,17 @@ export default function RoutinesPage() {
             </button>
             
             <div className="text-center mb-6">
-              <div className="w-16 h-16 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
-                <i className="ri-search-line text-sage-600 text-3xl"></i>
+              <div className="w-16 h-16 rounded-full bg-taupe-100 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-search-line text-taupe text-3xl"></i>
               </div>
-              <h3 className="text-2xl font-serif font-bold text-forest-800 mb-2">Browse Products</h3>
+              <h3 className="text-2xl font-serif font-bold text-deep mb-2">Browse Products</h3>
               <p className="text-gray-600 text-sm">Find products to add to your routine</p>
             </div>
 
             <div className="space-y-3">
               <a
                 href="/marketplace"
-                className="w-full px-6 py-4 bg-forest-800 text-white rounded-xl hover:bg-forest-900 transition-colors text-left flex items-center gap-4 cursor-pointer"
+                className="w-full px-6 py-4 bg-deep text-white rounded-xl hover:bg-deep-900 transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
                   <i className="ri-shopping-bag-3-line text-2xl"></i>
@@ -214,10 +219,10 @@ export default function RoutinesPage() {
 
               <a
                 href="/discover"
-                className="w-full px-6 py-4 bg-white border-2 border-forest-800 text-forest-800 rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4 cursor-pointer"
+                className="w-full px-6 py-4 bg-white border-2 border-deep text-deep rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-lg bg-forest-800/10 flex items-center justify-center">
-                  <i className="ri-compass-discover-line text-2xl text-forest-800"></i>
+                <div className="w-12 h-12 rounded-lg bg-deep/10 flex items-center justify-center">
+                  <i className="ri-compass-discover-line text-2xl text-deep"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Browse Discovery</p>
@@ -235,7 +240,7 @@ export default function RoutinesPage() {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden relative">
             <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-forest-800">Saved Products</h3>
+              <h3 className="text-xl font-bold text-deep">Saved Products</h3>
               <button
                 onClick={() => setShowSavedProductsPopup(false)}
                 className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
@@ -249,7 +254,7 @@ export default function RoutinesPage() {
                 <div className="text-center py-8">
                   <i className="ri-bookmark-line text-4xl text-gray-300 mb-3"></i>
                   <p className="text-gray-500">No saved products yet</p>
-                  <a href="/discover" className="text-sage-600 hover:underline text-sm mt-2 inline-block">
+                  <a href="/discover" className="text-taupe hover:underline text-sm mt-2 inline-block">
                     Browse products to save
                   </a>
                 </div>
@@ -264,13 +269,13 @@ export default function RoutinesPage() {
                       />
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-gray-500">{product.brand}</p>
-                        <p className="font-medium text-forest-800 truncate">{product.name}</p>
-                        <p className="text-sm text-sage-600">{product.priceRange}</p>
+                        <p className="font-medium text-deep truncate">{product.name}</p>
+                        <p className="text-sm text-taupe">{product.priceRange}</p>
                       </div>
                       <div className="flex items-center gap-2">
                         <a
                           href={`/product-detail?id=${product.id}`}
-                          className="p-2 text-forest-800 hover:bg-forest-800/10 rounded-lg transition-colors cursor-pointer"
+                          className="p-2 text-deep hover:bg-deep/10 rounded-lg transition-colors cursor-pointer"
                           title="View Details"
                         >
                           <i className="ri-eye-line"></i>

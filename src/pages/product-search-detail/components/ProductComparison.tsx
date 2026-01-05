@@ -99,7 +99,7 @@ const ProductComparison = ({
                     key={concern}
                     className={
                       product.concerns?.includes(concern)
-                        ? 'text-green-600'
+                        ? 'text-taupe'
                         : 'text-gray-500'
                     }
                   >

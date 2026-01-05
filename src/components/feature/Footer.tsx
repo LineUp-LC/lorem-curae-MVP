@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   fadeInUpSoft,
@@ -17,6 +17,13 @@ import {
  * - Links: underline slide-in on hover
  * - Logo: gentle opacity pulse
  * - Columns: staggered fade-in
+ * 
+ * Link Updates:
+ * - FAQ -> /faq
+ * - AI Guide -> /ai-chat
+ * - Ingredient Library -> /ingredients
+ * - Routine Tracker renamed to Routine Notes -> /routines?id=1
+ * - Product Compare -> /discover (opens comparison UI)
  */
 
 const footerVariants = {
@@ -48,7 +55,41 @@ const linkHover = {
   transition: { duration: 0.2 },
 };
 
+// Tool items with their proper routes
+const toolLinks = [
+  { name: 'Product Finder', path: '/discover' },
+  { name: 'AI Guide', path: '/ai-chat' },
+  { name: 'Product Compare', path: '/discover', action: 'openComparison' },
+  { name: 'Ingredient Library', path: '/ingredients' },
+  { name: 'Routine Notes', path: '/routines?id=1' },
+];
+
+// Support items with their proper routes
+const supportLinks = [
+  { name: 'Contact Us', path: '/contact' },
+  { name: 'FAQ', path: '/faq' },
+  { name: 'Accessibility', path: '/accessibility' },
+];
+
+// Community items with their proper routes
+const communityLinks = [
+  { name: 'Stories', path: '/community' },
+  { name: 'Marketplace', path: '/marketplace' },
+  { name: 'Reviews', path: '/reviews-products' },
+];
+
 export default function Footer() {
+  const navigate = useNavigate();
+
+  const handleToolClick = (item: typeof toolLinks[0], e: React.MouseEvent) => {
+    if (item.action === 'openComparison') {
+      e.preventDefault();
+      // Navigate to discover and trigger comparison mode
+      localStorage.setItem('openComparisonOnLoad', 'true');
+      navigate('/discover');
+    }
+  };
+
   return (
     <footer className="lc-footer">
       <style>{`
@@ -298,10 +339,16 @@ export default function Footer() {
         <motion.div className="lc-footer-column" variants={columnVariants}>
           <h4>Tools</h4>
           <ul>
-            {['Product Finder', 'AI Guide', 'Product Compare', 'Ingredient Library', 'Routine Tracker'].map((item) => (
-              <li key={item}>
+            {toolLinks.map((item) => (
+              <li key={item.name}>
                 <motion.div whileHover={linkHover}>
-                  <Link to="/discover" className="lc-footer-link">{item}</Link>
+                  <Link 
+                    to={item.path} 
+                    className="lc-footer-link"
+                    onClick={(e) => handleToolClick(item, e)}
+                  >
+                    {item.name}
+                  </Link>
                 </motion.div>
               </li>
             ))}
@@ -312,10 +359,10 @@ export default function Footer() {
         <motion.div className="lc-footer-column" variants={columnVariants}>
           <h4>Community</h4>
           <ul>
-            {['Stories', 'Marketplace', 'Reviews'].map((item) => (
-              <li key={item}>
+            {communityLinks.map((item) => (
+              <li key={item.name}>
                 <motion.div whileHover={linkHover}>
-                  <Link to="/community" className="lc-footer-link">{item}</Link>
+                  <Link to={item.path} className="lc-footer-link">{item.name}</Link>
                 </motion.div>
               </li>
             ))}
@@ -326,10 +373,10 @@ export default function Footer() {
         <motion.div className="lc-footer-column" variants={columnVariants}>
           <h4>Support</h4>
           <ul>
-            {['Contact Us', 'FAQ', 'Accessibility'].map((item) => (
-              <li key={item}>
+            {supportLinks.map((item) => (
+              <li key={item.name}>
                 <motion.div whileHover={linkHover}>
-                  <Link to="/contact" className="lc-footer-link">{item}</Link>
+                  <Link to={item.path} className="lc-footer-link">{item.name}</Link>
                 </motion.div>
               </li>
             ))}

@@ -104,7 +104,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
             onClick={() => setActiveTab('overview')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'overview'
-                ? 'text-sage-600 border-b-2 border-sage-600'
+                ? 'text-taupe border-b-2 border-taupe'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -114,7 +114,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
             onClick={() => setActiveTab('recipe')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'recipe'
-                ? 'text-sage-600 border-b-2 border-sage-600'
+                ? 'text-taupe border-b-2 border-taupe'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -124,7 +124,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
             onClick={() => setActiveTab('stores')}
             className={`px-6 py-3 font-medium transition-colors ${
               activeTab === 'stores'
-                ? 'text-sage-600 border-b-2 border-sage-600'
+                ? 'text-taupe border-b-2 border-taupe'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -138,11 +138,11 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
             <div className="space-y-6">
               {/* Existing overview content */}
               <div className="grid grid-cols-2 gap-4">
-                <div className="bg-sage-50 rounded-xl p-4">
+                <div className="bg-taupe-50 rounded-xl p-4">
                   <p className="text-sm text-gray-600 mb-1">Calories</p>
                   <p className="text-2xl font-bold text-gray-900">{food.calories}</p>
                 </div>
-                <div className="bg-sage-50 rounded-xl p-4">
+                <div className="bg-taupe-50 rounded-xl p-4">
                   <p className="text-sm text-gray-600 mb-1">Prep Time</p>
                   <p className="text-2xl font-bold text-gray-900">{food.preparation_time} min</p>
                 </div>
@@ -153,7 +153,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
                 <h3 className="text-lg font-bold text-gray-900 mb-3">Skin Benefits</h3>
                 <div className="flex flex-wrap gap-2">
                   {food.skin_benefits.map((benefit, idx) => (
-                    <span key={idx} className="px-3 py-1 bg-sage-100 text-sage-700 text-sm rounded-full">
+                    <span key={idx} className="px-3 py-1 bg-taupe-100 text-taupe-700 text-sm rounded-full">
                       {benefit}
                     </span>
                   ))}
@@ -214,14 +214,14 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
             <div className="space-y-4">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-bold text-gray-900">Available at {stores.length} locations near you</h3>
-                <button className="text-sm text-sage-600 hover:text-sage-700 font-medium cursor-pointer">
+                <button className="text-sm text-taupe hover:text-taupe-700 font-medium cursor-pointer">
                   <i className="ri-map-pin-line mr-1"></i>
                   Change Location
                 </button>
               </div>
 
               {stores.map((store) => (
-                <div key={store.id} className="border border-gray-200 rounded-xl p-4 hover:border-sage-600 transition-colors">
+                <div key={store.id} className="border border-gray-200 rounded-xl p-4 hover:border-taupe transition-colors">
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
@@ -246,7 +246,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
                       <p className="text-xl font-bold text-gray-900 mb-1">{store.price}</p>
                       <span className={`inline-block px-2 py-1 text-xs font-medium rounded-full ${
                         store.availability === 'In Stock'
-                          ? 'bg-green-100 text-green-700'
+                          ? 'bg-taupe-100 text-taupe-700'
                           : store.availability === 'Limited Stock'
                           ? 'bg-amber-100 text-amber-700'
                           : 'bg-gray-100 text-gray-700'
@@ -257,7 +257,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
                   </div>
 
                   <div className="flex gap-2">
-                    <button className="flex-1 px-4 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer">
+                    <button className="flex-1 px-4 py-2 bg-taupe text-white rounded-lg hover:bg-taupe-700 transition-colors text-sm font-medium whitespace-nowrap cursor-pointer">
                       <i className="ri-navigation-line mr-1"></i>
                       Get Directions
                     </button>
@@ -288,7 +288,7 @@ const FoodDetailModal = ({ food, onClose, onAddToPlan }: FoodDetailModalProps) =
         <div className="sticky bottom-0 bg-white border-t border-gray-200 p-6">
           <button
             onClick={() => onAddToPlan(food)}
-            className="w-full px-6 py-3 bg-sage-600 text-white rounded-xl font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+            className="w-full px-6 py-3 bg-taupe text-white rounded-xl font-semibold hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer"
           >
             <i className="ri-calendar-line mr-2"></i>
             Add to Meal Plan

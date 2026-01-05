@@ -472,7 +472,7 @@ const AIChatPage = () => {
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-primary to-dark rounded-full flex items-center justify-center relative">
                   <i className="ri-sparkling-2-fill text-white text-xl"></i>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-coral-400 rounded-full border-2 border-white"></div>
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>
                 </div>
                 <div>
                   <h2 className="text-lg font-semibold text-deep">Curae AI</h2>
@@ -514,14 +514,14 @@ const AIChatPage = () => {
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-2">
                           <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
-                            insight.type === 'progress' ? 'bg-green-100' :
+                            insight.type === 'progress' ? 'bg-taupe-100' :
                             insight.type === 'recommendation' ? 'bg-blue-100' :
                             insight.type === 'consistency' ? 'bg-amber-100' :
                             insight.type === 'warning' ? 'bg-red-100' :
                             'bg-purple-100'
                           }`}>
                             <i className={`${
-                              insight.type === 'progress' ? 'ri-line-chart-line text-green-600' :
+                              insight.type === 'progress' ? 'ri-line-chart-line text-taupe' :
                               insight.type === 'recommendation' ? 'ri-lightbulb-line text-blue-600' :
                               insight.type === 'consistency' ? 'ri-calendar-check-line text-amber-600' :
                               insight.type === 'warning' ? 'ri-alert-line text-red-600' :

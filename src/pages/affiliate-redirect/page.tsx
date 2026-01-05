@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-browser';
@@ -83,18 +82,18 @@ export default function AffiliateRedirectPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
-        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mb-4"></div>
+        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-taupe mb-4"></div>
         <h2 className="text-2xl font-semibold text-gray-900 mb-2">Redirecting...</h2>
         <p className="text-gray-600">
           You're being redirected to our partner store. This helps us track your purchase for cashback rewards.
         </p>
         <div className="mt-6 flex items-center justify-center space-x-4 text-sm text-gray-500">
           <div className="flex items-center space-x-2">
-            <i className="ri-shield-check-line text-sage-600"></i>
+            <i className="ri-shield-check-line text-taupe"></i>
             <span>Secure tracking</span>
           </div>
           <div className="flex items-center space-x-2">
-            <i className="ri-money-dollar-circle-line text-sage-600"></i>
+            <i className="ri-money-dollar-circle-line text-taupe"></i>
             <span>Cashback eligible</span>
           </div>
         </div>

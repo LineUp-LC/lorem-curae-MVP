@@ -243,7 +243,7 @@ const PremiumPackagesPage = () => {
                       )}
                       <div className="absolute top-4 right-4">
                         <span className={`px-3 py-1 text-white text-xs font-semibold rounded-full ${
-                          pkg.tier === 'premium' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-sage-600'
+                          pkg.tier === 'premium' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-taupe'
                         }`}>
                           {pkg.tier === 'premium' ? 'Premium' : 'Plus'}
                         </span>
@@ -297,7 +297,7 @@ const PremiumPackagesPage = () => {
                         <ul className="space-y-1">
                           {pkg.items.slice(0, 3).map((item, idx) => (
                             <li key={idx} className="text-sm text-gray-600 flex items-start">
-                              <i className="ri-check-line text-sage-600 mr-1 mt-0.5 flex-shrink-0"></i>
+                              <i className="ri-check-line text-taupe mr-1 mt-0.5 flex-shrink-0"></i>
                               <span>{item}</span>
                             </li>
                           ))}
@@ -316,7 +316,7 @@ const PremiumPackagesPage = () => {
                             <span className="text-2xl font-bold text-gray-900">${pkg.price}</span>
                             <span className="text-sm text-gray-500 line-through ml-2">${pkg.value}</span>
                           </div>
-                          <span className="px-3 py-1 bg-sage-100 text-sage-700 text-sm font-semibold rounded-full">
+                          <span className="px-3 py-1 bg-taupe-100 text-taupe-700 text-sm font-semibold rounded-full">
                             Save ${pkg.savings}
                           </span>
                         </div>
@@ -362,7 +362,7 @@ const PremiumPackagesPage = () => {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 flex items-center justify-center bg-sage-100 text-sage-600 rounded-full mx-auto mb-4">
+                <div className="w-16 h-16 flex items-center justify-center bg-taupe-100 text-taupe rounded-full mx-auto mb-4">
                   <i className="ri-magic-line text-3xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">2. Get Matched</h3>
@@ -372,7 +372,7 @@ const PremiumPackagesPage = () => {
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 flex items-center justify-center bg-coral-100 text-coral-600 rounded-full mx-auto mb-4">
+                <div className="w-16 h-16 flex items-center justify-center bg-primary-100 text-primary-600 rounded-full mx-auto mb-4">
                   <i className="ri-gift-line text-3xl"></i>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">3. Enjoy Savings</h3>

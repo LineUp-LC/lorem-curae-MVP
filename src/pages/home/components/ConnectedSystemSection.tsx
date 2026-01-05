@@ -162,7 +162,7 @@ const tools = [
     pain: 'The pain: Trying new routines without any way to measure if they\'re actually working—or knowing when it\'s time to adjust.',
     description: 'Curae analyzes your tracked routines and skin progress over time, providing personalized feedback and actionable insights. See what\'s working, what needs adjustment, and receive tailored recommendations based on your real results.',
     outcome: 'Data-driven insights that evolve with your skin',
-    link: '/routines',
+    link: '/my-skin',
   },
 ];
 

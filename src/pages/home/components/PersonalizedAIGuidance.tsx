@@ -9,7 +9,7 @@ export default function PersonalizedAIGuidance() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Pain Point Callout */}
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-dark rounded-full text-sm font-medium mb-4">
             <i className="ri-error-warning-line"></i>
             Sound Familiar?
           </span>
@@ -30,7 +30,7 @@ export default function PersonalizedAIGuidance() {
               Personalized AI Guidance
             </h2>
             <h3 className="text-xl text-slate-600 mb-6 leading-relaxed font-semibold">
-              Your <span className="text-sage-600 bg-sage-50 px-1 rounded">personal skincare assistant</span> that actually knows your skin.
+              Your <span className="text-taupe bg-taupe-50 px-1 rounded">personal skincare assistant</span> that actually knows your skin.
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
               Get instant, accurate answers to your skincare questions. Ask about product compatibility, 
@@ -58,7 +58,7 @@ export default function PersonalizedAIGuidance() {
 
             <Link
               to="/ai-chat"
-              className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
+              className="inline-flex items-center space-x-3 bg-taupe hover:bg-taupe-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
               aria-label="Start chatting with AI skincare assistant"
             >
               <span>Chat with Your Guide</span>

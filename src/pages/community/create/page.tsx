@@ -68,26 +68,26 @@ const CommunityCreatePage = () => {
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-sage-50 rounded-xl p-6 text-left">
+              <div className="bg-taupe-50 rounded-xl p-6 text-left">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-xl font-bold text-gray-900">Curae Plus</h3>
-                  <span className="text-2xl font-bold text-sage-600">$4.99</span>
+                  <span className="text-2xl font-bold text-taupe">$4.99</span>
                 </div>
                 <ul className="space-y-3 text-sm text-gray-700 mb-6">
                   <li className="flex items-start">
-                    <i className="ri-check-line text-sage-600 mr-2 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe mr-2 mt-0.5"></i>
                     <span>Create 1 community</span>
                   </li>
                   <li className="flex items-start">
-                    <i className="ri-check-line text-sage-600 mr-2 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe mr-2 mt-0.5"></i>
                     <span>Join up to 8 communities</span>
                   </li>
                   <li className="flex items-start">
-                    <i className="ri-check-line text-sage-600 mr-2 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe mr-2 mt-0.5"></i>
                     <span>100MB uploads</span>
                   </li>
                   <li className="flex items-start">
-                    <i className="ri-check-line text-sage-600 mr-2 mt-0.5"></i>
+                    <i className="ri-check-line text-taupe mr-2 mt-0.5"></i>
                     <span>Customizable profile</span>
                   </li>
                 </ul>
@@ -132,7 +132,7 @@ const CommunityCreatePage = () => {
               </button>
               <button
                 onClick={() => navigate('/subscription')}
-                className="px-8 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+                className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer"
               >
                 View Plans
               </button>
@@ -168,13 +168,13 @@ const CommunityCreatePage = () => {
             {[1, 2, 3].map((s) => (
               <div key={s} className="flex items-center flex-1">
                 <div className={`w-10 h-10 flex items-center justify-center rounded-full font-semibold ${
-                  step >= s ? 'bg-sage-600 text-white' : 'bg-gray-200 text-gray-600'
+                  step >= s ? 'bg-taupe text-white' : 'bg-gray-200 text-gray-600'
                 }`}>
                   {s}
                 </div>
                 {s < 3 && (
                   <div className={`flex-1 h-1 mx-4 ${
-                    step > s ? 'bg-sage-600' : 'bg-gray-200'
+                    step > s ? 'bg-taupe' : 'bg-gray-200'
                   }`}></div>
                 )}
               </div>
@@ -202,7 +202,7 @@ const CommunityCreatePage = () => {
                   value={communityData.name}
                   onChange={(e) => setCommunityData({ ...communityData, name: e.target.value })}
                   placeholder="e.g., Acne Warriors, Natural Beauty Lovers"
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                 />
               </div>
 
@@ -215,7 +215,7 @@ const CommunityCreatePage = () => {
                   onChange={(e) => setCommunityData({ ...communityData, description: e.target.value })}
                   placeholder="Describe what your community is about..."
                   rows={4}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   {communityData.description.length} / 500 characters
@@ -233,7 +233,7 @@ const CommunityCreatePage = () => {
                   <input type="file" accept="image/*" className="hidden" id="cover-upload" />
                   <label
                     htmlFor="cover-upload"
-                    className="inline-block px-6 py-2 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap"
+                    className="inline-block px-6 py-2 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap"
                   >
                     Choose Image
                   </label>
@@ -244,7 +244,7 @@ const CommunityCreatePage = () => {
                 <button
                   onClick={() => setStep(2)}
                   disabled={!communityData.name || !communityData.description}
-                  className="px-8 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                  className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                 >
                   Next Step
                 </button>
@@ -268,12 +268,12 @@ const CommunityCreatePage = () => {
                       onClick={() => setCommunityData({ ...communityData, category: cat.id })}
                       className={`p-4 border-2 rounded-lg transition-all cursor-pointer ${
                         communityData.category === cat.id
-                          ? 'border-sage-600 bg-sage-50'
-                          : 'border-gray-200 hover:border-sage-300'
+                          ? 'border-taupe bg-taupe-50'
+                          : 'border-gray-200 hover:border-taupe-300'
                       }`}
                     >
                       <i className={`${cat.icon} text-2xl mb-2 ${
-                        communityData.category === cat.id ? 'text-sage-600' : 'text-gray-600'
+                        communityData.category === cat.id ? 'text-taupe' : 'text-gray-600'
                       }`}></i>
                       <p className="font-medium text-gray-900">{cat.name}</p>
                     </button>
@@ -290,12 +290,12 @@ const CommunityCreatePage = () => {
                     onClick={() => setCommunityData({ ...communityData, privacy: 'public' })}
                     className={`w-full p-4 border-2 rounded-lg transition-all text-left cursor-pointer ${
                       communityData.privacy === 'public'
-                        ? 'border-sage-600 bg-sage-50'
-                        : 'border-gray-200 hover:border-sage-300'
+                        ? 'border-taupe bg-taupe-50'
+                        : 'border-gray-200 hover:border-taupe-300'
                     }`}
                   >
                     <div className="flex items-start">
-                      <i className="ri-global-line text-2xl text-sage-600 mr-3"></i>
+                      <i className="ri-global-line text-2xl text-taupe mr-3"></i>
                       <div>
                         <p className="font-semibold text-gray-900 mb-1">Public</p>
                         <p className="text-sm text-gray-600">
@@ -309,12 +309,12 @@ const CommunityCreatePage = () => {
                     onClick={() => setCommunityData({ ...communityData, privacy: 'private' })}
                     className={`w-full p-4 border-2 rounded-lg transition-all text-left cursor-pointer ${
                       communityData.privacy === 'private'
-                        ? 'border-sage-600 bg-sage-50'
-                        : 'border-gray-200 hover:border-sage-300'
+                        ? 'border-taupe bg-taupe-50'
+                        : 'border-gray-200 hover:border-taupe-300'
                     }`}
                   >
                     <div className="flex items-start">
-                      <i className="ri-lock-line text-2xl text-sage-600 mr-3"></i>
+                      <i className="ri-lock-line text-2xl text-taupe mr-3"></i>
                       <div>
                         <p className="font-semibold text-gray-900 mb-1">Private</p>
                         <p className="text-sm text-gray-600">
@@ -336,7 +336,7 @@ const CommunityCreatePage = () => {
                 <button
                   onClick={() => setStep(3)}
                   disabled={!communityData.category}
-                  className="px-8 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
+                  className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                 >
                   Next Step
                 </button>
@@ -365,7 +365,7 @@ const CommunityCreatePage = () => {
                         value={rule}
                         onChange={(e) => handleRuleChange(index, e.target.value)}
                         placeholder={`Rule ${index + 1}`}
-                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sage-500 focus:border-transparent"
+                        className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-taupe-500 focus:border-transparent"
                       />
                       {communityData.rules.length > 1 && (
                         <button
@@ -381,14 +381,14 @@ const CommunityCreatePage = () => {
 
                 <button
                   onClick={handleAddRule}
-                  className="mt-3 flex items-center text-sage-600 hover:text-sage-700 font-medium cursor-pointer"
+                  className="mt-3 flex items-center text-taupe hover:text-taupe-700 font-medium cursor-pointer"
                 >
                   <i className="ri-add-line mr-1"></i>
                   Add Another Rule
                 </button>
               </div>
 
-              <div className="bg-sage-50 rounded-xl p-6">
+              <div className="bg-taupe-50 rounded-xl p-6">
                 <h3 className="font-semibold text-gray-900 mb-3">Preview</h3>
                 <div className="space-y-4">
                   <div>
@@ -428,7 +428,7 @@ const CommunityCreatePage = () => {
                     // Create community logic here
                     navigate('/community');
                   }}
-                  className="px-8 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer"
+                  className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Create Community
                 </button>

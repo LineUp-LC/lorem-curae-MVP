@@ -65,7 +65,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 3,
       name: 'Glow Market',
-      logo: 'https://readdy.ai/api/search-image?query=Online%20beauty%20marketplace%20logo%2C%20modern%20e-commerce%20branding%2C%20forest%20green%20accent%2C%20clean%20minimalist%20design%2C%20trusted%20retailer%20identity&width=80&height=80&seq=retailer-logo-003&orientation=squarish',
+      logo: 'https://readdy.ai/api/search-image?query=Online%20beauty%20marketplace%20logo%2C%20modern%20e-commerce%20branding%2C%20coral%20green%20accent%2C%20clean%20minimalist%20design%2C%20trusted%20retailer%20identity&width=80&height=80&seq=retailer-logo-003&orientation=squarish',
       price: 43.50,
       shipping: 4.99,
       estimatedTax: 4.24,
@@ -195,7 +195,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-serif text-forest-900 mb-3">Where to Buy</h2>
+          <h2 className="text-3xl font-serif text-gray-900 mb-3">Where to Buy</h2>
           <p className="text-gray-600">
             Compare prices from trusted retailers. All prices include estimated shipping and taxes.
           </p>
@@ -208,7 +208,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 rounded-full border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer"
+              className="px-4 py-2 rounded-full border border-gray-300 focus:border-primary-600 focus:outline-none text-sm cursor-pointer"
             >
               <option value="trust">Trust Score</option>
               <option value="price-low">Price: Low to High</option>
@@ -225,14 +225,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
               }}
               className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium transition-all cursor-pointer whitespace-nowrap ${
                 showComparison
-                  ? 'bg-sage-600 text-white'
-                  : 'bg-sage-100 text-sage-700 hover:bg-sage-200'
+                  ? 'bg-cream-600 text-white'
+                  : 'bg-cream-300 text-cream-700 hover:bg-cream-200'
               }`}
             >
               <i className="ri-scales-line text-lg"></i>
               <span>{showComparison ? 'Exit Compare' : 'Compare Stores'}</span>
               {selectedRetailers.length > 0 && (
-                <span className="bg-white text-sage-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className="bg-white text-cream-700 px-2 py-0.5 rounded-full text-xs font-bold">
                   {selectedRetailers.length}
                 </span>
               )}
@@ -240,7 +240,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
             <button
               onClick={() => setShowTaxInfo(!showTaxInfo)}
-              className="flex items-center space-x-2 text-sm text-sage-600 hover:text-sage-700 cursor-pointer"
+              className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer"
             >
               <i className="ri-information-line text-lg"></i>
               <span className="font-medium">About Pricing</span>
@@ -250,10 +250,10 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
         {/* Comparison View */}
         {showComparison && selectedRetailers.length > 0 && (
-          <div className="mb-8 bg-gradient-to-br from-sage-50 to-cream-50 rounded-2xl p-6 border-2 border-sage-200">
+          <div className="mb-8 bg-gradient-to-br from-taupe-50 to-cream-50 rounded-2xl p-6 border-2 border-taupe-200">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-forest-900 flex items-center space-x-2">
-                <i className="ri-scales-line text-sage-600"></i>
+              <h3 className="text-xl font-semibold text-cream-900 flex items-center space-x-2">
+                <i className="ri-scales-line text-taupe"></i>
                 <span>Store Comparison</span>
               </h3>
               <button
@@ -275,10 +275,10 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                 const isSlowestDelivery = compareRetailers.length >= 2 && parseInt(retailer.deliveryDays.split('-')[0]) === highlights.maxDelivery && highlights.minDelivery !== highlights.maxDelivery;
 
                 return (
-                  <div key={retailer.id} className="bg-white rounded-xl p-5 border-2 border-sage-300 relative">
+                  <div key={retailer.id} className="bg-white rounded-xl p-5 border-2 border-taupe-300 relative">
                     <button
                       onClick={() => toggleRetailerSelection(retailer.id)}
-                      className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center bg-sage-600 text-white rounded-full hover:bg-sage-700 cursor-pointer"
+                      className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center bg-taupe text-white rounded-full hover:bg-taupe-700 cursor-pointer"
                     >
                       <i className="ri-close-line text-sm"></i>
                     </button>
@@ -287,18 +287,18 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       <div className="w-12 h-12 flex items-center justify-center bg-cream-50 rounded-lg overflow-hidden">
                         <img src={retailer.logo} alt={retailer.name} className="w-full h-full object-cover" />
                       </div>
-                      <h4 className="font-semibold text-forest-900 text-sm">{retailer.name}</h4>
+                      <h4 className="font-semibold text-cream-900 text-sm">{retailer.name}</h4>
                     </div>
 
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Total Price:</span>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-lg font-bold ${isBestPrice ? 'text-sage-600' : isHighestPrice ? 'text-orange-600' : 'text-gray-900'}`}>
+                          <span className={`text-lg font-bold ${isBestPrice ? 'text-taupe' : isHighestPrice ? 'text-orange-600' : 'text-gray-900'}`}>
                             ${retailer.totalPrice.toFixed(2)}
                           </span>
                           {isBestPrice && (
-                            <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full whitespace-nowrap">
+                            <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
                               Best Price
                             </span>
                           )}
@@ -316,11 +316,11 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-gray-600">Shipping:</span>
                         <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-medium ${hasFreeShipping ? 'text-sage-600 font-semibold' : 'text-gray-900'}`}>
+                          <span className={`text-sm font-medium ${hasFreeShipping ? 'text-taupe font-semibold' : 'text-gray-900'}`}>
                             {retailer.shipping === 0 ? 'FREE' : `$${retailer.shipping.toFixed(2)}`}
                           </span>
                           {hasFreeShipping && (
-                            <i className="ri-check-line text-sage-600"></i>
+                            <i className="ri-check-line text-taupe"></i>
                           )}
                         </div>
                       </div>
@@ -332,11 +332,11 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-xs text-gray-600">Trust Score:</span>
                           <div className="flex items-center space-x-2">
-                            <span className={`text-sm font-semibold ${isHighestTrust ? 'text-sage-600' : isLowestTrust ? 'text-orange-600' : 'text-gray-900'}`}>
+                            <span className={`text-sm font-semibold ${isHighestTrust ? 'text-taupe' : isLowestTrust ? 'text-orange-600' : 'text-gray-900'}`}>
                               {retailer.trustScore}/10
                             </span>
                             {isHighestTrust && (
-                              <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full whitespace-nowrap">
+                              <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
                                 Highest Rated
                               </span>
                             )}
@@ -350,11 +350,11 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                         <div className="flex items-center justify-between">
                           <span className="text-xs text-gray-600">Delivery:</span>
                           <div className="flex items-center space-x-2">
-                            <span className={`text-sm font-medium ${isFastestDelivery ? 'text-sage-600 font-semibold' : isSlowestDelivery ? 'text-orange-600' : 'text-gray-900'}`}>
+                            <span className={`text-sm font-medium ${isFastestDelivery ? 'text-taupe font-semibold' : isSlowestDelivery ? 'text-orange-600' : 'text-gray-900'}`}>
                               {retailer.deliveryDays} days
                             </span>
                             {isFastestDelivery && (
-                              <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-xs font-semibold rounded-full whitespace-nowrap">
+                              <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
                                 Fastest
                               </span>
                             )}
@@ -372,7 +372,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       href={retailer.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-4 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all cursor-pointer text-sm whitespace-nowrap"
+                      className="mt-4 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-cream-600 text-white rounded-full font-semibold hover:bg-cream-700 transition-all cursor-pointer text-sm whitespace-nowrap"
                     >
                       <span>Visit Store</span>
                       <i className="ri-external-link-line"></i>
@@ -390,10 +390,10 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
             {/* Legend */}
             {compareRetailers.length >= 2 && (
-              <div className="mt-6 pt-6 border-t border-sage-200">
+              <div className="mt-6 pt-6 border-t border-taupe-200">
                 <div className="flex items-center justify-center gap-6 flex-wrap">
                   <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-sage-100 rounded"></div>
+                    <div className="w-4 h-4 bg-primary-100 rounded"></div>
                     <span className="text-sm text-gray-700">Best Value</span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -414,24 +414,24 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                 <i className="ri-information-line text-xl text-blue-600"></i>
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-forest-900 mb-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
                   Understanding Total Costs
                 </h3>
                 <ul className="space-y-2 text-sm text-gray-700">
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Estimated taxes</strong> are calculated based on your location and may vary at checkout</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Shipping costs</strong> are provided by each retailer and may change based on delivery speed</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span><strong>Total price</strong> includes product price + shipping + estimated tax for easy comparison</span>
                   </li>
                   <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-sage-600 mt-0.5"></i>
+                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
                     <span>Final price will be confirmed at the retailer's checkout</span>
                   </li>
                 </ul>
@@ -447,9 +447,9 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
               key={retailer.id}
               className={`bg-cream-50 rounded-2xl p-6 border-2 transition-all ${
                 selectedRetailers.includes(retailer.id)
-                  ? 'border-sage-400 shadow-lg'
+                  ? 'border-taupe-400 shadow-lg'
                   : retailer.inStock
-                  ? 'border-gray-200 hover:border-sage-300 hover:shadow-lg'
+                  ? 'border-gray-200 hover:border-taupe-300 hover:shadow-lg'
                   : 'border-gray-200 opacity-60'
               }`}
             >
@@ -461,8 +461,8 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       onClick={() => toggleRetailerSelection(retailer.id)}
                       className={`w-6 h-6 flex items-center justify-center rounded border-2 cursor-pointer transition-all flex-shrink-0 mt-1 ${
                         selectedRetailers.includes(retailer.id)
-                          ? 'bg-sage-600 border-sage-600'
-                          : 'bg-white border-gray-300 hover:border-sage-400'
+                          ? 'bg-taupe border-taupe'
+                          : 'bg-white border-gray-300 hover:border-taupe-400'
                       }`}
                     >
                       {selectedRetailers.includes(retailer.id) && (
@@ -481,7 +481,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                   
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold text-forest-900">
+                      <h3 className="text-xl font-semibold text-gray-900">
                         {retailer.name}
                       </h3>
                       
@@ -495,7 +495,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                       
                       {/* Affiliate Partner Badge */}
                       {retailer.isAffiliate && (
-                        <span className="flex items-center space-x-1 px-3 py-1 bg-sage-100 text-sage-800 text-xs font-semibold rounded-full border border-sage-300">
+                        <span className="flex items-center space-x-1 px-3 py-1 bg-cream-100 text-cream-800 text-xs font-semibold rounded-full border border-light">
                           <i className="ri-shield-check-fill"></i>
                           <span>Partner</span>
                         </span>
@@ -515,7 +515,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                           key={idx}
                           className="flex items-center space-x-1 px-3 py-1 bg-white text-gray-700 text-xs rounded-full border border-gray-200"
                         >
-                          <i className="ri-check-line text-sage-600"></i>
+                          <i className="ri-check-line text-taupe"></i>
                           <span>{feature}</span>
                         </span>
                       ))}
@@ -546,7 +546,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                     </div>
                     <div className="flex items-center justify-between gap-8 pt-2 border-t border-gray-300">
                       <span className="text-base font-semibold text-gray-900">Total:</span>
-                      <span className="text-2xl font-bold text-forest-900">
+                      <span className="text-2xl font-bold text-gray-900">
                         ${retailer.totalPrice.toFixed(2)}
                       </span>
                     </div>
@@ -563,14 +563,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                           href={retailer.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
+                          className="flex items-center space-x-2 px-6 py-3 bg-cream-600 text-white rounded-full font-semibold hover:bg-cream-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
                         >
                           <span>Visit Store</span>
                           <i className="ri-external-link-line"></i>
                         </a>
                         <Link
                           to="/retailer-reviews"
-                          className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer underline"
+                          className="text-cream-600 hover:text-cream-700 text-sm font-medium cursor-pointer underline"
                         >
                           View Reviews
                         </Link>
@@ -585,14 +585,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                         </button>
                         <Link
                           to="/retailer-reviews"
-                          className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer underline"
+                          className="text-gray-600 hover:text-gray-700 text-sm font-medium cursor-pointer underline"
                         >
                           View Reviews
                         </Link>
                       </>
                     )}
                     <p className="text-xs text-gray-500">
-                      <i className="ri-shield-check-line text-sage-600"></i> Secure checkout
+                      <i className="ri-shield-check-line text-gray-600"></i> Secure checkout
                     </p>
                   </div>
                 </div>

@@ -130,7 +130,7 @@ export default function AffiliateDashboardPage() {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-sage-600 mb-4"></div>
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-taupe mb-4"></div>
           <p className="text-gray-600">Loading affiliate dashboard...</p>
         </div>
       </div>
@@ -145,7 +145,7 @@ export default function AffiliateDashboardPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-serif text-forest-900 mb-6">Affiliate Dashboard</h1>
+            <h1 className="text-4xl lg:text-6xl font-serif text-deep-900 mb-6">Affiliate Dashboard</h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto">
               Track your earnings from beauty brand partnerships and manage your affiliate links
             </p>
@@ -155,8 +155,8 @@ export default function AffiliateDashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-green-100 rounded-lg">
-                  <i className="ri-money-dollar-circle-line text-2xl text-green-600"></i>
+                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 rounded-lg">
+                  <i className="ri-money-dollar-circle-line text-2xl text-taupe"></i>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Total Earnings</p>
@@ -191,8 +191,8 @@ export default function AffiliateDashboardPage() {
 
             <div className="bg-white rounded-xl shadow-sm p-6">
               <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-sage-100 rounded-lg">
-                  <i className="ri-bar-chart-line text-2xl text-sage-600"></i>
+                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 rounded-lg">
+                  <i className="ri-bar-chart-line text-2xl text-taupe"></i>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600">Conversion Rate</p>
@@ -216,7 +216,7 @@ export default function AffiliateDashboardPage() {
                   onClick={() => setActiveTab(key as any)}
                   className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                     activeTab === key
-                      ? 'border-sage-600 text-sage-600'
+                      ? 'border-taupe text-taupe'
                       : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
                   }`}
                 >
@@ -238,10 +238,10 @@ export default function AffiliateDashboardPage() {
                     <div key={transaction.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-4">
                         <div className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                          transaction.status === 'completed' ? 'bg-green-100' : 'bg-amber-100'
+                          transaction.status === 'completed' ? 'bg-taupe-100' : 'bg-amber-100'
                         }`}>
                           <i className={`${
-                            transaction.status === 'completed' ? 'ri-check-line text-green-600' : 'ri-time-line text-amber-600'
+                            transaction.status === 'completed' ? 'ri-check-line text-taupe' : 'ri-time-line text-amber-600'
                           } text-lg`}></i>
                         </div>
                         <div>
@@ -278,12 +278,12 @@ export default function AffiliateDashboardPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-gray-900">{partner.brand_name}</h3>
-                          <p className="text-sm text-sage-600">{partner.commission_rate}% commission</p>
+                          <p className="text-sm text-taupe">{partner.commission_rate}% commission</p>
                         </div>
                       </div>
                       <button
                         onClick={() => copyToClipboard(generateAffiliateLink(partner))}
-                        className="w-full px-4 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors text-sm font-medium"
+                        className="w-full px-4 py-2 bg-taupe text-white rounded-lg hover:bg-taupe-700 transition-colors text-sm font-medium"
                       >
                         Copy Link
                       </button>
@@ -309,7 +309,7 @@ export default function AffiliateDashboardPage() {
                           <h3 className="text-xl font-semibold text-gray-900 mb-2">{partner.brand_name}</h3>
                           <p className="text-gray-600 mb-3">{partner.description}</p>
                           <div className="flex items-center space-x-4 text-sm">
-                            <span className="flex items-center space-x-1 text-sage-600">
+                            <span className="flex items-center space-x-1 text-taupe">
                               <i className="ri-percent-line"></i>
                               <span>{partner.commission_rate}% commission</span>
                             </span>
@@ -323,7 +323,7 @@ export default function AffiliateDashboardPage() {
                       <div className="flex flex-col sm:flex-row gap-3">
                         <button
                           onClick={() => copyToClipboard(generateAffiliateLink(partner))}
-                          className="flex items-center space-x-2 px-4 py-2 bg-sage-600 text-white rounded-lg hover:bg-sage-700 transition-colors"
+                          className="flex items-center space-x-2 px-4 py-2 bg-taupe text-white rounded-lg hover:bg-taupe-700 transition-colors"
                         >
                           <i className="ri-link text-lg"></i>
                           <span>Copy Link</span>
@@ -368,11 +368,11 @@ export default function AffiliateDashboardPage() {
                         <td className="py-4 px-2 text-gray-600">{transaction.product_name || 'N/A'}</td>
                         <td className="py-4 px-2 text-gray-900">${transaction.amount.toFixed(2)}</td>
                         <td className="py-4 px-2 text-gray-900">{transaction.commission_percentage}%</td>
-                        <td className="py-4 px-2 font-medium text-green-600">${transaction.cashback_amount.toFixed(2)}</td>
+                        <td className="py-4 px-2 font-medium text-taupe">${transaction.cashback_amount.toFixed(2)}</td>
                         <td className="py-4 px-2">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                             transaction.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
+                              ? 'bg-taupe-100 text-taupe-800' 
                               : 'bg-amber-100 text-amber-800'
                           }`}>
                             {transaction.status}
@@ -405,10 +405,10 @@ export default function AffiliateDashboardPage() {
                     <div key={click.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center space-x-4">
                         <div className={`w-10 h-10 flex items-center justify-center rounded-full ${
-                          click.converted ? 'bg-green-100' : 'bg-gray-100'
+                          click.converted ? 'bg-taupe-100' : 'bg-gray-100'
                         }`}>
                           <i className={`${
-                            click.converted ? 'ri-check-line text-green-600' : 'ri-cursor-line text-gray-500'
+                            click.converted ? 'ri-check-line text-taupe' : 'ri-cursor-line text-gray-500'
                           } text-lg`}></i>
                         </div>
                         <div>
@@ -419,7 +419,7 @@ export default function AffiliateDashboardPage() {
                         </div>
                       </div>
                       <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                        click.converted ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+                        click.converted ? 'bg-taupe-100 text-taupe-800' : 'bg-gray-100 text-gray-600'
                       }`}>
                         {click.converted ? 'Converted' : 'Click'}
                       </span>

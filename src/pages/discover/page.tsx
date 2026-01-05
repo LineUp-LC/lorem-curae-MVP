@@ -15,6 +15,13 @@ const DiscoverPage = () => {
   const normalizedConcerns = userConcerns.map((c) => normalizeUserConcern(c));
 
   useEffect(() => {
+    // Check if we should auto-open comparison (from footer link)
+    const shouldOpenComparison = localStorage.getItem('openComparisonOnLoad');
+    if (shouldOpenComparison === 'true') {
+      setShowComparison(true);
+      localStorage.removeItem('openComparisonOnLoad');
+    }
+
     const stored = localStorage.getItem('selectedProducts');
     if (stored) {
       try {

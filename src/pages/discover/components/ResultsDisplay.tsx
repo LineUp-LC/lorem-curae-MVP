@@ -37,7 +37,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
         {/* Back Button */}
         <button
           onClick={onBackToCatalog}
-          className="flex items-center space-x-2 text-forest-800 hover:text-sage-600 mb-8 cursor-pointer transition-colors"
+          className="flex items-center space-x-2 text-deep hover:text-taupe mb-8 cursor-pointer transition-colors"
         >
           <i className="ri-arrow-left-line text-xl"></i>
           <span className="font-medium">Back to Products</span>
@@ -45,10 +45,10 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
 
         {/* Header */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-sage-100 rounded-full mb-6">
-            <i className="ri-checkbox-circle-line text-4xl text-sage-600"></i>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-taupe-100 rounded-full mb-6">
+            <i className="ri-checkbox-circle-line text-4xl text-taupe"></i>
           </div>
-          <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">
+          <h1 className="text-4xl lg:text-5xl font-serif text-deep-900 mb-4">
             Your Personalized Routine
           </h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -57,24 +57,24 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
         </div>
 
         {/* Skin Profile Summary */}
-        <div className="bg-gradient-to-br from-sage-50 to-cream-100 rounded-3xl p-8 mb-12 shadow-lg">
-          <h2 className="text-2xl font-serif text-forest-900 mb-6">Your Skin Profile</h2>
+        <div className="bg-gradient-to-br from-taupe-50 to-cream-100 rounded-3xl p-8 mb-12 shadow-lg">
+          <h2 className="text-2xl font-serif text-deep-900 mb-6">Your Skin Profile</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-white rounded-xl p-6">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 flex items-center justify-center bg-sage-100 rounded-full">
-                  <i className="ri-user-line text-xl text-sage-600"></i>
+                <div className="w-10 h-10 flex items-center justify-center bg-taupe-100 rounded-full">
+                  <i className="ri-user-line text-xl text-taupe"></i>
                 </div>
-                <h3 className="font-semibold text-forest-900">Skin Type</h3>
+                <h3 className="font-semibold text-deep-900">Skin Type</h3>
               </div>
               <p className="text-gray-700 capitalize">{data.skinType || 'Not specified'}</p>
             </div>
             <div className="bg-white rounded-xl p-6">
               <div className="flex items-center space-x-3 mb-3">
-                <div className="w-10 h-10 flex items-center justify-center bg-coral-100 rounded-full">
-                  <i className="ri-alert-line text-xl text-coral-600"></i>
+                <div className="w-10 h-10 flex items-center justify-center bg-primary-100 rounded-full">
+                  <i className="ri-alert-line text-xl text-primary-600"></i>
                 </div>
-                <h3 className="font-semibold text-forest-900">Main Concerns</h3>
+                <h3 className="font-semibold text-deep-900">Main Concerns</h3>
               </div>
               <p className="text-gray-700">
                 {data.concerns?.length > 0 ? data.concerns.join(', ') : 'None specified'}
@@ -85,7 +85,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
                 <div className="w-10 h-10 flex items-center justify-center bg-amber-100 rounded-full">
                   <i className="ri-target-line text-xl text-amber-600"></i>
                 </div>
-                <h3 className="font-semibold text-forest-900">Goals</h3>
+                <h3 className="font-semibold text-deep-900">Goals</h3>
               </div>
               <p className="text-gray-700">
                 {data.goals?.length > 0 ? data.goals.join(', ') : 'None specified'}
@@ -96,7 +96,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
 
         {/* Recommended Routine */}
         <div className="mb-12">
-          <h2 className="text-3xl font-serif text-forest-900 mb-8 text-center">
+          <h2 className="text-3xl font-serif text-deep-900 mb-8 text-center">
             Your Morning & Evening Routine
           </h2>
           <div className="space-y-6">
@@ -115,22 +115,22 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
                   </div>
                   <div className="flex-1 space-y-4">
                     <div>
-                      <span className="inline-block px-3 py-1 bg-sage-100 text-sage-700 text-sm font-semibold rounded-full mb-3">
+                      <span className="inline-block px-3 py-1 bg-taupe-100 text-taupe-700 text-sm font-semibold rounded-full mb-3">
                         {product.step}
                       </span>
-                      <h3 className="text-2xl font-semibold text-forest-900 mb-1">
+                      <h3 className="text-2xl font-semibold text-deep-900 mb-1">
                         {product.name}
                       </h3>
                       <p className="text-gray-600">by {product.brand}</p>
                     </div>
                     <div className="flex items-start space-x-3 bg-cream-50 rounded-xl p-4">
-                      <i className="ri-lightbulb-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+                      <i className="ri-lightbulb-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
                       <div>
-                        <p className="font-medium text-forest-900 mb-1">Why we recommend this:</p>
+                        <p className="font-medium text-deep-900 mb-1">Why we recommend this:</p>
                         <p className="text-gray-700 text-sm leading-relaxed">{product.reason}</p>
                       </div>
                     </div>
-                    <button className="w-full md:w-auto px-8 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-colors whitespace-nowrap cursor-pointer">
+                    <button className="w-full md:w-auto px-8 py-3 bg-taupe text-white rounded-full font-semibold hover:bg-taupe-700 transition-colors whitespace-nowrap cursor-pointer">
                       Add to Routine
                     </button>
                   </div>
@@ -141,13 +141,13 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
         </div>
 
         {/* CTA Section */}
-        <div className="bg-forest-900 rounded-3xl p-12 text-center text-white">
+        <div className="bg-deep-900 rounded-3xl p-12 text-center text-white">
           <h2 className="text-3xl font-serif mb-4">Ready to Start Your Journey?</h2>
           <p className="text-cream-200 mb-8 max-w-2xl mx-auto">
             Save your personalized routine, track your progress, and connect with our community for ongoing support and inspiration.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <button className="px-8 py-4 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all shadow-lg whitespace-nowrap cursor-pointer">
+            <button className="px-8 py-4 bg-taupe text-white rounded-full font-semibold hover:bg-taupe-700 transition-all shadow-lg whitespace-nowrap cursor-pointer">
               Save My Routine
             </button>
             <button className="px-8 py-4 border-2 border-white text-white rounded-full font-semibold hover:bg-white/10 transition-all whitespace-nowrap cursor-pointer">

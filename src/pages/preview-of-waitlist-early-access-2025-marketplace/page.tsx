@@ -40,7 +40,7 @@ const MarketplaceWaitlistPage = () => {
           </Link>
           <a 
             href="#waitlist" 
-            className="px-6 py-2.5 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-sm font-medium whitespace-nowrap"
+            className="px-6 py-2.5 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-sm font-medium whitespace-nowrap"
           >
             Join Waitlist
           </a>
@@ -48,10 +48,10 @@ const MarketplaceWaitlistPage = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-sage-50 via-white to-cream-50">
+      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-taupe-50 via-white to-cream-50">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-sage-100 rounded-full mb-8">
-            <i className="ri-store-3-line text-3xl text-sage-600"></i>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-taupe-100 rounded-full mb-8">
+            <i className="ri-store-3-line text-3xl text-taupe"></i>
           </div>
           <h1 className="text-5xl lg:text-6xl font-serif text-slate-900 mb-6 leading-tight">
             Marketplace for Indie Beauty Creators
@@ -64,7 +64,7 @@ const MarketplaceWaitlistPage = () => {
           </p>
           <a 
             href="#waitlist" 
-            className="inline-block px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+            className="inline-block px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
           >
             Join the Creator Waitlist
           </a>
@@ -79,29 +79,29 @@ const MarketplaceWaitlistPage = () => {
           </h2>
           <div className="grid md:grid-cols-4 gap-6">
             <div className="text-center">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-seedling-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-seedling-line text-2xl text-taupe"></i>
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">Hobbyists</h3>
               <p className="text-sm text-slate-600">Testing the waters with your first products</p>
             </div>
             <div className="text-center">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-flask-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-flask-line text-2xl text-taupe"></i>
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">Testers</h3>
               <p className="text-sm text-slate-600">Experimenting with formulations and feedback</p>
             </div>
             <div className="text-center">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-store-2-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-store-2-line text-2xl text-taupe"></i>
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">Small to Mid-Size Brands</h3>
               <p className="text-sm text-slate-600">Growing indie creators ready to scale</p>
             </div>
             <div className="text-center">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-vip-crown-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i className="ri-vip-crown-line text-2xl text-taupe"></i>
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">Established Creators</h3>
               <p className="text-sm text-slate-600">Proven brands seeking new audiences</p>
@@ -111,15 +111,15 @@ const MarketplaceWaitlistPage = () => {
       </section>
 
       {/* Core Benefits */}
-      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-sage-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-taupe-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-12 text-center">
             Core Benefits
           </h2>
           <div className="grid md:grid-cols-3 gap-8">
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-user-heart-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mb-6">
+                <i className="ri-user-heart-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">Reach More Customers</h3>
               <p className="text-slate-600 leading-relaxed">
@@ -127,8 +127,8 @@ const MarketplaceWaitlistPage = () => {
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-line-chart-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mb-6">
+                <i className="ri-line-chart-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">Grow Your Sales</h3>
               <p className="text-slate-600 leading-relaxed">
@@ -136,8 +136,8 @@ const MarketplaceWaitlistPage = () => {
               </p>
             </div>
             <div className="bg-white rounded-2xl p-8 shadow-sm">
-              <div className="w-14 h-14 bg-sage-100 rounded-full flex items-center justify-center mb-6">
-                <i className="ri-shield-check-line text-2xl text-sage-600"></i>
+              <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center mb-6">
+                <i className="ri-shield-check-line text-2xl text-taupe"></i>
               </div>
               <h3 className="text-2xl font-serif text-slate-900 mb-4">Build Trust</h3>
               <p className="text-slate-600 leading-relaxed">
@@ -156,35 +156,35 @@ const MarketplaceWaitlistPage = () => {
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-4 p-6 bg-cream-50 rounded-xl">
-              <i className="ri-star-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-star-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Premium Search Placement</h3>
                 <p className="text-sm text-slate-600">Get featured at the top of search results and category pages</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 bg-cream-50 rounded-xl">
-              <i className="ri-medal-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-medal-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Featured Badge</h3>
                 <p className="text-sm text-slate-600">Stand out with verified and featured storefront badges</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 bg-cream-50 rounded-xl">
-              <i className="ri-megaphone-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-megaphone-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Promotional Tools</h3>
                 <p className="text-sm text-slate-600">Run campaigns and promotions to boost visibility</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 bg-cream-50 rounded-xl">
-              <i className="ri-book-open-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-book-open-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Brand Storytelling</h3>
                 <p className="text-sm text-slate-600">Share your journey and values with custom storefront pages</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 bg-cream-50 rounded-xl">
-              <i className="ri-team-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-team-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Community Growth</h3>
                 <p className="text-sm text-slate-600">Build a following and engage with your customers directly</p>
@@ -195,7 +195,7 @@ const MarketplaceWaitlistPage = () => {
       </section>
 
       {/* Analytics & Insights */}
-      <section className="py-20 px-6 bg-gradient-to-br from-sage-50 to-cream-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-taupe-50 to-cream-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6 text-center">
             Analytics &amp; Insights
@@ -205,17 +205,17 @@ const MarketplaceWaitlistPage = () => {
           </p>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="bg-white rounded-xl p-6 text-center">
-              <i className="ri-eye-line text-3xl text-sage-600 mb-4"></i>
+              <i className="ri-eye-line text-3xl text-taupe mb-4"></i>
               <h3 className="font-semibold text-slate-900 mb-2">Performance Tracking</h3>
               <p className="text-sm text-slate-600">Monitor views, clicks, and conversions</p>
             </div>
             <div className="bg-white rounded-xl p-6 text-center">
-              <i className="ri-heart-pulse-line text-3xl text-sage-600 mb-4"></i>
+              <i className="ri-heart-pulse-line text-3xl text-taupe mb-4"></i>
               <h3 className="font-semibold text-slate-900 mb-2">Engagement Metrics</h3>
               <p className="text-sm text-slate-600">See how customers interact with your products</p>
             </div>
             <div className="bg-white rounded-xl p-6 text-center">
-              <i className="ri-bar-chart-box-line text-3xl text-sage-600 mb-4"></i>
+              <i className="ri-bar-chart-box-line text-3xl text-taupe mb-4"></i>
               <h3 className="font-semibold text-slate-900 mb-2">Sales Optimization</h3>
               <p className="text-sm text-slate-600">Identify trends and improve your offerings</p>
             </div>
@@ -231,28 +231,28 @@ const MarketplaceWaitlistPage = () => {
           </h2>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="flex items-start space-x-4 p-6 border border-gray-200 rounded-xl">
-              <i className="ri-palette-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-palette-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Custom Storefront</h3>
                 <p className="text-sm text-slate-600">Design your storefront to match your brand identity</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 border border-gray-200 rounded-xl">
-              <i className="ri-code-box-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-code-box-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">API Access</h3>
                 <p className="text-sm text-slate-600">Integrate with your existing systems and workflows</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 border border-gray-200 rounded-xl">
-              <i className="ri-customer-service-2-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-customer-service-2-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Priority Support</h3>
                 <p className="text-sm text-slate-600">Get dedicated help when you need it most</p>
               </div>
             </div>
             <div className="flex items-start space-x-4 p-6 border border-gray-200 rounded-xl">
-              <i className="ri-dashboard-line text-2xl text-sage-600 flex-shrink-0 mt-1"></i>
+              <i className="ri-dashboard-line text-2xl text-taupe flex-shrink-0 mt-1"></i>
               <div>
                 <h3 className="font-semibold text-slate-900 mb-2">Advanced Analytics</h3>
                 <p className="text-sm text-slate-600">Deep insights into customer behavior and trends</p>
@@ -263,7 +263,7 @@ const MarketplaceWaitlistPage = () => {
       </section>
 
       {/* Volume Incentives */}
-      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-sage-50">
+      <section className="py-20 px-6 bg-gradient-to-br from-cream-50 to-taupe-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6 text-center">
             Volume Incentives
@@ -274,17 +274,17 @@ const MarketplaceWaitlistPage = () => {
           </p>
           <div className="grid md:grid-cols-3 gap-6 opacity-60">
             <div className="bg-white rounded-xl p-8 text-center">
-              <div className="text-3xl font-bold text-sage-600 mb-2">12%</div>
+              <div className="text-3xl font-bold text-taupe mb-2">12%</div>
               <div className="text-sm text-slate-600 mb-4">Transaction Fee</div>
               <div className="text-lg font-semibold text-slate-900">$10K+ Monthly GMV</div>
             </div>
             <div className="bg-white rounded-xl p-8 text-center">
-              <div className="text-3xl font-bold text-sage-600 mb-2">10%</div>
+              <div className="text-3xl font-bold text-taupe mb-2">10%</div>
               <div className="text-sm text-slate-600 mb-4">Transaction Fee</div>
               <div className="text-lg font-semibold text-slate-900">$25K+ Monthly GMV</div>
             </div>
             <div className="bg-white rounded-xl p-8 text-center">
-              <div className="text-3xl font-bold text-sage-600 mb-2">8%</div>
+              <div className="text-3xl font-bold text-taupe mb-2">8%</div>
               <div className="text-sm text-slate-600 mb-4">Transaction Fee</div>
               <div className="text-lg font-semibold text-slate-900">$50K+ Monthly GMV</div>
             </div>
@@ -296,8 +296,8 @@ const MarketplaceWaitlistPage = () => {
       <section id="waitlist" className="py-24 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-sage-100 rounded-full mb-8">
-              <i className="ri-hand-heart-line text-4xl text-sage-600"></i>
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-taupe-100 rounded-full mb-8">
+              <i className="ri-hand-heart-line text-4xl text-taupe"></i>
             </div>
             <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
               Join the Creator Waitlist
@@ -321,7 +321,7 @@ const MarketplaceWaitlistPage = () => {
                     <input 
                       type="email" 
                       name="EMAIL" 
-                      className="required email w-full px-6 py-4 border-2 border-slate-200 rounded-full focus:border-sage-600 focus:outline-none text-lg" 
+                      className="required email w-full px-6 py-4 border-2 border-slate-200 rounded-full focus:border-taupe focus:outline-none text-lg" 
                       id="mce-EMAIL" 
                       required 
                       placeholder="Your email address *"
@@ -349,7 +349,7 @@ const MarketplaceWaitlistPage = () => {
                         type="submit"
                         name="subscribe"
                         id="mc-embedded-subscribe"
-                        className="w-full px-8 py-4 bg-sage-600 text-white rounded-full hover:bg-sage-700 transition-colors text-lg font-medium whitespace-nowrap"
+                        className="w-full px-8 py-4 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-lg font-medium whitespace-nowrap"
                       >
                         Join the Creator Waitlist
                       </button>

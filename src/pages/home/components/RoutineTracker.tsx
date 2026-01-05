@@ -9,7 +9,7 @@ export default function RoutineTracker() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Pain Point Callout */}
         <div className="text-center mb-12">
-          <span className="inline-flex items-center gap-2 px-4 py-2 bg-coral-50 text-coral-700 rounded-full text-sm font-medium mb-4">
+          <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary-50 text-dark rounded-full text-sm font-medium mb-4">
             <i className="ri-error-warning-line"></i>
             Tracking Troubles
           </span>
@@ -67,8 +67,8 @@ export default function RoutineTracker() {
 
           <div className="absolute -bottom-6 right-6 bg-white rounded-xl shadow-lg p-4 border border-gray-100">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <i className="ri-fire-line text-green-600"></i>
+              <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
+                <i className="ri-fire-line text-taupe"></i>
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-900">Streak Tracking</p>
@@ -81,7 +81,7 @@ export default function RoutineTracker() {
         <div className="text-center">
           <Link
             to="/routines"
-            className="inline-flex items-center space-x-3 bg-sage-600 hover:bg-sage-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center space-x-3 bg-taupe hover:bg-taupe-700 text-white px-8 py-4 rounded-full font-semibold text-lg transition-all hover:shadow-lg cursor-pointer whitespace-nowrap"
           >
             <span>Build Your Routine</span>
             <i className="ri-arrow-right-line text-xl"></i>

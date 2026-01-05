@@ -67,17 +67,17 @@ export default function PasswordGate({ children }: PasswordGateProps) {
   if (authed) return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cream-50 via-white to-sage-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 via-white to-taupe-50 flex items-center justify-center p-4">
       <div className={`w-full max-w-md motion-safe:animate-enter-scale ${shake ? 'animate-shake' : ''}`}>
         {/* Card */}
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
           {/* Header */}
-          <div className="bg-gradient-to-r from-sage-600 to-forest-700 px-8 py-6 text-center">
+          <div className="bg-gradient-to-r from-taupe to-taupe-700 px-8 py-6 text-center">
             <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
               <i className="ri-lock-line text-3xl text-white"></i>
             </div>
             <h1 className="text-2xl font-serif text-white mb-1">Protected Site</h1>
-            <p className="text-sage-100 text-sm">Enter password to continue</p>
+            <p className="text-taupe-100 text-sm">Enter password to continue</p>
           </div>
           
           {/* Form */}
@@ -94,8 +94,8 @@ export default function PasswordGate({ children }: PasswordGateProps) {
                     placeholder="Enter your password"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    className={`w-full px-4 py-3 border rounded-xl text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:border-transparent ${
-                      error ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-sage-300'
+                    className={`w-full px-4 py-3 border rounded-xl text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-taupe-500 focus:border-transparent ${
+                      error ? 'border-red-300 bg-red-50' : 'border-gray-200 hover:border-taupe-300'
                     }`}
                     autoComplete="current-password"
                   />
@@ -116,7 +116,7 @@ export default function PasswordGate({ children }: PasswordGateProps) {
               <button
                 type="submit"
                 disabled={loading || !input.trim()}
-                className="w-full px-6 py-3 bg-sage-600 text-white rounded-xl font-medium transition-all duration-200 hover:bg-sage-700 focus:outline-none focus:ring-2 focus:ring-sage-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-sage-600 flex items-center justify-center gap-2"
+                className="w-full px-6 py-3 bg-taupe text-white rounded-xl font-medium transition-all duration-200 hover:bg-taupe-700 focus:outline-none focus:ring-2 focus:ring-taupe-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-taupe flex items-center justify-center gap-2"
               >
                 {loading ? (
                   <>

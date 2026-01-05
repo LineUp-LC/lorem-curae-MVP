@@ -214,47 +214,47 @@ const ProductReviewsPage = () => {
   };
 
   const getSimilarityBadge = (score: number) => {
-    if (score >= 70) return { label: 'Very Similar to You', color: 'bg-green-100 text-green-800', icon: 'ri-user-heart-line' };
+    if (score >= 70) return { label: 'Very Similar to You', color: 'bg-sage/20 text-sage', icon: 'ri-user-heart-line' };
     if (score >= 50) return { label: 'Similar Profile', color: 'bg-blue-100 text-blue-800', icon: 'ri-user-line' };
     if (score >= 30) return { label: 'Somewhat Similar', color: 'bg-amber-100 text-amber-800', icon: 'ri-user-2-line' };
     return null;
   };
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       <div className="pt-24 pb-16 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
-            <div className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
-              <Link to="/discover" className="hover:text-sage-600 focus:text-sage-600 focus:outline-none cursor-pointer transition-colors duration-fast">Discover</Link>
+            <div className="flex items-center space-x-2 text-sm text-warm-gray mb-4">
+              <Link to="/discover" className="hover:text-primary focus:text-primary focus:outline-none cursor-pointer transition-colors duration-fast">Discover</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <Link to="/product-detail" className="hover:text-sage-600 focus:text-sage-600 focus:outline-none cursor-pointer transition-colors duration-fast">Products</Link>
+              <Link to="/product-detail" className="hover:text-primary focus:text-primary focus:outline-none cursor-pointer transition-colors duration-fast">Products</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <span className="text-sage-600 font-medium">Product Reviews</span>
+              <span className="text-primary font-medium">Product Reviews</span>
             </div>
-            <h1 className="text-4xl lg:text-5xl font-serif text-forest-900 mb-4">Product Reviews &amp; Results</h1>
-            <p className="text-xl text-gray-600 max-w-3xl">Real customer experiences with detailed before/after results, pros and cons, and personalized recommendations based on skin profiles.</p>
+            <h1 className="text-4xl lg:text-5xl font-serif text-deep mb-4">Product Reviews &amp; Results</h1>
+            <p className="text-xl text-warm-gray max-w-3xl">Real customer experiences with detailed before/after results, pros and cons, and personalized recommendations based on skin profiles.</p>
           </div>
 
           {userSkinTypeParam && (
-            <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg border-l-4 border-sage-600">
+            <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg border-l-4 border-primary">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-sage-100 flex items-center justify-center flex-shrink-0"><i className="ri-user-heart-line text-sage-600 text-xl"></i></div>
+                  <div className="w-12 h-12 rounded-full bg-light/30 flex items-center justify-center flex-shrink-0"><i className="ri-user-heart-line text-primary text-xl"></i></div>
                   <div>
-                    <h3 className="text-xl font-semibold text-forest-900 mb-2">Personalized for Your Skin Profile</h3>
-                    <p className="text-gray-600 text-sm mb-3">Reviews prioritized for: <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong></p>
+                    <h3 className="text-xl font-semibold text-deep mb-2">Personalized for Your Skin Profile</h3>
+                    <p className="text-warm-gray text-sm mb-3">Reviews prioritized for: <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong></p>
                     <div className="flex items-center space-x-4">
                       <label className="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" checked={showOnlySimilar} onChange={(e) => setShowOnlySimilar(e.target.checked)} className="w-4 h-4 text-sage-600 border-gray-300 rounded focus:ring-sage-500" />
-                        <span className="text-sm text-gray-700">Only show reviews from similar skin profiles</span>
+                        <input type="checkbox" checked={showOnlySimilar} onChange={(e) => setShowOnlySimilar(e.target.checked)} className="w-4 h-4 text-primary border-blush rounded focus:ring-primary/50" />
+                        <span className="text-sm text-warm-gray">Only show reviews from similar skin profiles</span>
                       </label>
-                      <span className="text-xs text-sage-600 bg-sage-50 px-2 py-1 rounded-full">{sortedReviews.filter(r => (r.similarityScore || 0) > 20).length} matching reviews</span>
+                      <span className="text-xs text-primary bg-light/20 px-2 py-1 rounded-full">{sortedReviews.filter(r => (r.similarityScore || 0) > 20).length} matching reviews</span>
                     </div>
                   </div>
                 </div>
-                <Link to="/my-skin" className="text-sage-600 hover:text-sage-700 text-sm font-medium cursor-pointer flex items-center space-x-1"><i className="ri-settings-3-line"></i><span>Update Profile</span></Link>
+                <Link to="/my-skin" className="text-primary hover:text-dark text-sm font-medium cursor-pointer flex items-center space-x-1"><i className="ri-settings-3-line"></i><span>Update Profile</span></Link>
               </div>
             </div>
           )}
@@ -262,21 +262,21 @@ const ProductReviewsPage = () => {
           <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-forest-900 mb-1">{averageRating.toFixed(1)}</div>
+                <div className="text-3xl font-bold text-deep mb-1">{averageRating.toFixed(1)}</div>
                 <div className="flex items-center justify-center space-x-1 mb-2">{renderStars(Math.round(averageRating))}</div>
-                <p className="text-sm text-gray-600">Average Rating</p>
+                <p className="text-sm text-warm-gray">Average Rating</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-forest-900 mb-1">{allReviews.length}</div>
-                <p className="text-sm text-gray-600">Total Reviews</p>
+                <div className="text-3xl font-bold text-deep mb-1">{allReviews.length}</div>
+                <p className="text-sm text-warm-gray">Total Reviews</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-forest-900 mb-1">{recommendPercentage.toFixed(0)}%</div>
-                <p className="text-sm text-gray-600">Would Recommend</p>
+                <div className="text-3xl font-bold text-deep mb-1">{recommendPercentage.toFixed(0)}%</div>
+                <p className="text-sm text-warm-gray">Would Recommend</p>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold text-forest-900 mb-1">{((allReviews.filter(r => r.verified).length / allReviews.length) * 100).toFixed(0)}%</div>
-                <p className="text-sm text-gray-600">Verified Purchases</p>
+                <div className="text-3xl font-bold text-deep mb-1">{((allReviews.filter(r => r.verified).length / allReviews.length) * 100).toFixed(0)}%</div>
+                <p className="text-sm text-warm-gray">Verified Purchases</p>
               </div>
             </div>
           </div>
@@ -284,8 +284,8 @@ const ProductReviewsPage = () => {
           <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Sort By</label>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer">
+                <label className="block text-sm font-semibold text-warm-gray mb-2">Sort By</label>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
                   {userSkinTypeParam && <option value="relevance">Most Relevant to You</option>}
                   <option value="newest">Newest First</option>
                   <option value="oldest">Oldest First</option>
@@ -295,8 +295,8 @@ const ProductReviewsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Rating</label>
-                <select value={filterRating} onChange={(e) => setFilterRating(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer">
+                <label className="block text-sm font-semibold text-warm-gray mb-2">Rating</label>
+                <select value={filterRating} onChange={(e) => setFilterRating(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
                   <option value="all">All Ratings</option>
                   <option value="5">5 Stars</option>
                   <option value="4">4 Stars</option>
@@ -306,28 +306,28 @@ const ProductReviewsPage = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Skin Type</label>
-                <select value={filterSkinType} onChange={(e) => setFilterSkinType(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer">
+                <label className="block text-sm font-semibold text-warm-gray mb-2">Skin Type</label>
+                <select value={filterSkinType} onChange={(e) => setFilterSkinType(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
                   <option value="all">All Skin Types</option>
                   {skinTypes.map((skinType) => (<option key={skinType} value={skinType}>{skinType}</option>))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Recommendation</label>
-                <select value={filterRecommended} onChange={(e) => setFilterRecommended(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:border-sage-600 focus:outline-none text-sm cursor-pointer">
+                <label className="block text-sm font-semibold text-warm-gray mb-2">Recommendation</label>
+                <select value={filterRecommended} onChange={(e) => setFilterRecommended(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
                   <option value="all">All</option>
                   <option value="yes">Recommends</option>
                   <option value="no">Doesn't Recommend</option>
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Purchase Status</label>
+                <label className="block text-sm font-semibold text-warm-gray mb-2">Purchase Status</label>
                 <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="checkbox" checked={filterVerified} onChange={(e) => setFilterVerified(e.target.checked)} className="w-4 h-4 text-sage-600 border-gray-300 rounded focus:ring-sage-500" />
-                  <span className="text-sm text-gray-700">Verified only</span>
+                  <input type="checkbox" checked={filterVerified} onChange={(e) => setFilterVerified(e.target.checked)} className="w-4 h-4 text-primary border-blush rounded focus:ring-primary/50" />
+                  <span className="text-sm text-warm-gray">Verified only</span>
                 </label>
               </div>
-              <div className="flex items-end"><div className="text-sm text-gray-600">Showing {sortedReviews.length} of {allReviews.length} reviews</div></div>
+              <div className="flex items-end"><div className="text-sm text-warm-gray">Showing {sortedReviews.length} of {allReviews.length} reviews</div></div>
             </div>
           </div>
 
@@ -337,60 +337,60 @@ const ProductReviewsPage = () => {
               return (
                 <div key={review.id} className="bg-white rounded-2xl p-6 shadow-lg">
                   <div className="flex items-start space-x-4 mb-4">
-                    <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200 flex-shrink-0"><img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" /></div>
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-blush/30 flex-shrink-0"><img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" /></div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-900">{review.userName}</h3>
-                        {review.verified && (<span className="flex items-center space-x-1 px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full"><i className="ri-shield-check-fill"></i><span>Verified</span></span>)}
+                        <h3 className="text-lg font-semibold text-deep">{review.userName}</h3>
+                        {review.verified && (<span className="flex items-center space-x-1 px-3 py-1 bg-sage/20 text-sage text-xs font-semibold rounded-full"><i className="ri-shield-check-fill"></i><span>Verified</span></span>)}
                         {similarityBadge && (<span className={`flex items-center space-x-1 px-3 py-1 ${similarityBadge.color} text-xs font-semibold rounded-full`}><i className={similarityBadge.icon}></i><span>{similarityBadge.label}</span></span>)}
                       </div>
                       <div className="flex items-center space-x-4 mb-2">
                         <div className="flex items-center space-x-1">{renderStars(review.rating)}</div>
-                        <span className="text-sm text-gray-500">{new Date(review.date).toLocaleDateString()}</span>
-                        <span className="text-sm text-gray-500">• Used for {review.usageDuration}</span>
+                        <span className="text-sm text-warm-gray/80">{new Date(review.date).toLocaleDateString()}</span>
+                        <span className="text-sm text-warm-gray/80">• Used for {review.usageDuration}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className="text-xs text-gray-500">{review.skinType} skin • Age {review.age}</span>
+                        <span className="text-xs text-warm-gray/80">{review.skinType} skin • Age {review.age}</span>
                         <div className="flex flex-wrap gap-1">
                           {review.skinConcerns.slice(0, 2).map((concern, idx) => (
-                            <span key={idx} className={`px-2 py-1 text-xs rounded-full ${userSkinProfile.primaryConcerns.includes(concern) ? 'bg-sage-100 text-sage-800 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
+                            <span key={idx} className={`px-2 py-1 text-xs rounded-full ${userSkinProfile.primaryConcerns.includes(concern) ? 'bg-primary/10 text-primary font-medium' : 'bg-blush/50 text-warm-gray'}`}>{concern}</span>
                           ))}
                         </div>
                       </div>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100"><img src={review.productImage} alt={review.productName} className="w-full h-full object-cover" /></div>
+                      <div className="w-16 h-16 rounded-lg overflow-hidden bg-blush/30"><img src={review.productImage} alt={review.productName} className="w-full h-full object-cover" /></div>
                       <div>
-                        <p className="text-sm font-medium text-gray-900">{review.productName}</p>
-                        <div className={`text-xs font-medium ${review.wouldRecommend ? 'text-green-600' : 'text-red-600'}`}>{review.wouldRecommend ? '✓ Recommends' : "✗ Doesn't Recommend"}</div>
+                        <p className="text-sm font-medium text-deep">{review.productName}</p>
+                        <div className={`text-xs font-medium ${review.wouldRecommend ? 'text-sage' : 'text-red-600'}`}>{review.wouldRecommend ? '✓ Recommends' : "✗ Doesn't Recommend"}</div>
                       </div>
                     </div>
                   </div>
-                  <h4 className="text-xl font-semibold text-gray-900 mb-3">{review.title}</h4>
-                  <p className="text-gray-700 leading-relaxed mb-6">{review.content}</p>
+                  <h4 className="text-xl font-semibold text-deep mb-3">{review.title}</h4>
+                  <p className="text-warm-gray leading-relaxed mb-6">{review.content}</p>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                     <div>
-                      <h5 className="text-lg font-semibold text-green-700 mb-3 flex items-center space-x-2"><i className="ri-thumb-up-line"></i><span>What I Love</span></h5>
-                      <ul className="space-y-2">{review.pros.map((pro, idx) => (<li key={idx} className="flex items-start space-x-2 text-sm text-gray-700"><i className="ri-check-line text-green-600 mt-0.5 flex-shrink-0"></i><span>{pro}</span></li>))}</ul>
+                      <h5 className="text-lg font-semibold text-sage mb-3 flex items-center space-x-2"><i className="ri-thumb-up-line"></i><span>What I Love</span></h5>
+                      <ul className="space-y-2">{review.pros.map((pro, idx) => (<li key={idx} className="flex items-start space-x-2 text-sm text-warm-gray"><i className="ri-check-line text-sage mt-0.5 flex-shrink-0"></i><span>{pro}</span></li>))}</ul>
                     </div>
                     <div>
-                      <h5 className="text-lg font-semibold text-red-700 mb-3 flex items-center space-x-2"><i className="ri-thumb-down-line"></i><span>Areas for Improvement</span></h5>
-                      <ul className="space-y-2">{review.cons.map((con, idx) => (<li key={idx} className="flex items-start space-x-2 text-sm text-gray-700"><i className="ri-close-line text-red-600 mt-0.5 flex-shrink-0"></i><span>{con}</span></li>))}</ul>
+                      <h5 className="text-lg font-semibold text-red-600 mb-3 flex items-center space-x-2"><i className="ri-thumb-down-line"></i><span>Areas for Improvement</span></h5>
+                      <ul className="space-y-2">{review.cons.map((con, idx) => (<li key={idx} className="flex items-start space-x-2 text-sm text-warm-gray"><i className="ri-close-line text-red-600 mt-0.5 flex-shrink-0"></i><span>{con}</span></li>))}</ul>
                     </div>
                   </div>
                   {review.beforeAfterPhotos && (
                     <div className="mb-6">
-                      <h5 className="text-lg font-semibold text-gray-900 mb-3">Progress Photos</h5>
+                      <h5 className="text-lg font-semibold text-deep mb-3">Progress Photos</h5>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{review.beforeAfterPhotos.map((photo, idx) => (<div key={idx} className="rounded-lg overflow-hidden"><img src={photo} alt={`Progress photo ${idx + 1}`} className="w-full h-48 object-cover" /></div>))}</div>
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+                  <div className="flex items-center justify-between pt-4 border-t border-blush">
                     <div className="flex items-center space-x-4">
-                      <button className="flex items-center space-x-2 text-gray-600 hover:text-sage-600 cursor-pointer"><i className="ri-thumb-up-line"></i><span className="text-sm">Helpful ({review.helpful})</span></button>
-                      <button className="flex items-center space-x-2 text-gray-600 hover:text-sage-600 cursor-pointer"><i className="ri-share-line"></i><span className="text-sm">Share</span></button>
-                      <button className="flex items-center space-x-2 text-gray-600 hover:text-sage-600 cursor-pointer"><i className="ri-flag-line"></i><span className="text-sm">Report</span></button>
+                      <button className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-thumb-up-line"></i><span className="text-sm">Helpful ({review.helpful})</span></button>
+                      <button className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-share-line"></i><span className="text-sm">Share</span></button>
+                      <button className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-flag-line"></i><span className="text-sm">Report</span></button>
                     </div>
-                    <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${review.wouldRecommend ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <div className={`flex items-center space-x-2 px-4 py-2 rounded-full ${review.wouldRecommend ? 'bg-sage/20 text-sage' : 'bg-red-100 text-red-800'}`}>
                       <i className={review.wouldRecommend ? 'ri-heart-fill' : 'ri-heart-line'}></i>
                       <span className="text-sm font-medium">{review.wouldRecommend ? 'Recommends this product' : "Doesn't recommend"}</span>
                     </div>
@@ -402,10 +402,10 @@ const ProductReviewsPage = () => {
 
           {sortedReviews.length === 0 && (
             <div className="text-center py-12">
-              <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-gray-100 rounded-full"><i className="ri-search-line text-3xl text-gray-400"></i></div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">No reviews found</h3>
-              <p className="text-gray-600 mb-6">Try adjusting your filters to see more results.</p>
-              <button onClick={() => { setSortBy('newest'); setFilterRating('all'); setFilterSkinType('all'); setFilterRecommended('all'); setFilterVerified(false); setShowOnlySimilar(false); }} className="px-6 py-3 bg-sage-600 text-white rounded-full font-semibold hover:bg-sage-700 transition-all cursor-pointer">Clear All Filters</button>
+              <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-blush/30 rounded-full"><i className="ri-search-line text-3xl text-warm-gray/60"></i></div>
+              <h3 className="text-xl font-semibold text-deep mb-2">No reviews found</h3>
+              <p className="text-warm-gray mb-6">Try adjusting your filters to see more results.</p>
+              <button onClick={() => { setSortBy('newest'); setFilterRating('all'); setFilterSkinType('all'); setFilterRecommended('all'); setFilterVerified(false); setShowOnlySimilar(false); }} className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all cursor-pointer">Clear All Filters</button>
             </div>
           )}
         </div>

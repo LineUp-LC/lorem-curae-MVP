@@ -38,7 +38,7 @@ const ProfileEditPage = () => {
         <div className="bg-white rounded-xl p-8">
           {/* Current Profile */}
           <div className="flex items-center space-x-6 mb-8 pb-8 border-b border-gray-200">
-            <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-sage-200">
+            <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-taupe-200">
               <img 
                 src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=current-avatar&orientation=squarish"
                 alt="Current profile"
@@ -58,11 +58,11 @@ const ProfileEditPage = () => {
             <button
               onClick={() => setUploadMethod('computer')}
               className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'computer' ? 'border-sage-600 bg-sage-50' : 'border-gray-200 hover:border-sage-300'
+                uploadMethod === 'computer' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
               }`}
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-sage-100 text-sage-600 rounded-lg mr-4">
+                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 text-taupe rounded-lg mr-4">
                   <i className="ri-computer-line text-2xl"></i>
                 </div>
                 <div className="text-left">
@@ -71,18 +71,18 @@ const ProfileEditPage = () => {
                 </div>
               </div>
               {uploadMethod === 'computer' && (
-                <i className="ri-check-line text-2xl text-sage-600"></i>
+                <i className="ri-check-line text-2xl text-taupe"></i>
               )}
             </button>
 
             <button
               onClick={() => setUploadMethod('drive')}
               className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'drive' ? 'border-sage-600 bg-sage-50' : 'border-gray-200 hover:border-sage-300'
+                uploadMethod === 'drive' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
               }`}
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-coral-100 text-coral-600 rounded-lg mr-4">
+                <div className="w-12 h-12 flex items-center justify-center bg-primary-100 text-primary-600 rounded-lg mr-4">
                   <i className="ri-google-line text-2xl"></i>
                 </div>
                 <div className="text-left">
@@ -91,14 +91,14 @@ const ProfileEditPage = () => {
                 </div>
               </div>
               {uploadMethod === 'drive' && (
-                <i className="ri-check-line text-2xl text-sage-600"></i>
+                <i className="ri-check-line text-2xl text-taupe"></i>
               )}
             </button>
 
             <button
               onClick={() => setUploadMethod('provided')}
               className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'provided' ? 'border-sage-600 bg-sage-50' : 'border-gray-200 hover:border-sage-300'
+                uploadMethod === 'provided' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
               }`}
             >
               <div className="flex items-center">
@@ -111,7 +111,7 @@ const ProfileEditPage = () => {
                 </div>
               </div>
               {uploadMethod === 'provided' && (
-                <i className="ri-check-line text-2xl text-sage-600"></i>
+                <i className="ri-check-line text-2xl text-taupe"></i>
               )}
             </button>
           </div>
@@ -125,7 +125,7 @@ const ProfileEditPage = () => {
               <input type="file" accept="image/*" className="hidden" id="file-upload" />
               <label
                 htmlFor="file-upload"
-                className="inline-block px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="inline-block px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap"
               >
                 Choose File
               </label>
@@ -134,10 +134,10 @@ const ProfileEditPage = () => {
 
           {uploadMethod === 'drive' && (
             <div className="border-2 border-gray-200 rounded-lg p-12 text-center">
-              <i className="ri-google-line text-5xl text-coral-600 mb-4"></i>
+              <i className="ri-google-line text-5xl text-primary-600 mb-4"></i>
               <p className="text-gray-900 font-medium mb-2">Connect to Google Drive</p>
               <p className="text-sm text-gray-600 mb-4">Access your photos from the cloud</p>
-              <button className="px-6 py-3 bg-coral-600 text-white rounded-lg font-medium hover:bg-coral-700 transition-colors cursor-pointer whitespace-nowrap">
+              <button className="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-dark transition-colors cursor-pointer whitespace-nowrap">
                 Connect Google Drive
               </button>
             </div>
@@ -150,7 +150,7 @@ const ProfileEditPage = () => {
                 {providedAvatars.map((avatar, idx) => (
                   <button
                     key={idx}
-                    className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-sage-600 transition-all cursor-pointer"
+                    className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-taupe transition-all cursor-pointer"
                   >
                     <img 
                       src={avatar}
@@ -172,7 +172,7 @@ const ProfileEditPage = () => {
               >
                 Cancel
               </button>
-              <button className="px-6 py-3 bg-sage-600 text-white rounded-lg font-medium hover:bg-sage-700 transition-colors cursor-pointer whitespace-nowrap">
+              <button className="px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap">
                 Save Profile Picture
               </button>
             </div>

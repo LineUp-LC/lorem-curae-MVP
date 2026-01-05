@@ -116,7 +116,7 @@ export default function ServiceDetailPage() {
           <div className="mb-8">
             <button
               onClick={() => navigate('/services/search')}
-              className="flex items-center gap-2 text-cream-800 hover:text-coral-900 mb-4 cursor-pointer"
+              className="flex items-center gap-2 text-cream-800 hover:text-primary-900 mb-4 cursor-pointer"
             >
               <i className="ri-arrow-left-line"></i>
               <span>Back to Search</span>
@@ -129,11 +129,11 @@ export default function ServiceDetailPage() {
                 </h1>
                 <div className="flex items-center gap-4 mb-4">
                   <div className="flex items-center gap-2">
-                    <i className="ri-star-fill text-coral-400 text-xl"></i>
+                    <i className="ri-star-fill text-primary text-xl"></i>
                     <span className="font-bold text-gray-800 text-xl">{businessData.rating}</span>
                     <span className="text-black-600">({businessData.reviewCount} reviews)</span>
                   </div>
-                  <span className="text-coral-400">•</span>
+                  <span className="text-primary">•</span>
                   <button
                     onClick={() => setShowReviewModal(true)}
                     className="text-gray-800 hover:underline cursor-pointer"
@@ -202,7 +202,7 @@ export default function ServiceDetailPage() {
                       />
                       <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
                         <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center">
-                          <i className="ri-play-fill text-3xl text-forest-800"></i>
+                          <i className="ri-play-fill text-3xl text-deep"></i>
                         </div>
                       </div>
                     </div>
@@ -212,30 +212,30 @@ export default function ServiceDetailPage() {
 
               {/* About */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-4">
+                <h2 className="font-serif text-3xl font-bold text-deep mb-4">
                   About
                 </h2>
                 <p className="text-gray-600 leading-relaxed mb-6">{businessData.description}</p>
                 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
-                    <i className="ri-map-pin-line text-forest-800 text-xl mt-1"></i>
+                    <i className="ri-map-pin-line text-deep text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-forest-800 mb-1">Location</p>
+                      <p className="font-medium text-deep mb-1">Location</p>
                       <p className="text-gray-600 text-sm">{businessData.location}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="ri-phone-line text-forest-800 text-xl mt-1"></i>
+                    <i className="ri-phone-line text-deep text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-forest-800 mb-1">Phone</p>
+                      <p className="font-medium text-deep mb-1">Phone</p>
                       <p className="text-gray-600 text-sm">{businessData.phone}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-3">
-                    <i className="ri-time-line text-forest-800 text-xl mt-1"></i>
+                    <i className="ri-time-line text-deep text-xl mt-1"></i>
                     <div>
-                      <p className="font-medium text-forest-800 mb-1">Hours</p>
+                      <p className="font-medium text-deep mb-1">Hours</p>
                       <p className="text-gray-600 text-sm">{businessData.hours}</p>
                     </div>
                   </div>
@@ -251,13 +251,13 @@ export default function ServiceDetailPage() {
                   {mockTreatments.map((treatment) => (
                     <div
                       key={treatment.id}
-                      className="p-6 border border-gray-200 rounded-xl hover:border-coral-800/30 transition-all"
+                      className="p-6 border border-gray-200 rounded-xl hover:border-primary-800/30 transition-all"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <h3 className="font-serif text-2xl font-bold text-gray-800">
                           {treatment.name}
                         </h3>
-                        <span className="text-xl font-bold text-forest-800">{treatment.price}</span>
+                        <span className="text-xl font-bold text-deep">{treatment.price}</span>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
                         <i className="ri-time-line text-cream-800"></i>
@@ -271,7 +271,7 @@ export default function ServiceDetailPage() {
 
               {/* Team */}
               <div className="bg-white rounded-2xl shadow-sm p-8">
-                <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+                <h2 className="font-serif text-3xl font-bold text-deep mb-6">
                   Meet Our Team
                 </h2>
                 <div className="grid md:grid-cols-3 gap-6">
@@ -284,19 +284,19 @@ export default function ServiceDetailPage() {
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <h3 className="font-serif text-xl font-bold text-forest-800 mb-1">
+                      <h3 className="font-serif text-xl font-bold text-deep mb-1">
                         {employee.name}
                       </h3>
                       <p className="text-sm text-gray-600 mb-2">{employee.title}</p>
                       <div className="flex items-center justify-center gap-1 mb-3">
-                        <i className="ri-star-fill text-coral-400"></i>
-                        <span className="font-medium text-forest-800">{employee.rating}</span>
+                        <i className="ri-star-fill text-primary"></i>
+                        <span className="font-medium text-deep">{employee.rating}</span>
                       </div>
                       <div className="flex flex-wrap gap-2 justify-center">
                         {employee.specialties.map((specialty, idx) => (
                           <span
                             key={idx}
-                            className="px-2 py-1 bg-cream-100 text-forest-800 text-xs rounded-full"
+                            className="px-2 py-1 bg-cream-100 text-deep text-xs rounded-full"
                           >
                             {specialty}
                           </span>
@@ -311,7 +311,7 @@ export default function ServiceDetailPage() {
 
           {activeTab === 'reviews' && (
             <div className="bg-white rounded-2xl shadow-sm p-8">
-              <h2 className="font-serif text-3xl font-bold text-forest-800 mb-6">
+              <h2 className="font-serif text-3xl font-bold text-deep mb-6">
                 Customer Reviews
               </h2>
               <p className="text-gray-600">Reviews section coming soon...</p>
@@ -325,7 +325,7 @@ export default function ServiceDetailPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full p-8">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="font-serif text-3xl font-bold text-forest-800">
+              <h3 className="font-serif text-3xl font-bold text-deep">
                 Write a Review
               </h3>
               <button
@@ -339,17 +339,17 @@ export default function ServiceDetailPage() {
             
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-forest-800 mb-2">Rating</label>
+                <label className="block text-sm font-medium text-deep mb-2">Rating</label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button key={star} className="cursor-pointer">
-                      <i className="ri-star-line text-3xl text-gray-300 hover:text-coral-400"></i>
+                      <i className="ri-star-line text-3xl text-gray-300 hover:text-primary"></i>
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-forest-800 mb-2">Your Review</label>
+                <label className="block text-sm font-medium text-deep mb-2">Your Review</label>
                 <textarea
                   rows={6}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2C5F4F]/20"
@@ -357,7 +357,7 @@ export default function ServiceDetailPage() {
                   maxLength={500}
                 ></textarea>
               </div>
-              <button className="w-full px-6 py-3 bg-forest-800 text-white rounded-lg hover:bg-forest-900 transition-colors font-medium whitespace-nowrap cursor-pointer">
+              <button className="w-full px-6 py-3 bg-deep text-white rounded-lg hover:bg-deep-900 transition-colors font-medium whitespace-nowrap cursor-pointer">
                 Submit Review
               </button>
             </div>

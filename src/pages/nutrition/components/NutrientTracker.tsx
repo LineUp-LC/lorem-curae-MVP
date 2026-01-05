@@ -146,7 +146,7 @@ const NutrientTracker = () => {
       red: { bg: 'bg-red-100', text: 'text-red-600', progress: 'bg-red-500' },
       amber: { bg: 'bg-amber-100', text: 'text-amber-600', progress: 'bg-amber-500' },
       teal: { bg: 'bg-light/30', text: 'text-primary', progress: 'bg-primary' },
-      green: { bg: 'bg-green-100', text: 'text-green-600', progress: 'bg-green-500' },
+      green: { bg: 'bg-taupe-100', text: 'text-taupe', progress: 'bg-taupe-500' },
       indigo: { bg: 'bg-indigo-100', text: 'text-indigo-600', progress: 'bg-indigo-600' },
     };
     return colors[color] || colors.blue;
