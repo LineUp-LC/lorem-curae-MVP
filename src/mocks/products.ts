@@ -1,28 +1,4 @@
-export interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  category: string;
-  price: number;
-  rating: number;
-  reviewCount: number;
-  image: string;
-  description: string;
-  skinTypes: string[];
-  concerns: string[];
-  keyIngredients: string[];
-  inStock: boolean;
-  preferences?: {
-    vegan?: boolean;
-    crueltyFree?: boolean;
-    fragranceFree?: boolean;
-    glutenFree?: boolean;
-    alcoholFree?: boolean;
-    siliconeFree?: boolean;
-    plantBased?: boolean;
-    chemicalFree?: boolean;
-  };
-}
+import type { Product } from '../types/product';
 
 export const productData: Product[] = [
   {
@@ -39,6 +15,12 @@ export const productData: Product[] = [
     concerns: ['hydration', 'sensitivity'],
     keyIngredients: ['Hyaluronic Acid', 'Ceramides', 'Glycerin'],
     inStock: true,
+    size: { value: 200, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Hyaluronic Acid', isKeyActive: true },
+      { name: 'Ceramides', isKeyActive: true },
+      { name: 'Glycerin', concentration: 5, concentrationUnit: '%' },
+    ],
     preferences: { vegan: true, crueltyFree: true, fragranceFree: true, alcoholFree: true },
   },
   {
@@ -55,6 +37,12 @@ export const productData: Product[] = [
     concerns: ['brightening', 'dark spots', 'dullness'],
     keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'],
     inStock: true,
+    size: { value: 30, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Vitamin C', concentration: 15, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Ferulic Acid', concentration: 1, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Vitamin E', concentration: 1, concentrationUnit: '%' },
+    ],
     preferences: { crueltyFree: true, plantBased: true, glutenFree: true },
   },
   {
@@ -71,6 +59,12 @@ export const productData: Product[] = [
     concerns: ['hydration', 'barrier repair', 'sensitivity'],
     keyIngredients: ['Ceramides', 'Niacinamide', 'Squalane'],
     inStock: true,
+    size: { value: 50, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Ceramides', isKeyActive: true },
+      { name: 'Niacinamide', concentration: 5, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Squalane', concentration: 10, concentrationUnit: '%' },
+    ],
     preferences: { vegan: true, fragranceFree: true, siliconeFree: true },
   },
   {
@@ -87,6 +81,12 @@ export const productData: Product[] = [
     concerns: ['acne', 'texture', 'pores'],
     keyIngredients: ['Salicylic Acid', 'Niacinamide', 'Zinc'],
     inStock: true,
+    size: { value: 30, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Salicylic Acid', concentration: 2, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Niacinamide', concentration: 4, concentrationUnit: '%' },
+      { name: 'Zinc PCA', concentration: 1, concentrationUnit: '%' },
+    ],
     preferences: { crueltyFree: true, alcoholFree: true },
   },
   {
@@ -103,6 +103,12 @@ export const productData: Product[] = [
     concerns: ['sun protection', 'anti-aging'],
     keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'],
     inStock: true,
+    size: { value: 50, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Zinc Oxide', concentration: 15, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Titanium Dioxide', concentration: 5, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Vitamin E', isKeyActive: false },
+    ],
     preferences: { vegan: true, crueltyFree: true, chemicalFree: true },
   },
   {
@@ -119,6 +125,12 @@ export const productData: Product[] = [
     concerns: ['anti-aging', 'fine lines', 'texture'],
     keyIngredients: ['Retinol', 'Peptides', 'Hyaluronic Acid'],
     inStock: true,
+    size: { value: 30, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Retinol', concentration: 0.5, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Peptides', isKeyActive: true },
+      { name: 'Hyaluronic Acid', concentration: 2, concentrationUnit: '%' },
+    ],
     preferences: { crueltyFree: true, fragranceFree: true, glutenFree: true },
   },
   {
@@ -135,6 +147,12 @@ export const productData: Product[] = [
     concerns: ['pores', 'texture', 'oil control'],
     keyIngredients: ['Kaolin Clay', 'Hyaluronic Acid', 'Aloe Vera'],
     inStock: true,
+    size: { value: 75, unit: 'g' },
+    activeIngredients: [
+      { name: 'Kaolin Clay', isKeyActive: true },
+      { name: 'Hyaluronic Acid', isKeyActive: true },
+      { name: 'Aloe Vera', isKeyActive: false },
+    ],
     preferences: { vegan: true, plantBased: true, alcoholFree: true, siliconeFree: true },
   },
   {
@@ -151,6 +169,12 @@ export const productData: Product[] = [
     concerns: ['pores', 'oil control', 'texture'],
     keyIngredients: ['Niacinamide', 'Zinc', 'Hyaluronic Acid'],
     inStock: true,
+    size: { value: 30, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Niacinamide', concentration: 10, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Zinc PCA', concentration: 1, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Hyaluronic Acid', concentration: 1, concentrationUnit: '%' },
+    ],
     preferences: { vegan: true, crueltyFree: true, fragranceFree: true },
   },
   {
@@ -167,6 +191,12 @@ export const productData: Product[] = [
     concerns: ['sensitivity', 'redness', 'hydration'],
     keyIngredients: ['Centella Asiatica', 'Ceramides', 'Panthenol'],
     inStock: true,
+    size: { value: 50, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Centella Asiatica', concentration: 70, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Ceramides', isKeyActive: true },
+      { name: 'Panthenol', concentration: 5, concentrationUnit: '%' },
+    ],
     preferences: { vegan: true, fragranceFree: true, alcoholFree: true, plantBased: true },
   },
   {
@@ -183,6 +213,12 @@ export const productData: Product[] = [
     concerns: ['texture', 'dullness', 'pores'],
     keyIngredients: ['Glycolic Acid', 'Salicylic Acid', 'Witch Hazel'],
     inStock: true,
+    size: { value: 200, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Glycolic Acid', concentration: 7, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Salicylic Acid', concentration: 0.5, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Witch Hazel', isKeyActive: false },
+    ],
     preferences: { crueltyFree: true, siliconeFree: true },
   },
   {
@@ -199,6 +235,12 @@ export const productData: Product[] = [
     concerns: ['anti-aging', 'dark circles', 'fine lines'],
     keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'],
     inStock: true,
+    size: { value: 15, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Peptides', isKeyActive: true },
+      { name: 'Caffeine', concentration: 5, concentrationUnit: '%', isKeyActive: true },
+      { name: 'Hyaluronic Acid', concentration: 1, concentrationUnit: '%' },
+    ],
     preferences: { crueltyFree: true, fragranceFree: true },
   },
   {
@@ -215,6 +257,12 @@ export const productData: Product[] = [
     concerns: ['cleansing', 'hydration'],
     keyIngredients: ['Hyaluronic Acid', 'Aloe Vera', 'Green Tea'],
     inStock: true,
+    size: { value: 150, unit: 'ml' },
+    activeIngredients: [
+      { name: 'Hyaluronic Acid', isKeyActive: true },
+      { name: 'Aloe Vera', isKeyActive: false },
+      { name: 'Green Tea Extract', isKeyActive: false },
+    ],
     preferences: { vegan: true, plantBased: true, glutenFree: true, alcoholFree: true },
   },
 ];
