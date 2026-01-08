@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
-import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
+import { productMatchesUserConcerns } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
 
 // Static data moved outside component to prevent recreation on each render
@@ -53,8 +53,6 @@ export default function ProductCatalog({
   const [sortBy, setSortBy] = useState<string>('popular');
   const [timeOfDay, setTimeOfDay] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [surveyCompleted, setSurveyCompleted] = useState(false);
-  const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
 
   // Safe fallback for compareList to prevent undefined errors
   const safeCompareList = compareList ?? [];
@@ -70,34 +68,6 @@ export default function ProductCatalog({
   // Safe fallback for userConcerns
   const safeUserConcerns = userConcerns ?? [];
 
-  // Load user preferences from skinSurveyData
-  useEffect(() => {
-    const skinData = localStorage.getItem('skinSurveyData');
-    if (skinData) {
-      const parsed = JSON.parse(skinData);
-      if (parsed.preferences) {
-        setUserPreferences(parsed.preferences);
-      }
-    }
-  }, []);
-
-  // Preference label mapping
-  const preferenceLabels: Record<string, string> = {
-    vegan: 'Vegan',
-    crueltyFree: 'Cruelty-Free',
-    fragranceFree: 'Fragrance-Free',
-    glutenFree: 'Gluten-Free',
-    alcoholFree: 'Alcohol-Free',
-    siliconeFree: 'Silicone-Free',
-    plantBased: 'Plant-Based',
-    chemicalFree: 'Chemical-Free',
-  };
-
-  // Check if a product preference matches user's preferences
-  const isPreferenceMatching = (prefKey: string): boolean => {
-    return userPreferences[prefKey] === true;
-  };
-
   // Detect scroll for translucent background effect
   useEffect(() => {
     const handleScroll = () => {
@@ -105,13 +75,6 @@ export default function ProductCatalog({
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Check if user has completed the skin survey
-  useEffect(() => {
-    const userProfile = localStorage.getItem('userProfile');
-    const skinSurveyData = localStorage.getItem('skinSurveyData');
-    setSurveyCompleted(!!(userProfile || skinSurveyData));
   }, []);
 
   // Handle category from URL params (from homepage CTAs)
@@ -332,60 +295,6 @@ export default function ProductCatalog({
             </div>
           </div>
 
-          {/* Key Ingredients - with highlighting for matching ingredients */}
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-warm-gray mb-2">Key Ingredients:</p>
-            <div className="flex flex-wrap gap-1">
-              {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
-                const isMatchingIngredient = matchesIngredient(ingredient, safeUserConcerns);
-                
-                return (
-                  <span
-                    key={idx}
-                    className={`px-2 py-1 text-xs rounded-full border ${
-                      isMatchingIngredient
-                        ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                        : 'bg-cream text-warm-gray border-blush'
-                    }`}
-                  >
-                    {ingredient}
-                  </span>
-                );
-              })}
-              {product.keyIngredients.length > 3 && (
-                <span className="px-2 py-1 bg-cream text-warm-gray text-xs rounded-full border border-blush">
-                  +{product.keyIngredients.length - 3}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Preference Tags - Task 9 */}
-          {product.preferences && Object.keys(product.preferences).some(k => product.preferences?.[k as keyof typeof product.preferences]) && (
-            <div className="mb-4">
-              <p className="text-xs font-semibold text-warm-gray mb-2">Product Preferences:</p>
-              <div className="flex flex-wrap gap-1">
-                {Object.entries(product.preferences).map(([key, value]) => {
-                  if (!value) return null;
-                  const isMatching = isPreferenceMatching(key);
-                  return (
-                    <span
-                      key={key}
-                      className={`px-2 py-1 text-xs rounded-full border ${
-                        isMatching
-                          ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                          : 'bg-cream text-warm-gray border-blush'
-                      }`}
-                    >
-                      {isMatching && <i className="ri-check-line mr-0.5"></i>}
-                      {preferenceLabels[key] || key}
-                    </span>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
           <div className="flex items-center justify-between pt-4 border-t border-blush">
             <div>
               <p className="text-xs text-warm-gray/80 mb-1">Estimated price range</p>
@@ -407,30 +316,8 @@ export default function ProductCatalog({
           Discover Your Perfect Match
         </h1>
         <p className="text-xl text-warm-gray max-w-3xl mx-auto mb-8">
-          Explore our curated collection of clean, science-backed skincare products tailored
-          to your unique needs
+          Discover products that truly fit your skin profile, compare them side‑by‑side, and shop confidently through reputable retailers vetted by our community
         </p>
-
-        {/* Quiz CTA Banner - Only show if survey not completed */}
-        {!surveyCompleted && (
-          <div className="bg-gradient-to-r from-primary to-dark rounded-3xl p-8 mb-12 shadow-xl">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-              <div className="text-left text-white">
-                <h3 className="text-2xl font-serif mb-2">Not sure where to start?</h3>
-                <p className="text-light">
-                  Take our personalized skin quiz to find products perfect for you
-                </p>
-              </div>
-              <button
-                onClick={() => navigate('/skin-survey-account')}
-                className="px-8 py-4 bg-white text-primary-700 rounded-full font-semibold hover:bg-cream transition-all shadow-lg whitespace-nowrap cursor-pointer flex items-center space-x-2"
-              >
-                <i className="ri-questionnaire-line text-xl"></i>
-                <span>Start Skin Quiz</span>
-              </button>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Search Bar */}
@@ -631,7 +518,7 @@ export default function ProductCatalog({
         </div>
       )}
 
-      {/* Comparison Bar - MERGED: All enhancements + QA accessibility fixes */}
+      {/* Comparison Bar */}
       {showCompareBar && (
         <div
           ref={compareBarRef}
