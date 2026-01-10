@@ -6,6 +6,7 @@ import RoutineBuilder from './components/RoutineBuilder';
 import ConflictDetection from './components/ConflictDetection';
 import NotesSection from './components/NotesSection';
 import { sessionState } from '../../lib/utils/sessionState';
+import RoutineTutorial from './components/RoutineTutorial';
 
 export default function RoutinesPage() {
   const [searchParams] = useSearchParams();
@@ -16,6 +17,15 @@ export default function RoutinesPage() {
   const [showBrowsePopup, setShowBrowsePopup] = useState(false);
   const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);
   const [savedProducts, setSavedProducts] = useState<any[]>([]);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check if tutorial should show on first visit
+  useEffect(() => {
+    const tutorialComplete = localStorage.getItem('routineBuilderTutorialComplete');
+    if (!tutorialComplete) {
+      setShowTutorial(true);
+    }
+  }, []);
 
   useEffect(() => {
     sessionState.navigateTo('/routines');
@@ -299,6 +309,11 @@ export default function RoutinesPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* First-Time Tutorial */}
+      {showTutorial && (
+        <RoutineTutorial onComplete={() => setShowTutorial(false)} />
       )}
 
       <Footer />
