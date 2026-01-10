@@ -328,7 +328,29 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What's your skin tone?</h2>
-            <p className="text-warm-gray mb-8">Select your Fitzpatrick skin type. Hover over swatches for details.</p>
+            <p className="text-warm-gray mb-4">Select your Fitzpatrick skin type. Hover over swatches for details.</p>
+
+            {/* Why we ask this explanation */}
+            <div className="bg-cream/50 border border-blush rounded-lg p-4 mb-8">
+              <div className="flex items-start gap-3">
+                <i className="ri-information-line text-primary text-xl flex-shrink-0 mt-0.5"></i>
+                <div>
+                  <p className="text-sm text-warm-gray leading-relaxed">
+                    <span className="font-medium text-deep">Why we ask this:</span> We use your skin tone to personalize product recommendations and sun-safety guidance. All skin tones can experience sun damage, even if redness is less visible.
+                  </p>
+                  <a
+                    href="https://www.aad.org/public/everyday-care/sun-protection"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-sm text-primary hover:text-dark font-medium mt-2 transition-colors"
+                  >
+                    Learn more about sun safety
+                    <i className="ri-external-link-line"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {skinToneOptions.map((tone) => (
                 <button
