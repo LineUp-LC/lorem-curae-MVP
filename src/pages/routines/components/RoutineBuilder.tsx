@@ -398,7 +398,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         onDragEnd={handleDragEnd}
       >
         <div className="relative mb-8">
-          <div className="overflow-x-auto pb-4 scrollbar-hide">
+          <div className="overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
             <SortableContext items={stepIds} strategy={horizontalListSortingStrategy}>
               <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
                 {filteredSteps.map((step, index) => (
