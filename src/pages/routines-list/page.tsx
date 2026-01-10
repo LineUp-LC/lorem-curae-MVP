@@ -176,8 +176,12 @@ export default function RoutinesListPage() {
     navigate('/routines');
   };
 
-  const handleViewRoutine = (id: string) => {
-    navigate(`/routines?id=${id}`);
+  const handleViewNotes = (id: string) => {
+    navigate(`/routines?id=${id}&tab=notes`);
+  };
+
+  const handleEditRoutine = (id: string) => {
+    navigate(`/routines?id=${id}&tab=routine`);
   };
 
   return (
@@ -336,14 +340,23 @@ export default function RoutinesListPage() {
                     </div>
                   </div>
 
-                  {/* Action Button */}
-                  {/* CHANGED: px-6 py-3 -> px-4 sm:px-6 py-2.5 sm:py-3 */}
-                  <button
-                    onClick={() => handleViewRoutine(routine.id)}
-                    className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
-                  >
-                    View & Edit Routine
-                  </button>
+                  {/* Action Buttons: View Notes and Edit Routine */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleViewNotes(routine.id)}
+                      className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                    >
+                      <i className="ri-file-text-line mr-1 sm:mr-2"></i>
+                      View Notes
+                    </button>
+                    <button
+                      onClick={() => handleEditRoutine(routine.id)}
+                      className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                    >
+                      <i className="ri-pencil-line mr-1 sm:mr-2"></i>
+                      Edit
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}

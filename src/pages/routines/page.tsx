@@ -19,22 +19,26 @@ export default function RoutinesPage() {
 
   useEffect(() => {
     sessionState.navigateTo('/routines');
-    
+
     // Load routine name from URL params or localStorage
     const routineId = searchParams.get('id');
+    const tabParam = searchParams.get('tab');
+
+    // Set active tab based on URL param
+    if (tabParam === 'notes') {
+      setActiveTab('notes');
+    } else if (tabParam === 'routine') {
+      setActiveTab('routine');
+    }
+
     if (routineId) {
-      // If coming from footer link (id=1), switch to notes tab
-      if (routineId === '1') {
-        setActiveTab('notes');
-      }
-      
       const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
       const routine = savedRoutines.find((r: any) => r.id === routineId);
       if (routine) {
         setRoutineName(routine.name);
       }
     }
-    
+
     // Load saved products
     const products = JSON.parse(localStorage.getItem('savedProducts') || '[]');
     setSavedProducts(products);
