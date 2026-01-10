@@ -352,68 +352,103 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
   const getExpirationStatus = (expirationDate?: Date) => {
     if (!expirationDate) return null;
-    
+
     const now = new Date();
     const daysUntilExpiration = Math.ceil((expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    
+
     if (daysUntilExpiration < 0) {
-      return { status: 'expired', color: 'text-red-600 bg-red-50', text: 'Expired', icon: 'ri-error-warning-line' };
+      return {
+        status: 'expired',
+        color: 'text-red-600 bg-red-50',
+        text: 'Expired',
+        icon: 'ri-error-warning-line',
+        tooltip: 'This product has expired. Replace it to avoid skin irritation or reduced effectiveness.'
+      };
     } else if (daysUntilExpiration <= 30) {
-      return { status: 'expiring-soon', color: 'text-amber-600 bg-amber-50', text: `Expires in ${daysUntilExpiration} days`, icon: 'ri-time-line' };
+      return {
+        status: 'expiring-soon',
+        color: 'text-amber-600 bg-amber-50',
+        text: `Expires in ${daysUntilExpiration} days`,
+        icon: 'ri-time-line',
+        tooltip: 'This product is expiring soon. Consider reordering to avoid running out.'
+      };
     } else if (daysUntilExpiration <= 90) {
-      return { status: 'valid', color: 'text-blue-600 bg-blue-50', text: `Expires in ${Math.ceil(daysUntilExpiration / 30)} months`, icon: 'ri-calendar-line' };
+      return {
+        status: 'valid',
+        color: 'text-blue-600 bg-blue-50',
+        text: `Expires in ${Math.ceil(daysUntilExpiration / 30)} months`,
+        icon: 'ri-calendar-line',
+        tooltip: 'This product is still good to use. We\'ll remind you when it\'s time to reorder.'
+      };
     }
-    return { status: 'fresh', color: 'text-sage bg-sage/10', text: 'Fresh', icon: 'ri-checkbox-circle-line' };
+    return {
+      status: 'fresh',
+      color: 'text-sage bg-sage/10',
+      text: 'Fresh',
+      icon: 'ri-checkbox-circle-line',
+      tooltip: 'This product is fresh and at peak effectiveness.'
+    };
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-8">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-3xl font-bold text-deep mb-2">
             Build Your Routine
           </h2>
           <p className="text-warm-gray text-sm">
-            Follow our expert-guided template for a successful skincare routine
+            Drag to reorder steps, add products, and customize your perfect routine
           </p>
         </div>
 
         {/* Time Filter */}
-        <div className="flex bg-cream rounded-full p-1">
-          <button
-            onClick={() => setTimeFilter('morning')}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-              timeFilter === 'morning'
-                ? 'bg-white text-deep shadow-sm'
-                : 'text-warm-gray'
-            }`}
-          >
-            <i className="ri-sun-line mr-2"></i>
-            Morning
-          </button>
-          <button
-            onClick={() => setTimeFilter('evening')}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-              timeFilter === 'evening'
-                ? 'bg-white text-deep shadow-sm'
-                : 'text-warm-gray'
-            }`}
-          >
-            <i className="ri-moon-line mr-2"></i>
-            Evening
-          </button>
-          <button
-            onClick={() => setTimeFilter('both')}
-            className={`px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-              timeFilter === 'both'
-                ? 'bg-white text-deep shadow-sm'
-                : 'text-warm-gray'
-            }`}
-          >
-            <i className="ri-time-line mr-2"></i>
-            Both
-          </button>
+        <div className="flex flex-col items-start lg:items-end gap-1">
+          <div className="flex bg-cream rounded-full p-1">
+            <button
+              onClick={() => setTimeFilter('morning')}
+              title="Show only morning routine steps (cleansing, SPF, etc.)"
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                timeFilter === 'morning'
+                  ? 'bg-white text-deep shadow-sm'
+                  : 'text-warm-gray hover:text-deep'
+              }`}
+            >
+              <i className="ri-sun-line mr-1 sm:mr-2"></i>
+              <span className="hidden sm:inline">Morning</span>
+              <span className="sm:hidden">AM</span>
+            </button>
+            <button
+              onClick={() => setTimeFilter('evening')}
+              title="Show only evening routine steps (treatments, retinol, etc.)"
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                timeFilter === 'evening'
+                  ? 'bg-white text-deep shadow-sm'
+                  : 'text-warm-gray hover:text-deep'
+              }`}
+            >
+              <i className="ri-moon-line mr-1 sm:mr-2"></i>
+              <span className="hidden sm:inline">Evening</span>
+              <span className="sm:hidden">PM</span>
+            </button>
+            <button
+              onClick={() => setTimeFilter('both')}
+              title="Show all routine steps for the full day"
+              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                timeFilter === 'both'
+                  ? 'bg-white text-deep shadow-sm'
+                  : 'text-warm-gray hover:text-deep'
+              }`}
+            >
+              <i className="ri-time-line mr-1 sm:mr-2"></i>
+              <span className="hidden sm:inline">Both</span>
+              <span className="sm:hidden">All</span>
+            </button>
+          </div>
+          <p className="text-xs text-warm-gray/70">
+            Filter by time of day
+          </p>
         </div>
       </div>
 
@@ -473,13 +508,21 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                         {step.title}
                       </h3>
                       {step.recommended && (
-                        <span className="px-3 py-1 bg-light/20 text-primary text-xs font-medium rounded-full whitespace-nowrap">
+                        <span
+                          className="px-3 py-1 bg-light/20 text-primary text-xs font-medium rounded-full whitespace-nowrap cursor-help"
+                          title="This step is essential for most skin types and recommended by dermatologists"
+                        >
                           Recommended
                         </span>
                       )}
                     </div>
                     {step.timeOfDay !== 'both' && (
-                      <span className="inline-flex items-center px-3 py-1 bg-blush/50 text-warm-gray text-xs font-medium rounded-full whitespace-nowrap mb-2">
+                      <span
+                        className="inline-flex items-center px-3 py-1 bg-blush/50 text-warm-gray text-xs font-medium rounded-full whitespace-nowrap mb-2 cursor-help"
+                        title={step.timeOfDay === 'morning'
+                          ? 'Best used in the morning — this step protects or energizes your skin for the day'
+                          : 'Best used in the evening — this step repairs and treats while you sleep'}
+                      >
                         <i className={`${step.timeOfDay === 'morning' ? 'ri-sun-line' : 'ri-moon-line'} mr-1`}></i>
                         {step.timeOfDay === 'morning' ? 'Morning Only' : 'Evening Only'}
                       </span>
@@ -521,6 +564,8 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                           <button
                             onClick={() => handleRemoveProduct(step.id)}
                             className="ml-auto px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
+                            title="Remove this product from your routine"
+                            aria-label={`Remove ${step.product?.name} from routine`}
                           >
                             <i className="ri-delete-bin-line"></i>
                           </button>
@@ -535,7 +580,10 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                           {(() => {
                             const expStatus = getExpirationStatus(step.product.expirationDate);
                             return expStatus ? (
-                              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium ${expStatus.color}`}>
+                              <span
+                                className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium cursor-help ${expStatus.color}`}
+                                title={expStatus.tooltip}
+                              >
                                 <i className={expStatus.icon}></i>
                                 {expStatus.text}
                               </span>
@@ -562,21 +610,25 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                   </div>
                 ) : (
                   <div>
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <button
                         onClick={() => setShowProductSelector(step.id)}
                         className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                        title="Choose from products you've previously saved or purchased"
                       >
                         <i className="ri-add-line mr-2"></i>
                         Add from Saved
                       </button>
+                      {index === 0 && <p className="text-xs text-warm-gray/70 text-center">Products you've bookmarked appear here</p>}
                       <button
                         onClick={() => handleBrowseProducts(step.title)}
                         className="w-full px-6 py-3 bg-white border-2 border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                        title="Discover new products for this step"
                       >
                         <i className="ri-search-line mr-2"></i>
                         Browse {step.title}s
                       </button>
+                      {index === 0 && <p className="text-xs text-warm-gray/70 text-center">Find and save new products</p>}
                     </div>
 
                     {/* Product Selector Modal */}
@@ -617,11 +669,14 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                             ))}
                           {savedProducts.filter(p => p.category === step.title).length === 0 && (
                             <div className="text-center py-6 text-warm-gray text-sm">
-                              No saved products for this category.
-                              <br />
+                              <i className="ri-bookmark-line text-2xl text-blush mb-2 block"></i>
+                              <p className="font-medium text-deep mb-1">No saved {step.title.toLowerCase()}s yet</p>
+                              <p className="text-xs text-warm-gray/80 mb-3">
+                                Browse products and tap the bookmark icon to save them here
+                              </p>
                               <button
                                 onClick={() => handleBrowseProducts(step.title)}
-                                className="text-primary hover:underline mt-2 cursor-pointer whitespace-nowrap"
+                                className="text-primary hover:underline cursor-pointer whitespace-nowrap"
                               >
                                 Browse {step.title}s →
                               </button>
@@ -637,20 +692,30 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
                 {/* Add Custom Step Button Card */}
                 <div
-                  className="border-2 border-dashed border-primary/40 rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer flex flex-col items-center justify-center text-center"
+                  className="group border-2 border-dashed border-primary/40 rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer flex flex-col items-center justify-center text-center"
                   style={{ width: '380px', flexShrink: 0, minHeight: '300px' }}
                   onClick={() => {
                     if (onBrowseClick) onBrowseClick();
                   }}
                 >
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                    <i className="ri-add-line text-3xl text-primary"></i>
+                    <i className="ri-add-line text-3xl text-primary group-hover:scale-110 transition-transform"></i>
                   </div>
                   <h4 className="font-serif text-xl font-bold text-deep mb-2">+ Add Custom Step</h4>
-                  <p className="text-warm-gray text-sm mb-4">
-                    Add a product that doesn't fit the template
+                  <p className="text-warm-gray text-sm mb-3">
+                    For products that don't fit the standard steps
                   </p>
-                  <span className="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full">
+
+                  {/* Examples of custom steps */}
+                  <div className="flex flex-wrap justify-center gap-1.5 mb-4">
+                    {['Essence', 'Face Mist', 'Sheet Mask', 'Spot Treatment'].map((example) => (
+                      <span key={example} className="px-2 py-0.5 bg-blush/50 text-warm-gray text-xs rounded-full">
+                        {example}
+                      </span>
+                    ))}
+                  </div>
+
+                  <span className="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
                     Browse Products
                   </span>
                 </div>

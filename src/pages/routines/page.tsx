@@ -153,29 +153,38 @@ export default function RoutinesPage() {
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-white rounded-full p-1 shadow-sm">
+          <div className="flex flex-col items-center mb-8">
+            <div className="inline-flex bg-white rounded-full p-1 shadow-sm mb-2">
               <button
                 onClick={() => setActiveTab('routine')}
-                className={`px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                title="Build and customize your skincare routine steps"
+                className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'routine'
                     ? 'bg-deep text-white'
                     : 'text-gray-600 hover:text-deep'
                 }`}
               >
+                <i className="ri-layout-grid-line mr-2 hidden sm:inline"></i>
                 Routine Builder
               </button>
               <button
                 onClick={() => setActiveTab('notes')}
-                className={`px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                title="Track daily observations and skin progress"
+                className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'notes'
                     ? 'bg-deep text-white'
                     : 'text-gray-600 hover:text-deep'
                 }`}
               >
+                <i className="ri-file-text-line mr-2 hidden sm:inline"></i>
                 Routine Notes
               </button>
             </div>
+            <p className="text-xs text-warm-gray/70">
+              {activeTab === 'routine'
+                ? 'Add products and customize your daily routine steps'
+                : 'Track how your skin responds over time'}
+            </p>
           </div>
 
           {/* Content */}

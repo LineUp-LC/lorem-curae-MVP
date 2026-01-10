@@ -80,6 +80,7 @@ export default function RoutinesListPage() {
   const [shareRoutineId, setShareRoutineId] = useState<string | null>(null);
   
   // Routine builder education flow state
+  const [showIntroPopup, setShowIntroPopup] = useState(false);
   const [showFamiliarityPopup, setShowFamiliarityPopup] = useState(false);
   const [showEducationFlow, setShowEducationFlow] = useState(false);
   const [educationStep, setEducationStep] = useState(0);
@@ -152,8 +153,17 @@ export default function RoutinesListPage() {
     if (isFamiliar) {
       setShowSystemExplanation(true);
     } else {
+      setShowIntroPopup(true);
+    }
+  };
+
+  const handleIntroResponse = (wantsEducation: boolean) => {
+    setShowIntroPopup(false);
+    if (wantsEducation) {
       setShowEducationFlow(true);
       setEducationStep(0);
+    } else {
+      navigate('/routines');
     }
   };
 
@@ -395,30 +405,96 @@ export default function RoutinesListPage() {
       {/* Phase 1: Familiarity Popup */}
       {showFamiliarityPopup && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-light/30 flex items-center justify-center mx-auto mb-6">
-              <i className="ri-questionnaire-line text-primary text-4xl"></i>
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
+            <div className="text-center mb-6">
+              <div className="w-20 h-20 rounded-full bg-light/30 flex items-center justify-center mx-auto mb-6">
+                <i className="ri-sparkle-line text-primary text-4xl"></i>
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-deep mb-3">
+                Let's Build Your Perfect Routine
+              </h3>
+              <p className="text-warm-gray">
+                Our Routine Builder helps you create a personalized skincare regimen with expert-guided steps, product recommendations, and ingredient conflict detection.
+              </p>
             </div>
-            <h3 className="text-2xl font-serif font-bold text-deep mb-4">
-              Are you familiar with skincare routines?
-            </h3>
-            <p className="text-warm-gray mb-8">
-              This helps us personalize your experience
-            </p>
+
+            <div className="bg-cream/50 border border-blush rounded-xl p-4 mb-6">
+              <p className="text-sm text-deep font-medium mb-1">Quick question:</p>
+              <p className="text-warm-gray text-sm">Are you familiar with building skincare routines (cleansers, serums, moisturizers, etc.)?</p>
+            </div>
+
             <div className="flex gap-4">
               <button
                 onClick={() => handleFamiliarityResponse(true)}
                 className="flex-1 px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors font-medium cursor-pointer"
               >
-                Yes
+                Yes, I know the basics
               </button>
               <button
                 onClick={() => handleFamiliarityResponse(false)}
                 className="flex-1 px-6 py-4 border-2 border-primary text-deep rounded-xl hover:bg-cream transition-colors font-medium cursor-pointer"
               >
-                No
+                No, I'm new to this
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Phase 1.5: Introduction for New Users */}
+      {showIntroPopup && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
+            <div className="text-center mb-6">
+              <div className="w-16 h-16 rounded-full bg-light/30 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-hand-heart-line text-primary text-3xl"></i>
+              </div>
+              <h3 className="text-2xl font-serif font-bold text-deep mb-3">
+                No worries — we've got you covered!
+              </h3>
+              <p className="text-warm-gray">
+                Building a skincare routine doesn't have to be overwhelming. We'll walk you through the essentials so you feel confident every step of the way.
+              </p>
+            </div>
+
+            {/* What you'll learn */}
+            <div className="bg-cream/50 border border-blush rounded-xl p-5 mb-6">
+              <p className="text-sm font-semibold text-deep mb-3">In just 2 minutes, you'll learn:</p>
+              <ul className="space-y-2">
+                <li className="flex items-start gap-2 text-sm text-warm-gray">
+                  <i className="ri-check-line text-primary mt-0.5"></i>
+                  <span>The difference between AM and PM routines</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-warm-gray">
+                  <i className="ri-check-line text-primary mt-0.5"></i>
+                  <span>Why product order matters for absorption</span>
+                </li>
+                <li className="flex items-start gap-2 text-sm text-warm-gray">
+                  <i className="ri-check-line text-primary mt-0.5"></i>
+                  <span>Pro tips personalized to your skin concerns</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => handleIntroResponse(true)}
+                className="w-full px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors font-medium cursor-pointer"
+              >
+                <i className="ri-graduation-cap-line mr-2"></i>
+                Show me how it works
+              </button>
+              <button
+                onClick={() => handleIntroResponse(false)}
+                className="w-full px-6 py-3 text-warm-gray hover:text-deep hover:bg-cream rounded-xl transition-colors text-sm cursor-pointer"
+              >
+                Skip for now — I'll explore on my own
+              </button>
+            </div>
+
+            <p className="text-xs text-warm-gray/70 text-center mt-4">
+              You can always revisit these tips from the Help menu
+            </p>
           </div>
         </div>
       )}
@@ -470,9 +546,9 @@ export default function RoutinesListPage() {
             <div className="flex gap-3">
               <button
                 onClick={handleSkipEducation}
-                className="flex-1 px-4 py-3 text-warm-gray hover:bg-cream rounded-xl transition-colors font-medium cursor-pointer"
+                className="px-4 py-3 text-warm-gray hover:text-deep hover:bg-cream rounded-xl transition-colors text-sm cursor-pointer"
               >
-                Skip
+                Skip to builder
               </button>
               <button
                 onClick={handleNextEducationStep}

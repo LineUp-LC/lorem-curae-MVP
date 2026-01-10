@@ -117,6 +117,37 @@ export default function ConflictDetection() {
         <p className="text-gray-600 text-sm ml-13">
           We've identified {detectedConflicts.length} potential {detectedConflicts.length === 1 ? 'conflict' : 'conflicts'} in your routine
         </p>
+
+        {/* Severity Legend */}
+        <div className="mt-4 p-4 bg-cream/50 border border-blush rounded-xl">
+          <p className="text-xs font-medium text-deep mb-3 uppercase tracking-wide">Understanding Severity Levels</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex items-start gap-2">
+              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+                HIGH
+              </span>
+              <p className="text-xs text-warm-gray leading-relaxed">
+                Stop using together — may cause irritation
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+                MEDIUM
+              </span>
+              <p className="text-xs text-warm-gray leading-relaxed">
+                Adjust timing or order — effectiveness may be reduced
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+                LOW
+              </span>
+              <p className="text-xs text-warm-gray leading-relaxed">
+                Monitor for reactions — generally safe
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Conflicts List */}
@@ -136,7 +167,14 @@ export default function ConflictDetection() {
               aria-controls={`conflict-details-${conflict.id}`}
             >
               <div className="flex items-start gap-4">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-2 whitespace-nowrap ${getSeverityColor(conflict.severity)}`}>
+                <div
+                  className={`px-3 py-1 rounded-full text-xs font-medium border flex items-center gap-2 whitespace-nowrap cursor-help ${getSeverityColor(conflict.severity)}`}
+                  title={conflict.severity === 'high'
+                    ? 'Stop using these products together immediately'
+                    : conflict.severity === 'medium'
+                    ? 'Consider adjusting your routine timing'
+                    : 'Monitor for reactions, generally safe'}
+                >
                   <i className={getSeverityIcon(conflict.severity)}></i>
                   {conflict.severity.toUpperCase()} PRIORITY
                 </div>

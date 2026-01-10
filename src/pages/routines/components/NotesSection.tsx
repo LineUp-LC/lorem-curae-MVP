@@ -34,7 +34,7 @@ export default function NotesSection() {
 
   // EXAMPLE NOTE - Remove when user says "Remove Routine notes example"
   const exampleNote: Note = {
-    id: 'example-note-1',
+    id: 'example-note',
     date: new Date().toISOString().split('T')[0],
     time: '08:30 AM',
     routine_type: 'morning',
@@ -169,23 +169,25 @@ export default function NotesSection() {
   return (
     <div className="max-w-4xl mx-auto">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-8 shadow-sm mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h2 className="text-2xl font-serif text-deep mb-2">Routine Notes & Progress</h2>
-            <p className="text-warm-gray">Track your daily routine and skin observations</p>
+      <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+          <div className="flex-1">
+            <h2 className="text-2xl font-serif text-deep mb-2">Routine Notes</h2>
+            <p className="text-warm-gray text-sm sm:text-base">
+              Your personal skincare journal — track what works, notice patterns, and help your AI learn what's best for your skin.
+            </p>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => setShowDateFilter(!showDateFilter)}
-              className="px-4 py-2 bg-blush/50 text-warm-gray rounded-lg hover:bg-blush transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-blush/50 text-warm-gray rounded-lg hover:bg-blush transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 text-sm"
             >
               <i className="ri-filter-line"></i>
-              Filter by Date
+              <span className="hidden sm:inline">Filter</span>
             </button>
             <button
               onClick={() => setIsAddingNote(true)}
-              className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors cursor-pointer whitespace-nowrap flex items-center gap-2"
+              className="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors cursor-pointer whitespace-nowrap flex items-center justify-center gap-2 text-sm sm:text-base"
             >
               <i className="ri-add-line text-xl"></i>
               Add Note
@@ -193,20 +195,45 @@ export default function NotesSection() {
           </div>
         </div>
 
-        {/* FIXED: Added AI personalization info banner */}
-        <div className="bg-sage/10 border border-sage/30 rounded-xl p-4 mb-6">
+        {/* AI personalization info banner */}
+        <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 mb-6">
           <div className="flex items-start gap-3">
-            <div className="w-8 h-8 flex items-center justify-center bg-sage/20 rounded-full flex-shrink-0">
-              <i className="ri-sparkling-line text-sage"></i>
+            <div className="w-8 h-8 flex items-center justify-center bg-primary/10 rounded-full flex-shrink-0">
+              <i className="ri-sparkling-line text-primary"></i>
             </div>
             <div>
-              <p className="text-sm text-warm-gray">
-                <span className="font-medium text-deep">Self-tracking helps your AI understand you better.</span>{' '}
-                The more notes you add, the more personalized your skincare recommendations and overall website experience becomes.
+              <p className="text-sm text-warm-gray leading-relaxed">
+                <span className="font-medium text-deep">Your notes power smarter recommendations.</span>{' '}
+                The more you track, the better we understand your skin's unique patterns and needs.
               </p>
             </div>
           </div>
         </div>
+
+        {/* What to Track - Quick Prompts */}
+        {!isAddingNote && !showDateFilter && (
+          <div className="bg-cream/50 border border-blush rounded-xl p-4 mb-6">
+            <p className="text-xs font-medium text-deep mb-3 uppercase tracking-wide">Ideas for what to track</p>
+            <div className="flex flex-wrap gap-2">
+              {[
+                'How my skin feels today',
+                'New product reaction',
+                'Breakout or irritation',
+                'Skin looking great!',
+                'Changed my routine',
+                'Environmental factors'
+              ].map((prompt) => (
+                <button
+                  key={prompt}
+                  onClick={() => setIsAddingNote(true)}
+                  className="px-3 py-1.5 bg-white border border-blush text-warm-gray text-xs rounded-full hover:border-primary hover:text-primary transition-colors cursor-pointer"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Date Filter */}
         {showDateFilter && (
@@ -246,12 +273,17 @@ export default function NotesSection() {
         {/* Add Note Form */}
         {isAddingNote && (
           <div className="bg-cream rounded-xl p-6 mb-6">
-            <h3 className="text-lg font-semibold text-deep mb-4">New Routine Note</h3>
-            
+            <div className="mb-6">
+              <h3 className="text-lg font-semibold text-deep mb-1">New Routine Note</h3>
+              <p className="text-sm text-warm-gray">
+                Capture how your skin looks and feels — even small details help over time.
+              </p>
+            </div>
+
             <div className="space-y-4">
               {/* Routine Type */}
               <div>
-                <label className="block text-sm font-medium text-warm-gray mb-2">Routine Type</label>
+                <label className="block text-sm font-medium text-deep mb-2">When did you do this routine?</label>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setNewNote({ ...newNote, routine_type: 'morning' })}
@@ -280,13 +312,14 @@ export default function NotesSection() {
 
               {/* Photo Upload */}
               <div>
-                <label className="block text-sm font-medium text-warm-gray mb-2">
-                  Add Photo (Optional)
+                <label className="block text-sm font-medium text-deep mb-1">
+                  Photo (Optional)
                 </label>
+                <p className="text-xs text-warm-gray mb-2">A quick selfie helps track visible changes over time</p>
                 <div className="flex items-center gap-4">
                   <label className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-dashed border-blush rounded-lg hover:border-primary transition-colors cursor-pointer">
                     <i className="ri-camera-line text-primary"></i>
-                    <span className="text-sm text-warm-gray">Upload Photo</span>
+                    <span className="text-sm text-warm-gray">Choose Photo</span>
                     <input
                       type="file"
                       accept="image/*"
@@ -313,66 +346,68 @@ export default function NotesSection() {
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-warm-gray/80 mt-1">
-                  Photos help AI track your progress and provide better insights
-                </p>
               </div>
 
               {/* Skin Condition */}
               <div>
-                <label className="block text-sm font-medium text-warm-gray mb-2">Skin Condition</label>
+                <label className="block text-sm font-medium text-deep mb-1">How does your skin look & feel?</label>
+                <p className="text-xs text-warm-gray mb-2">Describe texture, hydration, any concerns</p>
                 <input
                   type="text"
                   value={newNote.skin_condition}
                   onChange={(e) => setNewNote({ ...newNote, skin_condition: e.target.value })}
-                  placeholder="e.g., Clear, Slightly dry, Small breakout on chin"
+                  placeholder="e.g., Hydrated and calm, slight dryness around nose"
                   className="w-full px-4 py-2 border border-blush rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               {/* Products Used */}
               <div>
-                <label className="block text-sm font-medium text-warm-gray mb-2">Products Used</label>
+                <label className="block text-sm font-medium text-deep mb-1">Products you used</label>
+                <p className="text-xs text-warm-gray mb-2">List each product separated by commas</p>
                 <input
                   type="text"
                   value={newNote.products_used}
                   onChange={(e) => setNewNote({ ...newNote, products_used: e.target.value })}
-                  placeholder="Separate products with commas"
+                  placeholder="e.g., CeraVe Cleanser, Vitamin C Serum, SPF 50"
                   className="w-full px-4 py-2 border border-blush rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
 
               {/* Observations */}
               <div>
-                <label className="block text-sm font-medium text-warm-gray mb-2">Observations</label>
+                <label className="block text-sm font-medium text-deep mb-1">Any observations or notes?</label>
+                <p className="text-xs text-warm-gray mb-2">Reactions, changes, or anything you noticed</p>
                 <textarea
                   value={newNote.observations}
                   onChange={(e) => setNewNote({ ...newNote, observations: e.target.value })}
-                  placeholder="How does your skin feel? Any changes or reactions?"
+                  placeholder="e.g., Tried a new serum today — skin tingled slightly but no irritation. Will monitor..."
                   rows={3}
                   className="w-full px-4 py-2 border border-blush rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 />
               </div>
 
               {/* Optional Fields */}
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-warm-gray mb-2">Mood (Optional)</label>
+                  <label className="block text-sm font-medium text-deep mb-1">Mood</label>
+                  <p className="text-xs text-warm-gray mb-2">Stress can affect skin</p>
                   <input
                     type="text"
                     value={newNote.mood}
                     onChange={(e) => setNewNote({ ...newNote, mood: e.target.value })}
-                    placeholder="e.g., Stressed, Relaxed"
+                    placeholder="e.g., Relaxed, Tired, Stressed"
                     className="w-full px-4 py-2 border border-blush rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-warm-gray mb-2">Weather (Optional)</label>
+                  <label className="block text-sm font-medium text-deep mb-1">Weather</label>
+                  <p className="text-xs text-warm-gray mb-2">Climate impacts skin</p>
                   <input
                     type="text"
                     value={newNote.weather}
                     onChange={(e) => setNewNote({ ...newNote, weather: e.target.value })}
-                    placeholder="e.g., Humid, Dry"
+                    placeholder="e.g., Humid, Cold & dry, Sunny"
                     className="w-full px-4 py-2 border border-blush rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
@@ -405,25 +440,33 @@ export default function NotesSection() {
       {/* Notes List */}
       <div className="space-y-4">
         {allNotes.length === 0 ? (
-          <div className="bg-white rounded-2xl p-12 text-center shadow-sm">
-            <i className="ri-file-list-3-line text-6xl text-blush mb-4"></i>
-            <h3 className="text-xl font-semibold text-deep mb-2">No notes yet</h3>
-            <p className="text-warm-gray mb-6">Start tracking your routine to see progress over time</p>
+          <div className="bg-white rounded-2xl p-8 sm:p-12 text-center shadow-sm">
+            <div className="w-16 h-16 rounded-full bg-cream flex items-center justify-center mx-auto mb-4">
+              <i className="ri-edit-2-line text-3xl text-primary"></i>
+            </div>
+            <h3 className="text-xl font-serif font-semibold text-deep mb-2">Start Your Skincare Journal</h3>
+            <p className="text-warm-gray mb-2 max-w-md mx-auto">
+              Tracking your routine helps you understand what works for your unique skin.
+            </p>
+            <p className="text-sm text-warm-gray/80 mb-6 max-w-md mx-auto">
+              Note how products feel, track reactions, and watch your progress over time. Your AI will use these insights to personalize recommendations.
+            </p>
             <button
               onClick={() => setIsAddingNote(true)}
               className="px-6 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors cursor-pointer whitespace-nowrap"
             >
-              Add Your First Note
+              <i className="ri-add-line mr-2"></i>
+              Write Your First Note
             </button>
           </div>
         ) : (
           allNotes.map((note) => (
             <div key={note.id} className="bg-white rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
               {/* Example Note Badge */}
-              {note.id === 'example-note-1' && (
-                <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-light/30 text-primary rounded-full text-xs font-medium">
+              {note.id === 'example-note' && (
+                <div className="mb-4 inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-xs font-medium">
                   <i className="ri-information-line"></i>
-                  Example Note - Remove when you say "Remove Routine notes example"
+                  Example Note — This shows how your entries will look
                 </div>
               )}
               
