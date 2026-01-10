@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -221,6 +221,62 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
   const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
 
+  // Ref for horizontal scroll container
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Physics-based momentum scrolling with easing
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+    if (!scrollContainer) return;
+
+    let velocity = 0;
+    let animationId: number | null = null;
+
+    // Physics constants
+    const FRICTION = 0.92; // Higher = more momentum
+    const VELOCITY_THRESHOLD = 0.5; // Stop when velocity is negligible
+    const WHEEL_MULTIPLIER = 50; // Unused but kept for reference
+
+    const animateMomentum = () => {
+      if (Math.abs(velocity) < VELOCITY_THRESHOLD) {
+        velocity = 0;
+        animationId = null;
+        return;
+      }
+
+      // Apply velocity directly
+      scrollContainer.scrollLeft += velocity;
+
+      // Apply friction to decelerate
+      velocity *= FRICTION;
+
+      animationId = requestAnimationFrame(animateMomentum);
+    };
+
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+
+      // Normalize deltaY for consistent speed in both directions
+      const direction = Math.sign(e.deltaY);
+      const normalizedDelta = direction * 50; // consistent magnitude
+      velocity += normalizedDelta;
+
+      // Cap velocity at controlled limit
+      velocity = Math.max(-400, Math.min(400, velocity));
+
+      // Start momentum animation if not already running
+      if (!animationId) {
+        animationId = requestAnimationFrame(animateMomentum);
+      }
+    };
+
+    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
+    return () => {
+      scrollContainer.removeEventListener('wheel', handleWheel);
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+  }, []);
+
   const filteredSteps = routineSteps.filter(
     step => timeFilter === 'both' || step.timeOfDay === timeFilter || step.timeOfDay === 'both'
   );
@@ -398,7 +454,10 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         onDragEnd={handleDragEnd}
       >
         <div className="relative mb-8">
-          <div className="overflow-x-auto pb-4 scrollbar-hide scroll-smooth">
+          <div
+            ref={scrollContainerRef}
+            className="overflow-x-auto overflow-y-hidden pb-4 scrollbar-hide"
+          >
             <SortableContext items={stepIds} strategy={horizontalListSortingStrategy}>
               <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
                 {filteredSteps.map((step, index) => (
