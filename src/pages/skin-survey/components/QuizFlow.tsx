@@ -21,6 +21,52 @@ interface SurveyData {
   environmentalExposure: string[];
 }
 
+// Skin tone options with Fitzpatrick scale colors
+const skinToneOptions = [
+  {
+    value: 'Type I - Very Fair',
+    label: 'Type I',
+    shortLabel: 'Very Fair',
+    color: '#F8E4D9',
+    description: 'Burns easily, tans minimally. Redness appears quickly.',
+  },
+  {
+    value: 'Type II - Fair',
+    label: 'Type II',
+    shortLabel: 'Fair',
+    color: '#F0D5C4',
+    description: 'Burns easily, tans minimally. Redness appears quickly.',
+  },
+  {
+    value: 'Type III - Medium',
+    label: 'Type III',
+    shortLabel: 'Medium',
+    color: '#D8B094',
+    description: 'Sometimes burns, tans gradually. Redness may be less intense.',
+  },
+  {
+    value: 'Type IV - Olive',
+    label: 'Type IV',
+    shortLabel: 'Olive',
+    color: '#C49A6C',
+    description: 'Can burn with prolonged exposure, tans more easily. Redness may be less visible.',
+  },
+  {
+    value: 'Type V - Brown',
+    label: 'Type V',
+    shortLabel: 'Brown',
+    color: '#A67C52',
+    description: 'Can still burn even if redness is not obvious. Sun damage can occur without visible color change.',
+  },
+  {
+    value: 'Type VI - Dark Brown/Black',
+    label: 'Type VI',
+    shortLabel: 'Deep',
+    color: '#6B4423',
+    description: 'Still vulnerable to UV damage. Burns may appear as tenderness or darker patches.',
+  },
+];
+
 // FIXED: Added props interface for onComplete callback
 interface QuizFlowProps {
   onComplete?: (data: SurveyData) => void;
@@ -282,26 +328,52 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
         return (
           <div>
             <h2 className="text-3xl font-bold text-deep mb-4">What's your skin tone?</h2>
-            <p className="text-warm-gray mb-8">Select your Fitzpatrick skin type</p>
+            <p className="text-warm-gray mb-8">Select your Fitzpatrick skin type. Hover over swatches for details.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                'Type I - Very Fair',
-                'Type II - Fair',
-                'Type III - Medium',
-                'Type IV - Olive',
-                'Type V - Brown',
-                'Type VI - Dark Brown/Black'
-              ].map((tone) => (
+              {skinToneOptions.map((tone) => (
                 <button
-                  key={tone}
-                  onClick={() => handleSingleSelect('complexion', tone)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
-                    surveyData.complexion === tone
+                  key={tone.value}
+                  onClick={() => handleSingleSelect('complexion', tone.value)}
+                  className={`group relative p-4 rounded-lg border-2 transition-all text-left cursor-pointer ${
+                    surveyData.complexion === tone.value
                       ? 'border-primary bg-primary-50 text-primary-700'
                       : 'border-blush hover:border-primary-300'
                   }`}
                 >
-                  {tone}
+                  <div className="flex items-center gap-3">
+                    {/* Color Swatch */}
+                    <div className="relative">
+                      <div
+                        className="w-10 h-10 rounded-full border-2 border-white shadow-md flex-shrink-0"
+                        style={{ backgroundColor: tone.color }}
+                      />
+                      {/* Tooltip */}
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible group-focus-within:opacity-100 group-focus-within:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-sm rounded-lg px-4 py-3 shadow-xl min-w-[180px]">
+                          {/* Large color preview */}
+                          <div
+                            className="w-16 h-16 rounded-lg border-2 border-white/20 mx-auto mb-2"
+                            style={{ backgroundColor: tone.color }}
+                          />
+                          <p className="font-semibold text-center">{tone.shortLabel}</p>
+                          <p className="text-xs text-gray-300 text-center mt-1">{tone.description}</p>
+                        </div>
+                        {/* Tooltip arrow */}
+                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-deep" />
+                      </div>
+                    </div>
+                    {/* Label */}
+                    <div>
+                      <span className="font-medium">{tone.label}</span>
+                      <span className="text-warm-gray"> - {tone.shortLabel}</span>
+                    </div>
+                  </div>
+                  {/* Selected indicator */}
+                  {surveyData.complexion === tone.value && (
+                    <div className="absolute top-2 right-2">
+                      <i className="ri-checkbox-circle-fill text-primary text-xl"></i>
+                    </div>
+                  )}
                 </button>
               ))}
             </div>
