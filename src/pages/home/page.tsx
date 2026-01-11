@@ -1,6 +1,7 @@
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import HeroSection from './components/HeroSection';
+import WhyThisMattersSection from './components/WhyThisMattersSection';
 import ConnectedSystemSection from './components/ConnectedSystemSection';
 import DifferentiationSection from './components/DifferentiationSection';
 import IngredientSection from './components/IngredientSection';
@@ -34,6 +35,7 @@ const HomePage = () => {
       <Navbar />
       <main>
         <HeroSection />
+        <WhyThisMattersSection />
         <ConnectedSystemSection />
         <DifferentiationSection />
         <IngredientSection />
