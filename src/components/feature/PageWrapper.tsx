@@ -7,6 +7,11 @@ import Footer from './Footer';
  * 
  * Provides consistent Lorem Curae styling across all pages.
  * 
+ * MOBILE FIXES APPLIED:
+ * - Responsive header offset (64px mobile, 80px desktop)
+ * - iOS safe area support via env(safe-area-inset-top)
+ * - Dynamic viewport height (100dvh) for mobile browsers
+ * 
  * Color Scheme:
  * - Primary: #C4704D (coral)
  * - Light: #E8A888 (light coral)
@@ -42,9 +47,17 @@ export default function PageWrapper({ children, className = '' }: PageWrapperPro
           color: #2D2A26;
         }
         
+        /* FIXED: Mobile-first with safe area support */
         .lc-page-content {
-          padding-top: 80px;
-          min-height: calc(100vh - 80px);
+          padding-top: calc(64px + env(safe-area-inset-top, 0px));
+          min-height: 100vh;
+          min-height: 100dvh;
+        }
+        
+        @media (min-width: 640px) {
+          .lc-page-content {
+            padding-top: calc(80px + env(safe-area-inset-top, 0px));
+          }
         }
         
         /* Sage overrides */

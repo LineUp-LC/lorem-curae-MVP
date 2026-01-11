@@ -253,6 +253,11 @@ export default function HeroSection() {
           margin-bottom: 2rem;
         }
 
+        .lc-hero-subhead .lc-emphasis {
+          color: #2D2A26;
+          font-weight: 600;
+        }
+
         /* Trust Indicators */
         .lc-trust-row {
           display: flex;
@@ -510,7 +515,7 @@ export default function HeroSection() {
           className="lc-hero-subhead"
           variants={heroVariants.subhead}
         >
-         The only platform that unifies your skin profile with science‑backed recommendations and community‑reviewed retailers — all supported by a community that actually gets it.
+          The only platform that unifies <span className="lc-emphasis">your skin profile</span> with <span className="lc-emphasis">science-backed recommendations</span> and <span className="lc-emphasis">community-reviewed retailers</span> — all supported by a community that <span className="lc-emphasis">actually gets it</span>.
         </motion.p>
 
         {/* Trust indicators */}

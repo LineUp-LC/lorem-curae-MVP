@@ -7,6 +7,14 @@ import { sessionState, getEffectiveConcerns } from '../../lib/utils/sessionState
 import type { Product } from '../../types/product';
 import { normalizeUserConcern } from '../../lib/utils/matching';
 
+/**
+ * DiscoverPage Component
+ * 
+ * MOBILE FIXES APPLIED:
+ * - Safe area padding for iOS notch devices
+ * - Responsive header offset (64px mobile, 80px desktop)
+ */
+
 const DiscoverPage = () => {
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -107,7 +115,20 @@ const DiscoverPage = () => {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <main className="pt-20">
+      {/* FIXED: Mobile-first padding with iOS safe area support */}
+      <main 
+        className="pt-16 sm:pt-20"
+        style={{ 
+          paddingTop: 'calc(64px + env(safe-area-inset-top, 0px))',
+        }}
+      >
+        <style>{`
+          @media (min-width: 640px) {
+            main {
+              padding-top: calc(80px + env(safe-area-inset-top, 0px)) !important;
+            }
+          }
+        `}</style>
         <ProductCatalog
           userConcerns={normalizedConcerns}
           compareList={selectedProducts}

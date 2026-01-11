@@ -1,3 +1,8 @@
+// =====================================================
+// FILE: src/components/feature/Navbar.tsx
+// LOCATION: Replace your existing Navbar.tsx file
+// =====================================================
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import ProfileDropdown from './ProfileDropdown';
@@ -5,19 +10,17 @@ import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
 
 /**
- * Navbar Component
+ * Navbar Component - MOBILE OPTIMIZED
  * 
- * Color Scheme (Lorem Curae):
- * - Primary: #C4704D (coral)
- * - Light: #E8A888 (light coral)
- * - Dark: #8B4D35 (dark coral)
- * - Cream: #FDF8F5 (background)
- * - Deep: #2D2A26 (text)
- * - Sage: #7A8B7A (accents)
- * - Warm Gray: #6B635A (body text)
+ * Mobile Fixes Applied:
+ * - Fixed height container (64px mobile, 80px desktop)
+ * - iOS safe area support (env(safe-area-inset-top))
+ * - 44px minimum tap targets for accessibility
+ * - Body scroll lock when mobile menu is open
+ * - Full-screen mobile menu overlay
+ * - Logo won't wrap on small screens
  */
 
-// Static data moved outside component to prevent recreation on each render
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'Discover', path: '/discover' },
@@ -40,7 +43,6 @@ const Navbar = () => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
     };
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -62,28 +64,81 @@ const Navbar = () => {
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (showMobileMenu) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showMobileMenu]);
+
   const isHomePage = location.pathname === '/';
 
   return (
     <>
       <style>{`
+        /* ===== NAVBAR MOBILE FIXES ===== */
         .lc-nav {
           font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
         }
+        
+        /* Fixed header container with stable height and safe area */
+        .lc-nav-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          z-index: 50;
+          padding-top: env(safe-area-inset-top, 0px);
+          transition: all 0.3s ease;
+        }
+        
+        /* Inner header with fixed height to prevent layout shift */
+        .lc-nav-inner {
+          height: 64px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 0 1rem;
+        }
+        
+        @media (min-width: 640px) {
+          .lc-nav-inner {
+            height: 80px;
+            padding: 0 1.5rem;
+          }
+        }
+        
+        @media (min-width: 1024px) {
+          .lc-nav-inner {
+            padding: 0 3rem;
+          }
+        }
+        
         .lc-nav-scrolled {
           background: rgba(253, 248, 245, 0.95) !important;
           backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
           border-bottom: 1px solid rgba(196, 112, 77, 0.1);
+          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
         }
+        
         .lc-nav-link {
           color: #6B635A !important;
           font-weight: 500;
           transition: color 0.3s ease;
           position: relative;
+          white-space: nowrap;
         }
+        
         .lc-nav-link:hover {
           color: #C4704D !important;
         }
+        
         .lc-nav-link::after {
           content: '';
           position: absolute;
@@ -94,143 +149,213 @@ const Navbar = () => {
           background: #C4704D;
           transition: width 0.3s ease;
         }
+        
         .lc-nav-link:hover::after {
           width: 100%;
         }
+        
+        /* Logo - prevent wrapping, responsive size */
         .lc-logo {
           font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif) !important;
           font-weight: 600;
           letter-spacing: 0.02em;
           color: #2D2A26;
+          white-space: nowrap;
+          font-size: 1.5rem;
+          flex-shrink: 0;
         }
+        
+        @media (min-width: 640px) {
+          .lc-logo {
+            font-size: 1.875rem;
+          }
+        }
+        
+        /* Mobile menu - full screen overlay below header */
+        .lc-mobile-menu {
+          position: fixed;
+          top: calc(64px + env(safe-area-inset-top, 0px));
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: white;
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          z-index: 40;
+          padding-bottom: env(safe-area-inset-bottom, 20px);
+        }
+        
+        /* Mobile links with proper tap targets */
         .lc-mobile-link {
           color: #2D2A26;
           transition: all 0.2s ease;
+          display: flex;
+          align-items: center;
+          padding: 1rem 1.5rem;
+          font-size: 1.125rem;
+          font-weight: 500;
+          border-radius: 0.5rem;
+          min-height: 48px;
         }
-        .lc-mobile-link:hover {
+        
+        .lc-mobile-link:hover,
+        .lc-mobile-link:active {
           background: rgba(196, 112, 77, 0.08);
           color: #C4704D;
         }
+        
+        /* Icon buttons - 44px minimum tap target */
+        .lc-nav-icon-btn {
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 50%;
+          transition: all 0.2s ease;
+          flex-shrink: 0;
+          cursor: pointer;
+        }
+        
+        /* Right side icons container */
+        .lc-nav-icons {
+          display: flex;
+          align-items: center;
+          gap: 0.25rem;
+        }
+        
+        @media (min-width: 640px) {
+          .lc-nav-icons {
+            gap: 0.5rem;
+          }
+        }
       `}</style>
-      <nav
-        className={`lc-nav fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          isScrolled || showMobileMenu ? 'lc-nav-scrolled shadow-md' : 'bg-transparent'
+      
+      {/* Fixed header container with safe area */}
+      <header 
+        className={`lc-nav-container ${
+          isScrolled || showMobileMenu ? 'lc-nav-scrolled' : 'bg-transparent'
         }`}
       >
-        <div className="w-full px-4 sm:px-6 lg:px-12">
-          <div className="flex items-center justify-between h-16 sm:h-20">
-            {/* Mobile Menu Button */}
+        <div className="lc-nav-inner">
+          {/* Mobile Menu Button */}
+          <button
+            onClick={() => setShowMobileMenu(!showMobileMenu)}
+            className={`lc-nav-icon-btn lg:hidden ${
+              isScrolled || !isHomePage || showMobileMenu 
+                ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
+                : 'text-white hover:bg-white/20'
+            }`}
+            aria-label={showMobileMenu ? 'Close menu' : 'Open menu'}
+            aria-expanded={showMobileMenu}
+          >
+            <i className={`${showMobileMenu ? 'ri-close-line' : 'ri-menu-line'} text-xl`}></i>
+          </button>
+
+          {/* Logo */}
+          <Link to="/" className="flex items-center">
+            <span className={`lc-logo transition-colors ${
+              isScrolled || !isHomePage || showMobileMenu ? 'text-[#2D2A26]' : 'text-white'
+            }`}>
+              Lorem Curae
+            </span>
+          </Link>
+
+          {/* Center Navigation - Desktop */}
+          <nav className="hidden lg:flex items-center space-x-8" role="navigation">
+            {navLinks.map((link) => (
+              <Link 
+                key={link.path}
+                to={link.path} 
+                className="lc-nav-link"
+              >
+                {link.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right Side Icons */}
+          <div className="lc-nav-icons">
             <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className={`lg:hidden w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
+              onClick={() => setIsSearchOpen(true)}
+              className={`lc-nav-icon-btn ${
                 isScrolled || !isHomePage || showMobileMenu 
                   ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
                   : 'text-white hover:bg-white/20'
               }`}
-              aria-label="Toggle menu"
+              aria-label="Search"
             >
-              <i className={`${showMobileMenu ? 'ri-close-line' : 'ri-menu-line'} text-xl`}></i>
+              <i className="ri-search-line text-xl"></i>
             </button>
 
-            {/* Logo */}
-            <Link to="/" className="flex items-center cursor-pointer">
-              <span className={`lc-logo text-3xl transition-colors ${
-                isScrolled || !isHomePage || showMobileMenu ? 'text-[#2D2A26]' : 'text-white'
-              }`}>
-                Lorem Curae
-              </span>
+            {/* Cart Button */}
+            <Link
+              to="/cart"
+              className={`lc-nav-icon-btn relative ${
+                isScrolled || !isHomePage || showMobileMenu
+                  ? 'text-[#2D2A26] hover:bg-[#C4704D]/10'
+                  : 'text-white hover:bg-white/10'
+              }`}
+              aria-label={`Shopping Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
+            >
+              <i className="ri-shopping-cart-line text-xl"></i>
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C4704D] text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
             </Link>
 
-            {/* Center Navigation - Desktop */}
-            <div className="hidden lg:flex items-center space-x-8">
-              {navLinks.map((link) => (
-                <Link 
-                  key={link.path}
-                  to={link.path} 
-                  className="lc-nav-link transition-colors cursor-pointer"
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
-
-            {/* Right Side */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Profile Button */}
+            <div className="relative">
               <button
-                onClick={() => setIsSearchOpen(true)}
-                className={`w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
+                onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                className={`lc-nav-icon-btn overflow-hidden ring-2 ${
                   isScrolled || !isHomePage || showMobileMenu 
-                    ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
-                    : 'text-white hover:bg-white/20'
+                    ? 'ring-[#E8A888]/50 hover:ring-[#C4704D]' 
+                    : 'ring-white/30 hover:ring-white/50'
                 }`}
-                aria-label="Search"
+                aria-label="Profile menu"
+                aria-expanded={showProfileDropdown}
               >
-                <i className="ri-search-line text-xl"></i>
-              </button>
-
-              {/* Cart Button */}
-              <Link
-                to="/cart"
-                className={`relative w-10 h-10 flex items-center justify-center rounded-full transition-colors cursor-pointer ${
-                  isScrolled || !isHomePage || showMobileMenu
-                    ? 'text-[#2D2A26] hover:bg-[#C4704D]/10'
-                    : 'text-white hover:bg-white/10'
-                }`}
-                aria-label="Shopping Cart"
-              >
-                <i className="ri-shopping-cart-line text-xl"></i>
-                {cartCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-5 h-5 bg-[#C4704D] text-white text-xs rounded-full flex items-center justify-center font-medium">
-                    {cartCount}
-                  </span>
-                )}
-              </Link>
-
-              {/* Profile Button */}
-              <div className="relative">
-                <button
-                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                  className={`w-10 h-10 rounded-full overflow-hidden ring-2 transition-all cursor-pointer ${
-                    isScrolled || !isHomePage || showMobileMenu 
-                      ? 'ring-[#E8A888]/50 hover:ring-[#C4704D]' 
-                      : 'ring-white/30 hover:ring-white/50'
-                  }`}
-                  aria-label="Profile"
-                >
-                  <img 
-                    src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=navbar-avatar&orientation=squarish"
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-                <ProfileDropdown 
-                  isOpen={showProfileDropdown} 
-                  onClose={() => setShowProfileDropdown(false)} 
+                <img 
+                  src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=navbar-avatar&orientation=squarish"
+                  alt=""
+                  width={44}
+                  height={44}
+                  className="w-full h-full object-cover"
+                  loading="eager"
                 />
-              </div>
+              </button>
+              <ProfileDropdown 
+                isOpen={showProfileDropdown} 
+                onClose={() => setShowProfileDropdown(false)} 
+              />
             </div>
           </div>
         </div>
+      </header>
 
-        {/* Mobile Menu */}
-        {showMobileMenu && (
-          <div className="lg:hidden bg-white border-t border-[#E8D4CC]/30 motion-safe:animate-enter-down">
-            <div className="px-4 py-4 space-y-1">
-              {navLinks.map((link, index) => (
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  className="lc-mobile-link block px-4 py-3 rounded-lg font-medium transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
-                  style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
-                  onClick={() => setShowMobileMenu(false)}
-                >
-                  {link.name}
-                </Link>
-              ))}
-            </div>
+      {/* Mobile Menu - Full screen overlay */}
+      {showMobileMenu && (
+        <nav className="lc-mobile-menu lg:hidden" role="navigation" aria-label="Mobile navigation">
+          <div className="px-4 py-4 space-y-1">
+            {navLinks.map((link, index) => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className="lc-mobile-link motion-safe:animate-enter-right"
+                style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
+                onClick={() => setShowMobileMenu(false)}
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
-        )}
-      </nav>
+        </nav>
+      )}
 
       <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
     </>

@@ -353,3 +353,140 @@ img:not([loading]) {
     @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-primary-700;
   }
 }
+/* =====================================================
+   FILE: src/index.css
+   LOCATION: ADD THIS TO THE END of your existing index.css file
+   (Do not replace the entire file - just append this content)
+   ===================================================== */
+
+/* ============================================
+   MOBILE LAYOUT UTILITIES
+   ============================================ */
+
+/* iOS Safe Area Support */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  
+  /* Header height tokens */
+  --header-height-mobile: 64px;
+  --header-height-desktop: 80px;
+}
+
+/* Page content offset for fixed header */
+.page-content {
+  padding-top: calc(var(--header-height-mobile) + var(--safe-area-inset-top));
+  min-height: 100vh;
+  min-height: 100dvh; /* Dynamic viewport height for mobile */
+}
+
+@media (min-width: 640px) {
+  .page-content {
+    padding-top: calc(var(--header-height-desktop) + var(--safe-area-inset-top));
+  }
+}
+
+/* Safe area padding utilities */
+@layer utilities {
+  .pt-safe {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  .px-safe {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  
+  /* Content padding - consistent across app */
+  .content-padding {
+    @apply px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Minimum tap target */
+  .tap-target {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
+  /* Mobile-first container */
+  .mobile-container {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* Prevent content jumping - reserve space for images */
+.aspect-product {
+  aspect-ratio: 3/4;
+}
+
+.aspect-hero {
+  aspect-ratio: 16/9;
+}
+
+@media (max-width: 640px) {
+  .aspect-product {
+    aspect-ratio: 1/1;
+  }
+}
+
+/* Fixed bottom bar safe area */
+.fixed-bottom-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile text scaling */
+@layer utilities {
+  .text-responsive {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base sm:text-lg;
+  }
+  
+  .heading-responsive {
+    @apply text-2xl sm:text-3xl lg:text-4xl;
+  }
+  
+  .heading-responsive-xl {
+    @apply text-3xl sm:text-4xl lg:text-5xl xl:text-6xl;
+  }
+}
+
+/* Prevent horizontal overflow on mobile */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Better touch scrolling */
+.scroll-touch {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Skeleton loading placeholder */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(232, 212, 204, 0.3) 0%,
+    rgba(232, 212, 204, 0.5) 50%,
+    rgba(232, 212, 204, 0.3) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

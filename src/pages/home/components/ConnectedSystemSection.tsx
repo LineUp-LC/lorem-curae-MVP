@@ -321,9 +321,14 @@ export default function ConnectedSystemSection() {
           color: #7A8B7A;
           font-weight: 500;
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           gap: 0.5rem;
           margin-top: auto;
+        }
+
+        .lc-card-outcome svg {
+          flex-shrink: 0;
+          margin-top: 0.15rem;
         }
         
         @media (max-width: 768px) {

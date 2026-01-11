@@ -1,12 +1,34 @@
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 
+/**
+ * AboutPage Component
+ * 
+ * MOBILE FIXES APPLIED:
+ * - Safe area padding for iOS notch devices
+ * - Responsive header offset (64px mobile, 80px desktop)
+ */
+
 const AboutPage = () => {
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
       <Navbar />
       
-      <main className="pt-20">
+      {/* FIXED: Mobile-first padding with iOS safe area support */}
+      <main 
+        className="pt-16 sm:pt-20"
+        style={{ 
+          paddingTop: 'calc(64px + env(safe-area-inset-top, 0px))',
+        }}
+      >
+        <style>{`
+          @media (min-width: 640px) {
+            main {
+              padding-top: calc(80px + env(safe-area-inset-top, 0px)) !important;
+            }
+          }
+        `}</style>
+        
         {/* Hero Section */}
         <section className="py-16 px-6 lg:px-12">
           <div className="max-w-4xl mx-auto text-center">
