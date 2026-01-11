@@ -34,7 +34,7 @@ interface RoutineStep {
   stepNumber: number;
   title: string;
   description: string;
-  timeOfDay: 'morning' | 'evening' | 'both';
+  timeOfDay: 'morning' | 'evening';
   product?: Product;
   recommended: boolean;
 }
@@ -89,73 +89,115 @@ function SortableStepCard({ step, children }: SortableStepCardProps) {
 }
 
 const templateSteps: RoutineStep[] = [
+  // Morning Routine Steps
   {
-    id: '1',
+    id: 'am-1',
     stepNumber: 1,
     title: 'Cleanser',
     description: 'Start with a gentle cleanser to remove impurities and prepare your skin',
-    timeOfDay: 'both',
+    timeOfDay: 'morning',
     recommended: true,
   },
   {
-    id: '2',
+    id: 'am-2',
     stepNumber: 2,
     title: 'Toner',
     description: 'Balance your skin\'s pH and prep for better absorption',
-    timeOfDay: 'both',
+    timeOfDay: 'morning',
     recommended: false,
   },
   {
-    id: '3',
+    id: 'am-3',
     stepNumber: 3,
     title: 'Serum',
     description: 'Target specific concerns with concentrated active ingredients',
-    timeOfDay: 'both',
+    timeOfDay: 'morning',
     recommended: true,
   },
   {
-    id: '4',
+    id: 'am-4',
     stepNumber: 4,
     title: 'Eye Cream',
     description: 'Nourish the delicate eye area with specialized care',
-    timeOfDay: 'both',
+    timeOfDay: 'morning',
     recommended: false,
   },
   {
-    id: '5',
+    id: 'am-5',
     stepNumber: 5,
     title: 'Moisturizer',
     description: 'Lock in hydration and strengthen your skin barrier',
-    timeOfDay: 'both',
+    timeOfDay: 'morning',
     recommended: true,
   },
   {
-    id: '6',
+    id: 'am-6',
     stepNumber: 6,
     title: 'Sunscreen',
     description: 'Protect your skin from UV damage (SPF 30 or higher)',
     timeOfDay: 'morning',
     recommended: true,
   },
+  // Evening Routine Steps
   {
-    id: '7',
-    stepNumber: 7,
+    id: 'pm-1',
+    stepNumber: 1,
+    title: 'Cleanser',
+    description: 'Remove makeup, sunscreen, and daily buildup with a thorough cleanse',
+    timeOfDay: 'evening',
+    recommended: true,
+  },
+  {
+    id: 'pm-2',
+    stepNumber: 2,
+    title: 'Toner',
+    description: 'Balance your skin\'s pH and prep for nighttime treatments',
+    timeOfDay: 'evening',
+    recommended: false,
+  },
+  {
+    id: 'pm-3',
+    stepNumber: 3,
+    title: 'Serum',
+    description: 'Apply treatment serums while your skin repairs overnight',
+    timeOfDay: 'evening',
+    recommended: true,
+  },
+  {
+    id: 'pm-4',
+    stepNumber: 4,
+    title: 'Eye Cream',
+    description: 'Nourish the delicate eye area while you sleep',
+    timeOfDay: 'evening',
+    recommended: false,
+  },
+  {
+    id: 'pm-5',
+    stepNumber: 5,
+    title: 'Moisturizer',
+    description: 'Lock in hydration to support overnight skin repair',
+    timeOfDay: 'evening',
+    recommended: true,
+  },
+  {
+    id: 'pm-6',
+    stepNumber: 6,
     title: 'Night Treatment',
     description: 'Apply targeted treatments like retinol or sleeping masks',
     timeOfDay: 'evening',
     recommended: false,
   },
   {
-    id: '9',
-    stepNumber: 9,
+    id: 'pm-7',
+    stepNumber: 7,
     title: 'Facial Oil',
     description: 'Nourish and seal in moisture with botanical oils',
     timeOfDay: 'evening',
     recommended: false,
   },
   {
-    id: '10',
-    stepNumber: 10,
+    id: 'pm-8',
+    stepNumber: 8,
     title: 'Night Cream',
     description: 'Rich moisturizer to support overnight repair',
     timeOfDay: 'evening',
@@ -217,9 +259,15 @@ interface RoutineBuilderProps {
 // FIX #4a: Added onSave to destructured props
 export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
-  const [timeFilter, setTimeFilter] = useState<'morning' | 'evening' | 'both'>('both');
+  const [timeFilter, setTimeFilter] = useState<'morning' | 'evening'>('morning');
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
   const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
+
+  // State for save confirmation toast
+  const [saveConfirmation, setSaveConfirmation] = useState<{
+    visible: boolean;
+    routineType: 'morning' | 'evening';
+  } | null>(null);
 
   // Ref for horizontal scroll container
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -278,7 +326,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
   }, []);
 
   const filteredSteps = routineSteps.filter(
-    step => timeFilter === 'both' || step.timeOfDay === timeFilter || step.timeOfDay === 'both'
+    step => step.timeOfDay === timeFilter
   );
 
   // Count filled steps for summary
@@ -348,6 +396,25 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     } else {
       navigate('/discover', { state: { filterCategory: category } });
     }
+  };
+
+  // Handle save with confirmation
+  const handleSaveWithConfirmation = () => {
+    // Call the parent's onSave
+    if (onSave) {
+      onSave();
+    }
+
+    // Show confirmation toast
+    setSaveConfirmation({
+      visible: true,
+      routineType: timeFilter,
+    });
+
+    // Auto-dismiss after 4 seconds
+    setTimeout(() => {
+      setSaveConfirmation(null);
+    }, 4000);
   };
 
   const getExpirationStatus = (expirationDate?: Date) => {
@@ -432,50 +499,30 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
               <span className="hidden sm:inline">Evening</span>
               <span className="sm:hidden">PM</span>
             </button>
-            <button
-              onClick={() => setTimeFilter('both')}
-              title="Show all routine steps for the full day"
-              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                timeFilter === 'both'
-                  ? 'bg-white text-deep shadow-sm'
-                  : 'text-warm-gray hover:text-deep'
-              }`}
-            >
-              <i className="ri-time-line mr-1 sm:mr-2"></i>
-              <span className="hidden sm:inline">Both</span>
-              <span className="sm:hidden">All</span>
-            </button>
           </div>
           <p className="text-xs text-warm-gray/70">
-            Filter by time of day
+            Switch between routines
           </p>
         </div>
       </div>
 
-      {/* FIX #1: Prominent Routine Type Header */}
+      {/* Prominent Routine Type Header */}
       <div className="mb-6 text-center py-4 bg-gradient-to-r from-cream to-white rounded-xl border border-blush">
         <h3 className="text-2xl font-serif font-bold text-deep flex items-center justify-center gap-3">
-          {timeFilter === 'morning' && (
+          {timeFilter === 'morning' ? (
             <>
               <i className="ri-sun-line text-amber-500 text-3xl"></i>
               Morning Routine
             </>
-          )}
-          {timeFilter === 'evening' && (
+          ) : (
             <>
               <i className="ri-moon-line text-indigo-500 text-3xl"></i>
               Evening Routine
             </>
           )}
-          {timeFilter === 'both' && (
-            <>
-              <i className="ri-calendar-line text-primary text-3xl"></i>
-              Full Daily Routine
-            </>
-          )}
         </h3>
         <p className="text-warm-gray text-sm mt-2">
-          {filteredSteps.length} steps in your {timeFilter === 'both' ? 'complete' : timeFilter} routine
+          {filteredSteps.length} steps in your {timeFilter} routine
           {filledStepsCount > 0 && (
             <span className="text-primary font-medium"> • {filledStepsCount} products added</span>
           )}
@@ -516,17 +563,6 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                         </span>
                       )}
                     </div>
-                    {step.timeOfDay !== 'both' && (
-                      <span
-                        className="inline-flex items-center px-3 py-1 bg-blush/50 text-warm-gray text-xs font-medium rounded-full whitespace-nowrap mb-2 cursor-help"
-                        title={step.timeOfDay === 'morning'
-                          ? 'Best used in the morning — this step protects or energizes your skin for the day'
-                          : 'Best used in the evening — this step repairs and treats while you sleep'}
-                      >
-                        <i className={`${step.timeOfDay === 'morning' ? 'ri-sun-line' : 'ri-moon-line'} mr-1`}></i>
-                        {step.timeOfDay === 'morning' ? 'Morning Only' : 'Evening Only'}
-                      </span>
-                    )}
                   </div>
                 </div>
 
@@ -536,7 +572,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                 {step.product ? (
                   <div className="bg-cream rounded-lg p-4">
                     <div className="flex flex-col gap-3 mb-3">
-                      <div 
+                      <div
                         className="w-full h-32 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleProductClick(step.product!)}
                       >
@@ -548,7 +584,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       </div>
                       <div>
                         <p className="text-xs text-warm-gray/80 mb-1">{step.product.brand}</p>
-                        <h4 
+                        <h4
                           className="font-medium text-deep mb-2 cursor-pointer hover:underline"
                           onClick={() => handleProductClick(step.product!)}
                         >
@@ -565,7 +601,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                             onClick={() => handleRemoveProduct(step.id)}
                             className="ml-auto px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
                             title="Remove this product from your routine"
-                            aria-label={`Remove ${step.product?.name} from routine`}
+                            aria-label={`Remove ${step.product.name} from routine`}
                           >
                             <i className="ri-delete-bin-line"></i>
                           </button>
@@ -578,7 +614,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       {step.product.expirationDate && (
                         <div>
                           {(() => {
-                            const expStatus = getExpirationStatus(step.product.expirationDate);
+                            const expStatus = getExpirationStatus(step.product!.expirationDate);
                             return expStatus ? (
                               <span
                                 className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium cursor-help ${expStatus.color}`}
@@ -776,17 +812,17 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         {/* Ordered Summary List */}
         <div className="space-y-2 mb-6">
           {filteredSteps.map((step, index) => (
-            <div 
+            <div
               key={step.id}
               className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                step.product 
-                  ? 'bg-white border border-primary/20' 
+                step.product
+                  ? 'bg-white border border-primary/20'
                   : 'bg-gray-50 border border-gray-200'
               }`}
             >
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                step.product 
-                  ? 'bg-primary text-white' 
+                step.product
+                  ? 'bg-primary text-white'
                   : 'bg-gray-200 text-gray-500'
               }`}>
                 {index + 1}
@@ -826,9 +862,9 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </div>
         </div>
 
-        {/* FIX #4b: Save Routine Button */}
+        {/* Save Routine Button */}
         <button
-          onClick={onSave}
+          onClick={handleSaveWithConfirmation}
           disabled={filledStepsCount === 0}
           className={`w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
             filledStepsCount > 0
@@ -837,7 +873,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           }`}
         >
           <i className="ri-save-line text-xl"></i>
-          Save My Routine
+          Save {timeFilter === 'morning' ? 'Morning' : 'Evening'} Routine
         </button>
         
         {filledStepsCount === 0 && (
@@ -846,6 +882,63 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </p>
         )}
       </div>
+
+      {/* Save Confirmation Toast */}
+      {saveConfirmation && (
+        <div
+          className={`fixed top-24 right-6 z-50 transition-all duration-300 transform ${
+            saveConfirmation.visible ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+          }`}
+          role="status"
+          aria-live="polite"
+          aria-label={`${saveConfirmation.routineType === 'morning' ? 'Morning routine' : 'Evening routine'} saved successfully`}
+        >
+          <div className="bg-white rounded-2xl shadow-2xl border border-blush/50 p-5 min-w-[320px] max-w-[400px]">
+            <div className="flex items-start gap-4">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
+                saveConfirmation.routineType === 'morning'
+                  ? 'bg-amber-100'
+                  : 'bg-indigo-100'
+              }`}>
+                <i className={`text-2xl ${
+                  saveConfirmation.routineType === 'morning'
+                    ? 'ri-sun-line text-amber-600'
+                    : 'ri-moon-line text-indigo-600'
+                }`}></i>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-start justify-between gap-2 mb-1">
+                  <h4 className="font-serif text-lg font-semibold text-deep">
+                    {saveConfirmation.routineType === 'morning'
+                      ? 'Morning Routine Saved'
+                      : 'Evening Routine Saved'}
+                  </h4>
+                  <button
+                    onClick={() => setSaveConfirmation(null)}
+                    className="text-warm-gray/50 hover:text-warm-gray cursor-pointer transition-colors p-1 -m-1"
+                    aria-label="Dismiss notification"
+                  >
+                    <i className="ri-close-line text-lg"></i>
+                  </button>
+                </div>
+                <p className="text-sm text-warm-gray leading-relaxed">
+                  {saveConfirmation.routineType === 'morning'
+                    ? 'Your morning routine is ready to help you start the day with glowing skin.'
+                    : 'Your evening routine is set to work its magic while you rest.'}
+                </p>
+                <div className="mt-3 pt-3 border-t border-blush/30">
+                  <p className="text-xs text-warm-gray/70 flex items-center gap-1">
+                    <i className="ri-lightbulb-line"></i>
+                    {saveConfirmation.routineType === 'morning'
+                      ? 'Tip: Consistency is key — try to follow your routine daily.'
+                      : 'Tip: Apply products on clean, slightly damp skin for better absorption.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
