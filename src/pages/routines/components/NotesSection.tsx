@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../../lib/supabase-browser';
+import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
+
+interface NoteDraft {
+  routine_type: 'morning' | 'evening';
+  skin_condition: string;
+  products_used: string;
+  observations: string;
+  mood: string;
+  weather: string;
+}
 
 interface Note {
   id: string;
@@ -17,20 +27,31 @@ interface Note {
 
 export default function NotesSection() {
   const [notes, setNotes] = useState<Note[]>([]);
-  const [isAddingNote, setIsAddingNote] = useState(false);
+
+  // Persisted state for draft note and form visibility
+  const [isAddingNote, setIsAddingNote, clearIsAddingNote] = useLocalStorageState<boolean>(
+    'routine_note_form_open',
+    false
+  );
+
   const [selectedPhoto, setSelectedPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string>('');
   const [dateFilter, setDateFilter] = useState<{ start: string; end: string } | null>(null);
   const [showDateFilter, setShowDateFilter] = useState(false);
-  
-  const [newNote, setNewNote] = useState({
-    routine_type: 'morning' as 'morning' | 'evening',
+
+  const defaultDraft: NoteDraft = {
+    routine_type: 'morning',
     skin_condition: '',
     products_used: '',
     observations: '',
     mood: '',
     weather: '',
-  });
+  };
+
+  const [newNote, setNewNote, clearNoteDraft] = useLocalStorageState<NoteDraft>(
+    'routine_note_draft',
+    defaultDraft
+  );
 
   // EXAMPLE NOTE - Remove when user says "Remove Routine notes example"
   const exampleNote: Note = {
@@ -136,17 +157,12 @@ export default function NotesSection() {
 
       if (error) throw error;
 
-      setNewNote({
-        routine_type: 'morning',
-        skin_condition: '',
-        products_used: '',
-        observations: '',
-        mood: '',
-        weather: '',
-      });
+      // Clear the persisted draft after successful save
+      clearNoteDraft();
+      clearIsAddingNote();
+
       setSelectedPhoto(null);
       setPhotoPreview('');
-      setIsAddingNote(false);
       loadNotes();
     } catch (error) {
       console.error('Error saving note:', error);
@@ -417,6 +433,8 @@ export default function NotesSection() {
               <div className="flex justify-end gap-3 pt-4">
                 <button
                   onClick={() => {
+                    // Clear the draft when user cancels
+                    clearNoteDraft();
                     setIsAddingNote(false);
                     setSelectedPhoto(null);
                     setPhotoPreview('');

@@ -48,7 +48,7 @@ const BadgesPage = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
       <Navbar />
       
-      <main className="max-w-6xl mx-auto px-6 lg:px-12 py-12">
+      <main className="max-w-6xl mx-auto px-6 lg:px-12 pt-24 pb-12">
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-serif mb-4" style={{ color: '#2D2A26' }}>Your Achievements</h1>

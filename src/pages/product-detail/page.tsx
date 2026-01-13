@@ -8,10 +8,16 @@ import SimilarProducts from './components/SimilarProducts';
 import ProductComparison from '../discover/components/ProductComparison';
 import { productData } from '../../mocks/products';
 import { supabase } from '../../lib/supabase-browser';
+import { useFavorites } from '../../lib/utils/favoritesState';
+import { recentlyViewedState } from '../../lib/utils/recentlyViewedState';
+import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 
 export default function ProductDetailPage() {
   const [selectedImage, setSelectedImage] = useState(0);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useLocalStorageState<string>(
+    'product_detail_active_tab',
+    'overview'
+  );
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
@@ -19,6 +25,9 @@ export default function ProductDetailPage() {
   const [showProductComparison, setShowProductComparison] = useState(false);
   const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Favorites state
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     const skinData = localStorage.getItem('skinSurveyData');
@@ -47,6 +56,17 @@ export default function ProductDetailPage() {
     inStock: true,
     freeShipping: true
   };
+
+  // Track product view on mount
+  useEffect(() => {
+    recentlyViewedState.addRecentlyViewed({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.images[0],
+      priceRange: product.priceRange,
+    });
+  }, [product.id]);
 
   const keyIngredients = ['Vitamin C', 'Ferulic Acid', 'Vitamin E'];
 
@@ -94,6 +114,16 @@ export default function ProductDetailPage() {
       setShowSaveSuccess(true);
       setTimeout(() => setShowSaveSuccess(false), 3000);
     }
+  };
+
+  const handleToggleFavorite = () => {
+    toggleFavorite({
+      id: product.id,
+      name: product.name,
+      brand: product.brand,
+      image: product.images[0],
+      priceRange: product.priceRange,
+    });
   };
 
   const scrollToIngredients = () => {
@@ -445,7 +475,18 @@ export default function ProductDetailPage() {
 
               {/* Action Buttons */}
               <div className="space-y-3">
-                <button onClick={handleSaveToRoutine} className="w-full bg-primary hover:bg-dark text-white font-semibold py-4 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2">
+                <button
+                  onClick={handleToggleFavorite}
+                  className={`w-full font-semibold py-4 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${
+                    isFavorite(product.id)
+                      ? 'bg-primary/10 text-primary border-2 border-primary hover:bg-primary/20'
+                      : 'bg-primary hover:bg-dark text-white'
+                  }`}
+                >
+                  <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-lg`}></i>
+                  {isFavorite(product.id) ? 'Saved to Favorites' : 'Add to Favorites'}
+                </button>
+                <button onClick={handleSaveToRoutine} className="w-full bg-white hover:bg-cream text-primary font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary">
                   <i className="ri-bookmark-line text-lg"></i>Save to Routine
                 </button>
                 <button onClick={scrollToReviews} className="w-full bg-white hover:bg-cream text-primary font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary">

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 
 interface SurveyData {
   sexAtBirth: string;
@@ -73,8 +74,12 @@ interface QuizFlowProps {
 }
 
 const QuizFlow = ({ onComplete }: QuizFlowProps) => {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [surveyData, setSurveyData] = useState<SurveyData>({
+  // Persisted survey progress and answers
+  const [currentStep, setCurrentStep, clearCurrentStep] = useLocalStorageState<number>(
+    'survey_current_step',
+    1
+  );
+  const [surveyData, setSurveyData, clearSurveyData] = useLocalStorageState<SurveyData>('survey_answers', {
     sexAtBirth: '',
     skinType: [],
     concerns: [],
@@ -672,6 +677,15 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     }
   }, [currentStep, totalSteps]);
 
+  // Clear persisted survey data when completed
+  const handleViewResults = () => {
+    // Save final data to skinSurveyData for results page
+    localStorage.setItem('skinSurveyData', JSON.stringify(surveyData));
+    // Clear progress data (survey is complete)
+    clearCurrentStep();
+    clearSurveyData();
+  };
+
   if (currentStep > totalSteps) {
     return (
       <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
@@ -684,10 +698,11 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             Thank you for completing your skin survey. We're analyzing your responses to create your personalized skincare profile.
           </p>
           <Link
-            to="/skin-survey/results"
+            to="/my-skin"
+            onClick={handleViewResults}
             className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-8 py-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
           >
-            <span>Check Results</span>
+            <span>Check skin profile</span>
             <i className="ri-arrow-right-line"></i>
           </Link>
         </div>

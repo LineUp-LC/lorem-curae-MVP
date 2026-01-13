@@ -17,6 +17,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 
 interface Product {
   id: string;
@@ -259,9 +260,31 @@ interface RoutineBuilderProps {
 // FIX #4a: Added onSave to destructured props
 export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
-  const [timeFilter, setTimeFilter] = useState<'morning' | 'evening'>('morning');
+  const [timeFilter, setTimeFilter] = useLocalStorageState<'morning' | 'evening'>(
+    'routine_builder_time_filter',
+    'morning'
+  );
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
   const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
+
+  // Feature 2: Routine Completion Tracker with daily reset
+  const [completedSteps, setCompletedSteps] = useLocalStorageState<{
+    morning: string[];
+    evening: string[];
+    lastResetDate: string;
+  }>('routine_completion_tracker', {
+    morning: [],
+    evening: [],
+    lastResetDate: new Date().toDateString()
+  });
+
+  // Reset completed steps at midnight (new day)
+  useEffect(() => {
+    const today = new Date().toDateString();
+    if (completedSteps.lastResetDate !== today) {
+      setCompletedSteps({ morning: [], evening: [], lastResetDate: today });
+    }
+  }, [completedSteps.lastResetDate, setCompletedSteps]);
 
   // State for save confirmation toast
   const [saveConfirmation, setSaveConfirmation] = useState<{
@@ -331,6 +354,26 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
   // Count filled steps for summary
   const filledStepsCount = filteredSteps.filter(s => s.product).length;
+
+  // Count completed steps for current time filter
+  const completedStepsCount = timeFilter === 'morning'
+    ? completedSteps.morning.length
+    : completedSteps.evening.length;
+
+  const isStepCompleted = (stepId: string) => {
+    return timeFilter === 'morning'
+      ? completedSteps.morning.includes(stepId)
+      : completedSteps.evening.includes(stepId);
+  };
+
+  const toggleStepCompletion = (stepId: string) => {
+    const key = timeFilter;
+    const current = completedSteps[key];
+    const updated = current.includes(stepId)
+      ? current.filter(id => id !== stepId)
+      : [...current, stepId];
+    setCompletedSteps({ ...completedSteps, [key]: updated });
+  };
 
   // DnD Kit sensors for mouse/touch/keyboard support
   const sensors = useSensors(
@@ -544,8 +587,23 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
               <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
                 {filteredSteps.map((step, index) => (
                   <SortableStepCard key={step.id} step={step} index={index}>
+                    {/* Mark as Done Toggle */}
+                    {step.product && (
+                      <button
+                        onClick={() => toggleStepCompletion(step.id)}
+                        className={`absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                          isStepCompleted(step.id)
+                            ? 'bg-sage text-white'
+                            : 'bg-cream text-warm-gray hover:bg-blush'
+                        }`}
+                        title={isStepCompleted(step.id) ? 'Mark as not done' : 'Mark as done'}
+                      >
+                        <i className={isStepCompleted(step.id) ? 'ri-check-line' : 'ri-checkbox-blank-circle-line'}></i>
+                      </button>
+                    )}
+
                     {/* Step Number & Title */}
-                    <div className="flex items-start gap-4 mb-4 pr-10">
+                    <div className="flex items-start gap-4 mb-4 pr-10 pl-10">
                       <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
                         {index + 1}
                       </div>
@@ -796,6 +854,33 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </div>
         </div>
       </div>
+
+      {/* Today's Completion Progress */}
+      {filledStepsCount > 0 && (
+        <div className="mb-6 p-4 bg-sage/10 rounded-xl border border-sage/20">
+          <div className="flex items-center justify-between mb-2">
+            <h4 className="font-medium text-deep flex items-center gap-2">
+              <i className="ri-calendar-check-line text-sage"></i>
+              Today's {timeFilter === 'morning' ? 'Morning' : 'Evening'} Progress
+            </h4>
+            <span className="text-sm font-medium text-sage">
+              {completedStepsCount} / {filledStepsCount} done
+            </span>
+          </div>
+          <div className="h-2 bg-sage/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-sage rounded-full transition-all duration-500"
+              style={{ width: `${filledStepsCount > 0 ? (completedStepsCount / filledStepsCount) * 100 : 0}%` }}
+            ></div>
+          </div>
+          {completedStepsCount === filledStepsCount && filledStepsCount > 0 && (
+            <p className="text-xs text-sage mt-2 flex items-center gap-1">
+              <i className="ri-check-double-line"></i>
+              All steps completed! Great job staying consistent.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* FIX #3: Your Routine Summary Card */}
       <div className="bg-gradient-to-br from-cream to-white rounded-2xl border-2 border-primary/20 p-6">

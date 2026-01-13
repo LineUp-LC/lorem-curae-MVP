@@ -14,6 +14,51 @@ const SettingsPage = () => {
     return localStorage.getItem('user_theme') || 'light';
   });
 
+  // Feature 3: Daily Routine Reminder settings
+  const [routineReminders, setRoutineReminders] = useState(() => {
+    const saved = localStorage.getItem('routine_reminders');
+    return saved ? JSON.parse(saved) : {
+      enabled: false,
+      morningTime: '07:00',
+      eveningTime: '21:00'
+    };
+  });
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+
+  // Check notification permission on mount
+  useEffect(() => {
+    if ('Notification' in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    if ('Notification' in window) {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      return permission === 'granted';
+    }
+    return false;
+  };
+
+  const handleReminderToggle = async (enabled: boolean) => {
+    if (enabled && notificationPermission !== 'granted') {
+      const granted = await requestNotificationPermission();
+      if (!granted) {
+        return; // Don't enable if permission denied
+      }
+    }
+    const updated = { ...routineReminders, enabled };
+    setRoutineReminders(updated);
+    localStorage.setItem('routine_reminders', JSON.stringify(updated));
+  };
+
+  const handleReminderTimeChange = (field: 'morningTime' | 'eveningTime', value: string) => {
+    const updated = { ...routineReminders, [field]: value };
+    setRoutineReminders(updated);
+    localStorage.setItem('routine_reminders', JSON.stringify(updated));
+  };
+
   // Apply theme on mount and when changed
   useEffect(() => {
     const root = document.documentElement;
@@ -176,7 +221,68 @@ const SettingsPage = () => {
               {activeTab === 'notifications' && (
                 <div className="space-y-6 motion-safe:animate-fade-in">
                   <h2 className="text-xl font-bold text-deep">Notification Preferences</h2>
-                  
+
+                  {/* Daily Routine Reminders Section */}
+                  <div className="p-4 bg-cream rounded-xl border border-blush">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-sage/20 flex items-center justify-center">
+                          <i className="ri-notification-badge-line text-sage text-xl"></i>
+                        </div>
+                        <div>
+                          <p className="font-medium text-deep">Daily Routine Reminders</p>
+                          <p className="text-sm text-warm-gray">Get reminded to complete your skincare routine</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleReminderToggle(!routineReminders.enabled)}
+                        className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer ${
+                          routineReminders.enabled ? 'bg-sage' : 'bg-gray-300'
+                        }`}
+                      >
+                        <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                          routineReminders.enabled ? 'translate-x-6' : 'translate-x-0.5'
+                        }`}></div>
+                      </button>
+                    </div>
+
+                    {routineReminders.enabled && (
+                      <div className="space-y-3 pt-3 border-t border-blush">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <i className="ri-sun-line text-amber-500"></i>
+                            <span className="text-sm text-warm-gray">Morning routine</span>
+                          </div>
+                          <input
+                            type="time"
+                            value={routineReminders.morningTime}
+                            onChange={(e) => handleReminderTimeChange('morningTime', e.target.value)}
+                            className="px-3 py-1.5 border border-blush rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
+                          />
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <i className="ri-moon-line text-indigo-500"></i>
+                            <span className="text-sm text-warm-gray">Evening routine</span>
+                          </div>
+                          <input
+                            type="time"
+                            value={routineReminders.eveningTime}
+                            onChange={(e) => handleReminderTimeChange('eveningTime', e.target.value)}
+                            className="px-3 py-1.5 border border-blush rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
+                          />
+                        </div>
+                      </div>
+                    )}
+
+                    {notificationPermission === 'denied' && (
+                      <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
+                        <i className="ri-error-warning-line"></i>
+                        Notifications are blocked. Please enable them in your browser settings.
+                      </p>
+                    )}
+                  </div>
+
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div>

@@ -5,6 +5,7 @@ import { sessionState } from '../../lib/utils/sessionState';
 import { adaptiveAI } from '../../lib/utils/adaptiveAI';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-browser';
+import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 
 // Local interface for AI chat user profile (different from Supabase UserProfile)
 interface AIChatUserProfile {
@@ -57,13 +58,25 @@ const AIChatPage = () => {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
-  const [inputMessage, setInputMessage] = useState('');
+
+  // Persist input draft for session continuity (user can resume typing)
+  const [inputMessage, setInputMessage] = useLocalStorageState<string>(
+    'ai_chat_input_draft',
+    ''
+  );
+
   const [showCustomize, setShowCustomize] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentSession, setCurrentSession] = useState<string>('current');
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
-  const [showInsights, setShowInsights] = useState(true);
+
+  // Persist insights panel visibility preference
+  const [showInsights, setShowInsights] = useLocalStorageState<boolean>(
+    'ai_chat_insights_visible',
+    true
+  );
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const [userProfile, setUserProfile] = useState<AIChatUserProfile>({
@@ -98,7 +111,24 @@ const AIChatPage = () => {
     loadUserProfile();
     loadChatSessions();
     loadAIInsights();
-    // Auto-scroll disabled per requirement
+
+    // Restore current session messages if available
+    const lastSessionId = localStorage.getItem('ai_chat_current_session');
+    if (lastSessionId && lastSessionId !== 'current') {
+      const saved = localStorage.getItem('chat_sessions');
+      if (saved) {
+        try {
+          const sessions = JSON.parse(saved);
+          const session = sessions.find((s: ChatSession) => s.id === lastSessionId);
+          if (session) {
+            setMessages(session.messages);
+            setCurrentSession(session.id);
+          }
+        } catch (e) {
+          console.warn('Failed to restore chat session:', e);
+        }
+      }
+    }
   }, []);
 
   // Auto-scroll disabled - user controls their own scroll position
@@ -320,11 +350,15 @@ const AIChatPage = () => {
 
     setChatSessions(updatedSessions);
     localStorage.setItem('chat_sessions', JSON.stringify(updatedSessions));
+
+    // Track current session for restoration
+    localStorage.setItem('ai_chat_current_session', session.id);
   };
 
   const loadChatSession = (session: ChatSession) => {
     setMessages(session.messages);
     setCurrentSession(session.id);
+    localStorage.setItem('ai_chat_current_session', session.id);
   };
 
   const startNewChat = () => {
@@ -337,6 +371,7 @@ const AIChatPage = () => {
       }
     ]);
     setCurrentSession('current');
+    localStorage.setItem('ai_chat_current_session', 'current');
   };
 
   // Fixed: Message objects now match the Message interface
@@ -606,16 +641,33 @@ const AIChatPage = () => {
               ))}
               
               {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-cream rounded-2xl px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
-                        <i className="ri-sparkling-2-fill text-white text-xs"></i>
+                <div className="flex justify-start motion-safe:animate-fade-in">
+                  <div className="max-w-[80%]">
+                    <div className="bg-cream rounded-2xl px-4 py-3">
+                      {/* AI Avatar and Thinking State */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
+                          <i className="ri-sparkling-2-fill text-white text-xs"></i>
+                        </div>
+                        <span className="text-xs font-medium text-deep">Curae</span>
+                        <span className="text-xs text-warm-gray/70 flex items-center gap-1">
+                          <i className="ri-loader-4-line motion-safe:animate-spin text-primary"></i>
+                          Thinking...
+                        </span>
                       </div>
-                      <div className="flex gap-1">
+
+                      {/* Typing Dots */}
+                      <div className="flex gap-1 mb-3">
                         <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce"></div>
                         <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
                         <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+
+                      {/* Skeleton Lines for Response Preview */}
+                      <div className="space-y-2">
+                        <div className="h-3 bg-warm-gray/20 rounded-full w-full motion-safe:animate-pulse"></div>
+                        <div className="h-3 bg-warm-gray/20 rounded-full w-4/5 motion-safe:animate-pulse" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="h-3 bg-warm-gray/20 rounded-full w-3/5 motion-safe:animate-pulse" style={{ animationDelay: '0.2s' }}></div>
                       </div>
                     </div>
                   </div>
@@ -682,8 +734,9 @@ const AIChatPage = () => {
       {/* AI Settings Popup */}
       {showCustomize && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-            <div className="flex items-center justify-between mb-6">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-[90vw] sm:max-w-md max-h-[85vh] flex flex-col">
+            {/* Header - Fixed */}
+            <div className="flex items-center justify-between p-6 pb-4 border-b border-blush shrink-0">
               <h3 className="text-xl font-bold text-deep">AI Settings</h3>
               <button
                 onClick={() => setShowCustomize(false)}
@@ -693,7 +746,8 @@ const AIChatPage = () => {
               </button>
             </div>
 
-            <div className="space-y-6">
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Tone */}
               <div>
                 <label className="block text-sm font-medium text-warm-gray mb-2">Response Tone</label>
@@ -764,7 +818,8 @@ const AIChatPage = () => {
               </div>
             </div>
 
-            <div className="mt-8 flex gap-3">
+            {/* Footer - Fixed */}
+            <div className="p-6 pt-4 border-t border-blush shrink-0 flex gap-3">
               <button
                 onClick={() => setShowCustomize(false)}
                 className="flex-1 px-4 py-3 border border-blush text-warm-gray rounded-lg hover:bg-cream transition-colors font-medium cursor-pointer"

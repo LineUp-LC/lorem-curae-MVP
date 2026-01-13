@@ -7,12 +7,25 @@ import ConflictDetection from './components/ConflictDetection';
 import NotesSection from './components/NotesSection';
 import { sessionState } from '../../lib/utils/sessionState';
 import RoutineTutorial from './components/RoutineTutorial';
+import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 
 export default function RoutinesPage() {
   const [searchParams] = useSearchParams();
-  const [activeTab, setActiveTab] = useState<'routine' | 'notes'>('routine');
-  const [routineSteps, setRoutineSteps] = useState<any[]>([]);
-  const [routineName, setRoutineName] = useState('My Skincare Routine');
+
+  // Persisted state for continuity between sessions
+  const [activeTab, setActiveTab] = useLocalStorageState<'routine' | 'notes'>(
+    'routine_active_tab',
+    'routine'
+  );
+  const [routineSteps, setRoutineSteps] = useLocalStorageState<any[]>(
+    'routine_builder_steps',
+    []
+  );
+  const [routineName, setRoutineName] = useLocalStorageState<string>(
+    'routine_builder_name',
+    'My Skincare Routine'
+  );
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [showBrowsePopup, setShowBrowsePopup] = useState(false);
   const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);

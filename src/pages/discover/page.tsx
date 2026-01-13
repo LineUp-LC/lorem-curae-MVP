@@ -6,6 +6,7 @@ import Footer from '../../components/feature/Footer';
 import { sessionState, getEffectiveConcerns } from '../../lib/utils/sessionState';
 import type { Product } from '../../types/product';
 import { normalizeUserConcern } from '../../lib/utils/matching';
+import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 
 /**
  * DiscoverPage Component
@@ -18,8 +19,13 @@ import { normalizeUserConcern } from '../../lib/utils/matching';
 const DiscoverPage = () => {
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
   const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
-  const [showComparison, setShowComparison] = useState(false);
-  
+
+  // Persist comparison visibility state for session continuity
+  const [showComparison, setShowComparison] = useLocalStorageState<boolean>(
+    'discover_comparison_visible',
+    false
+  );
+
   const normalizedConcerns = userConcerns.map((c) => normalizeUserConcern(c));
 
   useEffect(() => {

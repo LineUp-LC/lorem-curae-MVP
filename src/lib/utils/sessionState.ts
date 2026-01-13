@@ -51,6 +51,8 @@ interface SessionContext {
   savedItems: string[];
   quizProgress?: any;
   routineSteps?: any[];
+  lastVisitedPage?: string;
+  lastVisitedAt?: number;
 }
 
 class SessionStateManager {
@@ -76,6 +78,8 @@ class SessionStateManager {
         searchHistory: [],
         viewedProducts: [],
         savedItems: [],
+        lastVisitedPage: undefined,
+        lastVisitedAt: undefined,
       },
       tempSkinType: undefined,
       tempConcerns: undefined,
@@ -202,13 +206,55 @@ class SessionStateManager {
     this.saveState();
   }
 
-  // Navigate to page
+  // Pages that should not be restored (auth, onboarding, password gate)
+  private excludedPages = [
+    '/auth/login',
+    '/auth/signup',
+    '/auth/callback',
+    '/auth/reset-password',
+    '/skin-survey',
+    '/onboarding',
+    '/password',
+  ];
+
+  // Navigate to page and track for restoration
   navigateTo(page: string): void {
     if (!this.state.context.visitedPages.includes(page)) {
       this.state.context.visitedPages.push(page);
     }
     this.state.context.currentPage = page;
+
+    // Track last visited page for restoration (exclude auth/onboarding pages)
+    const shouldTrack = !this.excludedPages.some(excluded =>
+      page.startsWith(excluded)
+    );
+    if (shouldTrack && page !== '/') {
+      this.state.context.lastVisitedPage = page;
+      this.state.context.lastVisitedAt = Date.now();
+    }
+
     this.trackInteraction('navigation', page);
+  }
+
+  // Get last visited page for restoration
+  getLastVisitedPage(): string | undefined {
+    const { lastVisitedPage, lastVisitedAt } = this.state.context;
+
+    // Only restore if visited within last 24 hours
+    if (lastVisitedPage && lastVisitedAt) {
+      const hoursSinceVisit = (Date.now() - lastVisitedAt) / (1000 * 60 * 60);
+      if (hoursSinceVisit < 24) {
+        return lastVisitedPage;
+      }
+    }
+    return undefined;
+  }
+
+  // Clear last visited page (after successful restoration)
+  clearLastVisitedPage(): void {
+    this.state.context.lastVisitedPage = undefined;
+    this.state.context.lastVisitedAt = undefined;
+    this.saveState();
   }
 
   // Mark action as completed
@@ -382,5 +428,7 @@ export function useSessionState() {
     clearTempData: sessionState.clearTempData.bind(sessionState),
     setUser: sessionState.setUser.bind(sessionState),
     clearUser: sessionState.clearUser.bind(sessionState),
+    getLastVisitedPage: sessionState.getLastVisitedPage.bind(sessionState),
+    clearLastVisitedPage: sessionState.clearLastVisitedPage.bind(sessionState),
   };
 }

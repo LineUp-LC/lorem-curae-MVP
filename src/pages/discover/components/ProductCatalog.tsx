@@ -3,6 +3,9 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
 import { productMatchesUserConcerns } from '../../../lib/utils/matching';
 import type { Product } from '../../../types/product';
+import { useFavorites } from '../../../lib/utils/favoritesState';
+import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
+import Dropdown from '../../../components/ui/Dropdown';
 
 /**
  * ProductCatalog Component
@@ -57,10 +60,27 @@ export default function ProductCatalog({
 }: ProductCatalogProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-  const [selectedSkinType, setSelectedSkinType] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<string>('popular');
-  const [timeOfDay, setTimeOfDay] = useState<string>('all');
+
+  // Favorites for reactive updates
+  const { isFavorite, toggleFavorite } = useFavorites();
+
+  // Persisted filter and sort preferences
+  const [selectedCategory, setSelectedCategory] = useLocalStorageState<string>(
+    'discover_filter_category',
+    'all'
+  );
+  const [selectedSkinType, setSelectedSkinType] = useLocalStorageState<string>(
+    'discover_filter_skin_type',
+    'all'
+  );
+  const [sortBy, setSortBy] = useLocalStorageState<string>(
+    'discover_sort_by',
+    'popular'
+  );
+  const [timeOfDay, setTimeOfDay] = useLocalStorageState<string>(
+    'discover_filter_time_of_day',
+    'all'
+  );
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Safe fallback for compareList to prevent undefined errors
@@ -70,7 +90,10 @@ export default function ProductCatalog({
   const showCompareBar = safeCompareList.length > 0;
 
   // Comparison bar state: minimize toggle and scroll-based translucency
-  const [isCompareBarMinimized, setIsCompareBarMinimized] = useState(false);
+  const [isCompareBarMinimized, setIsCompareBarMinimized] = useLocalStorageState<boolean>(
+    'discover_compare_bar_minimized',
+    false
+  );
   const [isScrolled, setIsScrolled] = useState(false);
   const compareBarRef = useRef<HTMLDivElement>(null);
 
@@ -226,24 +249,53 @@ export default function ProductCatalog({
           </span>
         )}
 
-        {/* Comparison Button - WITH QA accessibility fixes */}
-        <button
-          onClick={(e) => handleAddToCompare(product, e)}
-          className={`absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md z-10 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-            isSelected
-              ? 'bg-primary text-white'
-              : 'bg-white text-warm-gray hover:bg-light/30'
-          }`}
-          title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
-          aria-label={isSelected ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
-          aria-pressed={isSelected}
-        >
-          {isSelected ? (
-            <i className="ri-check-line text-xl"></i>
-          ) : (
-            <i className="ri-scales-line text-xl"></i>
-          )}
-        </button>
+        {/* Action Buttons - Horizontal Layout */}
+        <div className="absolute top-3 right-3 flex flex-row items-center gap-2 z-10">
+          {/* Favorite Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleFavorite({
+                id: product.id,
+                name: product.name,
+                brand: product.brand,
+                image: product.image,
+                priceRange: `$${(product.price * 0.9).toFixed(2)} - $${(product.price * 1.1).toFixed(2)}`,
+                category: product.category,
+                skinTypes: product.skinTypes,
+              });
+            }}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+              isFavorite(product.id)
+                ? 'bg-primary text-white'
+                : 'bg-white text-warm-gray hover:bg-light/30 hover:text-primary'
+            }`}
+            title={isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'}
+            aria-label={isFavorite(product.id) ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`}
+            aria-pressed={isFavorite(product.id)}
+          >
+            <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+          </button>
+
+          {/* Comparison Button */}
+          <button
+            onClick={(e) => handleAddToCompare(product, e)}
+            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+              isSelected
+                ? 'bg-primary text-white'
+                : 'bg-white text-warm-gray hover:bg-light/30'
+            }`}
+            title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
+            aria-label={isSelected ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
+            aria-pressed={isSelected}
+          >
+            {isSelected ? (
+              <i className="ri-check-line text-xl"></i>
+            ) : (
+              <i className="ri-scales-line text-xl"></i>
+            )}
+          </button>
+        </div>
 
         {/* Product Image */}
         <div className="relative w-full h-80 overflow-hidden bg-cream">
@@ -380,84 +432,106 @@ export default function ProductCatalog({
         </div>
 
         {/* Skin Type, Time of Day & Sort */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
 
           {/* Skin Type + Time of Day */}
-          <div className="flex items-center flex-wrap gap-2 xs:gap-3">
+          <div className="flex flex-col xs:flex-row items-start xs:items-end gap-3 xs:gap-4 w-full sm:w-auto">
 
             {/* Skin Type */}
-            <label
-              htmlFor="filter-skin-type"
-              className="text-sm font-semibold text-warm-gray"
-            >
-              Skin Type:
-            </label>
-
-            <select
-              id="filter-skin-type"
-              name="skinType"
-              value={selectedSkinType}
-              onChange={(e) => {
-                setSelectedSkinType(e.target.value)
-                onFilterChange('skinType', e.target.value)
-              }}
-              className="px-3 xs:px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
-            >
-              {skinTypes.map((type) => (
-                <option key={type.value} value={type.value}>
-                  {type.label}
-                </option>
-              ))}
-            </select>
+            <div className="w-full xs:w-auto">
+              <label
+                htmlFor="filter-skin-type"
+                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
+              >
+                Skin Type
+              </label>
+              <Dropdown
+                id="filter-skin-type"
+                name="skinType"
+                value={selectedSkinType}
+                onChange={(value) => {
+                  setSelectedSkinType(value)
+                  onFilterChange('skinType', value)
+                }}
+                options={skinTypes}
+                className="min-w-[150px]"
+              />
+            </div>
 
             {/* Time of Day */}
-            <label
-              htmlFor="filter-time-of-day"
-              className="text-sm font-semibold text-warm-gray ml-2 xs:ml-4"
-            >
-              Time of Day:
-            </label>
-
-            <select
-              id="filter-time-of-day"
-              name="timeOfDay"
-              value={timeOfDay}
-              onChange={(e) => {
-                setTimeOfDay(e.target.value)
-                onFilterChange('timeOfDay', e.target.value)
-              }}
-              className="px-3 xs:px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
-            >
-              <option value="all">All</option>
-              <option value="am">AM (Morning)</option>
-              <option value="pm">PM (Evening)</option>
-            </select>
+            <div className="w-full xs:w-auto">
+              <label
+                htmlFor="filter-time-of-day"
+                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
+              >
+                Time of Day
+              </label>
+              <Dropdown
+                id="filter-time-of-day"
+                name="timeOfDay"
+                value={timeOfDay}
+                onChange={(value) => {
+                  setTimeOfDay(value)
+                  onFilterChange('timeOfDay', value)
+                }}
+                options={[
+                  { value: 'all', label: 'All Times' },
+                  { value: 'am', label: 'AM (Morning)' },
+                  { value: 'pm', label: 'PM (Evening)' },
+                ]}
+                className="min-w-[150px]"
+              />
+            </div>
           </div>
 
-          {/* Sort */}
-          <div className="flex items-center space-x-2 xs:space-x-3">
-            <label
-              htmlFor="filter-sort-by"
-              className="text-sm font-semibold text-warm-gray"
-            >
-              Sort by:
-            </label>
+          {/* Sort + Reset */}
+          <div className="flex items-end gap-4">
+            {/* Sort */}
+            <div className="w-full xs:w-auto">
+              <label
+                htmlFor="filter-sort-by"
+                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
+              >
+                Sort By
+              </label>
+              <Dropdown
+                id="filter-sort-by"
+                name="sortBy"
+                value={sortBy}
+                onChange={(value) => {
+                  setSortBy(value)
+                  onFilterChange('sortBy', value)
+                }}
+                options={[
+                  { value: 'popular', label: 'Most Popular' },
+                  { value: 'rating', label: 'Highest Rated' },
+                  { value: 'price-low', label: 'Price: Low to High' },
+                  { value: 'price-high', label: 'Price: High to Low' },
+                ]}
+                className="min-w-[170px]"
+              />
+            </div>
 
-            <select
-              id="filter-sort-by"
-              name="sortBy"
-              value={sortBy}
-              onChange={(e) => {
-                setSortBy(e.target.value)
-                onFilterChange('sortBy', e.target.value)
-              }}
-              className="px-3 xs:px-4 py-2 rounded-full border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer"
-            >
-              <option value="popular">Most Popular</option>
-              <option value="rating">Highest Rated</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-            </select>
+            {/* Reset Filters */}
+            {(selectedCategory !== 'all' || selectedSkinType !== 'all' || timeOfDay !== 'all' || sortBy !== 'popular') && (
+              <button
+                onClick={() => {
+                  setSelectedCategory('all');
+                  setSelectedSkinType('all');
+                  setTimeOfDay('all');
+                  setSortBy('popular');
+                  onFilterChange('category', 'all');
+                  onFilterChange('skinType', 'all');
+                  onFilterChange('timeOfDay', 'all');
+                  onFilterChange('sortBy', 'popular');
+                }}
+                className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium text-warm-gray hover:text-deep transition-colors cursor-pointer whitespace-nowrap"
+                title="Reset all filters to defaults"
+              >
+                <i className="ri-refresh-line text-base"></i>
+                <span className="hidden sm:inline">Reset</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

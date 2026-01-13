@@ -99,19 +99,19 @@ export default function SubscriptionPage() {
       
       <div className="pt-20 pb-16">
         {/* Hero Section */}
-        <div className="bg-gradient-to-br from-primary to-dark text-white py-16 mb-12">
+        <div className="py-16 mb-12">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-5xl font-serif font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-xl text-light mb-8">Unlock premium features and support sustainable skincare</p>
-            
+            <h1 className="text-5xl font-serif font-bold mb-4 text-deep">Choose Your Plan</h1>
+            <p className="text-xl mb-8" style={{ color: 'rgba(45, 42, 38, 0.7)' }}>Unlock premium features and support sustainable skincare</p>
+
             {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full p-2">
+            <div className="inline-flex items-center gap-2 rounded-full p-1" style={{ border: '1px solid rgba(107, 99, 90, 0.2)' }}>
               <button
                 onClick={() => setBillingCycle('monthly')}
                 className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                   billingCycle === 'monthly'
-                    ? 'bg-white text-deep shadow-lg'
-                    : 'text-white hover:bg-white/10'
+                    ? 'bg-deep text-cream shadow-md'
+                    : 'text-deep hover:text-deep/80'
                 }`}
               >
                 Monthly
@@ -120,12 +120,12 @@ export default function SubscriptionPage() {
                 onClick={() => setBillingCycle('yearly')}
                 className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
                   billingCycle === 'yearly'
-                    ? 'bg-white text-deep shadow-lg'
-                    : 'text-white hover:bg-white/10'
+                    ? 'bg-deep text-cream shadow-md'
+                    : 'text-deep hover:text-deep/80'
                 }`}
               >
                 Yearly
-                <span className="ml-2 px-2 py-1 bg-primary text-white rounded-full text-xs font-bold">
+                <span className="ml-2 px-2 py-1 bg-primary text-cream rounded-full text-xs font-bold">
                   Save 25%
                 </span>
               </button>
@@ -151,7 +151,7 @@ export default function SubscriptionPage() {
                   }`}
                 >
                   {isPremium && (
-                    <div className="bg-gradient-to-r from-primary via-teal-500 to-primary text-white text-center py-3 font-bold text-sm">
+                    <div className="bg-gradient-to-r from-dark via-primary to-dark text-white text-center py-3 font-bold text-sm tracking-wide">
                       ⭐ PREMIUM - MOST POPULAR
                     </div>
                   )}
@@ -183,7 +183,7 @@ export default function SubscriptionPage() {
                         onClick={() => handleSubscribe(plan.name)}
                         className={`w-full py-3 rounded-lg font-bold transition-colors whitespace-nowrap ${
                           isPremium
-                            ? 'bg-gradient-to-r from-primary via-teal-500 to-primary text-white hover:from-primary hover:via-teal-600 hover:to-dark shadow-lg'
+                            ? 'bg-gradient-to-r from-dark to-primary text-white hover:from-deep hover:to-dark shadow-lg'
                             : 'bg-gray-900 text-white hover:bg-gray-800'
                         }`}
                       >
