@@ -293,7 +293,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
               <i className="ri-sparkling-2-fill text-white text-xs"></i>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-[#2D2A26]">Logo by Curae AI</p>
+              <p className="text-[10px] font-medium text-[#2D2A26]">Powered by Curae AI</p>
               <p className="text-[9px] text-[#6B635A]">Your personalized skincare assistant</p>
             </div>
           </div>

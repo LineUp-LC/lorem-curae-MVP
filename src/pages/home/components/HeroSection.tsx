@@ -515,7 +515,7 @@ export default function HeroSection() {
           className="lc-hero-subhead"
           variants={heroVariants.subhead}
         >
-          The only platform that unifies <span className="lc-emphasis">your skin profile</span> with <span className="lc-emphasis">science-backed recommendations</span> and <span className="lc-emphasis">community-reviewed retailers</span> — all supported by a community that <span className="lc-emphasis">actually gets it</span>.
+          The only platform that unifies <span className="lc-emphasis">your skin profile</span> with <span className="lc-emphasis">science‑backed recommendations</span> and <span className="lc-emphasis">community‑reviewed retailers</span> — all supported by communities that are <span className="lc-emphasis">with you every step of the way</span>.
         </motion.p>
 
         {/* Trust indicators */}

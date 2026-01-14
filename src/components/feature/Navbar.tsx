@@ -20,15 +20,10 @@ import { useCartCount } from '../../lib/utils/cartState';
  * - Full-screen mobile menu overlay
  * - Logo won't wrap on small screens
  *
- * Variants:
- * - "default": Dark text/icons for pages with light backgrounds
- * - "hero": White text/icons for pages with dark/colorful hero sections
+ * Visual behavior:
+ * - Before scroll: Transparent background, white icons/logo
+ * - After scroll: Cream background, dark icons/logo
  */
-
-interface NavbarProps {
-  /** Use "hero" variant when page has a dark/colorful hero behind the navbar */
-  variant?: 'default' | 'hero';
-}
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -40,7 +35,7 @@ const navLinks = [
   { name: 'About', path: '/about' },
 ];
 
-const Navbar = ({ variant = 'default' }: NavbarProps) => {
+const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -85,9 +80,9 @@ const Navbar = ({ variant = 'default' }: NavbarProps) => {
     };
   }, [showMobileMenu]);
 
-  // Determine if we should use light text (white) or dark text
-  // Light text only when: hero variant + not scrolled + mobile menu closed
-  const useLightText = variant === 'hero' && !isScrolled && !showMobileMenu;
+  // Use light (white) text/icons when not scrolled and mobile menu is closed
+  // On scroll or mobile menu open, switch to dark text with cream background
+  const useLightText = !isScrolled && !showMobileMenu;
 
   return (
     <>
@@ -140,6 +135,7 @@ const Navbar = ({ variant = 'default' }: NavbarProps) => {
         
         .lc-nav-link {
           color: #6B635A !important;
+          font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
           font-size: 1.125rem;
           font-weight: 500;
           transition: color 0.3s ease;
@@ -299,11 +295,7 @@ const Navbar = ({ variant = 'default' }: NavbarProps) => {
           <div className="lc-nav-icons">
             <button
               onClick={() => setIsSearchOpen(true)}
-              className={`lc-nav-icon-btn ${
-                useLightText
-                  ? 'text-white hover:bg-white/20'
-                  : 'text-[#2D2A26] hover:bg-[#C4704D]/10'
-              }`}
+              className="lc-nav-icon-btn text-[#2D2A26] hover:bg-[#C4704D]/10"
               aria-label="Search"
             >
               <i className="ri-search-line text-xl"></i>
@@ -312,11 +304,7 @@ const Navbar = ({ variant = 'default' }: NavbarProps) => {
             {/* Cart Button */}
             <Link
               to="/cart"
-              className={`lc-nav-icon-btn relative ${
-                useLightText
-                  ? 'text-white hover:bg-white/10'
-                  : 'text-[#2D2A26] hover:bg-[#C4704D]/10'
-              }`}
+              className="lc-nav-icon-btn relative text-[#2D2A26] hover:bg-[#C4704D]/10"
               aria-label={`Shopping Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
             >
               <i className="ri-shopping-cart-line text-xl"></i>
@@ -328,14 +316,10 @@ const Navbar = ({ variant = 'default' }: NavbarProps) => {
             </Link>
 
             {/* Profile Button */}
-            <div className="relative">
+            <div className="relative ml-2">
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className={`lc-nav-icon-btn overflow-hidden ring-2 ${
-                  useLightText
-                    ? 'ring-white/30 hover:ring-white/50'
-                    : 'ring-[#E8A888]/50 hover:ring-[#C4704D]'
-                }`}
+                className="lc-nav-icon-btn overflow-hidden ring-2 ring-[#E8A888]/50 hover:ring-[#C4704D]"
                 aria-label="Profile menu"
                 aria-expanded={showProfileDropdown}
               >
