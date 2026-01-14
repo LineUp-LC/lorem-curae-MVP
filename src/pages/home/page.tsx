@@ -32,7 +32,7 @@ const HomePage = () => {
           color: #2D2A26;
         }
       `}</style>
-      <Navbar />
+      <Navbar variant="hero" />
       <main>
         <HeroSection />
         <WhyThisMattersSection />

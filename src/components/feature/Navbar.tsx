@@ -11,7 +11,7 @@ import { useCartCount } from '../../lib/utils/cartState';
 
 /**
  * Navbar Component - MOBILE OPTIMIZED
- * 
+ *
  * Mobile Fixes Applied:
  * - Fixed height container (64px mobile, 80px desktop)
  * - iOS safe area support (env(safe-area-inset-top))
@@ -19,7 +19,16 @@ import { useCartCount } from '../../lib/utils/cartState';
  * - Body scroll lock when mobile menu is open
  * - Full-screen mobile menu overlay
  * - Logo won't wrap on small screens
+ *
+ * Variants:
+ * - "default": Dark text/icons for pages with light backgrounds
+ * - "hero": White text/icons for pages with dark/colorful hero sections
  */
+
+interface NavbarProps {
+  /** Use "hero" variant when page has a dark/colorful hero behind the navbar */
+  variant?: 'default' | 'hero';
+}
 
 const navLinks = [
   { name: 'Home', path: '/' },
@@ -31,7 +40,7 @@ const navLinks = [
   { name: 'About', path: '/about' },
 ];
 
-const Navbar = () => {
+const Navbar = ({ variant = 'default' }: NavbarProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
@@ -76,7 +85,9 @@ const Navbar = () => {
     };
   }, [showMobileMenu]);
 
-  const isHomePage = location.pathname === '/';
+  // Determine if we should use light text (white) or dark text
+  // Light text only when: hero variant + not scrolled + mobile menu closed
+  const useLightText = variant === 'hero' && !isScrolled && !showMobileMenu;
 
   return (
     <>
@@ -129,6 +140,7 @@ const Navbar = () => {
         
         .lc-nav-link {
           color: #6B635A !important;
+          font-size: 1.125rem;
           font-weight: 500;
           transition: color 0.3s ease;
           position: relative;
@@ -231,22 +243,29 @@ const Navbar = () => {
             gap: 0.5rem;
           }
         }
+
+        /* Ensure desktop nav visibility at lg breakpoint */
+        @media (min-width: 1024px) {
+          .lc-mobile-btn { display: none !important; }
+          .lc-desktop-nav { display: flex !important; }
+          .lc-mobile-menu { display: none !important; }
+        }
       `}</style>
       
       {/* Fixed header container with safe area */}
-      <header 
+      <header
         className={`lc-nav-container ${
-          isScrolled || showMobileMenu ? 'lc-nav-scrolled' : 'bg-transparent'
+          useLightText ? 'bg-transparent' : 'lc-nav-scrolled'
         }`}
       >
         <div className="lc-nav-inner">
           {/* Mobile Menu Button */}
           <button
             onClick={() => setShowMobileMenu(!showMobileMenu)}
-            className={`lc-nav-icon-btn lg:hidden ${
-              isScrolled || !isHomePage || showMobileMenu 
-                ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
-                : 'text-white hover:bg-white/20'
+            className={`lc-nav-icon-btn lc-mobile-btn lg:hidden ${
+              useLightText
+                ? 'text-white hover:bg-white/20'
+                : 'text-[#2D2A26] hover:bg-[#C4704D]/10'
             }`}
             aria-label={showMobileMenu ? 'Close menu' : 'Open menu'}
             aria-expanded={showMobileMenu}
@@ -257,14 +276,14 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center">
             <span className={`lc-logo transition-colors ${
-              isScrolled || !isHomePage || showMobileMenu ? 'text-[#2D2A26]' : 'text-white'
+              useLightText ? 'text-white' : 'text-[#2D2A26]'
             }`}>
               Lorem Curae
             </span>
           </Link>
 
           {/* Center Navigation - Desktop */}
-          <nav className="hidden lg:flex items-center space-x-8" role="navigation">
+          <nav className="hidden lg:flex lc-desktop-nav items-center space-x-10" role="navigation">
             {navLinks.map((link) => (
               <Link 
                 key={link.path}
@@ -281,9 +300,9 @@ const Navbar = () => {
             <button
               onClick={() => setIsSearchOpen(true)}
               className={`lc-nav-icon-btn ${
-                isScrolled || !isHomePage || showMobileMenu 
-                  ? 'text-[#2D2A26] hover:bg-[#C4704D]/10' 
-                  : 'text-white hover:bg-white/20'
+                useLightText
+                  ? 'text-white hover:bg-white/20'
+                  : 'text-[#2D2A26] hover:bg-[#C4704D]/10'
               }`}
               aria-label="Search"
             >
@@ -294,9 +313,9 @@ const Navbar = () => {
             <Link
               to="/cart"
               className={`lc-nav-icon-btn relative ${
-                isScrolled || !isHomePage || showMobileMenu
-                  ? 'text-[#2D2A26] hover:bg-[#C4704D]/10'
-                  : 'text-white hover:bg-white/10'
+                useLightText
+                  ? 'text-white hover:bg-white/10'
+                  : 'text-[#2D2A26] hover:bg-[#C4704D]/10'
               }`}
               aria-label={`Shopping Cart${cartCount > 0 ? `, ${cartCount} items` : ''}`}
             >
@@ -313,9 +332,9 @@ const Navbar = () => {
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
                 className={`lc-nav-icon-btn overflow-hidden ring-2 ${
-                  isScrolled || !isHomePage || showMobileMenu 
-                    ? 'ring-[#E8A888]/50 hover:ring-[#C4704D]' 
-                    : 'ring-white/30 hover:ring-white/50'
+                  useLightText
+                    ? 'ring-white/30 hover:ring-white/50'
+                    : 'ring-[#E8A888]/50 hover:ring-[#C4704D]'
                 }`}
                 aria-label="Profile menu"
                 aria-expanded={showProfileDropdown}
