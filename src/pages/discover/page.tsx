@@ -121,20 +121,7 @@ const DiscoverPage = () => {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      {/* FIXED: Mobile-first padding with iOS safe area support */}
-      <main 
-        className="pt-16 sm:pt-20"
-        style={{ 
-          paddingTop: 'calc(64px + env(safe-area-inset-top, 0px))',
-        }}
-      >
-        <style>{`
-          @media (min-width: 640px) {
-            main {
-              padding-top: calc(80px + env(safe-area-inset-top, 0px)) !important;
-            }
-          }
-        `}</style>
+      <main className="pt-24 pb-16">
         <ProductCatalog
           userConcerns={normalizedConcerns}
           compareList={selectedProducts}

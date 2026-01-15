@@ -255,7 +255,7 @@ const MarketplacePage = () => {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Hero Section - Clean style matching Ingredients page */}
         <section className="py-12 px-6 lg:px-12">
           <div className="max-w-7xl mx-auto">

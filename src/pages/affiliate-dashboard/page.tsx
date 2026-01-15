@@ -141,12 +141,12 @@ export default function AffiliateDashboardPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
       
-      <div className="pt-20 pb-16">
+      <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="text-center mb-12">
-            <h1 className="text-4xl lg:text-6xl font-serif text-deep-900 mb-6">Affiliate Dashboard</h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Affiliate Dashboard</h1>
+            <p className="text-sm text-warm-gray max-w-2xl mx-auto">
               Track your earnings from beauty brand partnerships and manage your affiliate links
             </p>
           </div>
@@ -468,7 +468,7 @@ export default function AffiliateDashboardPage() {
             </div>
           )}
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

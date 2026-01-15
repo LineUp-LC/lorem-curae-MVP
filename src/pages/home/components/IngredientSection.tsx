@@ -45,7 +45,7 @@ const ingredients = [
   { name: 'Niacinamide', benefit: 'Strengthens barrier and evens skin tone' },
   { name: 'Retinol', benefit: 'Reduces fine lines and boosts cell turnover' },
   { name: 'Vitamin C', benefit: 'Brightens dark spots with antioxidant power' },
-  { name: 'Ceramides', benefit: 'Restores your skin\'s natural barrier' },
+  { name: "Ceramides", benefit: "Restores your skin's natural barrier" },
   { name: 'Peptides', benefit: 'Signals collagen for improved firmness' },
   { name: 'Salicylic Acid', benefit: 'Clears breakouts by exfoliating pores' },
   { name: 'Azelaic Acid', benefit: 'Calms redness and fades acne marks' },
@@ -180,23 +180,23 @@ export default function IngredientSection() {
       >
         {/* Section intro with fade + lift */}
         <motion.div className="lc-section-intro">
-          <motion.span 
+          <motion.span
             className="lc-section-label"
             variants={fadeInUpSoft}
           >
-            Ingredient Transparency
+            Ingredient Library
           </motion.span>
-          <motion.h2 
+          <motion.h2
             className="lc-section-title"
             variants={fadeInUpSoft}
           >
-            Knowledge is your best skincare product
+            Finally understand what you're putting on your face.
           </motion.h2>
-          <motion.p 
+          <motion.p
             className="lc-section-description"
             variants={fadeInUpSoft}
           >
-            Understanding ingredients means you stop buying on hype and start buying on science. Our library gives you the truth about every ingredient—what it does, who it's for, and what to watch out for.
+            Reading ingredient lists like they're written in another language? Every ingredient decoded: what it does, who it's for, what to pair it with (and what to avoid).
           </motion.p>
         </motion.div>
         

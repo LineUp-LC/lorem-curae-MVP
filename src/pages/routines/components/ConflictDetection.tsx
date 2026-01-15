@@ -61,13 +61,13 @@ export default function ConflictDetection() {
   const getSeverityColor = (severity: string) => {
     switch (severity) {
       case 'high':
-        return 'bg-red-100 text-red-700 border-red-200';
+        return 'bg-primary-100 text-primary-700 border-primary-200';
       case 'medium':
-        return 'bg-amber-100 text-amber-700 border-amber-200';
+        return 'bg-blush-100 text-warm-gray-700 border-blush-300';
       case 'low':
-        return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+        return 'bg-sage-100 text-sage-700 border-sage-200';
       default:
-        return 'bg-gray-100 text-gray-700 border-gray-200';
+        return 'bg-cream-200 text-warm-gray border-blush';
     }
   };
 
@@ -88,13 +88,13 @@ export default function ConflictDetection() {
     return (
       <div className="bg-white rounded-2xl shadow-sm p-8">
         <div className="text-center py-12">
-          <div className="w-20 h-20 rounded-full bg-taupe-100 flex items-center justify-center mx-auto mb-4">
-            <i className="ri-checkbox-circle-line text-taupe text-4xl"></i>
+          <div className="w-20 h-20 rounded-full bg-sage-100 flex items-center justify-center mx-auto mb-4">
+            <i className="ri-checkbox-circle-line text-sage text-4xl"></i>
           </div>
           <h3 className="font-serif text-2xl font-bold text-deep mb-2">
             No Conflicts Detected
           </h3>
-          <p className="text-gray-600">
+          <p className="text-warm-gray">
             Your routine looks great! All products are compatible with each other.
           </p>
         </div>
@@ -107,14 +107,14 @@ export default function ConflictDetection() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
-            <i className="ri-shield-check-line text-red-600 text-xl"></i>
+          <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
+            <i className="ri-shield-check-line text-primary text-xl"></i>
           </div>
           <h2 className="font-serif text-3xl font-bold text-deep">
             Conflict Detection
           </h2>
         </div>
-        <p className="text-gray-600 text-sm ml-13">
+        <p className="text-warm-gray text-sm ml-13">
           We've identified {detectedConflicts.length} potential {detectedConflicts.length === 1 ? 'conflict' : 'conflicts'} in your routine
         </p>
 
@@ -123,7 +123,7 @@ export default function ConflictDetection() {
           <p className="text-xs font-medium text-deep mb-3 uppercase tracking-wide">Understanding Severity Levels</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="flex items-start gap-2">
-              <span className="px-2 py-0.5 bg-red-100 text-red-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+              <span className="px-2 py-0.5 bg-primary-100 text-primary-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
                 HIGH
               </span>
               <p className="text-xs text-warm-gray leading-relaxed">
@@ -131,7 +131,7 @@ export default function ConflictDetection() {
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+              <span className="px-2 py-0.5 bg-blush-100 text-warm-gray-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
                 MEDIUM
               </span>
               <p className="text-xs text-warm-gray leading-relaxed">
@@ -139,7 +139,7 @@ export default function ConflictDetection() {
               </p>
             </div>
             <div className="flex items-start gap-2">
-              <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
+              <span className="px-2 py-0.5 bg-sage-100 text-sage-700 text-xs font-medium rounded-full whitespace-nowrap flex-shrink-0">
                 LOW
               </span>
               <p className="text-xs text-warm-gray leading-relaxed">
@@ -156,13 +156,13 @@ export default function ConflictDetection() {
           <div
             key={conflict.id}
             className={`border-2 rounded-xl overflow-hidden transition-all ${
-              expandedConflict === conflict.id ? 'border-deep' : 'border-gray-200'
+              expandedConflict === conflict.id ? 'border-deep' : 'border-blush'
             }`}
           >
             {/* Conflict Header */}
             <button
               onClick={() => setExpandedConflict(expandedConflict === conflict.id ? null : conflict.id)}
-              className="w-full p-6 cursor-pointer hover:bg-gray-50 transition-colors text-left"
+              className="w-full p-6 cursor-pointer hover:bg-cream transition-colors text-left"
               aria-expanded={expandedConflict === conflict.id}
               aria-controls={`conflict-details-${conflict.id}`}
             >
@@ -184,12 +184,12 @@ export default function ConflictDetection() {
                   </h3>
                   <div className="flex flex-wrap gap-2 mb-3">
                     {conflict.products.map((product, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                      <span key={idx} className="px-3 py-1 bg-cream-200 text-deep-600 text-sm rounded-full font-medium">
                         {product}
                       </span>
                     ))}
                   </div>
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-warm-gray text-sm">
                     {conflict.explanation.substring(0, 150)}...
                   </p>
                 </div>
@@ -203,7 +203,7 @@ export default function ConflictDetection() {
             {expandedConflict === conflict.id && (
               <div 
                 id={`conflict-details-${conflict.id}`}
-                className="border-t border-gray-200 bg-cream-100 p-6 motion-safe:animate-slide-down"
+                className="border-t border-blush bg-cream p-6 motion-safe:animate-slide-down"
               >
                 {/* Full Explanation */}
                 <div className="mb-6">
@@ -211,7 +211,7 @@ export default function ConflictDetection() {
                     <i className="ri-information-line"></i>
                     Why This Matters
                   </h4>
-                  <p className="text-gray-700 text-sm leading-relaxed">
+                  <p className="text-warm-gray-700 text-sm leading-relaxed">
                     {conflict.explanation}
                   </p>
                 </div>
@@ -222,7 +222,7 @@ export default function ConflictDetection() {
                     <i className="ri-lightbulb-line"></i>
                     Our Recommendation
                   </h4>
-                  <p className="text-gray-700 text-sm leading-relaxed">
+                  <p className="text-warm-gray-700 text-sm leading-relaxed">
                     {conflict.recommendation}
                   </p>
                 </div>
@@ -239,20 +239,20 @@ export default function ConflictDetection() {
                       {conflict.alternativeProducts.map((product) => (
                         <div
                           key={product.id}
-                          className="bg-white rounded-lg p-4 border border-gray-200 hover:border-taupe-500 transition-colors duration-fast flex-shrink-0 w-[85vw] max-w-sm snap-start md:w-full md:max-w-none"
+                          className="bg-white rounded-lg p-4 border border-blush hover:border-primary transition-colors duration-fast flex-shrink-0 w-[85vw] max-w-sm snap-start md:w-full md:max-w-none"
                         >
                           <div className="flex items-start gap-4">
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs text-gray-500 mb-1">{product.brand}</p>
+                              <p className="text-xs text-warm-gray mb-1">{product.brand}</p>
                               <h5 className="font-medium text-deep mb-2">{product.name}</h5>
-                              <div className="mb-3 p-3 bg-taupe-50 rounded-lg border border-taupe-200">
-                                <p className="text-sm text-gray-700">
-                                  <strong className="text-taupe-700">Why this works better:</strong> {product.reason}
+                              <div className="mb-3 p-3 bg-sage-50 rounded-lg border border-sage-200">
+                                <p className="text-sm text-warm-gray-700">
+                                  <strong className="text-sage-700">Why this works better:</strong> {product.reason}
                                 </p>
                               </div>
                               <button
                                 onClick={() => navigate(`/product-detail?id=${product.id}`)}
-                                className="px-4 py-2 bg-taupe text-white rounded-lg hover:bg-taupe-700 focus:outline-none focus:ring-2 focus:ring-taupe-500 focus:ring-offset-2 transition-colors duration-fast text-sm font-medium whitespace-nowrap cursor-pointer"
+                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-fast text-sm font-medium whitespace-nowrap cursor-pointer"
                                 aria-label={`View details for ${product.name}`}
                               >
                                 View Product Details
@@ -278,7 +278,7 @@ export default function ConflictDetection() {
           </div>
           <div>
             <h4 className="font-medium text-deep mb-2">Learn More About Ingredient Interactions</h4>
-            <p className="text-sm text-gray-600 mb-3">
+            <p className="text-sm text-warm-gray mb-3">
               Understanding how ingredients work together helps you build a more effective routine. Our conflict detection uses dermatological research to keep your skin safe and healthy.
             </p>
             <button

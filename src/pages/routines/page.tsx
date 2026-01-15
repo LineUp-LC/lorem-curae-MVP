@@ -3,7 +3,6 @@ import { useSearchParams } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import RoutineBuilder from './components/RoutineBuilder';
-import ConflictDetection from './components/ConflictDetection';
 import NotesSection from './components/NotesSection';
 import { sessionState } from '../../lib/utils/sessionState';
 import RoutineTutorial from './components/RoutineTutorial';
@@ -123,7 +122,7 @@ export default function RoutinesPage() {
     <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-20 pb-16">
+      <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header - Shows routine name only */}
           <div className="text-center mb-12">
@@ -202,17 +201,14 @@ export default function RoutinesPage() {
 
           {/* Content */}
           {activeTab === 'routine' ? (
-            <div className="space-y-8">
-              <RoutineBuilder
-                steps={routineSteps}
-                onAddStep={handleAddStep}
-                onRemoveStep={handleRemoveStep}
-                onReorderSteps={handleReorderSteps}
-                onSave={handleSaveRoutine}
-                onBrowseClick={() => setShowBrowsePopup(true)}
-              />
-              <ConflictDetection />
-            </div>
+            <RoutineBuilder
+              steps={routineSteps}
+              onAddStep={handleAddStep}
+              onRemoveStep={handleRemoveStep}
+              onReorderSteps={handleReorderSteps}
+              onSave={handleSaveRoutine}
+              onBrowseClick={() => setShowBrowsePopup(true)}
+            />
           ) : (
             <NotesSection />
           )}

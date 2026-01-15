@@ -7,7 +7,7 @@ const StorefrontJoinPage = () => {
     <div className="min-h-screen bg-[#FDF8F5]">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Hero Section */}
         <section className="relative py-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-[#C4704D] to-[#8B4D35]"></div>

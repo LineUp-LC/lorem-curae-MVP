@@ -71,7 +71,7 @@ export default function ServicesPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Hero Section - Clean style matching Discover/Ingredients */}
         <section className="py-12 px-6 lg:px-12 mb-8">
           <div className="max-w-7xl mx-auto">

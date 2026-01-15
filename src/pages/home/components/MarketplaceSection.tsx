@@ -232,11 +232,11 @@ export default function MarketplaceSection() {
           >
             Curated Marketplace
           </motion.span>
-          <motion.h2 
+          <motion.h2
             className="lc-section-title"
             variants={fadeInUpSoft}
           >
-            Shop from creators who care as much as you do
+            Discover products crafted with intention, not mass-market formulas.
           </motion.h2>
           <motion.p 
             className="lc-section-description"
@@ -282,7 +282,7 @@ export default function MarketplaceSection() {
             className="lc-marketplace-content"
             variants={slideInFromRight}
           >
-            <h3>Not your average product shelf</h3>
+            <h3>Where fit matters more than bestsellers</h3>
             <p>
               Big-box retailers prioritize bestsellers. We prioritize fit. Our marketplace connects you directly with independent creators who formulate with intention.
             </p>

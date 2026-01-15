@@ -40,17 +40,17 @@ const painPoints = [
   {
     icon: 'ri-question-line',
     title: 'Conflicting advice',
-    description: 'Influencer picks, algorithm ads, and ingredient lists that read like chemistry exams.',
+    description: "It's hard to know what's real when every source says something different.",
   },
   {
     icon: 'ri-heart-pulse-line',
     title: '"Holy grail" failures',
-    description: 'Products that worked for everyone else but never for you.',
+    description: "It's frustrating when products promise results but don't match your skin once you try them.",
   },
   {
     icon: 'ri-tools-line',
     title: 'Missing tools',
-    description: "It's not your fault—you've just never had the right guidance.",
+    description: "You've been doing your best — you just haven't had the right guidance yet.",
   },
 ];
 
@@ -156,7 +156,7 @@ export default function WhyThisMattersSection() {
         </motion.span>
 
         <motion.h2 className="lc-why-title" variants={itemVariants}>
-          The skincare industry wasn't built for you. We're changing that.
+          Understanding your skin shouldn't feel impossible — but the industry made it that way.
         </motion.h2>
 
         <motion.div className="lc-pain-grid" variants={sectionVariants}>

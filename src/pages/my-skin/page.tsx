@@ -92,6 +92,7 @@ export default function MySkinPage() {
   const [showProductPopup, setShowProductPopup] = useState(false);
   const [selectedConcernForProduct, setSelectedConcernForProduct] = useState<SkinConcern | null>(null);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
+  const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
@@ -604,6 +605,13 @@ export default function MySkinPage() {
     }));
   };
 
+  const toggleIngredients = (concernId: string) => {
+    setExpandedIngredients(prev => ({
+      ...prev,
+      [concernId]: !prev[concernId],
+    }));
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-white">
       <Navbar />
@@ -832,13 +840,30 @@ export default function MySkinPage() {
                             </div>
                             <p className="text-xs text-warm-gray mb-2 line-clamp-1">{concern.description}</p>
                             <div className="flex flex-wrap gap-1 mb-2">
-                              {concern.recommendedIngredients.slice(0, 3).map((ing, idx) => (
+                              {(expandedIngredients[concern.id]
+                                ? concern.recommendedIngredients
+                                : concern.recommendedIngredients.slice(0, 3)
+                              ).map((ing, idx) => (
                                 <span key={idx} className="px-2 py-0.5 bg-white text-deep text-xs rounded-full border border-primary/20">
                                   {ing}
                                 </span>
                               ))}
                               {concern.recommendedIngredients.length > 3 && (
-                                <span className="px-2 py-0.5 text-warm-gray text-xs">+{concern.recommendedIngredients.length - 3}</span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    toggleIngredients(concern.id);
+                                  }}
+                                  className="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full border border-primary/30 hover:bg-primary/20 transition-colors cursor-pointer font-medium"
+                                  aria-expanded={expandedIngredients[concern.id]}
+                                  aria-label={expandedIngredients[concern.id]
+                                    ? 'Show fewer ingredients'
+                                    : `Show ${concern.recommendedIngredients.length - 3} more ingredients`}
+                                >
+                                  {expandedIngredients[concern.id]
+                                    ? 'Show less'
+                                    : `+${concern.recommendedIngredients.length - 3}`}
+                                </button>
                               )}
                             </div>
                             <div className="flex gap-2">

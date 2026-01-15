@@ -116,14 +116,14 @@ export default function DataImpactPage() {
     <div className="min-h-screen bg-white">
       <Navbar />
       
-      <div className="pt-20 pb-16">
+      <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h1 className="text-4xl font-bold text-gray-900 mb-2">Data Impact Dashboard</h1>
-                <p className="text-gray-600">See how your anonymized data contributes to systemic change</p>
+                <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Data Impact Dashboard</h1>
+                <p className="text-sm text-warm-gray">See how your anonymized data contributes to systemic change</p>
               </div>
               {userProfile && (
                 <span className={`px-4 py-2 rounded-full text-sm font-medium ${getTierBadge(userProfile.subscription_tier).color}`}>
@@ -490,7 +490,7 @@ export default function DataImpactPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       <Footer />
     </div>

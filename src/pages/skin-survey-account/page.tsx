@@ -73,7 +73,7 @@ export default function SkinSurveyAccountPage() {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <main className="pt-20">
+      <main className="pt-24">
         <QuizFlow onComplete={handleQuizComplete} />
       </main>
       <Footer />

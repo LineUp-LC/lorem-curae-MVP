@@ -32,7 +32,7 @@ const MarketplaceSuccessPage = () => {
     <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-32 pb-20">
+      <main className="pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6 text-center">
           {/* Success Icon */}
           <div className="w-24 h-24 bg-taupe-100 rounded-full flex items-center justify-center mx-auto mb-6">

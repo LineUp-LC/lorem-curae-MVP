@@ -127,7 +127,7 @@ const StorefrontDetailPage = () => {
     <div className="min-h-screen bg-[#FDF8F5]">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Banner */}
         <div className="relative h-64 overflow-hidden">
           <img 

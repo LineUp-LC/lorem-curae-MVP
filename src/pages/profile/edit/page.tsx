@@ -22,7 +22,7 @@ const ProfileEditPage = () => {
     <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="max-w-4xl mx-auto px-6 lg:px-12 py-12">
+      <main className="max-w-4xl mx-auto px-6 lg:px-12 pt-24 pb-16">
         <div className="mb-8">
           <button
             onClick={() => navigate(-1)}

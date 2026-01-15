@@ -204,7 +204,7 @@ export default function CommunityPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <div className="pt-20 pb-16">
+      <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           <div className="mb-8">
@@ -522,7 +522,7 @@ export default function CommunityPage() {
             </div>
           </div>
         </div>
-      </div>
+      </main>
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (

@@ -134,18 +134,18 @@ export default function QuizCTA() {
         whileInView="visible"
         viewport={viewportOnce}
       >
-        <motion.h2 
+        <motion.h2
           className="lc-cta-title"
           variants={contentVariants}
         >
-          Your skin journey starts with one question
+          Your skin story matters — this is where it begins.
         </motion.h2>
-        
-        <motion.p 
+
+        <motion.p
           className="lc-cta-text"
           variants={contentVariants}
         >
-          Our 2-minute adaptive survey learns your skin type, concerns, lifestyle, and goals. From there, every recommendation, every comparison, every piece of guidance is tailored to you.
+          Start with us — you're not navigating this alone anymore.
         </motion.p>
         
         {/* EDIT 2: Changed to "Take the Skin Survey" */}
@@ -161,11 +161,10 @@ export default function QuizCTA() {
           </motion.div>
         </motion.div>
         
-        <motion.p 
+        <motion.p
           className="lc-cta-timer"
           variants={contentVariants}
         >
-          No account required. Results instantly.
         </motion.p>
       </motion.div>
     </section>

@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import html2canvas from 'html2canvas';
+import { routineCompletionState } from '../../lib/utils/routineCompletionState';
 
 interface Routine {
   id: string;
@@ -75,6 +76,17 @@ const mockRoutines: Routine[] = [
 export default function RoutinesListPage() {
   const navigate = useNavigate();
   const [routines, setRoutines] = useState<Routine[]>(mockRoutines);
+  const [completedToday, setCompletedToday] = useState<Set<string>>(() => {
+    const completions = routineCompletionState.getCompletions();
+    return new Set(completions.map(c => c.routineId));
+  });
+
+  useEffect(() => {
+    return routineCompletionState.subscribe((completions) => {
+      setCompletedToday(new Set(completions.map(c => c.routineId)));
+    });
+  }, []);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [shareRoutineId, setShareRoutineId] = useState<string | null>(null);
@@ -198,8 +210,7 @@ export default function RoutinesListPage() {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      {/* CHANGED: pt-24 -> pt-20 sm:pt-24, pb-16 -> pb-12 sm:pb-16 */}
-      <main className="pt-20 sm:pt-24 pb-12 sm:pb-16">
+      <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           {/* CHANGED: mb-12 -> mb-8 sm:mb-12 */}
@@ -266,7 +277,24 @@ export default function RoutinesListPage() {
                       )}
                     </button>
                   </div>
-                  
+
+                  {/* Mark as Done Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      routineCompletionState.toggleCompletion(routine.id);
+                    }}
+                    className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                      completedToday.has(routine.id)
+                        ? 'bg-sage text-white'
+                        : 'bg-white/90 hover:bg-white text-deep'
+                    }`}
+                    title={completedToday.has(routine.id) ? 'Completed today - click to undo' : 'Mark as done for today'}
+                  >
+                    <i className={`${completedToday.has(routine.id) ? 'ri-check-line' : 'ri-checkbox-blank-circle-line'} mr-1`}></i>
+                    {completedToday.has(routine.id) ? 'Done' : 'Mark Done'}
+                  </button>
+
                   {/* Completion Badge */}
                   <div className="absolute bottom-3 left-3">
                     {/* CHANGED: px-3 -> px-2 sm:px-3 */}

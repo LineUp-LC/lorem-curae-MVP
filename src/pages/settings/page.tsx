@@ -91,10 +91,10 @@ const SettingsPage = () => {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <main className="max-w-7xl mx-auto px-6 lg:px-12 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-deep mb-2">Settings</h1>
-          <p className="text-warm-gray">Manage your account preferences and settings</p>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Settings</h1>
+          <p className="text-sm text-warm-gray">Manage your account preferences and settings</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">

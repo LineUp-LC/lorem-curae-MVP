@@ -18,6 +18,8 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
+import { routineProgressState } from '../../../lib/utils/routineProgressState';
+import ConflictDetectionPopup from './ConflictDetectionPopup';
 
 interface Product {
   id: string;
@@ -260,12 +262,21 @@ interface RoutineBuilderProps {
 // FIX #4a: Added onSave to destructured props
 export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
+
+  // Initialize time filter from saved progress if unfinished session exists
   const [timeFilter, setTimeFilter] = useLocalStorageState<'morning' | 'evening'>(
     'routine_builder_time_filter',
-    'morning'
+    () => {
+      const progress = routineProgressState.getProgress();
+      return progress.hasUnfinishedSession ? progress.lastTimeFilter : 'morning';
+    }
   );
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
   const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
+  const [showConflictPopup, setShowConflictPopup] = useState(false);
+
+  // Mock conflict count - in real app this would come from conflict detection logic
+  const conflictCount = 2;
 
   // Feature 2: Routine Completion Tracker with daily reset
   const [completedSteps, setCompletedSteps] = useLocalStorageState<{
@@ -294,6 +305,23 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
   // Ref for horizontal scroll container
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Restore scroll position to last interacted step on mount
+  useEffect(() => {
+    const progress = routineProgressState.getProgress();
+    if (progress.hasUnfinishedSession && progress.lastStepIndex > 0 && scrollContainerRef.current) {
+      // Delay to ensure DOM is rendered
+      const timeoutId = setTimeout(() => {
+        const stepWidth = 380 + 24; // card width + gap
+        const scrollPosition = progress.lastStepIndex * stepWidth;
+        scrollContainerRef.current?.scrollTo({
+          left: scrollPosition,
+          behavior: 'smooth'
+        });
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, []);
 
   // Physics-based momentum scrolling with easing
   useEffect(() => {
@@ -373,6 +401,12 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
       ? current.filter(id => id !== stepId)
       : [...current, stepId];
     setCompletedSteps({ ...completedSteps, [key]: updated });
+
+    // Track last interacted step for resume functionality
+    const stepIndex = filteredSteps.findIndex(s => s.id === stepId);
+    if (stepIndex >= 0) {
+      routineProgressState.setLastStep(stepIndex, timeFilter);
+    }
   };
 
   // DnD Kit sensors for mouse/touch/keyboard support
@@ -413,6 +447,12 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
       )
     );
     setShowProductSelector(null);
+
+    // Track last interacted step for resume functionality
+    const stepIndex = filteredSteps.findIndex(s => s.id === stepId);
+    if (stepIndex >= 0) {
+      routineProgressState.setLastStep(stepIndex, timeFilter);
+    }
   };
 
   const handleRemoveProduct = (stepId: string) => {
@@ -447,6 +487,9 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     if (onSave) {
       onSave();
     }
+
+    // Mark session as complete (routine saved)
+    routineProgressState.markSessionComplete();
 
     // Show confirmation toast
     setSaveConfirmation({
@@ -513,39 +556,64 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </p>
         </div>
 
-        {/* Time Filter */}
-        <div className="flex flex-col items-start lg:items-end gap-1">
-          <div className="flex bg-cream rounded-full p-1">
-            <button
-              onClick={() => setTimeFilter('morning')}
-              title="Show only morning routine steps (cleansing, SPF, etc.)"
-              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                timeFilter === 'morning'
-                  ? 'bg-white text-deep shadow-sm'
-                  : 'text-warm-gray hover:text-deep'
-              }`}
-            >
-              <i className="ri-sun-line mr-1 sm:mr-2"></i>
-              <span className="hidden sm:inline">Morning</span>
-              <span className="sm:hidden">AM</span>
-            </button>
-            <button
-              onClick={() => setTimeFilter('evening')}
-              title="Show only evening routine steps (treatments, retinol, etc.)"
-              className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                timeFilter === 'evening'
-                  ? 'bg-white text-deep shadow-sm'
-                  : 'text-warm-gray hover:text-deep'
-              }`}
-            >
-              <i className="ri-moon-line mr-1 sm:mr-2"></i>
-              <span className="hidden sm:inline">Evening</span>
-              <span className="sm:hidden">PM</span>
-            </button>
+        {/* Time Filter + Conflict Indicator */}
+        <div className="flex items-start gap-3">
+          {/* Conflict Indicator Button */}
+          <button
+            onClick={() => setShowConflictPopup(true)}
+            className={`self-start mt-1 relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+              conflictCount > 0
+                ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                : 'bg-sage/10 text-sage hover:bg-sage/20'
+            }`}
+            title={conflictCount > 0 ? `${conflictCount} ingredient conflicts detected` : 'No conflicts detected'}
+            aria-label={`View ingredient conflicts. ${conflictCount} conflicts found.`}
+          >
+            <i className={conflictCount > 0 ? 'ri-error-warning-line' : 'ri-shield-check-line'}></i>
+            <span className="hidden sm:inline">
+              {conflictCount > 0 ? 'Conflicts' : 'No Conflicts'}
+            </span>
+            {conflictCount > 0 && (
+              <span className="flex items-center justify-center w-5 h-5 bg-primary text-white text-xs font-bold rounded-full">
+                {conflictCount}
+              </span>
+            )}
+          </button>
+
+          {/* Time Filter */}
+          <div className="flex flex-col items-start lg:items-end gap-1">
+            <div className="flex bg-cream rounded-full p-1">
+              <button
+                onClick={() => setTimeFilter('morning')}
+                title="Show only morning routine steps (cleansing, SPF, etc.)"
+                className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  timeFilter === 'morning'
+                    ? 'bg-white text-deep shadow-sm'
+                    : 'text-warm-gray hover:text-deep'
+                }`}
+              >
+                <i className="ri-sun-line mr-1 sm:mr-2"></i>
+                <span className="hidden sm:inline">Morning</span>
+                <span className="sm:hidden">AM</span>
+              </button>
+              <button
+                onClick={() => setTimeFilter('evening')}
+                title="Show only evening routine steps (treatments, retinol, etc.)"
+                className={`px-4 sm:px-6 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                  timeFilter === 'evening'
+                    ? 'bg-white text-deep shadow-sm'
+                    : 'text-warm-gray hover:text-deep'
+                }`}
+              >
+                <i className="ri-moon-line mr-1 sm:mr-2"></i>
+                <span className="hidden sm:inline">Evening</span>
+                <span className="sm:hidden">PM</span>
+              </button>
+            </div>
+            <p className="text-xs text-warm-gray/70">
+              Switch between routines
+            </p>
           </div>
-          <p className="text-xs text-warm-gray/70">
-            Switch between routines
-          </p>
         </div>
       </div>
 
@@ -1024,6 +1092,13 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </div>
         </div>
       )}
+
+      {/* Conflict Detection Popup */}
+      <ConflictDetectionPopup
+        isOpen={showConflictPopup}
+        onClose={() => setShowConflictPopup(false)}
+        conflictCount={conflictCount}
+      />
     </div>
   );
 }

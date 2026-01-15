@@ -330,7 +330,7 @@ export default function ProductDetailPage() {
         </div>
       )}
 
-      <main className="flex-1 pt-20">
+      <main className="flex-1 pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             {/* Image Gallery */}
@@ -352,7 +352,7 @@ export default function ProductDetailPage() {
             <div className="space-y-6">
               <div>
                 <p className="text-sm font-medium text-primary mb-2">{product.brand}</p>
-                <h1 className="text-4xl font-bold text-deep mb-4">{product.name}</h1>
+                <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-4">{product.name}</h1>
                 <div className="flex items-center gap-4 mb-6">
                   <button onClick={scrollToReviews} className="flex items-center gap-2 hover:opacity-80 transition-opacity cursor-pointer">
                     <div className="flex items-center">

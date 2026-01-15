@@ -178,7 +178,7 @@ const AccountPage = () => {
       {/* Toast Notification */}
       {toastMessage && <Toast message={toastMessage} onClose={handleCloseToast} />}
 
-      <main className="max-w-7xl mx-auto px-6 lg:px-12 pt-24 pb-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         {/* Profile Header */}
         <div className="bg-white rounded-xl p-8 mb-8" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
           <div className="flex items-start justify-between">

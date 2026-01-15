@@ -48,11 +48,11 @@ const BadgesPage = () => {
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
       <Navbar />
       
-      <main className="max-w-6xl mx-auto px-6 lg:px-12 pt-24 pb-12">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-serif mb-4" style={{ color: '#2D2A26' }}>Your Achievements</h1>
-          <p style={{ color: '#6B635A' }}>Track your skincare journey milestones</p>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Your Achievements</h1>
+          <p className="text-sm text-warm-gray">Track your skincare journey milestones</p>
         </div>
 
         {/* Stats */}

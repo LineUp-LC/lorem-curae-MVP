@@ -159,7 +159,7 @@ const PremiumPackagesPage = () => {
     <div className="min-h-screen bg-cream-50">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Hero Section */}
         <section className="relative py-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-amber-500 to-orange-600"></div>

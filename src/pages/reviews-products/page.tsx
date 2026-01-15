@@ -223,7 +223,7 @@ const ProductReviewsPage = () => {
   return (
     <div className="min-h-screen bg-cream">
       <Navbar />
-      <div className="pt-24 pb-16 px-6 lg:px-12">
+      <main className="pt-24 pb-16 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center space-x-2 text-sm text-warm-gray mb-4">
@@ -409,7 +409,7 @@ const ProductReviewsPage = () => {
             </div>
           )}
         </div>
-      </div>
+      </main>
       <Footer />
     </div>
   );

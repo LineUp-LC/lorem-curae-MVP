@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import Navbar from '../../components/feature/Navbar';
+import Footer from '../../components/feature/Footer';
 
 const WaitlistLandingPage = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -32,23 +34,10 @@ const WaitlistLandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Minimal Header */}
-      <header className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-slate-200 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <Link to="/" className="text-2xl font-serif text-slate-900">
-            Lorem Curae
-          </Link>
-          <a 
-            href="#waitlist" 
-            className="px-6 py-2.5 bg-taupe text-white rounded-full hover:bg-taupe-700 transition-colors text-sm font-medium whitespace-nowrap"
-          >
-            Join Waitlist
-          </a>
-        </div>
-      </header>
+      <Navbar />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-20 px-6 bg-gradient-to-br from-taupe-50 via-white to-cream-50">
+      <section className="pt-24 sm:pt-28 pb-20 px-6 bg-gradient-to-br from-sage-50 via-white to-cream-50">
         <div className="max-w-4xl mx-auto text-center">
           {/* Creator Waitlist Link */}
           <div className="mb-8">
@@ -476,35 +465,7 @@ const WaitlistLandingPage = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 bg-slate-900 text-white">
-        <div className="max-w-7xl mx-auto text-center">
-          <Link to="/" className="text-3xl font-serif mb-4 inline-block">
-            Lorem Curae
-          </Link>
-          <p className="text-slate-400 mb-6">
-            Skincare clarity, powered by science and personalization
-          </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-slate-400">
-            <Link to="/privacy" className="hover:text-white transition-colors">
-              Privacy
-            </Link>
-            <span>•</span>
-            <Link to="/contact" className="hover:text-white transition-colors">
-              Contact
-            </Link>
-            <span>•</span>
-            <a 
-              href="https://readdy.ai/?origin=logo" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="hover:text-white transition-colors"
-            >
-              Powered by Readdy
-            </a>
-          </div>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 };

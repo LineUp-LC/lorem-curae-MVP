@@ -79,23 +79,23 @@ function AnimatedCounter({
 
 const testimonials = [
   {
-    quote: "I spent years bouncing between influencer recommendations and overwhelming product walls. Lorem Curae was the first place that actually understood my skin—not just sold to it.",
+    quote: "For the first time, I felt like someone understood my skin instead of trying to sell me something.",
     name: "Sarah M.",
     skin: "Combination Skin",
-    journey: "8 months"
+    journey: ""
   },
   {
-    quote: "My dermatologist was surprised at how well I understood my routine. I told her I finally had tools that explained the 'why' behind every product.",
+    quote: "I stopped guessing. I finally understood my skin — and everything changed.",
+    name: "Daniel R.",
+    skin: "Oily Skin",
+    journey: ""
+  },
+  {
+    quote: "I didn't feel alone anymore. The guidance finally made skincare make sense.",
     name: "Keisha L.",
     skin: "Sensitive Skin",
-    journey: "1 year"
+    journey: ""
   },
-  {
-    quote: "As someone with rosacea, I was terrified of trying new products. The ingredient transparency and AI guidance gave me confidence I never had before.",
-    name: "Emma T.",
-    skin: "Rosacea-prone",
-    journey: "6 months"
-  }
 ];
 
 const stats = [
@@ -248,11 +248,11 @@ export default function TestimonialSection() {
         whileInView="visible"
         viewport={viewportOnce}
       >
-        <motion.span 
+        <motion.span
           className="lc-section-label"
           variants={fadeInUpSoft}
         >
-          Community Voices
+          You're not the only one who felt lost before finding clarity.
         </motion.span>
         
         {/* Quote with AnimatePresence for smooth transitions */}
@@ -272,7 +272,7 @@ export default function TestimonialSection() {
               <div className="lc-testimonial-author">
                 <div className="lc-author-name">{testimonials[activeTestimonial].name}</div>
                 <div className="lc-author-details">
-                  {testimonials[activeTestimonial].skin} • {testimonials[activeTestimonial].journey}
+                  {testimonials[activeTestimonial].skin}{testimonials[activeTestimonial].journey && ` • ${testimonials[activeTestimonial].journey}`}
                 </div>
               </div>
             </motion.div>

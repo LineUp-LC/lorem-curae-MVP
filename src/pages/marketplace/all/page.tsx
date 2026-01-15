@@ -153,7 +153,7 @@ const MarketplaceAllPage = () => {
     <div className="min-h-screen bg-cream">
       <Navbar />
       
-      <main className="pt-20">
+      <main className="pt-24">
         {/* Header */}
         <section className="py-16 bg-white border-b border-blush">
           <div className="max-w-7xl mx-auto px-6 lg:px-12">

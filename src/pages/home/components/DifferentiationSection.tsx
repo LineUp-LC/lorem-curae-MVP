@@ -58,14 +58,14 @@ const quoteVariants = {
 
 // EDIT 4: Enhanced Lorem Curae description with all requested elements
 const competitors = [
-  { name: 'Sephora & Ulta', issue: 'Sell inventory first, fit second. Reviews aren\'t filtered by skin type.', isUs: false },
+  { name: "Sephora & Ulta", issue: "Inventory first, fit second. Reviews aren't filtered by skin type.", isUs: false },
   { name: 'Amazon', issue: 'Counterfeit risk. Zero personalization. Review manipulation.', isUs: false },
   { name: 'Google', issue: 'SEO-gamed results. Sponsored content disguised as advice.', isUs: false },
   { name: 'INCIdecoder', issue: 'Great for data, but no personalization or guidance.', isUs: false },
-  { 
-    name: 'Lorem Curae', 
-    issue: 'Personalized recommendations, community-reviewed retailers with retailer comparison, verified marketplace products, science-backed guidance, and a supportive community where you can go for advice—sharing your skin story together.', 
-    isUs: true 
+  {
+    name: 'Lorem Curae',
+    issue: 'Personalized recommendations, community-reviewed retailers with comparison tools, verified marketplace products, science-backed guidance, and a supportive community that walks the journey with you.',
+    isUs: true
   },
 ];
 
@@ -217,12 +217,11 @@ export default function DifferentiationSection() {
       >
         {/* Left content - slides in from left */}
         <motion.div variants={slideInFromLeft}>
-          <motion.h2 
+          <motion.h2
             className="lc-diff-title"
             variants={fadeInUpSoft}
           >
-            We're not Sephora. We're not Amazon.<br />
-            We're <em>on your side.</em>
+            We're not Sephora. We're not Amazon. We're on your side.
           </motion.h2>
           <motion.p 
             className="lc-diff-text"
