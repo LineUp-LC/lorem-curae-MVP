@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   fadeInUpSoft,
+  staggerContainer,
   staggerContainerSlow,
   cardHover,
   drawPath,
@@ -88,7 +89,7 @@ const tools = [
     ),
     title: 'Smart Product Finder',
     // EDIT 3: Added retailer/faulty products pain point
-    pain: 'The pain: Endless scrolling through products that weren\'t made for your skin—and finding retailers that sell faulty products, never knowing if the product actually works.',
+    pain: "The pain: Endless scrolling through products that weren't made for your skin—and finding retailers that sell faulty products, never knowing if the product actually works.",
     // EDIT 4: Combined products AND retailers search into one cohesive sentence
     description: 'Search for products and reputable retailers the way you actually think about skincare—by concern, ingredient, price, or skin type.',
     // EDIT 5: Replaced outcome with trusted retailers text
@@ -132,9 +133,9 @@ const tools = [
       </svg>
     ),
     title: 'Ingredient Library',
-    pain: 'The pain: Reading ingredient lists like they\'re written in another language.',
-    description: 'Every ingredient decoded: what it does, who it\'s for, what to pair it with (and what to avoid).',
-    outcome: 'Finally understand what you\'re putting on your face',
+    pain: "The pain: Reading ingredient lists like they're written in another language.",
+    description: "Every ingredient decoded: what it does, who it's for, what to pair it with (and what to avoid).",
+    outcome: "Finally understand what you're putting on your face",
     link: '/ingredients',
   },
   {
@@ -145,7 +146,7 @@ const tools = [
     ),
     title: 'Routine Tracking',
     // EDIT 8: Added guidance pain point
-    pain: 'The pain: Forgetting what you used when, never knowing what\'s working, and not having someone to guide you throughout your process.',
+    pain: "The pain: Forgetting what you used when, never knowing what's working, and not having someone to guide you throughout your process.",
     // EDIT 9: Added personalization and assessment text
     description: 'Build AM/PM routines with smart conflict detection. Track your progress over time—further enhancing your personalization so Curae can assess the progress you\'ve tracked for a selected time period.',
     outcome: 'Build consistency, see results',
@@ -159,8 +160,8 @@ const tools = [
       </svg>
     ),
     title: 'Progress Assessment and Feedback',
-    pain: 'The pain: Trying new routines without any way to measure if they\'re actually working—or knowing when it\'s time to adjust.',
-    description: 'Curae analyzes your tracked routines and skin progress over time, providing personalized feedback and actionable insights. See what\'s working, what needs adjustment, and receive tailored recommendations based on your real results.',
+    pain: "The pain: Trying new routines without any way to measure if they're actually working—or knowing when it's time to adjust.",
+    description: "Curae analyzes your tracked routines and skin progress over time, providing personalized feedback and actionable insights. See what's working, what needs adjustment, and receive tailored recommendations based on your real results.",
     outcome: 'Data-driven insights that evolve with your skin',
     link: '/my-skin',
   },
@@ -224,7 +225,36 @@ export default function ConnectedSystemSection() {
           font-style: italic;
           color: #C4704D;
         }
-        
+
+        /* Asset list styles */
+        .lc-asset-list {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+          margin-top: 2rem;
+          text-align: left;
+          max-width: 480px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+
+        .lc-asset-item {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.9375rem;
+          color: #6B635A;
+          display: flex;
+          align-items: flex-start;
+          gap: 0.75rem;
+          line-height: 1.5;
+        }
+
+        .lc-asset-bullet {
+          color: #C4704D;
+          font-size: 0.5rem;
+          margin-top: 0.45rem;
+          flex-shrink: 0;
+        }
+
         /* Connecting line SVG */
         .lc-connecting-line {
           position: absolute;
@@ -371,21 +401,44 @@ export default function ConnectedSystemSection() {
           >
             One Ecosystem, Infinite Clarity
           </motion.span>
-          <motion.h2 
+          <motion.h2
             className="lc-section-title"
             variants={fadeInUpSoft}
           >
-            Six tools that work together—so you don't have to
+            One ecosystem. Infinite clarity.
           </motion.h2>
-          {/* EDIT 2: Added "and builds the foundation for your personalized experience" */}
-          <motion.p 
+          <motion.p
             className="lc-section-description"
             variants={fadeInUpSoft}
           >
-            Each feature feeds into the next. Your skin quiz informs your product recommendations and builds the foundation for your personalized experience. Your ingredient knowledge shapes your comparisons. This isn't a collection of tools—it's a connected system built around <em>your</em> skin.
+            Everything you do on Lorem Curae strengthens the next step. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress help Curae learn with you. It's not a set of tools — it's a guided journey built around your skin.
           </motion.p>
+
+          {/* Asset list */}
+          <motion.ul
+            className="lc-asset-list"
+            variants={staggerContainer}
+          >
+            {[
+              'Take the survey',
+              'Get science-backed product + retailer recommendations',
+              'Build your routine with confidence',
+              'Track your progress',
+              'Receive insights that strengthen your personalization',
+              'Earn discounts when you purchase through our retailer links',
+            ].map((item, index) => (
+              <motion.li
+                key={index}
+                className="lc-asset-item"
+                variants={fadeInUpSoft}
+              >
+                <span className="lc-asset-bullet">●</span>
+                {item}
+              </motion.li>
+            ))}
+          </motion.ul>
         </motion.div>
-        
+
         {/* Cards grid with staggered animation */}
         <motion.div 
           className="lc-system-grid"
