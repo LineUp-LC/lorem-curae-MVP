@@ -56,15 +56,16 @@ const titleVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: {
+  visible: (i: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
+      delay: (i + 1) * 0.4,
       duration: TIMING.normal,
       ease: EASING.gentle,
     },
-  },
+  }),
 };
 
 const iconVariants = {
@@ -258,18 +259,24 @@ export default function ConnectedSystemSection() {
         /* Connecting line SVG */
         .lc-connecting-line {
           position: absolute;
-          top: 50%;
+          top: 200px;
           left: 50%;
-          transform: translate(-50%, -50%);
+          transform: translateX(-50%);
           width: 80%;
-          height: 200px;
+          height: 100%;
           pointer-events: none;
           opacity: 0.3;
         }
-        
+
+        @media (max-width: 1024px) {
+          .lc-connecting-line {
+            display: none;
+          }
+        }
+
         .lc-system-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+          grid-template-columns: repeat(3, 1fr);
           gap: 2rem;
           max-width: 1200px;
           margin: 0 auto;
@@ -277,7 +284,19 @@ export default function ConnectedSystemSection() {
           z-index: 1;
           align-items: stretch;
         }
-        
+
+        @media (max-width: 1024px) {
+          .lc-system-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 640px) {
+          .lc-system-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
         .lc-system-card {
           background: white;
           padding: 2.5rem;
@@ -372,27 +391,34 @@ export default function ConnectedSystemSection() {
         }
       `}</style>
 
-      {/* Decorative connecting line with draw animation */}
-      <svg className="lc-connecting-line" viewBox="0 0 800 200">
-        <motion.path
-          d="M0,100 Q200,50 400,100 T800,100"
-          stroke="#C4704D"
-          strokeWidth="2"
-          fill="none"
-          strokeDasharray="8 4"
-          variants={drawPath}
-          initial="hidden"
-          whileInView="visible"
-          viewport={viewportOnce}
-        />
-      </svg>
-
       <motion.div
         initial="hidden"
         whileInView="visible"
         viewport={viewportOnce}
         variants={sectionVariants}
       >
+        {/* Decorative connecting line with draw animation */}
+        <svg className="lc-connecting-line" viewBox="0 0 800 500">
+          <motion.path
+            d="M 50,80 L 750,80 C 750,160 720,240 500,270 C 280,300 100,370 50,420 L 750,420"
+            stroke="#C4704D"
+            strokeWidth="2"
+            fill="none"
+            strokeDasharray="8 4"
+            variants={{
+              hidden: { pathLength: 0, opacity: 0 },
+              visible: {
+                pathLength: 1,
+                opacity: 1,
+                transition: {
+                  pathLength: { duration: 2.4, ease: EASING.gentle },
+                  opacity: { duration: TIMING.fast },
+                },
+              },
+            }}
+          />
+        </svg>
+
         {/* Section intro with fade + lift */}
         <motion.div className="lc-section-intro" variants={titleVariants}>
           <motion.span 
@@ -447,6 +473,7 @@ export default function ConnectedSystemSection() {
           {tools.map((tool, index) => (
             <motion.div
               key={index}
+              custom={index}
               variants={cardVariants}
               whileHover={cardHover}
             >
