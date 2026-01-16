@@ -158,7 +158,7 @@ export default function HeroSection() {
           font-weight: 500;
           line-height: 1.1;
           max-width: 800px;
-          margin-bottom: 1.75rem;
+          margin-bottom: 5rem;
           letter-spacing: -0.01em;
           color: #2D2A26;
         }
@@ -167,10 +167,15 @@ export default function HeroSection() {
           font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
           font-size: clamp(1.25rem, 2.5vw, 1.5rem);
           color: #6B635A;
-          max-width: 550px;
-          line-height: 1.6;
+          max-width: 1000px;
+          line-height: 1.8;
           margin-bottom: 3rem;
           font-weight: 400;
+        }
+
+        .lc-hero-subhead em {
+          font-style: italic;
+          color: #C4704D;
         }
 
         /* CTA Container */
@@ -270,7 +275,7 @@ export default function HeroSection() {
           className="lc-hero-subhead"
           variants={heroVariants.subhead}
         >
-          Finally understand your skin — and what actually works for it.
+          Lorem Curae is one of the only platforms built to connect your unique skin profile with <em>personalized guidance</em>, <em>trusted retailers</em>, <em>ingredient clarity</em>, and <em>community support</em> into one connected experience. Everything works together so you never have to navigate skincare alone — and finally see <em>clarity</em> where there used to be confusion.
         </motion.p>
 
         {/* Primary CTA */}
