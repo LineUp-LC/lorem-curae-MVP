@@ -12,7 +12,7 @@ import {
  * QuizCTA Component
  * 
  * COPY UPDATES APPLIED:
- * - Edit 2: Changed "Take the Skin Quiz" to "Take the Skin Survey"
+ * - Edit 2: Changed "Take the Skin Quiz" to "Take the Survey"
  * - Removed "inbox" from results text
  */
 
@@ -148,7 +148,7 @@ export default function QuizCTA() {
           Start with us — you're not navigating this alone anymore.
         </motion.p>
         
-        {/* EDIT 2: Changed to "Take the Skin Survey" */}
+        {/* EDIT 2: Changed to "Take the Survey" */}
         <motion.div variants={contentVariants}>
           <motion.div
             whileHover={buttonHover}
@@ -156,7 +156,7 @@ export default function QuizCTA() {
             style={{ display: 'inline-block' }}
           >
             <Link to="/skin-survey" className="lc-btn-primary">
-              Take the Skin Survey
+              Take the Survey
             </Link>
           </motion.div>
         </motion.div>

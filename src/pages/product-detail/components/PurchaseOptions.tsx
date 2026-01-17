@@ -27,6 +27,14 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
   const [showTaxInfo, setShowTaxInfo] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const [selectedRetailers, setSelectedRetailers] = useState<number[]>([]);
+  const [showSortDropdown, setShowSortDropdown] = useState(false);
+
+  const sortOptions = [
+    { value: 'trust', label: 'Trust Score', icon: 'ri-shield-star-line' },
+    { value: 'price-low', label: 'Price: Low to High', icon: 'ri-arrow-up-line' },
+    { value: 'price-high', label: 'Price: High to Low', icon: 'ri-arrow-down-line' },
+    { value: 'delivery', label: 'Fastest Delivery', icon: 'ri-truck-line' },
+  ];
 
   // Mock retailer data
   const retailers: Retailer[] = [
@@ -191,7 +199,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
   };
 
   return (
-    <div className="py-12 px-6 lg:px-12 bg-white">
+    <div id="where-to-buy-section" className="py-12 px-6 lg:px-12 bg-white">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -205,16 +213,38 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
           <div className="flex items-center space-x-3">
             <label className="text-sm font-semibold text-gray-700">Sort by:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-              className="px-4 py-2 rounded-full border border-gray-300 focus:border-primary-600 focus:outline-none text-sm cursor-pointer"
-            >
-              <option value="trust">Trust Score</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="delivery">Fastest Delivery</option>
-            </select>
+            <div className="relative">
+              <button
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                className="flex items-center gap-2 px-4 py-2 rounded-full border border-gray-300 hover:border-primary bg-white text-sm cursor-pointer min-w-[180px] justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <i className={`${sortOptions.find(o => o.value === sortBy)?.icon} text-primary`}></i>
+                  {sortOptions.find(o => o.value === sortBy)?.label}
+                </span>
+                <i className={`ri-arrow-${showSortDropdown ? 'up' : 'down'}-s-line text-gray-500`}></i>
+              </button>
+              {showSortDropdown && (
+                <div className="absolute top-full left-0 mt-2 w-full bg-white border border-gray-200 rounded-xl shadow-lg z-50 overflow-hidden">
+                  {sortOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => {
+                        setSortBy(option.value);
+                        setShowSortDropdown(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 text-sm text-left hover:bg-cream transition-colors cursor-pointer ${
+                        sortBy === option.value ? 'bg-primary/10 text-primary font-medium' : 'text-gray-700'
+                      }`}
+                    >
+                      <i className={`${option.icon} ${sortBy === option.value ? 'text-primary' : 'text-gray-400'}`}></i>
+                      {option.label}
+                      {sortBy === option.value && <i className="ri-check-line ml-auto text-primary"></i>}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-3">

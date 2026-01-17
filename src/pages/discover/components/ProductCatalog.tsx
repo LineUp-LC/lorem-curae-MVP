@@ -83,6 +83,9 @@ export default function ProductCatalog({
   );
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Favorite notification state
+  const [favoriteNotification, setFavoriteNotification] = useState<{ show: boolean; productName: string; isAdding: boolean }>({ show: false, productName: '', isAdding: true });
+
   // Safe fallback for compareList to prevent undefined errors
   const safeCompareList = compareList ?? [];
 
@@ -255,6 +258,7 @@ export default function ProductCatalog({
           <button
             onClick={(e) => {
               e.stopPropagation();
+              const wasAlreadyFavorite = isFavorite(product.id);
               toggleFavorite({
                 id: product.id,
                 name: product.name,
@@ -264,6 +268,8 @@ export default function ProductCatalog({
                 category: product.category,
                 skinTypes: product.skinTypes,
               });
+              setFavoriteNotification({ show: true, productName: product.name, isAdding: !wasAlreadyFavorite });
+              setTimeout(() => setFavoriteNotification({ show: false, productName: '', isAdding: true }), 3000);
             }}
             className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
               isFavorite(product.id)
@@ -737,6 +743,17 @@ export default function ProductCatalog({
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Favorite Notification Popup */}
+      {favoriteNotification.show && (
+        <div className="fixed top-24 right-6 z-50 bg-primary text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 motion-safe:animate-fade-in">
+          <i className={`${favoriteNotification.isAdding ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+          <div>
+            <p className="font-medium">{favoriteNotification.isAdding ? 'Added to Favorites' : 'Removed from Favorites'}</p>
+            <p className="text-sm text-white/80">{favoriteNotification.productName}</p>
           </div>
         </div>
       )}

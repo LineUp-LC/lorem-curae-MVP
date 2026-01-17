@@ -515,17 +515,26 @@ const AIChatPage = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <button
-                  onClick={() => setShowInsights(!showInsights)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                    showInsights
-                      ? 'bg-primary text-white'
-                      : 'bg-cream text-warm-gray hover:bg-gray-200'
-                  }`}
-                >
-                  <i className="ri-lightbulb-line mr-2"></i>
-                  Insights
-                </button>
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => setShowInsights(!showInsights)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      showInsights
+                        ? 'bg-primary text-white'
+                        : 'bg-cream text-warm-gray hover:bg-gray-200'
+                    }`}
+                  >
+                    <i className="ri-lightbulb-line mr-2"></i>
+                    Insights
+                  </button>
+                  <div className="relative group">
+                    <i className="ri-information-line text-warm-gray/60 hover:text-warm-gray cursor-help"></i>
+                    <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-deep text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                      Get AI‑powered insights that reveal what's changing in your skin and why, using your notes, photos, and routines.
+                      <div className="absolute -top-1 right-3 w-2 h-2 bg-deep rotate-45"></div>
+                    </div>
+                  </div>
+                </div>
                 <Link
                   to="/my-skin"
                   className="px-4 py-2 bg-cream text-warm-gray rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"

@@ -19,6 +19,7 @@ export default function ProductDetailPage() {
     'overview'
   );
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [isSavedToRoutine, setIsSavedToRoutine] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
   const [showComparison, setShowComparison] = useState(false);
@@ -37,6 +38,13 @@ export default function ProductDetailPage() {
         setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
       }
     }
+  }, []);
+
+  // Check if product is already saved to routine
+  useEffect(() => {
+    const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
+    const isAlreadySaved = savedProducts.some((p: any) => p.id === 1);
+    setIsSavedToRoutine(isAlreadySaved);
   }, []);
 
   const product = {
@@ -98,7 +106,10 @@ export default function ProductDetailPage() {
 
   const handleSaveToRoutine = () => {
     const savedProducts = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-    if (!savedProducts.find((p: any) => p.id === product.id)) {
+    const existingIndex = savedProducts.findIndex((p: any) => p.id === product.id);
+
+    if (existingIndex === -1) {
+      // Add to routine
       savedProducts.push({
         id: product.id,
         name: product.name,
@@ -108,11 +119,12 @@ export default function ProductDetailPage() {
         savedAt: new Date().toISOString()
       });
       localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
-      setShowSaveSuccess(true);
-      setTimeout(() => setShowSaveSuccess(false), 3000);
+      setIsSavedToRoutine(true);
     } else {
-      setShowSaveSuccess(true);
-      setTimeout(() => setShowSaveSuccess(false), 3000);
+      // Remove from routine
+      savedProducts.splice(existingIndex, 1);
+      localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
+      setIsSavedToRoutine(false);
     }
   };
 
@@ -375,6 +387,12 @@ export default function ProductDetailPage() {
                       <i className="ri-checkbox-circle-fill"></i>In Stock
                     </span>
                   )}
+                  <button
+                    onClick={() => document.getElementById('where-to-buy-section')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="text-sm text-primary hover:text-dark underline cursor-pointer"
+                  >
+                    Check where to buy
+                  </button>
                 </div>
               </div>
 
@@ -486,8 +504,16 @@ export default function ProductDetailPage() {
                   <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-lg`}></i>
                   {isFavorite(product.id) ? 'Saved to Favorites' : 'Add to Favorites'}
                 </button>
-                <button onClick={handleSaveToRoutine} className="w-full bg-white hover:bg-cream text-primary font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary">
-                  <i className="ri-bookmark-line text-lg"></i>Save to Routine
+                <button
+                  onClick={handleSaveToRoutine}
+                  className={`w-full font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary ${
+                    isSavedToRoutine
+                      ? 'bg-primary/10 text-primary hover:bg-primary/20'
+                      : 'bg-white hover:bg-cream text-primary'
+                  }`}
+                >
+                  <i className={`${isSavedToRoutine ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-lg`}></i>
+                  {isSavedToRoutine ? 'Saved to Routine' : 'Save to Routine'}
                 </button>
                 <button onClick={scrollToReviews} className="w-full bg-white hover:bg-cream text-primary font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary">
                   <i className="ri-chat-3-line text-lg"></i>Read {product.reviewCount.toLocaleString()} Reviews

@@ -93,6 +93,43 @@ export default function MySkinPage() {
   const [selectedConcernForProduct, setSelectedConcernForProduct] = useState<SkinConcern | null>(null);
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+  const [showLifestyleCheckin, setShowLifestyleCheckin] = useState(false);
+  const [editingLifestyle, setEditingLifestyle] = useState({
+    sleepPattern: '',
+    stressLevel: '',
+    dietPattern: '',
+    waterIntake: '',
+    exerciseFrequency: '',
+    environmentalExposure: '',
+  });
+
+  // Lifestyle options for the check-in
+  const lifestyleOptions: Record<string, { emoji: string; options: string[] }> = {
+    sleepPattern: { emoji: '🌙', options: ['Less than 5 hours', '5-6 hours', '7-8 hours', 'More than 8 hours'] },
+    stressLevel: { emoji: '🧘', options: ['Low', 'Moderate', 'High', 'Very High'] },
+    dietPattern: { emoji: '🥗', options: ['Balanced', 'Mostly Healthy', 'Variable', 'Could Improve'] },
+    waterIntake: { emoji: '💧', options: ['Less than 4 cups', '4-6 cups', '6-8 cups', 'More than 8 cups'] },
+    exerciseFrequency: { emoji: '🏃', options: ['Rarely', '1-2 times/week', '3-4 times/week', 'Daily'] },
+    environmentalExposure: { emoji: '🌆', options: ['Urban/City', 'Suburban', 'Rural', 'High Pollution', 'Low Pollution'] },
+  };
+
+  const lifestyleLabels: Record<string, string> = {
+    sleepPattern: 'How much sleep do you get?',
+    stressLevel: 'What\'s your stress level?',
+    dietPattern: 'How would you describe your diet?',
+    waterIntake: 'Daily water intake?',
+    exerciseFrequency: 'How often do you exercise?',
+    environmentalExposure: 'Your environment?',
+  };
+
+  const handleSaveLifestyle = () => {
+    setLifestyleFactors(editingLifestyle);
+    // Save to localStorage
+    const existingData = JSON.parse(localStorage.getItem('skinSurveyData') || '{}');
+    existingData.lifestyle = editingLifestyle;
+    localStorage.setItem('skinSurveyData', JSON.stringify(existingData));
+    setShowLifestyleCheckin(false);
+  };
 
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
@@ -625,11 +662,11 @@ export default function MySkinPage() {
                 My Skin Profile
               </h1>
               <button
-                onClick={handleRetakeQuiz}
+                onClick={() => navigate('/routines-list')}
                 className="px-4 py-2 bg-white border border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
               >
-                <i className="ri-refresh-line mr-2"></i>
-                Retake Quiz
+                Routine
+                <i className="ri-arrow-right-line ml-2"></i>
               </button>
             </div>
             <p className="text-sm text-warm-gray">
@@ -866,6 +903,9 @@ export default function MySkinPage() {
                                 </button>
                               )}
                             </div>
+                            <p className="text-xs text-warm-gray/70 italic mb-2">
+                              <i className="ri-search-eye-line mr-1"></i>Look for these ingredients in products
+                            </p>
                             <div className="flex gap-2">
                               <button
                                 onClick={() => handlePrioritize(concern, 'products')}
@@ -904,7 +944,26 @@ export default function MySkinPage() {
                     <p className="text-xs text-warm-gray">Daily habits & exposure factors</p>
                   </div>
                 </div>
-                <i className={`ri-arrow-${expandedCategories.lifestyle ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setEditingLifestyle({
+                        sleepPattern: lifestyleFactors?.sleepPattern || '',
+                        stressLevel: lifestyleFactors?.stressLevel || '',
+                        dietPattern: lifestyleFactors?.dietPattern || '',
+                        waterIntake: lifestyleFactors?.waterIntake || '',
+                        exerciseFrequency: lifestyleFactors?.exerciseFrequency || '',
+                        environmentalExposure: lifestyleFactors?.environmentalExposure || '',
+                      });
+                      setShowLifestyleCheckin(true);
+                    }}
+                    className="px-3 py-1.5 bg-sage/10 text-sage rounded-lg text-xs font-medium hover:bg-sage/20 transition-colors cursor-pointer"
+                  >
+                    <i className="ri-refresh-line mr-1"></i>Update
+                  </button>
+                  <i className={`ri-arrow-${expandedCategories.lifestyle ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
+                </div>
               </button>
 
               {expandedCategories.lifestyle && (
@@ -1339,6 +1398,78 @@ export default function MySkinPage() {
                     <i className="ri-send-plane-fill text-lg"></i>
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lifestyle Check-in Modal */}
+      {showLifestyleCheckin && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-cream rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-gradient-to-r from-sage to-sage/80 text-white p-6 rounded-t-2xl">
+              <button
+                onClick={() => setShowLifestyleCheckin(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <i className="ri-heart-pulse-line text-2xl"></i>
+                </div>
+                <div>
+                  <h3 className="text-xl font-serif font-bold">Lifestyle Check-in</h3>
+                  <p className="text-sm text-white/80">How are things going?</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-6">
+              {Object.entries(lifestyleOptions).map(([key, { emoji, options }]) => (
+                <div key={key} className="space-y-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{emoji}</span>
+                    <h4 className="font-medium text-deep">{lifestyleLabels[key]}</h4>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {options.map((option) => (
+                      <button
+                        key={option}
+                        onClick={() => setEditingLifestyle(prev => ({ ...prev, [key]: option }))}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                          editingLifestyle[key as keyof typeof editingLifestyle] === option
+                            ? 'bg-sage text-white shadow-md scale-105'
+                            : 'bg-white text-warm-gray border border-blush hover:border-sage hover:text-sage'
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-cream border-t border-blush p-4 rounded-b-2xl">
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowLifestyleCheckin(false)}
+                  className="flex-1 px-6 py-3 bg-white text-warm-gray border border-blush rounded-xl font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSaveLifestyle}
+                  className="flex-1 px-6 py-3 bg-sage text-white rounded-xl font-medium hover:bg-sage/90 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <i className="ri-check-line"></i>
+                  Save Changes
+                </button>
               </div>
             </div>
           </div>

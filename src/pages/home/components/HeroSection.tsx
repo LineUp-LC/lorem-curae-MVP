@@ -294,7 +294,7 @@ export default function HeroSection() {
               whileTap={buttonTap}
               onClick={() => navigate('/skin-survey')}
             >
-              Take the Skin Survey
+              Begin your journey
             </motion.button>
           </motion.div>
         </motion.div>
