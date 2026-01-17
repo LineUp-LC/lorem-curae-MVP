@@ -158,7 +158,7 @@ export default function HeroSection() {
           font-weight: 500;
           line-height: 1.1;
           max-width: 800px;
-          margin-bottom: 5rem;
+          margin-bottom: 2rem;
           letter-spacing: -0.01em;
           color: #2D2A26;
         }
