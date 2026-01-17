@@ -263,7 +263,7 @@ const AccountPage = () => {
               <i className="ri-store-2-line text-2xl"></i>
             </div>
             <h3 className="font-semibold mb-1" style={{ color: '#2D2A26' }}>Marketplace</h3>
-            <p className="text-sm" style={{ color: '#6B635A' }}>Browse products</p>
+            <p className="text-sm" style={{ color: '#6B635A' }}>Browse Products and Services</p>
           </Link>
 
           <Link
@@ -283,13 +283,13 @@ const AccountPage = () => {
         <div className="mb-12">
           <div className="flex flex-col gap-4 mb-6">
             <h2 className="text-2xl font-bold" style={{ color: '#2D2A26' }}>
-              Saved Products
+              Favorited Products
             </h2>
 
             {favorites.length > 0 && (
               <div>
                 <p className="text-xs font-medium uppercase tracking-wide mb-3" style={{ color: '#6B635A' }}>
-                  Filter Saved Products
+                  Filter Favorited Products
                 </p>
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                   {/* Category Filter */}

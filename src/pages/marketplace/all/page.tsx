@@ -4,7 +4,7 @@ import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 
 const MarketplaceAllPage = () => {
-  const [filterType, setFilterType] = useState<'all' | 'featured' | 'premium' | 'services' | 'products'>('all');
+  const [filterType, setFilterType] = useState<'all' | 'featured' | 'forYou' | 'services' | 'products'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
 
@@ -142,7 +142,7 @@ const MarketplaceAllPage = () => {
     
     if (filterType === 'all') return matchesSearch;
     if (filterType === 'featured') return matchesSearch && storefront.featured;
-    if (filterType === 'premium') return matchesSearch && storefront.premiumVisibility;
+    if (filterType === 'forYou') return matchesSearch && matchesUserConcerns(storefront.concerns);
     if (filterType === 'services') return matchesSearch && storefront.type === 'services';
     if (filterType === 'products') return matchesSearch && storefront.type === 'products';
     
@@ -205,14 +205,14 @@ const MarketplaceAllPage = () => {
                   Featured
                 </button>
                 <button
-                  onClick={() => setFilterType('premium')}
+                  onClick={() => setFilterType('forYou')}
                   className={`px-5 py-2.5 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
-                    filterType === 'premium'
+                    filterType === 'forYou'
                       ? 'bg-primary text-white shadow-md'
                       : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
-                  Premium Visibility
+                  <i className="ri-sparkling-line mr-1"></i>For You
                 </button>
                 <button
                   onClick={() => setFilterType('products')}
