@@ -9,6 +9,7 @@ import {
   EASING,
   TIMING,
 } from '../../../lib/motion/motionVariants';
+import ScrollIndicator from './ScrollIndicator';
 
 /**
  * HeroSection Component
@@ -298,6 +299,9 @@ export default function HeroSection() {
             </motion.button>
           </motion.div>
         </motion.div>
+
+        {/* Scroll indicator */}
+        <ScrollIndicator />
       </motion.div>
     </section>
   );

@@ -16,7 +16,7 @@ import {
 
 export default function WhyWeExistSection() {
   return (
-    <section className="lc-why-we-exist">
+    <section id="why-lorem-curae" className="lc-why-we-exist">
       <style>{`
         .lc-why-we-exist {
           padding: 4rem 2rem 6rem;
