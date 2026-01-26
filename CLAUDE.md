@@ -203,4 +203,209 @@ Every operation must include:
 
 ---
 
+# 12. Stacking Directives (Augmentation Layers)
+
+The following stacking layers augment all existing rules. They do NOT override prior sections — they extend and reinforce them. These layers activate automatically for relevant tasks.
+
+---
+
+## 12.1 Premium Product Design & Motion Systems Mindset
+
+**Applies to:** UI, UX, motion, component architecture, visual design, branding, interaction design
+
+When this layer is active, you must:
+- Think like a senior product designer + senior frontend/motion engineer
+- Apply brand-aligned principles: calm, premium, science-backed clarity
+- Use design-systems thinking (tokens, tiers, variants, scalability)
+- Apply motion-engineering principles (soft, slow, intentional, never bouncy)
+- Ensure accessibility (WCAG AA+, reduced-motion, focus-visible)
+- Ensure cross-surface consistency (hero, onboarding, survey, dashboard)
+- Consider dark mode, high-contrast mode, and mobile ergonomics
+- Evaluate cognitive load, perceptual contrast, and longevity
+- Provide conceptual exploration before code
+- Provide tradeoff analysis before choosing a direction
+- Produce minimal, clean diffs that respect existing architecture
+- Consider future extraction into reusable components
+
+---
+
+## 12.2 CTA Design System & Premium Motion Layer
+
+**Applies to:** CTA improvements, refinements, redesigns
+
+### CTA Design System Thinking
+- Think in CTA tiers (Primary, Secondary, Tertiary)
+- Consider semantic usage rules for each tier
+- Propose multiple conceptual directions before choosing one
+- Evaluate longevity, cognitive load, and brand alignment
+- Consider dark mode, high-contrast mode, and mobile ergonomics
+- Ensure accessibility (WCAG AA+, focus-visible, reduced-motion)
+- Ensure the CTA can scale across hero, onboarding, survey, dashboard, and future surfaces
+
+### Premium Visual & Motion Language
+- Soft, slow, intentional, never bouncy
+- Motion should be "felt, not seen"
+- Use multi-keyframe curves for fluidity when appropriate
+- Use easing curves consistent with EASING.natural or EASING.gentle
+- Respect prefers-reduced-motion with graceful fallbacks
+- Avoid gimmicks, harsh shadows, or SaaS clichés
+
+### Visual Techniques to Consider
+- Gradient sheen physics
+- Micro-lift elevation
+- Soft shadows
+- Directional lighting
+- Subtle opacity breathing
+- Touch ergonomics
+- GPU-friendly transforms
+
+---
+
+## 12.3 Global Design System Enforcement Layer
+
+**Applies to:** All UI, UX, motion, layout, component, and writing tasks
+
+### Enforce Global Design System Consistency
+- Apply consistent typography, spacing, color, motion, and component patterns
+- Ensure all surfaces (hero, onboarding, survey, dashboard, settings) follow the same system
+- Identify and correct inconsistencies proactively
+- Use tokens and variables instead of hardcoded values
+- Maintain naming consistency across components, variants, and motion presets
+
+### Enforce Layout & Spacing Philosophy
+- Use a consistent spacing scale (vertical rhythm, modular scale, predictable increments)
+- Maintain clear hierarchy and breathing room
+- Avoid cramped or overly loose layouts
+- Ensure mobile-first ergonomics and responsive scaling
+- Respect container widths, grid systems, and alignment rules
+
+### Enforce Brand Voice & UX Writing
+- Tone: calm, premium, science-backed, editorial confidence
+- Avoid SaaS clichés, marketing fluff, or aggressive CTAs
+- Use clarity, precision, and warmth
+- Maintain consistent terminology across flows
+- Ensure microcopy supports user understanding and reduces cognitive load
+
+### Enforce Cross-Surface Cohesion
+- Hero → Onboarding → Survey → Dashboard must feel like one unified product
+- Motion, typography, spacing, and component patterns must remain consistent
+- Ensure transitions between surfaces feel intentional and premium
+
+---
+
+## 12.4 Motion Systems Layer (Global Motion Governance)
+
+**Applies to:** All motion across the product
+
+### Motion Philosophy
+- Soft, slow, intentional
+- "Felt, not seen"
+- No bounce, no jitter, no aggressive easing
+- Motion must support clarity, not decoration
+
+### Motion Architecture
+- Use multi-keyframe curves for fluidity
+- Use EASING.natural or EASING.gentle unless justified
+- Ensure perfect sync between related elements
+- Avoid mechanical or robotic motion
+- Always provide reduced-motion fallbacks
+
+### Motion Tokens
+Define and use:
+- Durations (fast, normal, slow)
+- Easing curves
+- Transform ranges
+- Opacity breathing ranges
+- Shadow expansion ranges
+
+### Motion QA
+Always consider:
+- Chrome, Firefox, Safari
+- iOS Safari, Android Chrome
+- 60fps performance
+- GPU-friendly transforms
+- No hydration mismatch
+
+---
+
+## 12.5 Typography & Spacing Philosophy Layer
+
+**Applies to:** All typography and spacing decisions
+
+### Typography System
+- Use brand fonts consistently (Cormorant Garamond, DM Sans)
+- Maintain hierarchy (H1 → H6, body, caption)
+- Use consistent letter-spacing, line-height, and weight rules
+- Avoid overly tight or loose tracking
+- Ensure readability across devices and modes
+
+### Spacing System
+- Use a modular spacing scale (4/8/12/16/24/32/48/etc.)
+- Maintain vertical rhythm
+- Ensure consistent padding/margins across components
+- Avoid arbitrary spacing values
+
+### Responsive Typography
+- Scale type gracefully from mobile → desktop
+- Maintain contrast and readability in dark mode
+- Avoid text that feels cramped or oversized
+
+### Accessibility
+- Minimum contrast ratios (WCAG AA+)
+- Avoid motion that affects readability
+- Ensure focus-visible states are typographically aligned
+
+---
+
+## 12.6 Component Architecture Layer
+
+**Applies to:** All component design and implementation
+
+### Component Philosophy
+- Components must be reusable, composable, and future-proof
+- Avoid one-off implementations unless explicitly required
+- Prefer extraction into shared components when patterns repeat
+
+### Component Structure
+For each component, consider:
+- Props
+- Variants
+- States (hover, active, focus, disabled, loading)
+- Motion presets
+- Dark mode handling
+- Accessibility hooks
+- Naming consistency
+
+### Implementation Rules
+- Provide diff-only changes
+- Avoid layout regressions
+- Use existing tokens
+- Add new tokens only when justified
+- Keep components minimal and readable
+- Avoid unnecessary abstraction
+
+### Cross-Surface Reuse
+Components should scale across:
+- Hero
+- Onboarding
+- Survey
+- Dashboard
+- Future surfaces
+
+---
+
+## 12.7 Stacking Order Reference
+
+1. CLAUDE.md (base rules — Sections 1–11)
+2. Premium Product Design & Motion Systems Mindset (12.1)
+3. CTA Design System & Premium Motion Layer (12.2)
+4. Global Design System Enforcement Layer (12.3)
+5. Motion Systems Layer (12.4)
+6. Typography & Spacing Philosophy Layer (12.5)
+7. Component Architecture Layer (12.6)
+
+These layers remain active for all design, motion, UX, and component tasks unless explicitly disabled.
+
+---
+
 # End of CLAUDE.md
