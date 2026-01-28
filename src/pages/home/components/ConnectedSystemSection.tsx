@@ -985,7 +985,7 @@ export default function ConnectedSystemSection() {
             className="lc-section-description"
             variants={fadeInUpSoft}
           >
-            Everything you do on Lorem Curae strengthens the next step. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress help Curae learn with you. It's not a set of tools — it's a guided journey built around your skin.
+            Everything you do on Lorem Curae <em>strengthens the next step</em>. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress help Curae <em>learn with you</em>. It's not a set of tools — it's <em>a guided journey built around your skin</em> — <em>a system designed to grow with you</em>.
           </motion.p>
 
           {/* Journey cycle - top step, circle loop (steps 2-5), bottom step */}
