@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { EASING } from '../../../lib/motion/motionVariants';
 
 /**
@@ -35,6 +35,8 @@ const fadeInVariants = {
 };
 
 export default function ScrollIndicator() {
+  const prefersReducedMotion = useReducedMotion();
+
   const handleScroll = () => {
     const target = document.getElementById('why-lorem-curae');
     if (target) {
@@ -55,7 +57,9 @@ export default function ScrollIndicator() {
           flex-direction: column;
           align-items: center;
           gap: 0.75rem;
-          margin-top: 3rem;
+          margin-top: auto;
+          margin-bottom: -3rem;
+          padding-top: 3rem;
           cursor: pointer;
         }
 
@@ -83,7 +87,8 @@ export default function ScrollIndicator() {
 
         @media (max-width: 768px) {
           .lc-scroll-indicator {
-            margin-top: 2rem;
+            padding-top: 2rem;
+            margin-bottom: -2rem;
           }
 
           .lc-scroll-text {
@@ -106,7 +111,9 @@ export default function ScrollIndicator() {
           gap: '0.75rem',
         }}
       >
-        <span className="lc-scroll-text">Why Lorem Curae?</span>
+        <span className="lc-scroll-text">
+          Why Lorem Curae?
+        </span>
         <motion.div animate="animate" variants={floatVariants}>
           <svg
             className="lc-scroll-arrow"

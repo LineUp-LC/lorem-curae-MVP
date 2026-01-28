@@ -42,6 +42,14 @@ const StorefrontRegisterPage = lazy(() => import('../pages/storefront/register/p
 const SellerOnboardingPage = lazy(() => import('../pages/seller/onboarding/page'));
 const SellerDashboardPage = lazy(() => import('../pages/seller/dashboard/page'));
 const SellerApplicationStatusPage = lazy(() => import('../pages/seller/application-status/page'));
+const CreatorOnboardingPage = lazy(() => import('../pages/creator/onboarding/page'));
+const CreatorDashboardPage = lazy(() => import('../pages/creator/dashboard/page'));
+const CreatorProductsPage = lazy(() => import('../pages/creator/products/page'));
+const CreatorPatchTestsPage = lazy(() => import('../pages/creator/patch-tests/page'));
+const CreatePatchTestPage = lazy(() => import('../pages/creator/patch-tests/create/page'));
+const CreatorAudiencePage = lazy(() => import('../pages/creator/audience/page'));
+const CreatorAnalyticsPage = lazy(() => import('../pages/creator/analytics/page'));
+const CreatorStorefrontPage = lazy(() => import('../pages/creator/storefront/page'));
 const AffiliateDashboardPage = lazy(() => import('../pages/affiliate-dashboard/page'));
 const AffiliateRedirectPage = lazy(() => import('../pages/affiliate-redirect/page'));
 const DataImpactPage = lazy(() => import('../pages/data-impact/page'));
@@ -238,6 +246,30 @@ const routes: RouteObject[] = [
   {
     path: '/seller/application-status',
     element: <SellerApplicationStatusPage />,
+  },
+  {
+    path: '/creator/onboarding',
+    element: <CreatorOnboardingPage />,
+  },
+  {
+    path: '/creator/dashboard',
+    element: <CreatorDashboardPage />,
+  },
+  {
+    path: '/creator/products',
+    element: <CreatorProductsPage />,
+  },
+  {
+    path: '/creator/patch-tests',
+    element: <CreatorPatchTestsPage />,
+  },
+  {
+    path: '/creator/patch-tests/create',
+    element: <CreatePatchTestPage />,
+  },
+  {
+    path: '/creator/audience',
+    element: <CreatorAudiencePage />,
   },
   {
     path: '/affiliate-dashboard',

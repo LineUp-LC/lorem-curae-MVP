@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   fadeInUpSoft,
   staggerContainer,
@@ -56,16 +57,15 @@ const titleVariants = {
 
 const cardVariants = {
   hidden: { opacity: 0, y: 40, scale: 0.95 },
-  visible: (i: number) => ({
+  visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      delay: (i + 1) * 0.4,
       duration: TIMING.normal,
       ease: EASING.gentle,
     },
-  }),
+  },
 };
 
 const iconVariants = {
@@ -78,6 +78,105 @@ const iconVariants = {
       ease: EASING.gentle,
     },
   },
+};
+
+// Step sequence animation variants
+const stepSequenceVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const stepItemVariants = {
+  hidden: { opacity: 0, x: -8 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: TIMING.normal,
+      ease: EASING.gentle,
+    },
+  },
+};
+
+// Sequential flow: 1 → 2 → arrow → 3 → arrow → 4 → arrow → 5 → arrow → 6
+// Each step appears after the previous arrow finishes
+const LOOP_STEP_REVEAL_DELAYS = [0.3, 1.6, 2.9, 4.2]; // by map index: [step2, step3, step4, step5]
+
+const createStepRevealVariants = (delay: number) => ({
+  hidden: { opacity: 0, y: 8, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: TIMING.slow, // 0.8s
+      ease: EASING.gentle,
+      delay,
+    },
+  },
+});
+
+// Passthrough container — propagates hidden/visible without stagger
+// Children control their own timing via explicit delays
+const revealContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0,
+      delayChildren: 0,
+    },
+  },
+};
+
+// Gentle float for endpoint arrows (step 1 ↔ circle ↔ step 6)
+const endpointArrowFloat = {
+  y: [0, 6, 0],
+  transition: {
+    duration: 2.5,
+    repeat: Infinity,
+    ease: EASING.natural,
+  },
+};
+
+// Arrow draw animation — each arrow draws after its step appears, before the next step
+const ARROW_DRAW_DURATION = 0.4;
+// Flow: step appears → arrow draws → next step appears
+const ARROW_DRAW_DELAYS = [1.2, 2.5, 3.8, 5.1]; // by map index: [step2, step3, step4, step5]
+
+const createArrowDrawVariants = (delayIndex: number, isReplay = false) => {
+  // On replay (hover), use 0 delay for immediate animation
+  const delay = isReplay ? 0 : ARROW_DRAW_DELAYS[delayIndex];
+
+  return {
+    arc: {
+      hidden: { pathLength: 0, opacity: 0 },
+      visible: {
+        pathLength: 1,
+        opacity: 1,
+        transition: {
+          pathLength: { duration: ARROW_DRAW_DURATION, ease: EASING.gentle, delay },
+          opacity: { duration: 0.3, ease: EASING.gentle, delay },
+        },
+      },
+    },
+    chevron: {
+      hidden: { pathLength: 0, opacity: 0 },
+      visible: {
+        pathLength: 1,
+        opacity: 1,
+        transition: {
+          pathLength: { duration: 0.3, ease: EASING.gentle, delay: delay + ARROW_DRAW_DURATION * 0.7 },
+          opacity: { duration: 0.2, ease: EASING.gentle, delay: delay + ARROW_DRAW_DURATION * 0.7 },
+        },
+      },
+    },
+  };
 };
 
 const tools = [
@@ -168,7 +267,108 @@ const tools = [
   },
 ];
 
+// Journey steps in cyclical order
+const journeySteps = [
+  'Take the survey',
+  'Get personalized recommendations',
+  'Build your routine',
+  'Track your progress',
+  'Receive evolving insights',
+  'Earn rewards',
+];
+
+// Arrow pointing inward (toward center)
+const InwardArrow = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M12 5v14M5 12l7-7 7 7" />
+  </svg>
+);
+
+// Curved arc arrow for quadrant steps (follows circle geometry)
+const CurvedArrow = ({
+  delayIndex = 0,
+  reducedMotion = false,
+  isReplay = false,
+}: {
+  delayIndex?: number;
+  reducedMotion?: boolean;
+  isReplay?: boolean;
+}) => {
+  if (reducedMotion) {
+    return (
+      <svg width="120" height="60" viewBox="0 0 126 60" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 50 Q60 22 116 50" fill="none" />
+        <path d="M111 41l5 9-9 5" fill="none" strokeWidth="2.5" />
+      </svg>
+    );
+  }
+
+  const variants = createArrowDrawVariants(delayIndex, isReplay);
+
+  return (
+    <svg width="120" height="60" viewBox="0 0 126 60" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <motion.path
+        d="M4 50 Q60 22 116 50"
+        fill="none"
+        variants={variants.arc}
+        {...(isReplay ? { initial: 'hidden', animate: 'visible' } : {})}
+      />
+      <motion.path
+        d="M111 41l5 9-9 5"
+        fill="none"
+        strokeWidth="2.5"
+        variants={variants.chevron}
+        {...(isReplay ? { initial: 'hidden', animate: 'visible' } : {})}
+      />
+    </svg>
+  );
+};
+
+// LoopStep component - handles hover state for arrow replay animation
+const LoopStep = ({
+  step,
+  index,
+  reducedMotion,
+}: {
+  step: string;
+  index: number;
+  reducedMotion: boolean;
+}) => {
+  // Track hover count to force arrow remount and replay animation
+  const [hoverCount, setHoverCount] = useState(0);
+
+  const handleMouseEnter = () => {
+    // Don't replay on reduced motion
+    if (reducedMotion) return;
+    setHoverCount((prev) => prev + 1);
+  };
+
+  return (
+    <motion.div
+      className="lc-loop-step"
+      variants={reducedMotion ? undefined : createStepRevealVariants(LOOP_STEP_REVEAL_DELAYS[index])}
+      role="listitem"
+      onMouseEnter={handleMouseEnter}
+    >
+      <span className="lc-loop-number" aria-hidden="true">
+        {index + 2}
+      </span>
+      <span className="lc-loop-label">{step}</span>
+      <span className="lc-loop-arrow" aria-hidden="true">
+        {/* Key change forces remount → animation replays from hidden state */}
+        <CurvedArrow
+          key={hoverCount}
+          delayIndex={index}
+          reducedMotion={reducedMotion}
+          isReplay={hoverCount > 0}
+        />
+      </span>
+    </motion.div>
+  );
+};
+
 export default function ConnectedSystemSection() {
+  const prefersReducedMotion = useReducedMotion();
   return (
     <section className="lc-connected-system" id="finder">
       <style>{`
@@ -227,39 +427,387 @@ export default function ConnectedSystemSection() {
           color: #C4704D;
         }
 
-        /* Asset list styles */
-        .lc-asset-list {
+        /* Journey wrapper - contains top step, circle loop, bottom step */
+        .lc-journey-wrapper {
           display: flex;
           flex-direction: column;
-          gap: 0.75rem;
-          margin-top: 2rem;
-          text-align: left;
-          max-width: 480px;
-          margin-left: auto;
-          margin-right: auto;
+          align-items: center;
+          width: 100%;
+          max-width: 580px;
+          --step-size: 44px;
+          --loop-shift-y: -7rem;
+          --loop-shift-x: -1.5rem;
+          margin: calc(3rem + var(--loop-shift-y)) auto 0;
+          transform: translateX(var(--loop-shift-x));
         }
 
-        .lc-asset-item {
-          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
-          font-size: 0.9375rem;
-          color: #6B635A;
+        /* Standalone endpoint steps (above/below circle) */
+        .lc-journey-endpoint {
           display: flex;
-          align-items: flex-start;
-          gap: 0.75rem;
-          line-height: 1.5;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.375rem;
+          text-align: center;
         }
 
-        .lc-asset-bullet {
+        .lc-journey-top {
+          margin-bottom: 0;
+          position: relative;
+          --top-shift-x: 1rem;
+          --top-shift-y: 7.3rem;
+          left: var(--top-shift-x);
+          top: var(--top-shift-y);
+        }
+
+        .lc-journey-bottom {
+          margin-top: 0;
+          position: relative;
+          --bottom-shift-x: 1.3rem;
+          --bottom-shift-y: -rem;
+          left: var(--bottom-shift-x);
+          top: var(--bottom-shift-y);
+        }
+
+        /* Directional arrows connecting endpoints to circle */
+        .lc-endpoint-arrow {
           color: #C4704D;
-          font-size: 0.5rem;
-          margin-top: 0.45rem;
-          flex-shrink: 0;
+          opacity: 0.5;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          --endpoint-arrow-offset: 0.75rem;
+          padding: var(--endpoint-arrow-offset) 0;
+          position: relative;
+        }
+
+        .lc-arrow-top {
+          --arrow-top-shift-x: 1rem;
+          --arrow-top-shift-y: 7.3rem;
+          left: var(--arrow-top-shift-x);
+          top: var(--arrow-top-shift-y);
+        }
+
+        .lc-arrow-down svg {
+          transform: rotate(180deg);
+        }
+
+        .lc-endpoint-arrow-bottom {
+          --arrow-bottom-shift-x: 1.3rem;
+          --arrow-bottom-shift-y: -1.1rem;
+          left: var(--arrow-bottom-shift-x);
+          top: var(--arrow-bottom-shift-y);
+        }
+
+        .lc-endpoint-arrow-bottom svg {
+          transform: rotate(180deg);
+        }
+
+        /* Circular journey loop */
+        .lc-journey-loop {
+          position: relative;
+          width: 100%;
+          aspect-ratio: 1;
+          --radius: 42%;
+          --step-offset-x: -60px;
+          --track-shift-x: 3.4rem;
+          --track-shift-y: 3rem;
+          --circle-shift-x: -2rem;
+          transform: translateX(var(--circle-shift-x));
+        }
+
+        /* Track wrapper - positions independently from step nodes */
+        .lc-loop-track-wrapper {
+          position: absolute;
+          inset: 0;
+          transform: translate(var(--track-shift-x), var(--track-shift-y));
+          pointer-events: none;
+        }
+
+        /* Central circle track (animated SVG) */
+        .lc-loop-track {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          width: 52%;
+          height: 52%;
+          transform: translate(-50%, -50%);
+          pointer-events: none;
+          animation:
+            lcTrackSpin 35s linear infinite,
+            lcTrackBreathe 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        .lc-track-pulse {
+          animation: lcTrackPulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes lcTrackSpin {
+          from { transform: translate(-50%, -50%) rotate(0deg); }
+          to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes lcTrackPulse {
+          0%, 100% { stroke-width: 2; stroke-opacity: 1; }
+          50% { stroke-width: 3; stroke-opacity: 0.5; }
+        }
+
+        @keyframes lcTrackBreathe {
+          0%, 100% { scale: 1; }
+          25% { scale: 1.018; }
+          50% { scale: 0.985; }
+          75% { scale: 1.01; }
+        }
+
+        /* Individual step node */
+        .lc-loop-step {
+          position: absolute;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.375rem;
+          text-align: center;
+          width: 110px;
+          transform: translate(calc(-50% + var(--step-offset-x)), -50%);
+        }
+
+        .lc-loop-number {
+          width: var(--step-size);
+          height: var(--step-size);
+          min-width: var(--step-size);
+          border-radius: 50%;
+          background: white;
+          border: 2px solid rgba(196, 112, 77, 0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #C4704D;
+          box-shadow: 0 4px 12px rgba(196, 112, 77, 0.1);
+          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lc-loop-step:hover .lc-loop-number {
+          background: rgba(196, 112, 77, 0.08);
+          border-color: #C4704D;
+          transform: scale(1.1);
+          box-shadow: 0 6px 20px rgba(196, 112, 77, 0.2);
+        }
+
+        .lc-loop-label {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.75rem;
+          font-weight: 500;
+          color: #6B635A;
+          line-height: 1.4;
+          transition: color 0.3s ease;
+        }
+
+        .lc-loop-step:hover .lc-loop-label {
+          color: #2D2A26;
+        }
+
+        /* Inward arrow */
+        .lc-loop-arrow {
+          color: #C4704D;
+          opacity: 0.5;
+          margin-top: 0.25rem;
+          transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lc-loop-step:hover .lc-loop-arrow {
+          opacity: 0.9;
+        }
+
+        /* Step positions using CSS trigonometry - 90° intervals at diagonal quadrants */
+        /* Step 2 → top-left, Step 3 → top-right, Step 4 → bottom-right, Step 5 → bottom-left */
+        /* nth-child offset by 1 (track wrapper comes first) */
+        .lc-loop-step:nth-child(2) {
+          top: calc(50% + var(--radius) * sin(-135deg));
+          left: calc(50% + var(--radius) * cos(-135deg));
+        }
+        .lc-loop-step:nth-child(3) {
+          top: calc(50% + var(--radius) * sin(-45deg));
+          left: calc(50% + var(--radius) * cos(-45deg));
+        }
+        .lc-loop-step:nth-child(4) {
+          top: calc(50% + var(--radius) * sin(45deg));
+          left: calc(50% + var(--radius) * cos(45deg));
+        }
+        .lc-loop-step:nth-child(5) {
+          top: calc(50% + var(--radius) * sin(135deg));
+          left: calc(50% + var(--radius) * cos(135deg));
+        }
+
+        /* Arrow rotation - point toward next step (clockwise arc) */
+        .lc-loop-step:nth-child(2) .lc-loop-arrow { transform: rotate(0deg); }
+        .lc-loop-step:nth-child(3) .lc-loop-arrow { transform: rotate(90deg); }
+        .lc-loop-step:nth-child(4) .lc-loop-arrow { transform: rotate(180deg); }
+        .lc-loop-step:nth-child(5) .lc-loop-arrow { transform: rotate(-90deg); }
+
+        /* Individual arrow position offsets */
+        .lc-loop-step:nth-child(2) .lc-loop-arrow {
+          position: relative;
+          --arrow-2-shift-x: 10.4rem;
+          --arrow-2-shift-y: -7.5rem;
+          left: var(--arrow-2-shift-x);
+          top: var(--arrow-2-shift-y);
+        }
+        .lc-loop-step:nth-child(3) .lc-loop-arrow {
+          position: relative;
+          --arrow-3-shift-x: 2.6rem;
+          --arrow-3-shift-y: 6.3rem;
+          left: var(--arrow-3-shift-x);
+          top: var(--arrow-3-shift-y);
+        }
+        .lc-loop-step:nth-child(4) .lc-loop-arrow {
+          position: relative;
+          --arrow-4-shift-x: -11rem;
+          --arrow-4-shift-y: -2.8rem;
+          left: var(--arrow-4-shift-x);
+          top: var(--arrow-4-shift-y);
+        }
+        .lc-loop-step:nth-child(5) .lc-loop-arrow {
+          position: relative;
+          --arrow-5-shift-x: -3rem;
+          --arrow-5-shift-y: -15.5rem;
+          left: var(--arrow-5-shift-x);
+          top: var(--arrow-5-shift-y);
+        }
+
+        /* Hover arrow animation preserves base rotation */
+        .lc-loop-step:nth-child(2):hover .lc-loop-arrow { transform: rotate(0deg) translateY(3px); }
+        .lc-loop-step:nth-child(3):hover .lc-loop-arrow { transform: rotate(90deg) translateY(3px); }
+        .lc-loop-step:nth-child(4):hover .lc-loop-arrow { transform: rotate(180deg) translateY(3px); }
+        .lc-loop-step:nth-child(5):hover .lc-loop-arrow { transform: rotate(-90deg) translateY(3px); }
+
+        /* Mobile: linear vertical list */
+        @media (max-width: 768px) {
+          .lc-journey-wrapper {
+            --loop-shift-y: 0rem;
+            --loop-shift-x: 0rem;
+            margin: 3rem auto 0;
+            transform: none;
+            max-width: 100%;
+          }
+
+          .lc-journey-endpoint {
+            flex-direction: row;
+            text-align: left;
+            width: 100%;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(196, 112, 77, 0.1);
+          }
+
+          .lc-journey-top {
+            margin-bottom: 0;
+          }
+
+          .lc-journey-bottom {
+            margin-top: 0;
+          }
+
+          .lc-journey-loop {
+            aspect-ratio: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 0;
+            --step-offset-x: 0px;
+            --circle-shift-x: 0rem;
+            transform: none;
+          }
+
+          .lc-loop-track-wrapper,
+          .lc-loop-track {
+            display: none;
+          }
+
+          .lc-loop-step {
+            position: relative;
+            transform: none !important;
+            flex-direction: row;
+            max-width: 100%;
+            text-align: left;
+            width: 100%;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid rgba(196, 112, 77, 0.1);
+          }
+
+          .lc-loop-step:nth-child(n) {
+            top: auto !important;
+            left: auto !important;
+          }
+
+          .lc-loop-label {
+            font-size: 0.9375rem;
+          }
+
+          .lc-loop-arrow {
+            display: none;
+          }
+
+          .lc-endpoint-arrow {
+            display: none;
+          }
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .lc-loop-track,
+          .lc-track-pulse {
+            animation: none !important;
+          }
+          .lc-loop-track {
+            transform: translate(-50%, -50%);
+            scale: 1;
+          }
+          .lc-loop-number,
+          .lc-loop-label,
+          .lc-loop-arrow {
+            transition: none;
+          }
+          .lc-loop-step:hover .lc-loop-number {
+            transform: none;
+          }
+          .lc-loop-step:hover .lc-loop-arrow {
+            transform: none;
+          }
+          /* Preserve base arrow rotation without animation */
+          .lc-loop-step:nth-child(2) .lc-loop-arrow,
+          .lc-loop-step:nth-child(2):hover .lc-loop-arrow { transform: rotate(45deg); }
+          .lc-loop-step:nth-child(3) .lc-loop-arrow,
+          .lc-loop-step:nth-child(3):hover .lc-loop-arrow { transform: rotate(135deg); }
+          .lc-loop-step:nth-child(4) .lc-loop-arrow,
+          .lc-loop-step:nth-child(4):hover .lc-loop-arrow { transform: rotate(225deg); }
+          .lc-loop-step:nth-child(5) .lc-loop-arrow,
+          .lc-loop-step:nth-child(5):hover .lc-loop-arrow { transform: rotate(315deg); }
+        }
+
+        /* High contrast mode */
+        @media (forced-colors: active) {
+          .lc-loop-number {
+            border: 2px solid ButtonText;
+          }
+          .lc-loop-label {
+            color: CanvasText;
+          }
+          .lc-loop-track circle {
+            stroke: ButtonText;
+          }
+          .lc-loop-arrow {
+            color: LinkText;
+          }
         }
 
         /* Connecting line SVG */
         .lc-connecting-line {
           position: absolute;
-          top: 200px;
+          top: 470px;
           left: 50%;
           transform: translateX(-50%);
           width: 80%;
@@ -440,29 +988,92 @@ export default function ConnectedSystemSection() {
             Everything you do on Lorem Curae strengthens the next step. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress help Curae learn with you. It's not a set of tools — it's a guided journey built around your skin.
           </motion.p>
 
-          {/* Asset list */}
-          <motion.ul
-            className="lc-asset-list"
-            variants={staggerContainer}
+          {/* Journey cycle - top step, circle loop (steps 2-5), bottom step */}
+          <motion.div
+            className="lc-journey-wrapper"
+            variants={prefersReducedMotion ? undefined : revealContainerVariants}
+            initial={prefersReducedMotion ? undefined : "hidden"}
+            whileInView={prefersReducedMotion ? undefined : "visible"}
+            viewport={viewportOnce}
+            role="list"
+            aria-label="Your skincare journey cycle"
           >
-            {[
-              'Take the survey',
-              'Get science-backed product + retailer recommendations',
-              'Build your routine with confidence',
-              'Track your progress',
-              'Receive insights that strengthen your personalization',
-              'Earn discounts when you purchase through our retailer links',
-            ].map((item, index) => (
-              <motion.li
-                key={index}
-                className="lc-asset-item"
-                variants={fadeInUpSoft}
-              >
-                <span className="lc-asset-bullet">●</span>
-                {item}
-              </motion.li>
-            ))}
-          </motion.ul>
+            {/* Step 1 - above circle (reveals first: delay 0s) */}
+            <motion.div
+              className="lc-journey-endpoint lc-journey-top"
+              variants={prefersReducedMotion ? undefined : createStepRevealVariants(0)}
+              role="listitem"
+            >
+              <span className="lc-loop-number" aria-hidden="true">1</span>
+              <span className="lc-loop-label">{journeySteps[0]}</span>
+            </motion.div>
+
+            {/* Arrow: Step 1 → Circle */}
+            <motion.span
+              className="lc-endpoint-arrow lc-arrow-top lc-arrow-down"
+              aria-hidden="true"
+              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
+            >
+              <InwardArrow />
+            </motion.span>
+
+            {/* Circular loop - steps 2–5 */}
+            <motion.div
+              className="lc-journey-loop"
+              variants={prefersReducedMotion ? undefined : revealContainerVariants}
+              role="presentation"
+            >
+              {/* Dashed circular track (independently positionable) */}
+              <div className="lc-loop-track-wrapper" aria-hidden="true">
+                <svg className="lc-loop-track" viewBox="0 0 200 200" fill="none">
+                  <circle
+                    className="lc-track-base"
+                    cx="100" cy="100" r="97"
+                    stroke="rgba(196,112,77,0.25)"
+                    strokeWidth="2"
+                    strokeDasharray="10 41"
+                  />
+                  <circle
+                    className="lc-track-pulse"
+                    cx="100" cy="100" r="97"
+                    stroke="rgba(196,112,77,0.25)"
+                    strokeWidth="2"
+                    strokeDasharray="10 41"
+                    strokeDashoffset="-25.5"
+                  />
+                </svg>
+              </div>
+
+              {/* Steps 2–5 positioned around the circle */}
+              {journeySteps.slice(1, 5).map((step, index) => (
+                <LoopStep
+                  key={step}
+                  step={step}
+                  index={index}
+                  reducedMotion={!!prefersReducedMotion}
+                />
+              ))}
+            </motion.div>
+
+            {/* Arrow: Circle → Step 6 (points down toward Step 6) */}
+            <motion.span
+              className="lc-endpoint-arrow lc-endpoint-arrow-bottom"
+              aria-hidden="true"
+              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
+            >
+              <InwardArrow />
+            </motion.span>
+
+            {/* Step 6 - below circle (reveals last: delay 5.5s) */}
+            <motion.div
+              className="lc-journey-endpoint lc-journey-bottom"
+              variants={prefersReducedMotion ? undefined : createStepRevealVariants(5.5)}
+              role="listitem"
+            >
+              <span className="lc-loop-number" aria-hidden="true">6</span>
+              <span className="lc-loop-label">{journeySteps[5]}</span>
+            </motion.div>
+          </motion.div>
         </motion.div>
 
         {/* Cards grid with staggered animation */}
@@ -473,7 +1084,6 @@ export default function ConnectedSystemSection() {
           {tools.map((tool, index) => (
             <motion.div
               key={index}
-              custom={index}
               variants={cardVariants}
               whileHover={cardHover}
             >

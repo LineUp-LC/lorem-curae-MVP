@@ -1,11 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  fadeIn,
-  fadeInUpSoft,
-  staggerContainer,
-  buttonHover,
-  buttonTap,
   EASING,
   TIMING,
 } from '../../../lib/motion/motionVariants';
@@ -47,18 +42,6 @@ const heroVariants = {
   },
 };
 
-// Subtle pulse animation for CTA
-const pulseVariants = {
-  pulse: {
-    scale: [1, 1.02, 1],
-    transition: {
-      duration: 3,
-      repeat: Infinity,
-      ease: 'easeInOut',
-    },
-  },
-};
-
 // Container with staggered children
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -91,7 +74,7 @@ export default function HeroSection() {
           flex-direction: column;
           align-items: center;
           text-align: center;
-          padding: 8rem 2rem 6rem;
+          padding: 12rem 2rem 6rem;
           position: relative;
           z-index: 1;
           min-height: 100vh;
@@ -159,19 +142,21 @@ export default function HeroSection() {
           font-weight: 500;
           line-height: 1.1;
           max-width: 800px;
-          margin-bottom: 2rem;
+          margin-top: -3rem;
+          margin-bottom: 3.5rem;
           letter-spacing: -0.01em;
           color: #2D2A26;
         }
 
         .lc-hero-subhead {
           font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
-          font-size: clamp(1.25rem, 2.5vw, 1.5rem);
+          font-size: clamp(1.0625rem, 1.8vw, 1.25rem);
           color: #6B635A;
           max-width: 1000px;
-          line-height: 1.8;
+          line-height: 1.7;
           margin-bottom: 3rem;
           font-weight: 400;
+          letter-spacing: 0.01em;
         }
 
         .lc-hero-subhead em {
@@ -185,33 +170,74 @@ export default function HeroSection() {
           flex-direction: column;
           align-items: center;
           gap: 1rem;
+          margin-top: 1.5rem;
         }
 
+        /* Premium outline CTA */
         .lc-btn-start {
           font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
-          font-size: 1.0625rem;
-          font-weight: 600;
-          padding: 1.25rem 3rem;
-          background: #C4704D;
-          color: white;
-          border: none;
+          font-size: 0.9375rem;
+          font-weight: 500;
+          padding: 0.875rem 2rem;
+          background: transparent;
+          color: #C4704D;
+          border: 1.5px solid #C4704D;
           border-radius: 100px;
           cursor: pointer;
-          letter-spacing: 0.02em;
+          letter-spacing: 0.03em;
           text-decoration: none;
           display: inline-flex;
           align-items: center;
-          gap: 0.5rem;
-          transition: background 0.3s ease;
+          justify-content: center;
+          transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                      box-shadow 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                      background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .lc-btn-start:hover {
-          background: #B5614A;
+          transform: translateY(-3px) scale(1.015);
+          box-shadow: 0 6px 20px rgba(196, 112, 77, 0.12);
+          background: rgba(196, 112, 77, 0.04);
+          transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                      box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                      background 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lc-btn-start:active {
+          transform: translateY(-1px) scale(0.99);
+          transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .lc-btn-start:focus-visible {
+          outline: 2px solid #7A8B7A;
+          outline-offset: 4px;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .lc-btn-start {
+            transition: none;
+          }
+          .lc-btn-start:hover {
+            transform: none;
+            box-shadow: none;
+          }
+          .lc-btn-start:active {
+            transform: none;
+          }
+        }
+
+        /* High contrast mode */
+        @media (forced-colors: active) {
+          .lc-btn-start {
+            border: 2px solid ButtonText;
+            color: ButtonText;
+          }
         }
 
         @media (max-width: 768px) {
           .lc-hero-content {
-            padding: 6rem 1.5rem 4rem;
+            padding: 8rem 1.5rem 4rem;
           }
         }
       `}</style>
@@ -284,20 +310,12 @@ export default function HeroSection() {
           className="lc-cta-container"
           variants={heroVariants.subhead}
         >
-          <motion.div
-            animate="pulse"
-            variants={pulseVariants}
-            style={{ borderRadius: '100px' }}
+          <button
+            className="lc-btn-start"
+            onClick={() => navigate('/skin-survey')}
           >
-            <motion.button
-              className="lc-btn-start"
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-              onClick={() => navigate('/skin-survey')}
-            >
-              Begin your journey
-            </motion.button>
-          </motion.div>
+            Begin your journey
+          </button>
         </motion.div>
 
         {/* Scroll indicator */}

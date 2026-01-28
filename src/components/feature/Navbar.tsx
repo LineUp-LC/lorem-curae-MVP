@@ -39,6 +39,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [isNavHovered, setIsNavHovered] = useState(false);
   const cartCount = useCartCount();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
@@ -138,15 +139,15 @@ const Navbar = () => {
           font-family: var(--lc-font-serif, 'Cormorant Garamond', Georgia, serif);
           font-size: 1.125rem;
           font-weight: 500;
-          transition: color 0.3s ease;
+          transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
           position: relative;
           white-space: nowrap;
         }
-        
+
         .lc-nav-link:hover {
           color: #C4704D !important;
         }
-        
+
         .lc-nav-link::after {
           content: '';
           position: absolute;
@@ -155,11 +156,42 @@ const Navbar = () => {
           width: 0;
           height: 2px;
           background: #C4704D;
-          transition: width 0.3s ease;
+          transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         .lc-nav-link:hover::after {
           width: 100%;
+        }
+
+        /* Active nav link state */
+        .lc-nav-link-active {
+          color: #C4704D !important;
+        }
+
+        .lc-nav-link-active::after {
+          width: 100%;
+        }
+
+        .lc-nav-link:focus-visible {
+          outline: 2px solid #7A8B7A;
+          outline-offset: 4px;
+          border-radius: 2px;
+        }
+
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+          .lc-nav-link,
+          .lc-nav-link::after {
+            transition: none;
+          }
+        }
+
+        /* High contrast mode */
+        @media (forced-colors: active) {
+          .lc-nav-link-active {
+            color: LinkText !important;
+            text-decoration: underline;
+          }
         }
         
         /* Logo - prevent wrapping, responsive size */
@@ -206,6 +238,12 @@ const Navbar = () => {
           min-height: 48px;
         }
         
+        /* Mobile active link state */
+        .lc-mobile-link-active {
+          background: rgba(196, 112, 77, 0.08);
+          color: #C4704D !important;
+        }
+
         .lc-mobile-link:hover,
         .lc-mobile-link:active {
           background: rgba(196, 112, 77, 0.08);
@@ -279,16 +317,26 @@ const Navbar = () => {
           </Link>
 
           {/* Center Navigation - Desktop */}
-          <nav className="hidden lg:flex lc-desktop-nav items-center space-x-10" role="navigation">
-            {navLinks.map((link) => (
-              <Link 
-                key={link.path}
-                to={link.path} 
-                className="lc-nav-link"
-              >
-                {link.name}
-              </Link>
-            ))}
+          <nav
+            className="hidden lg:flex lc-desktop-nav items-center space-x-10"
+            role="navigation"
+            onMouseEnter={() => setIsNavHovered(true)}
+            onMouseLeave={() => setIsNavHovered(false)}
+          >
+            {navLinks.map((link) => {
+              const isActive = location.pathname === link.path ||
+                (link.path !== '/' && location.pathname.startsWith(link.path));
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`lc-nav-link ${isActive && !isNavHovered ? 'lc-nav-link-active' : ''}`}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </nav>
 
           {/* Right Side Icons */}
@@ -345,17 +393,22 @@ const Navbar = () => {
       {showMobileMenu && (
         <nav className="lc-mobile-menu lg:hidden" role="navigation" aria-label="Mobile navigation">
           <div className="px-4 py-4 space-y-1">
-            {navLinks.map((link, index) => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className="lc-mobile-link motion-safe:animate-enter-right"
-                style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
-                onClick={() => setShowMobileMenu(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
+            {navLinks.map((link, index) => {
+              const isActive = location.pathname === link.path ||
+                (link.path !== '/' && location.pathname.startsWith(link.path));
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`lc-mobile-link motion-safe:animate-enter-right ${isActive ? 'lc-mobile-link-active' : ''}`}
+                  style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
+                  onClick={() => setShowMobileMenu(false)}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {link.name}
+                </Link>
+              );
+            })}
           </div>
         </nav>
       )}
