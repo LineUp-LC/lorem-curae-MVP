@@ -172,7 +172,7 @@ export default function RoutinesPage() {
                 title="Build and customize your skincare routine steps"
                 className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'routine'
-                    ? 'bg-deep text-white'
+                    ? 'bg-primary text-white'
                     : 'text-gray-600 hover:text-deep'
                 }`}
               >
@@ -184,7 +184,7 @@ export default function RoutinesPage() {
                 title="Track daily observations and skin progress"
                 className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === 'notes'
-                    ? 'bg-deep text-white'
+                    ? 'bg-primary text-white'
                     : 'text-gray-600 hover:text-deep'
                 }`}
               >
@@ -221,23 +221,23 @@ export default function RoutinesPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 relative">
             <button
               onClick={() => setShowBrowsePopup(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              className="absolute top-4 right-4 text-warm-gray/60 hover:text-warm-gray transition-colors cursor-pointer"
             >
               <i className="ri-close-line text-2xl"></i>
             </button>
-            
+
             <div className="text-center mb-6">
               <div className="w-16 h-16 rounded-full bg-taupe-100 flex items-center justify-center mx-auto mb-4">
                 <i className="ri-search-line text-taupe text-3xl"></i>
               </div>
               <h3 className="text-2xl font-serif font-bold text-deep mb-2">Browse Products</h3>
-              <p className="text-gray-600 text-sm">Find products to add to your routine</p>
+              <p className="text-warm-gray text-sm">Find products to add to your routine</p>
             </div>
 
             <div className="space-y-3">
               <a
                 href="/marketplace"
-                className="w-full px-6 py-4 bg-deep text-white rounded-xl hover:bg-deep-900 transition-colors text-left flex items-center gap-4 cursor-pointer"
+                className="w-full px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
                   <i className="ri-shopping-bag-3-line text-2xl"></i>
@@ -251,14 +251,14 @@ export default function RoutinesPage() {
 
               <a
                 href="/discover"
-                className="w-full px-6 py-4 bg-white border-2 border-deep text-deep rounded-xl hover:bg-cream-100 transition-colors text-left flex items-center gap-4 cursor-pointer"
+                className="w-full px-6 py-4 bg-white border-2 border-primary text-primary rounded-xl hover:bg-cream transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-lg bg-deep/10 flex items-center justify-center">
-                  <i className="ri-compass-discover-line text-2xl text-deep"></i>
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <i className="ri-compass-discover-line text-2xl text-primary"></i>
                 </div>
                 <div>
                   <p className="font-semibold">Browse Discovery</p>
-                  <p className="text-sm text-gray-600">Explore personalized recommendations</p>
+                  <p className="text-sm text-warm-gray">Explore personalized recommendations</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
               </a>
@@ -271,21 +271,21 @@ export default function RoutinesPage() {
       {showSavedProductsPopup && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden relative">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-6 border-b border-blush flex items-center justify-between">
               <h3 className="text-xl font-bold text-deep">Saved Products</h3>
               <button
                 onClick={() => setShowSavedProductsPopup(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                className="text-warm-gray/60 hover:text-warm-gray transition-colors cursor-pointer"
               >
                 <i className="ri-close-line text-2xl"></i>
               </button>
             </div>
-            
+
             <div className="p-6 overflow-y-auto max-h-[60vh]">
               {savedProducts.length === 0 ? (
                 <div className="text-center py-8">
-                  <i className="ri-bookmark-line text-4xl text-gray-300 mb-3"></i>
-                  <p className="text-gray-500">No saved products yet</p>
+                  <i className="ri-bookmark-line text-4xl text-warm-gray/40 mb-3"></i>
+                  <p className="text-warm-gray">No saved products yet</p>
                   <a href="/discover" className="text-taupe hover:underline text-sm mt-2 inline-block">
                     Browse products to save
                   </a>
@@ -300,7 +300,7 @@ export default function RoutinesPage() {
                         className="w-16 h-16 rounded-lg object-cover"
                       />
                       <div className="flex-1 min-w-0">
-                        <p className="text-xs text-gray-500">{product.brand}</p>
+                        <p className="text-xs text-warm-gray/80">{product.brand}</p>
                         <p className="font-medium text-deep truncate">{product.name}</p>
                         <p className="text-sm text-taupe">{product.priceRange}</p>
                       </div>
