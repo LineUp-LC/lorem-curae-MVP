@@ -323,59 +323,6 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     }
   }, []);
 
-  // Physics-based momentum scrolling with easing
-  useEffect(() => {
-    const scrollContainer = scrollContainerRef.current;
-    if (!scrollContainer) return;
-
-    let velocity = 0;
-    let animationId: number | null = null;
-
-    // Physics constants
-    const FRICTION = 0.92; // Higher = more momentum
-    const VELOCITY_THRESHOLD = 0.5; // Stop when velocity is negligible
-    const WHEEL_MULTIPLIER = 50; // Unused but kept for reference
-
-    const animateMomentum = () => {
-      if (Math.abs(velocity) < VELOCITY_THRESHOLD) {
-        velocity = 0;
-        animationId = null;
-        return;
-      }
-
-      // Apply velocity directly
-      scrollContainer.scrollLeft += velocity;
-
-      // Apply friction to decelerate
-      velocity *= FRICTION;
-
-      animationId = requestAnimationFrame(animateMomentum);
-    };
-
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-
-      // Normalize deltaY for consistent speed in both directions
-      const direction = Math.sign(e.deltaY);
-      const normalizedDelta = direction * 50; // consistent magnitude
-      velocity += normalizedDelta;
-
-      // Cap velocity at controlled limit
-      velocity = Math.max(-400, Math.min(400, velocity));
-
-      // Start momentum animation if not already running
-      if (!animationId) {
-        animationId = requestAnimationFrame(animateMomentum);
-      }
-    };
-
-    scrollContainer.addEventListener('wheel', handleWheel, { passive: false });
-    return () => {
-      scrollContainer.removeEventListener('wheel', handleWheel);
-      if (animationId) cancelAnimationFrame(animationId);
-    };
-  }, []);
-
   const filteredSteps = routineSteps.filter(
     step => step.timeOfDay === timeFilter
   );
@@ -545,6 +492,23 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-8">
+      {/* Custom scrollbar styles for horizontal scroll area */}
+      <style>{`
+        .routine-builder-scroll::-webkit-scrollbar {
+          height: 8px;
+        }
+        .routine-builder-scroll::-webkit-scrollbar-track {
+          background: #FDF8F5;
+          border-radius: 4px;
+        }
+        .routine-builder-scroll::-webkit-scrollbar-thumb {
+          background: #C4704D;
+          border-radius: 4px;
+        }
+        .routine-builder-scroll::-webkit-scrollbar-thumb:hover {
+          background: #2D2A26;
+        }
+      `}</style>
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div>
@@ -649,7 +613,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         <div className="relative mb-8">
           <div
             ref={scrollContainerRef}
-            className="overflow-x-auto overflow-y-hidden pb-4 scrollbar-hide"
+            className="overflow-x-auto overflow-y-hidden pb-4 routine-builder-scroll"
           >
             <SortableContext items={stepIds} strategy={horizontalListSortingStrategy}>
               <div className="flex gap-6" style={{ minWidth: 'max-content' }}>

@@ -19,6 +19,13 @@ export interface ActiveIngredient {
   isKeyActive?: boolean;
 }
 
+/**
+ * Product source - where the product is available
+ * - marketplace: Available for purchase on Lorem Curae Marketplace
+ * - discovery: Available for research/discovery, links to external retailers
+ */
+export type ProductSource = 'marketplace' | 'discovery';
+
 export interface Product {
   id: number;
   name: string;
@@ -33,6 +40,8 @@ export interface Product {
   concerns: string[];
   keyIngredients: string[];
   inStock: boolean;
+  /** Where the product is available: marketplace or discovery */
+  source?: ProductSource;
   /** Product size/volume information */
   size?: ProductSize;
   /** Active ingredients with concentration data */

@@ -41,7 +41,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 1,
       name: 'Official Brand Store',
-      logo: 'https://readdy.ai/api/search-image?query=Minimalist%20skincare%20brand%20logo%2C%20clean%20modern%20design%2C%20sage%20green%20and%20white%20colors%2C%20simple%20geometric%20shape%2C%20professional%20beauty%20brand%20identity&width=80&height=80&seq=retailer-logo-001&orientation=squarish',
+      logo: 'https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=80&h=80&fit=crop&q=80',
       price: 45.00,
       shipping: 0,
       estimatedTax: 3.94,
@@ -57,7 +57,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 2,
       name: 'Beauty Haven',
-      logo: 'https://readdy.ai/api/search-image?query=Beauty%20retailer%20logo%2C%20elegant%20cosmetics%20store%20branding%2C%20coral%20and%20cream%20colors%2C%20sophisticated%20design%2C%20luxury%20beauty%20marketplace&width=80&height=80&seq=retailer-logo-002&orientation=squarish',
+      logo: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=80&h=80&fit=crop&q=80',
       price: 45.00,
       shipping: 5.99,
       estimatedTax: 4.46,
@@ -73,7 +73,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 3,
       name: 'Glow Market',
-      logo: 'https://readdy.ai/api/search-image?query=Online%20beauty%20marketplace%20logo%2C%20modern%20e-commerce%20branding%2C%20coral%20green%20accent%2C%20clean%20minimalist%20design%2C%20trusted%20retailer%20identity&width=80&height=80&seq=retailer-logo-003&orientation=squarish',
+      logo: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=80&h=80&fit=crop&q=80',
       price: 43.50,
       shipping: 4.99,
       estimatedTax: 4.24,
@@ -89,7 +89,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 4,
       name: 'Skin Essentials',
-      logo: 'https://readdy.ai/api/search-image?query=Skincare%20retailer%20logo%2C%20professional%20beauty%20store%20branding%2C%20neutral%20earth%20tones%2C%20trustworthy%20design%2C%20premium%20cosmetics%20marketplace&width=80&height=80&seq=retailer-logo-004&orientation=squarish',
+      logo: 'https://images.unsplash.com/photo-1617897903246-719242758050?w=80&h=80&fit=crop&q=80',
       price: 46.00,
       shipping: 3.99,
       estimatedTax: 4.37,
@@ -105,7 +105,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
     {
       id: 5,
       name: 'Pure Beauty Co',
-      logo: 'https://readdy.ai/api/search-image?query=Natural%20beauty%20store%20logo%2C%20organic%20cosmetics%20branding%2C%20sage%20green%20and%20cream%2C%20eco-friendly%20design%2C%20clean%20beauty%20marketplace&width=80&height=80&seq=retailer-logo-005&orientation=squarish',
+      logo: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=80&h=80&fit=crop&q=80',
       price: 44.99,
       shipping: 6.50,
       estimatedTax: 4.50,

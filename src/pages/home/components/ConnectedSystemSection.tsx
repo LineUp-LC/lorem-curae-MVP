@@ -270,11 +270,11 @@ const tools = [
 // Journey steps in cyclical order
 const journeySteps = [
   'Take the survey',
-  'Get personalized recommendations',
+  'Search for compatible products, reputable retailers & earn discounts',
   'Build your routine',
   'Track your progress',
   'Receive evolving insights',
-  'Earn rewards',
+  'Get personalized recommendations',
 ];
 
 // Arrow pointing inward (toward center)
@@ -351,7 +351,7 @@ const LoopStep = ({
       onMouseEnter={handleMouseEnter}
     >
       <span className="lc-loop-number" aria-hidden="true">
-        {index + 2}
+        {index + 3}
       </span>
       <span className="lc-loop-label">{step}</span>
       <span className="lc-loop-arrow" aria-hidden="true">
@@ -468,6 +468,16 @@ export default function ConnectedSystemSection() {
           top: var(--bottom-shift-y);
         }
 
+        .lc-journey-mid {
+          position: relative;
+          --mid-shift-x: 1rem;
+          --mid-shift-y: 7.3rem;
+          left: var(--mid-shift-x);
+          top: var(--mid-shift-y);
+          margin-top: 0.5rem;
+          margin-bottom: 0.5rem;
+        }
+
         /* Directional arrows connecting endpoints to circle */
         .lc-endpoint-arrow {
           color: #C4704D;
@@ -489,6 +499,13 @@ export default function ConnectedSystemSection() {
 
         .lc-arrow-down svg {
           transform: rotate(180deg);
+        }
+
+        .lc-arrow-mid {
+          --arrow-mid-shift-x: 1rem;
+          --arrow-mid-shift-y: 6.3rem;
+          left: var(--arrow-mid-shift-x);
+          top: var(--arrow-mid-shift-y);
         }
 
         .lc-endpoint-arrow-bottom {
@@ -702,12 +719,12 @@ export default function ConnectedSystemSection() {
             border-bottom: 1px solid rgba(196, 112, 77, 0.1);
           }
 
-          .lc-journey-top {
-            margin-bottom: 0;
-          }
-
+          .lc-journey-top,
+          .lc-journey-mid,
           .lc-journey-bottom {
-            margin-top: 0;
+            left: 0;
+            top: 0;
+            margin: 0;
           }
 
           .lc-journey-loop {
@@ -1008,7 +1025,7 @@ export default function ConnectedSystemSection() {
               <span className="lc-loop-label">{journeySteps[0]}</span>
             </motion.div>
 
-            {/* Arrow: Step 1 → Circle */}
+            {/* Arrow: Step 1 → Step 2 */}
             <motion.span
               className="lc-endpoint-arrow lc-arrow-top lc-arrow-down"
               aria-hidden="true"
@@ -1017,7 +1034,26 @@ export default function ConnectedSystemSection() {
               <InwardArrow />
             </motion.span>
 
-            {/* Circular loop - steps 2–5 */}
+            {/* Step 2 - mid endpoint (reveals second: delay 0.4s) */}
+            <motion.div
+              className="lc-journey-endpoint lc-journey-mid"
+              variants={prefersReducedMotion ? undefined : createStepRevealVariants(0.4)}
+              role="listitem"
+            >
+              <span className="lc-loop-number" aria-hidden="true">2</span>
+              <span className="lc-loop-label">{journeySteps[1]}</span>
+            </motion.div>
+
+            {/* Arrow: Step 2 → Circle */}
+            <motion.span
+              className="lc-endpoint-arrow lc-arrow-mid lc-arrow-down"
+              aria-hidden="true"
+              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
+            >
+              <InwardArrow />
+            </motion.span>
+
+            {/* Circular loop - steps 3–6 */}
             <motion.div
               className="lc-journey-loop"
               variants={prefersReducedMotion ? undefined : revealContainerVariants}
@@ -1044,8 +1080,8 @@ export default function ConnectedSystemSection() {
                 </svg>
               </div>
 
-              {/* Steps 2–5 positioned around the circle */}
-              {journeySteps.slice(1, 5).map((step, index) => (
+              {/* Steps 3–6 positioned around the circle */}
+              {journeySteps.slice(2, 6).map((step, index) => (
                 <LoopStep
                   key={step}
                   step={step}
@@ -1053,25 +1089,6 @@ export default function ConnectedSystemSection() {
                   reducedMotion={!!prefersReducedMotion}
                 />
               ))}
-            </motion.div>
-
-            {/* Arrow: Circle → Step 6 (points down toward Step 6) */}
-            <motion.span
-              className="lc-endpoint-arrow lc-endpoint-arrow-bottom"
-              aria-hidden="true"
-              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
-            >
-              <InwardArrow />
-            </motion.span>
-
-            {/* Step 6 - below circle (reveals last: delay 5.5s) */}
-            <motion.div
-              className="lc-journey-endpoint lc-journey-bottom"
-              variants={prefersReducedMotion ? undefined : createStepRevealVariants(5.5)}
-              role="listitem"
-            >
-              <span className="lc-loop-number" aria-hidden="true">6</span>
-              <span className="lc-loop-label">{journeySteps[5]}</span>
             </motion.div>
           </motion.div>
         </motion.div>

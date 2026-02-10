@@ -149,8 +149,8 @@ const MarketplacePage = () => {
       id: 1,
       name: 'Glow Naturals',
       tagline: 'Clean Beauty for Radiant Skin',
-      logo: 'https://readdy.ai/api/search-image?query=minimalist%20modern%20skincare%20brand%20logo%20clean%20aesthetic%20natural%20beauty%20leaf%20icon%20professional%20design&width=200&height=200&seq=storefront-logo-1&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=natural%20organic%20skincare%20products%20arranged%20beautifully%20minimal%20aesthetic%20clean%20white%20background%20botanical%20elements%20professional%20product%20photography&width=1200&height=400&seq=storefront-banner-1&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=1200&h=400&fit=crop&q=80',
       followers: 12458,
       products: 45,
       services: 0,
@@ -165,8 +165,8 @@ const MarketplacePage = () => {
       id: 2,
       name: 'Pure Essence Lab',
       tagline: 'Science-Backed Skincare Solutions',
-      logo: 'https://readdy.ai/api/search-image?query=modern%20scientific%20skincare%20brand%20logo%20minimalist%20laboratory%20aesthetic%20professional%20clean%20design&width=200&height=200&seq=storefront-logo-2&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=luxury%20skincare%20laboratory%20products%20scientific%20aesthetic%20clean%20white%20background%20professional%20product%20photography%20serums%20bottles&width=1200&height=400&seq=storefront-banner-2&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=1200&h=400&fit=crop&q=80',
       followers: 8932,
       products: 32,
       services: 0,
@@ -181,8 +181,8 @@ const MarketplacePage = () => {
       id: 3,
       name: 'Botanical Beauty Co',
       tagline: 'Plant-Powered Skincare',
-      logo: 'https://readdy.ai/api/search-image?query=botanical%20plant%20based%20skincare%20brand%20logo%20natural%20organic%20aesthetic%20leaf%20flower%20design&width=200&height=200&seq=storefront-logo-3&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=botanical%20plant%20based%20skincare%20products%20natural%20ingredients%20herbs%20flowers%20clean%20aesthetic%20professional%20photography&width=1200&height=400&seq=storefront-banner-3&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=1200&h=400&fit=crop&q=80',
       followers: 15234,
       products: 58,
       services: 0,
@@ -197,8 +197,8 @@ const MarketplacePage = () => {
       id: 4,
       name: 'Derma Solutions',
       tagline: 'Clinical Grade Skincare',
-      logo: 'https://readdy.ai/api/search-image?query=medical%20dermatology%20skincare%20brand%20logo%20clinical%20professional%20minimalist%20design&width=200&height=200&seq=storefront-logo-4&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=clinical%20medical%20grade%20skincare%20products%20professional%20aesthetic%20white%20background%20dermatology%20approved&width=1200&height=400&seq=storefront-banner-4&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1617897903246-719242758050?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=1200&h=400&fit=crop&q=80',
       followers: 6721,
       products: 28,
       services: 0,
@@ -213,8 +213,8 @@ const MarketplacePage = () => {
       id: 5,
       name: 'Elite Skin Clinic',
       tagline: 'Professional Skincare Services',
-      logo: 'https://readdy.ai/api/search-image?query=luxury%20medical%20spa%20clinic%20logo%20elegant%20sophisticated%20minimalist%20design%20professional%20aesthetic&width=200&height=200&seq=storefront-logo-5&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=luxury%20medical%20spa%20treatment%20room%20professional%20clean%20aesthetic%20modern%20equipment%20skincare%20clinic&width=1200&height=400&seq=storefront-banner-5&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1560750588-73207b1ef5b8?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&h=400&fit=crop&q=80',
       followers: 10567,
       products: 0,
       services: 15,
@@ -229,8 +229,8 @@ const MarketplacePage = () => {
       id: 6,
       name: 'Radiance Spa & Wellness',
       tagline: 'Holistic Beauty Experience',
-      logo: 'https://readdy.ai/api/search-image?query=spa%20wellness%20center%20logo%20zen%20peaceful%20aesthetic%20natural%20healing%20design&width=200&height=200&seq=storefront-logo-6&orientation=squarish',
-      banner: 'https://readdy.ai/api/search-image?query=luxury%20spa%20treatment%20room%20peaceful%20zen%20aesthetic%20natural%20lighting%20wellness%20center%20professional%20photography&width=1200&height=400&seq=storefront-banner-6&orientation=landscape',
+      logo: 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=200&h=200&fit=crop&q=80',
+      banner: 'https://images.unsplash.com/photo-1600334089648-b0d9d3028eb2?w=1200&h=400&fit=crop&q=80',
       followers: 9834,
       products: 0,
       services: 22,
@@ -327,9 +327,13 @@ const MarketplacePage = () => {
                       {/* Product Image */}
                       <div className="relative h-64 overflow-hidden bg-cream">
                         <img
-                          src={product.image_url}
+                          src={product.image_url || '/placeholder-product.svg'}
                           alt={product.name}
                           className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.src = '/placeholder-product.svg';
+                          }}
                         />
                         {hasDiscount && (
                           <div className="absolute top-3 left-3">

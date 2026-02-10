@@ -306,10 +306,13 @@ export default function ProductCatalog({
         {/* Product Image */}
         <div className="relative w-full h-80 overflow-hidden bg-cream">
           <img
-            src={product.image}
+            src={product.image || '/placeholder-product.svg'}
             alt={product.name}
-            loading="lazy"
             className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300 transform-gpu"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder-product.svg';
+            }}
           />
           {!product.inStock && (
             <div className="absolute inset-0 bg-black/50 flex items-center justify-center">

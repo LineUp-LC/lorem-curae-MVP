@@ -274,7 +274,7 @@ const StorefrontDetailPage = () => {
                   {storefront.bestSellers.map((product) => (
                     <Link
                       key={product.id}
-                      to={`/product/${product.id}`}
+                      to={`/storefront-product-details?id=${product.id}`}
                       className="bg-white rounded-xl overflow-hidden border border-[#E8A888]/30 hover:border-[#C4704D] hover:shadow-lg transition-all group cursor-pointer"
                     >
                       <div className="aspect-square overflow-hidden bg-[#FDF8F5]">
@@ -332,7 +332,7 @@ const StorefrontDetailPage = () => {
                   {storefront.allProducts.map((product) => (
                     <Link
                       key={product.id}
-                      to={`/product/${product.id}`}
+                      to={`/storefront-product-details?id=${product.id}`}
                       className="bg-white rounded-xl overflow-hidden border border-[#E8A888]/30 hover:border-[#C4704D] hover:shadow-lg transition-all group cursor-pointer"
                     >
                       <div className="aspect-square overflow-hidden bg-[#FDF8F5]">

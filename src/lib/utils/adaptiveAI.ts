@@ -1,6 +1,29 @@
 // Adaptive AI behavior engine for personalized responses
 
 import { sessionState } from './sessionState';
+import {
+  retrieveProducts as retrieveProductsNew,
+  retrieveByCategory as retrieveByCategoryNew,
+  retrieveRoutine,
+  searchProducts,
+  formatProductsForChat,
+  type SkinSurvey,
+  type RankedProduct,
+} from '../ai';
+
+// Legacy imports for backward compatibility
+import {
+  retrieveProducts as retrieveProductsLegacy,
+  retrieveByCategory as retrieveByCategoryLegacy,
+  retrieveRoutineProducts,
+  searchByIngredient,
+  formatRecommendations,
+  type UserSkinProfile,
+  type RetrievedProduct,
+} from './productRetrieval';
+
+// Use new pipeline by default
+const USE_NEW_PIPELINE = true;
 
 interface AIResponse {
   message: string;
@@ -104,11 +127,24 @@ class AdaptiveAIEngine {
     sessionContext: any,
     additionalContext?: any
   ): AIResponse {
-    const { preferences, patterns } = sessionContext;
+    const { preferences: sessionPreferences, patterns } = sessionContext;
     const { topic, sentiment, complexity, userIntent } = conversationContext;
 
+    // Merge passed userProfile with session preferences (passed profile takes priority)
+    const userProfile = additionalContext?.userProfile || {};
+    const preferences = {
+      ...sessionPreferences,
+      skinType: userProfile.skinType || sessionPreferences.skinType,
+      concerns: userProfile.concerns || sessionPreferences.concerns,
+      goals: userProfile.goals || sessionPreferences.goals,
+      sensitivities: userProfile.sensitivities || sessionPreferences.sensitivities,
+      crueltyFree: userProfile.preferences?.crueltyFree ?? sessionPreferences.crueltyFree,
+      vegan: userProfile.preferences?.vegan ?? sessionPreferences.vegan,
+      budgetRange: sessionPreferences.budgetRange || 'mid',
+    };
+
     // Adapt tone based on preferences and sentiment
-    const tone = preferences.aiTone || 'friendly';
+    const tone = additionalContext?.tone || preferences.aiTone || 'friendly';
     let greeting = '';
     
     if (sentiment === 'positive') {
@@ -171,33 +207,107 @@ class AdaptiveAIEngine {
 
   private generateRoutineResponse(input: string, preferences: any, complexity: string, intent: string): string {
     const routinePreference = preferences.routinePreference || 'moderate';
-    
+    const skinType = preferences.skinType || 'combination';
+
+    // Build user profile for retrieval
+    const userProfile: UserSkinProfile = {
+      skinType: preferences.skinType,
+      concerns: preferences.concerns,
+      preferences: {
+        crueltyFree: preferences.crueltyFree,
+        vegan: preferences.vegan,
+        budgetRange: preferences.budgetRange || 'mid',
+      },
+    };
+
     if (intent === 'recommendation') {
-      if (complexity === 'simple') {
-        return `For a ${routinePreference} routine, I recommend starting with cleanser, treatment, and moisturizer.`;
-      } else {
-        return `Based on your ${routinePreference} routine preference, here's what I suggest: Start with a gentle cleanser suited for ${preferences.skinType || 'your skin type'}, follow with targeted treatments for ${preferences.concerns?.[0] || 'your concerns'}, and finish with a moisturizer. ${routinePreference === 'extensive' ? 'You can also add serums, essences, and SPF for comprehensive care.' : ''}`;
+      const routineProducts = retrieveRoutineProducts(userProfile);
+
+      let response = `Here's a personalized ${routinePreference} routine for your ${skinType} skin:\n\n`;
+
+      // Morning routine
+      response += `**Morning Routine:**\n`;
+      if (routineProducts.cleanser?.[0]) {
+        response += `1. Cleanse: ${routineProducts.cleanser[0].brand} ${routineProducts.cleanser[0].name} ($${routineProducts.cleanser[0].price})\n`;
       }
+      if (routineProducts.serum?.[0]) {
+        response += `2. Treat: ${routineProducts.serum[0].brand} ${routineProducts.serum[0].name} ($${routineProducts.serum[0].price})\n`;
+      }
+      if (routineProducts.moisturizer?.[0]) {
+        response += `3. Moisturize: ${routineProducts.moisturizer[0].brand} ${routineProducts.moisturizer[0].name} ($${routineProducts.moisturizer[0].price})\n`;
+      }
+      if (routineProducts.sunscreen?.[0]) {
+        response += `4. Protect: ${routineProducts.sunscreen[0].brand} ${routineProducts.sunscreen[0].name} ($${routineProducts.sunscreen[0].price})\n`;
+      }
+
+      response += `\nAll products are available on the Lorem Curae Marketplace.`;
+
+      if (preferences.concerns?.[0]) {
+        response += ` This routine specifically addresses your ${preferences.concerns[0]} concerns.`;
+      }
+
+      return response;
     } else if (intent === 'troubleshooting') {
       return `Let's optimize your routine. Common issues include using too many actives at once or incorrect product order. What specific problem are you experiencing?`;
     }
-    
+
     return `I can help you build a personalized ${routinePreference} routine. What would you like to focus on?`;
   }
 
   private generateProductResponse(input: string, preferences: any, complexity: string, intent: string, patterns: any): string {
-    const budget = preferences.budgetRange || 'mid';
     const skinType = preferences.skinType || 'combination';
+    const lowerInput = input.toLowerCase();
+
+    // Build user profile for retrieval
+    const userProfile: UserSkinProfile = {
+      skinType: preferences.skinType,
+      concerns: preferences.concerns,
+      preferences: {
+        crueltyFree: preferences.crueltyFree,
+        vegan: preferences.vegan,
+        fragranceFree: preferences.fragranceFree,
+        budgetRange: preferences.budgetRange || 'mid',
+      },
+    };
+
+    // Detect category from input
+    let category: string | undefined;
+    if (lowerInput.includes('cleanser') || lowerInput.includes('wash')) category = 'cleanser';
+    else if (lowerInput.includes('serum')) category = 'serum';
+    else if (lowerInput.includes('moisturizer') || lowerInput.includes('cream')) category = 'moisturizer';
+    else if (lowerInput.includes('sunscreen') || lowerInput.includes('spf')) category = 'sunscreen';
+    else if (lowerInput.includes('mask')) category = 'mask';
+    else if (lowerInput.includes('treatment') || lowerInput.includes('spot')) category = 'treatment';
+
+    // Detect ingredient searches
+    const ingredientMatch = lowerInput.match(/(?:with|contain|has|using)\s+(\w+(?:\s+\w+)?)/);
+    if (ingredientMatch) {
+      const ingredient = ingredientMatch[1];
+      const products = searchByIngredient(ingredient, userProfile, 3);
+      if (products.length > 0) {
+        return formatRecommendations(products, `Here are products containing ${ingredient} that match your skin profile:`);
+      }
+    }
 
     if (intent === 'recommendation') {
-      if (complexity === 'simple') {
-        return `I recommend ${budget}-range products suitable for ${skinType} skin.`;
-      } else {
-        const viewedCount = patterns.context?.viewedProducts?.length || 0;
-        return `Based on your ${skinType} skin and ${budget} budget preference${viewedCount > 0 ? `, and the ${viewedCount} products you've viewed` : ''}, I can suggest products that match your needs. ${preferences.concerns ? `For ${preferences.concerns[0]}, look for ingredients like niacinamide or retinol.` : ''}`;
+      const result = retrieveProducts(userProfile, { category, limit: 3 });
+
+      if (result.products.length > 0) {
+        const context = category
+          ? `Based on your ${skinType} skin, here are my top ${category} recommendations:`
+          : `Here are personalized product recommendations for your ${skinType} skin:`;
+        return formatRecommendations(result.products, context);
       }
+
+      return `I'd love to recommend products for your ${skinType} skin. Could you tell me what type of product you're looking for (cleanser, serum, moisturizer, sunscreen)?`;
     } else if (intent === 'comparison') {
       return `I'll help you compare products. What specific aspects matter most to you - ingredients, price, effectiveness, or user reviews?`;
+    }
+
+    // Default: retrieve general recommendations
+    const result = retrieveProducts(userProfile, { limit: 3 });
+    if (result.products.length > 0) {
+      return formatRecommendations(result.products, `Here are some products I think would work well for your ${skinType} skin:`);
     }
 
     return `I can recommend products tailored to your ${skinType} skin. What type of product are you looking for?`;
@@ -244,17 +354,38 @@ class AdaptiveAIEngine {
 
   private generateGeneralResponse(input: string, preferences: any, complexity: string, patterns: any): string {
     const hasProfile = preferences.skinType || preferences.concerns?.length > 0;
-    
+
     if (!hasProfile) {
-      return `I'm here to help with your skincare journey! To give you the most personalized advice, I'd love to learn about your skin type and concerns. Have you taken our skin quiz yet?`;
+      return `I'm here to help with your skincare journey! To give you the most personalized product recommendations, I'd love to learn about your skin type and concerns. Have you taken our skin quiz yet? In the meantime, I can still suggest some popular, well-reviewed products.`;
     }
+
+    // Build user profile for retrieval
+    const userProfile: UserSkinProfile = {
+      skinType: preferences.skinType,
+      concerns: preferences.concerns,
+      preferences: {
+        budgetRange: preferences.budgetRange || 'mid',
+      },
+    };
 
     const engagement = patterns.engagementLevel;
     if (engagement === 'high') {
-      return `You've been actively exploring! ${complexity === 'detailed' ? `Based on your ${patterns.preferredFeatures.join(', ')} interests, I can provide deeper insights into personalized skincare.` : 'How can I help you today?'}`;
+      const result = retrieveProducts(userProfile, { limit: 2 });
+      if (result.products.length > 0) {
+        let response = `You've been actively exploring! Based on your ${preferences.skinType} skin`;
+        if (preferences.concerns?.length > 0) {
+          response += ` and focus on ${preferences.concerns.join(', ')}`;
+        }
+        response += `, here are some products you might like:\n\n`;
+        result.products.forEach((product) => {
+          response += `- **${product.brand}** ${product.name} ($${product.price}) - ${product.matchReasons[0]}\n`;
+        });
+        response += `\nWould you like more details on any of these?`;
+        return response;
+      }
     }
 
-    return `I'm here to help with any skincare questions. What would you like to know?`;
+    return `I'm here to help with product recommendations, routine building, and ingredient questions. What would you like to know?`;
   }
 
   private addConcernSpecificAdvice(concern: string, complexity: string): string {

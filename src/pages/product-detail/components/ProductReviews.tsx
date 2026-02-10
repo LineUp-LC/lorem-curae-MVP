@@ -81,7 +81,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 1,
       userName: 'Sarah M.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20woman%20headshot%2C%20friendly%20smile%2C%20natural%20lighting%2C%20skincare%20enthusiast%2C%20clean%20background%2C%20modern%20portrait%20photography&width=60&height=60&seq=reviewer-001&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&q=80',
       rating: 5,
       title: 'Amazing results for combination skin!',
       content: 'I\'ve been using this serum for 3 months now and the difference is incredible. My T-zone is no longer oily by midday, and my cheeks feel hydrated. The texture is lightweight and absorbs quickly without any sticky residue. Perfect for my combination skin type!',
@@ -96,7 +96,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 2,
       userName: 'Jessica R.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20woman%20portrait%2C%20natural%20beauty%2C%20confident%20smile%2C%20skincare%20routine%2C%20professional%20headshot%2C%20clean%20aesthetic&width=60&height=60&seq=reviewer-002&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&q=80',
       rating: 4,
       title: 'Great for sensitive skin',
       content: 'As someone with very sensitive skin, I was hesitant to try this. But it\'s been gentle and effective. No irritation at all, and I\'ve noticed my redness has decreased significantly. Takes time to see results but worth the patience.',
@@ -111,7 +111,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 3,
       userName: 'Michael K.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20headshot%2C%20friendly%20expression%2C%20natural%20lighting%2C%20skincare%20enthusiast%2C%20clean%20background%2C%20modern%20portrait&width=60&height=60&seq=reviewer-003&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&q=80',
       rating: 5,
       title: 'Finally found my holy grail serum',
       content: 'After trying countless serums, this one actually delivers. The niacinamide really helps with my enlarged pores, and the hyaluronic acid keeps my skin plump all day. Great for oily skin that needs hydration without heaviness.',
@@ -126,7 +126,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 4,
       userName: 'Emma L.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20professional%20woman%2C%20natural%20skincare%20enthusiast%2C%20gentle%20smile%2C%20clean%20portrait%20photography%2C%20modern%20headshot&width=60&height=60&seq=reviewer-004&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&h=60&fit=crop&q=80',
       rating: 5,
       title: 'Perfect match for combination acne-prone skin',
       content: 'This serum has been a game-changer for my combination skin with persistent breakouts. It controls oil in my T-zone while keeping my cheeks moisturized. The acne-fighting ingredients work without over-drying. Highly recommend for similar skin types!',
@@ -141,7 +141,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 5,
       userName: 'David C.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20portrait%2C%20confident%20expression%2C%20skincare%20routine%20advocate%2C%20clean%20background%2C%20modern%20headshot&width=60&height=60&seq=reviewer-005&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&q=80',
       rating: 4,
       title: 'Effective for dark spots and uneven tone',
       content: 'Been dealing with hyperpigmentation from old acne scars. This serum has noticeably faded the dark spots over 4 months of consistent use. The vitamin C and niacinamide combo works well. Patience is key with pigmentation issues.',
@@ -156,7 +156,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     {
       id: 6,
       userName: 'Lisa K.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Mature%20woman%20portrait%2C%20elegant%20appearance%2C%20skincare%20expert%2C%20professional%20headshot%2C%20natural%20lighting&width=60&height=60&seq=reviewer-006&orientation=squarish',
+      userAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop&q=80',
       rating: 4,
       title: 'Good anti-aging benefits',
       content: 'At 45, I\'m always looking for products that help with fine lines and firmness. This serum has improved my skin texture and reduced some fine lines around my eyes. Takes consistent use to see results.',

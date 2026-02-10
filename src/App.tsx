@@ -6,6 +6,7 @@ import PasswordGate from "./PasswordGate";
 import { AuthProvider } from "./lib/auth/AuthContext";
 import LastVisitedPageRestorer from "./components/feature/LastVisitedPageRestorer";
 import PersistenceDebugPanel from "./components/feature/PersistenceDebugPanel";
+import ScrollToTop from "./components/feature/ScrollToTop";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
       <AuthProvider>
         <I18nextProvider i18n={i18n}>
           <BrowserRouter basename={__BASE_PATH__}>
+            <ScrollToTop />
             <LastVisitedPageRestorer />
             <PersistenceDebugPanel />
             <AppRoutes />

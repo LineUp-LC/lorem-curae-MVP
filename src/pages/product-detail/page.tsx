@@ -55,10 +55,10 @@ export default function ProductDetailPage() {
     reviewCount: 2156,
     priceRange: '$43.50 - $46.00',
     images: [
-      'https://readdy.ai/api/search-image?query=Brightening%20vitamin%20C%20serum%20in%20elegant%20glass%20dropper%20bottle&width=600&height=600&seq=1&orientation=squarish',
-      'https://readdy.ai/api/search-image?query=Vitamin%20C%20serum%20texture%20close-up&width=600&height=600&seq=2&orientation=squarish',
-      'https://readdy.ai/api/search-image?query=Vitamin%20C%20serum%20application%20on%20skin&width=600&height=600&seq=3&orientation=squarish',
-      'https://readdy.ai/api/search-image?query=Vitamin%20C%20serum%20ingredients%20display&width=600&height=600&seq=4&orientation=squarish'
+      'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&h=600&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1617897903246-719242758050?w=600&h=600&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&h=600&fit=crop&q=80',
+      'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=600&h=600&fit=crop&q=80'
     ],
     description: 'Powerful antioxidant serum that brightens, evens tone, and protects against environmental damage.',
     inStock: true,

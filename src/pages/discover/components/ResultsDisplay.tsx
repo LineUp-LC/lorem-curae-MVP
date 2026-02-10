@@ -10,7 +10,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
       name: 'Gentle Hydrating Cleanser',
       brand: 'Pure Essence',
       step: 'Step 1: Cleanse',
-      image: 'https://readdy.ai/api/search-image?query=Minimalist%20skincare%20cleanser%20bottle%20with%20pump%2C%20clean%20design%2C%20natural%20ingredients%2C%20soft%20lighting%2C%20simple%20white%20background%2C%20premium%20beauty%20product%20photography&width=300&height=400&seq=routine-product-001&orientation=portrait',
+      image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=400&fit=crop&q=80',
       reason: 'Perfect for your skin type, removes impurities without stripping moisture',
     },
     {
@@ -18,7 +18,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
       name: 'Brightening Vitamin C Serum',
       brand: 'Glow Naturals',
       step: 'Step 2: Treat',
-      image: 'https://readdy.ai/api/search-image?query=Elegant%20serum%20bottle%20with%20dropper%2C%20vitamin%20C%20formula%2C%20minimalist%20design%2C%20soft%20lighting%2C%20simple%20white%20background%2C%20high-end%20beauty%20product%20photography&width=300&height=400&seq=routine-product-002&orientation=portrait',
+      image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300&h=400&fit=crop&q=80',
       reason: 'Addresses your concerns with powerful antioxidants and brightening agents',
     },
     {
@@ -26,7 +26,7 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
       name: 'Barrier Repair Moisturizer',
       brand: 'Skin Harmony',
       step: 'Step 3: Moisturize',
-      image: 'https://readdy.ai/api/search-image?query=Premium%20moisturizer%20jar%20with%20elegant%20packaging%2C%20natural%20ingredients%2C%20minimalist%20design%2C%20soft%20lighting%2C%20simple%20white%20background%2C%20luxury%20beauty%20product%20photography&width=300&height=400&seq=routine-product-003&orientation=portrait',
+      image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=300&h=400&fit=crop&q=80',
       reason: 'Locks in hydration and strengthens your skin barrier for lasting results',
     },
   ];
@@ -108,9 +108,13 @@ const ResultsDisplay = ({ data, onBackToCatalog }: ResultsDisplayProps) => {
                 <div className="flex flex-col md:flex-row gap-6">
                   <div className="w-full md:w-48 h-64 rounded-xl overflow-hidden flex-shrink-0">
                     <img
-                      src={product.image}
+                      src={product.image || '/placeholder-product.svg'}
                       alt={product.name}
                       className="w-full h-full object-cover object-top"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = '/placeholder-product.svg';
+                      }}
                     />
                   </div>
                   <div className="flex-1 space-y-4">

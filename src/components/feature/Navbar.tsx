@@ -367,22 +367,25 @@ const Navbar = () => {
             <div className="relative ml-2">
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="lc-nav-icon-btn overflow-hidden ring-2 ring-[#E8A888]/50 hover:ring-[#C4704D]"
+                className="lc-nav-icon-btn overflow-hidden ring-2 ring-[#E8A888]/50 hover:ring-[#C4704D] bg-gradient-to-br from-[#FDF8F5] to-[#E8D4CC]"
                 aria-label="Profile menu"
                 aria-expanded={showProfileDropdown}
               >
-                <img 
+                {/* Person outline icon as base layer */}
+                <i className="ri-user-line absolute inset-0 flex items-center justify-center text-[#C4704D] text-xl"></i>
+                {/* Avatar image overlays the icon when loaded */}
+                <img
                   src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=navbar-avatar&orientation=squarish"
                   alt=""
                   width={44}
                   height={44}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover relative z-10"
                   loading="eager"
                 />
               </button>
-              <ProfileDropdown 
-                isOpen={showProfileDropdown} 
-                onClose={() => setShowProfileDropdown(false)} 
+              <ProfileDropdown
+                isOpen={showProfileDropdown}
+                onClose={() => setShowProfileDropdown(false)}
               />
             </div>
           </div>
