@@ -1,21 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useAuth } from '@/lib/auth/AuthContext';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import QuizFlow from './components/QuizFlow';
 import AuthPrompt from './components/AuthPrompt';
 
 const SkinSurveyPage = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const { user, loading } = useAuth();
 
-  // Simulate authentication check
-  useEffect(() => {
-    // In a real app, check authentication status here
-    // For demo purposes, setting to false to show auth prompt
-    setIsAuthenticated(false);
-  }, []);
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-cream flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
-  if (!isAuthenticated) {
+  // Show auth prompt if not logged in
+  if (!user) {
     return <AuthPrompt />;
   }
 
