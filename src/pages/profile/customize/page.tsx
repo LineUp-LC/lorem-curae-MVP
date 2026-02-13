@@ -99,9 +99,9 @@ export default function ProfileCustomizePage() {
 
   const getTierBadge = (tier: string) => {
     const badges = {
-      free: { text: 'Free', color: 'bg-gray-100 text-gray-700' },
-      plus: { text: 'Plus', color: 'bg-teal-100 text-teal-700' },
-      premium: { text: 'Premium', color: 'bg-amber-100 text-amber-700' }
+      free: { text: 'Free', color: 'bg-warm-gray/10 text-warm-gray' },
+      plus: { text: 'Plus', color: 'bg-sage/20 text-sage' },
+      premium: { text: 'Premium', color: 'bg-primary/10 text-primary' }
     };
     return badges[tier as keyof typeof badges] || badges.free;
   };
@@ -110,44 +110,32 @@ export default function ProfileCustomizePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent mb-3"></div>
+          <p className="text-warm-gray text-sm">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Customize Profile</h1>
-                <p className="text-sm text-warm-gray">Personalize your profile appearance and layout</p>
-              </div>
-              {userProfile && (
-                <span className={`px-4 py-2 rounded-full text-sm font-medium ${getTierBadge(userProfile.subscription_tier).color}`}>
-                  {getTierBadge(userProfile.subscription_tier).text}
-                </span>
-              )}
-            </div>
+          <div className="mb-6 text-center">
+            <h1 className="font-serif text-2xl font-semibold text-deep mb-1">Customize Profile</h1>
+            <p className="text-sm text-warm-gray">Control what appears on your public profile</p>
             {isLocked && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-                <i className="ri-lock-line text-amber-600 text-xl flex-shrink-0 mt-0.5"></i>
-                <div className="flex-1">
-                  <p className="text-amber-900 font-medium mb-1">Premium Feature</p>
-                  <p className="text-amber-700 text-sm">Profile customization is available for Plus and Premium members.</p>
-                </div>
+              <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-primary/5 border border-primary/20 rounded-full">
+                <i className="ri-lock-line text-primary text-sm"></i>
+                <span className="text-sm text-deep">Available for Plus and Premium</span>
                 <Link
                   to="/subscription"
-                  className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium text-sm whitespace-nowrap"
+                  className="text-sm font-medium text-primary hover:text-dark"
                 >
                   Upgrade
                 </Link>
@@ -155,153 +143,89 @@ export default function ProfileCustomizePage() {
             )}
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="max-w-2xl mx-auto">
             {/* Customization Options */}
-            <div className="lg:col-span-2 space-y-6">
-              {/* Theme Selection */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-1">Color Theme</h2>
-                    <p className="text-gray-600 text-sm">Choose your profile color scheme</p>
-                  </div>
-                  {isLocked && <i className="ri-lock-line text-gray-400 text-2xl"></i>}
-                </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {themes.map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => !isLocked && setSelectedTheme(theme.id)}
-                      disabled={isLocked}
-                      className={`p-4 rounded-xl border-2 transition-all ${
-                        selectedTheme === theme.id
-                          ? 'border-teal-600 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300'
-                      } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        <div
-                          className="w-8 h-8 rounded-full"
-                          style={{ backgroundColor: theme.primary }}
-                        ></div>
-                        <div
-                          className="w-8 h-8 rounded-full"
-                          style={{ backgroundColor: theme.secondary }}
-                        ></div>
-                        <div
-                          className="w-8 h-8 rounded-full"
-                          style={{ backgroundColor: theme.accent }}
-                        ></div>
-                      </div>
-                      <p className="font-semibold text-gray-900">{theme.name}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Layout Selection */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-1">Profile Layout</h2>
-                    <p className="text-gray-600 text-sm">Select how your content is displayed</p>
-                  </div>
-                  {isLocked && <i className="ri-lock-line text-gray-400 text-2xl"></i>}
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {layouts.map((layout) => (
-                    <button
-                      key={layout.id}
-                      onClick={() => !isLocked && setSelectedLayout(layout.id)}
-                      disabled={isLocked}
-                      className={`p-6 rounded-xl border-2 transition-all text-center ${
-                        selectedLayout === layout.id
-                          ? 'border-teal-600 shadow-md'
-                          : 'border-gray-200 hover:border-gray-300'
-                      } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                    >
-                      <i className={`${layout.icon} text-4xl text-gray-700 mb-3`}></i>
-                      <p className="font-semibold text-gray-900 mb-1">{layout.name}</p>
-                      <p className="text-sm text-gray-600">{layout.description}</p>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
+            <div className="space-y-6">
               {/* Visibility Settings */}
-              <div className="bg-white rounded-xl shadow-sm p-6">
-                <div className="flex items-center justify-between mb-6">
+              <div className="bg-white rounded-xl border border-blush/50 p-5">
+                <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-xl font-bold text-gray-900 mb-1">Visibility Settings</h2>
-                    <p className="text-gray-600 text-sm">Control what appears on your profile</p>
+                    <h2 className="font-medium text-deep text-base">Visibility Settings</h2>
+                    <p className="text-warm-gray text-sm">Control what appears on your profile</p>
                   </div>
-                  {isLocked && <i className="ri-lock-line text-gray-400 text-2xl"></i>}
+                  {isLocked && <i className="ri-lock-line text-warm-gray/40 text-lg"></i>}
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between py-3 border-b border-blush/30">
                     <div className="flex items-center gap-3">
-                      <i className="ri-medal-line text-2xl text-gray-700"></i>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i className="ri-medal-line text-base text-primary"></i>
+                      </div>
                       <div>
-                        <p className="font-medium text-gray-900">Show Badges</p>
-                        <p className="text-sm text-gray-600">Display your earned badges</p>
+                        <p className="font-medium text-deep text-sm">Show Badges</p>
+                        <p className="text-xs text-warm-gray">Display earned badges</p>
                       </div>
                     </div>
                     <button
                       onClick={() => !isLocked && setShowBadges(!showBadges)}
                       disabled={isLocked}
-                      className={`relative w-14 h-8 rounded-full transition-colors ${
-                        showBadges ? 'bg-teal-600' : 'bg-gray-300'
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        showBadges ? 'bg-primary' : 'bg-warm-gray/25'
                       } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       <span
-                        className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                          showBadges ? 'translate-x-6' : 'translate-x-0'
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                          showBadges ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       ></span>
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between py-3 border-b border-blush/30">
                     <div className="flex items-center gap-3">
-                      <i className="ri-calendar-check-line text-2xl text-gray-700"></i>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i className="ri-calendar-check-line text-base text-primary"></i>
+                      </div>
                       <div>
-                        <p className="font-medium text-gray-900">Show Routines</p>
-                        <p className="text-sm text-gray-600">Display your skincare routines</p>
+                        <p className="font-medium text-deep text-sm">Show Routines</p>
+                        <p className="text-xs text-warm-gray">Display skincare routines</p>
                       </div>
                     </div>
                     <button
                       onClick={() => !isLocked && setShowRoutines(!showRoutines)}
                       disabled={isLocked}
-                      className={`relative w-14 h-8 rounded-full transition-colors ${
-                        showRoutines ? 'bg-teal-600' : 'bg-gray-300'
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        showRoutines ? 'bg-primary' : 'bg-warm-gray/25'
                       } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       <span
-                        className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                          showRoutines ? 'translate-x-6' : 'translate-x-0'
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                          showRoutines ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       ></span>
                     </button>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between py-3">
                     <div className="flex items-center gap-3">
-                      <i className="ri-community-line text-2xl text-gray-700"></i>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <i className="ri-community-line text-base text-primary"></i>
+                      </div>
                       <div>
-                        <p className="font-medium text-gray-900">Show Communities</p>
-                        <p className="text-sm text-gray-600">Display joined communities</p>
+                        <p className="font-medium text-deep text-sm">Show Communities</p>
+                        <p className="text-xs text-warm-gray">Display joined communities</p>
                       </div>
                     </div>
                     <button
                       onClick={() => !isLocked && setShowCommunities(!showCommunities)}
                       disabled={isLocked}
-                      className={`relative w-14 h-8 rounded-full transition-colors ${
-                        showCommunities ? 'bg-teal-600' : 'bg-gray-300'
+                      className={`relative w-11 h-6 rounded-full transition-colors ${
+                        showCommunities ? 'bg-primary' : 'bg-warm-gray/25'
                       } ${isLocked ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
                       <span
-                        className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                          showCommunities ? 'translate-x-6' : 'translate-x-0'
+                        className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                          showCommunities ? 'translate-x-5' : 'translate-x-0'
                         }`}
                       ></span>
                     </button>
@@ -309,92 +233,22 @@ export default function ProfileCustomizePage() {
                 </div>
               </div>
 
-              {/* Premium Feature - Custom App Icon */}
-              {userProfile?.subscription_tier === 'premium' && (
-                <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <i className="ri-vip-crown-line text-2xl text-amber-600"></i>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 mb-2">Premium Exclusive: Custom App Icon</h3>
-                      <p className="text-gray-700 mb-4">Upload your own custom app icon to personalize your experience</p>
-                      <button className="px-6 py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors font-medium whitespace-nowrap">
-                        Upload Custom Icon
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               {/* Save Button */}
-              <div className="flex gap-4">
+              <div className="flex gap-3">
                 <Link
                   to="/account"
-                  className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-center whitespace-nowrap"
+                  className="flex-1 px-5 py-2.5 border border-blush text-warm-gray rounded-lg hover:bg-cream transition-colors font-medium text-center text-sm"
                 >
                   Cancel
                 </Link>
                 <button
                   onClick={handleSaveCustomization}
                   disabled={isLocked || saving}
-                  className="flex-1 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                  className="flex-1 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-dark transition-colors font-medium text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
                 </button>
-              </div>
-            </div>
-
-            {/* Live Preview */}
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl shadow-sm p-6 sticky top-24">
-                <h3 className="font-bold text-gray-900 mb-4">Live Preview</h3>
-                <div
-                  className="rounded-xl p-6 mb-4"
-                  style={{
-                    backgroundColor: themes.find(t => t.id === selectedTheme)?.secondary
-                  }}
-                >
-                  <div className="flex items-center gap-3 mb-4">
-                    <div
-                      className="w-16 h-16 rounded-full flex items-center justify-center"
-                      style={{
-                        backgroundColor: themes.find(t => t.id === selectedTheme)?.primary
-                      }}
-                    >
-                      <i className="ri-user-line text-2xl text-white"></i>
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-gray-900">{userProfile?.full_name || 'Your Name'}</h4>
-                      <p className="text-sm text-gray-600">Skincare Enthusiast</p>
-                    </div>
-                  </div>
-
-                  {showBadges && (
-                    <div className="mb-4">
-                      <p className="text-sm font-medium text-gray-700 mb-2">Badges</p>
-                      <div className="flex gap-2">
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                          <i className="ri-medal-line text-sm" style={{ color: themes.find(t => t.id === selectedTheme)?.primary }}></i>
-                        </div>
-                        <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
-                          <i className="ri-star-line text-sm" style={{ color: themes.find(t => t.id === selectedTheme)?.primary }}></i>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
-                  {showCommunities && (
-                    <div>
-                      <p className="text-sm font-medium text-gray-700 mb-2">Communities</p>
-                      <div className="flex gap-2">
-                        <div className="w-8 h-8 bg-white rounded-lg"></div>
-                        <div className="w-8 h-8 bg-white rounded-lg"></div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-gray-500 text-center">Preview of your customized profile</p>
               </div>
             </div>
           </div>
@@ -403,29 +257,29 @@ export default function ProfileCustomizePage() {
 
       {/* Upgrade Modal */}
       {showUpgradeModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full p-8">
-            <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i className="ri-vip-crown-line text-3xl text-amber-600"></i>
+        <div className="fixed inset-0 bg-deep/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-sm w-full p-6">
+            <div className="text-center mb-5">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                <i className="ri-vip-crown-line text-2xl text-primary"></i>
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">Upgrade to Customize</h3>
-              <p className="text-gray-600">
+              <h3 className="font-serif text-xl font-semibold text-deep mb-1">Upgrade to Customize</h3>
+              <p className="text-warm-gray text-sm">
                 Profile customization is available for Plus and Premium members
               </p>
             </div>
 
-            <div className="bg-gray-50 rounded-xl p-4 mb-6 space-y-2">
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <i className="ri-check-line text-teal-600"></i>
+            <div className="bg-cream rounded-xl p-4 mb-5 space-y-2">
+              <div className="flex items-center gap-2 text-sm text-deep">
+                <i className="ri-check-line text-primary"></i>
                 <span>Custom color themes</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <i className="ri-check-line text-teal-600"></i>
+              <div className="flex items-center gap-2 text-sm text-deep">
+                <i className="ri-check-line text-primary"></i>
                 <span>Multiple layout options</span>
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-700">
-                <i className="ri-check-line text-teal-600"></i>
+              <div className="flex items-center gap-2 text-sm text-deep">
+                <i className="ri-check-line text-primary"></i>
                 <span>Visibility controls</span>
               </div>
             </div>
@@ -433,13 +287,13 @@ export default function ProfileCustomizePage() {
             <div className="flex gap-3">
               <button
                 onClick={() => setShowUpgradeModal(false)}
-                className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium whitespace-nowrap"
+                className="flex-1 px-5 py-2.5 border border-blush text-warm-gray rounded-lg hover:bg-cream transition-colors font-medium text-sm"
               >
                 Cancel
               </button>
               <Link
                 to="/subscription"
-                className="flex-1 px-6 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 transition-colors font-medium text-center whitespace-nowrap"
+                className="flex-1 px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-center text-sm"
               >
                 View Plans
               </Link>

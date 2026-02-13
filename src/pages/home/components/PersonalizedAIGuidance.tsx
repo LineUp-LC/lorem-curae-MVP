@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 // Unsplash - woman with healthy glowing skin, natural portrait
 const AI_IMAGE = 'https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80';
@@ -23,7 +24,7 @@ export default function PersonalizedAIGuidance() {
           {/* Content */}
           <div>
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold mb-4">
-              <i className="ri-sparkling-line"></i>
+              <NeuralBloomIcon size={14} />
               AI-Powered
             </span>
             <h2 className="text-4xl lg:text-5xl font-serif text-slate-900 mb-6">
@@ -94,7 +95,7 @@ export default function PersonalizedAIGuidance() {
             <div className="absolute -bottom-6 -right-6 bg-white rounded-2xl shadow-xl p-6 max-w-xs">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <i className="ri-sparkling-2-fill text-2xl text-white"></i>
+                  <NeuralBloomIcon size={24} color="white" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-gray-900 mb-1">AI Recommendation</p>

@@ -391,7 +391,21 @@ export function getEffectiveSkinType(): string | undefined {
   if (user?.skin_type) {
     return user.skin_type;
   }
-  return sessionState.getTempSkinType();
+  const tempSkinType = sessionState.getTempSkinType();
+  if (tempSkinType) {
+    return tempSkinType;
+  }
+  // Check skinSurveyData from quiz
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      return parsed.skinType?.[0] || undefined;
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData:', e);
+  }
+  return undefined;
 }
 
 export function getEffectiveConcerns(): string[] {
@@ -399,7 +413,21 @@ export function getEffectiveConcerns(): string[] {
   if (user?.concerns && user.concerns.length > 0) {
     return user.concerns;
   }
-  return sessionState.getTempConcerns() || [];
+  const tempConcerns = sessionState.getTempConcerns();
+  if (tempConcerns && tempConcerns.length > 0) {
+    return tempConcerns;
+  }
+  // Check skinSurveyData from quiz
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      return parsed.concerns || [];
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData:', e);
+  }
+  return [];
 }
 
 // React hook for using session state

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
+import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
 import { sessionState } from '../../lib/utils/sessionState';
 import { adaptiveAI } from '../../lib/utils/adaptiveAI';
 import { Link } from 'react-router-dom';
@@ -689,6 +690,7 @@ const AIChatPage = () => {
   const [showCustomize, setShowCustomize] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [currentSession, setCurrentSession] = useState<string>('current');
+  const [isTransitioning, setIsTransitioning] = useState(false);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
 
@@ -746,14 +748,58 @@ const AIChatPage = () => {
     moreAboutYou: ''
   });
 
-  const quickPrompts = [
-    'Recommend products for my skin type',
-    'Create a morning routine for me',
-    'Find me a good moisturizer',
-    'Suggest a vitamin C serum',
-    'What sunscreen should I use?',
-    'Show me products for acne',
-  ];
+  // Dynamic quick prompts based on user profile
+  const getQuickPrompts = () => {
+    const prompts: string[] = [];
+    const { skinType, concerns } = userProfile;
+
+    // Add skin type specific prompts
+    if (skinType) {
+      prompts.push(`Recommend products for my ${skinType} skin`);
+    } else {
+      prompts.push('Recommend products for my skin type');
+    }
+
+    // Add concern-specific prompts
+    if (concerns.includes('acne') || concerns.includes('Acne Prone')) {
+      prompts.push('Best treatments for acne');
+      prompts.push('Acne-safe moisturizers');
+    }
+    if (concerns.includes('dryness') || concerns.includes('Lack of Hydration')) {
+      prompts.push('Hydrating products for dry skin');
+      prompts.push('Best serums for hydration');
+    }
+    if (concerns.includes('aging') || concerns.includes('Signs of Aging')) {
+      prompts.push('Anti-aging serums');
+      prompts.push('Products for fine lines');
+    }
+    if (concerns.includes('hyperpigmentation') || concerns.includes('Uneven Skin Tone')) {
+      prompts.push('Products for dark spots');
+      prompts.push('Brightening serums');
+    }
+    if (concerns.includes('sensitivity') || concerns.includes('Rosacea')) {
+      prompts.push('Gentle products for sensitive skin');
+    }
+
+    // Add general prompts if we have room
+    const generalPrompts = [
+      'Create a morning routine for me',
+      'What sunscreen should I use?',
+      'Find me a good moisturizer',
+    ];
+
+    // Fill remaining slots with general prompts (max 6 total)
+    for (const prompt of generalPrompts) {
+      if (prompts.length >= 6) break;
+      if (!prompts.includes(prompt)) {
+        prompts.push(prompt);
+      }
+    }
+
+    return prompts.slice(0, 6);
+  };
+
+  const quickPrompts = getQuickPrompts();
 
   useEffect(() => {
     loadUserProfile();
@@ -830,22 +876,19 @@ const AIChatPage = () => {
   };
 
   const loadUserProfile = () => {
-    const savedProfile = localStorage.getItem('user_skin_profile');
-    if (savedProfile) {
-      setUserProfile(JSON.parse(savedProfile));
-    } else {
-      // Load from quiz results if available
-      const quizResults = localStorage.getItem('skin_quiz_results');
-      if (quizResults) {
-        const results = JSON.parse(quizResults);
-        setUserProfile({
-          skinType: results.skinType || 'normal',
-          concerns: results.concerns || [],
-          goals: results.goals || [],
-          sensitivities: results.sensitivities || [],
-          preferences: results.preferences || { crueltyFree: false, vegan: false },
-        });
-      }
+    const savedSurvey = localStorage.getItem('skinSurveyData');
+    if (savedSurvey) {
+      const data = JSON.parse(savedSurvey);
+      setUserProfile({
+        skinType: data.skinType?.[0] || 'normal',
+        concerns: data.concerns || [],
+        goals: data.concerns || [], // Use concerns as goals
+        sensitivities: data.allergens || [],
+        preferences: {
+          crueltyFree: data.preferences?.includes('Cruelty-free') || false,
+          vegan: data.preferences?.includes('Vegan') || false,
+        },
+      });
     }
   };
 
@@ -1478,21 +1521,29 @@ const AIChatPage = () => {
           <div className="lg:col-span-1 bg-white rounded-xl p-4 overflow-y-auto shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-bold text-deep">Conversations</h2>
-              <button 
+              <button
                 onClick={() => {
-                  setMessages([
-                    {
-                      id: 1,
-                      sender: 'ai',
-                      content: 'Hello! I\'m Curae AI, your personalized skincare assistant. I can help you with product recommendations, routine building, ingredient questions, and progress tracking. What would you like to know?',
-                      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-                    }
-                  ]);
-                  setCurrentSession('current');
+                  // Trigger transition animation
+                  setIsTransitioning(true);
+                  setTimeout(() => {
+                    setMessages([
+                      {
+                        id: 1,
+                        sender: 'ai',
+                        content: 'Hello! I\'m Curae AI, your personalized skincare assistant. I can help you with product recommendations, routine building, ingredient questions, and progress tracking. What would you like to know?',
+                        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                      }
+                    ]);
+                    setConversationHistory([]);
+                    setCurrentSession('current');
+                    setInputMessage('');
+                    setTimeout(() => setIsTransitioning(false), 300);
+                  }, 300);
                 }}
-                className="text-sm text-deep font-medium cursor-pointer"
+                className="text-sm text-primary font-medium cursor-pointer hover:text-primary/80 transition-colors flex items-center gap-1"
               >
-                + New Chat
+                <i className="ri-add-line"></i>
+                New Chat
               </button>
             </div>
             
@@ -1532,56 +1583,24 @@ const AIChatPage = () => {
           </div>
 
           {/* Main Chat Area */}
-          <div className="lg:col-span-3 bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
+          <div className={`lg:col-span-3 bg-white rounded-xl shadow-sm flex flex-col overflow-hidden transition-all duration-300 ${
+            isTransitioning ? 'opacity-0 scale-[0.98] translate-y-2' : 'opacity-100 scale-100 translate-y-0'
+          }`}>
             {/* Chat Header */}
             <div className="p-6 border-b border-blush flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-dark rounded-full flex items-center justify-center relative">
-                  <i className="ri-sparkling-2-fill text-white text-xl"></i>
-                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>
+                <div className="w-12 h-12 bg-gradient-to-br from-primary to-dark rounded-full flex items-center justify-center">
+                  <NeuralBloomIcon size={24} color="white" />
                 </div>
-                <div>
-                  <h2 className="text-lg font-semibold text-deep">Curae AI</h2>
-                  <p className="text-sm text-warm-gray/80 flex items-center gap-2">
-                    Your personalized skincare assistant
-                    {isRetrievalReady && (
-                      <span className="inline-flex items-center gap-1 text-xs text-sage">
-                        <span className="w-1.5 h-1.5 rounded-full bg-sage"></span>
-                        Product matching active
-                      </span>
-                    )}
-                  </p>
-                </div>
+                <h2 className="text-lg font-semibold text-deep">Curae AI</h2>
               </div>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={() => setShowInsights(!showInsights)}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                      showInsights
-                        ? 'bg-primary text-white'
-                        : 'bg-cream text-warm-gray hover:bg-gray-200'
-                    }`}
-                  >
-                    <i className="ri-lightbulb-line mr-2"></i>
-                    Insights
-                  </button>
-                  <div className="relative group">
-                    <i className="ri-information-line text-warm-gray/60 hover:text-warm-gray cursor-help"></i>
-                    <div className="absolute right-0 top-full mt-2 w-64 p-3 bg-deep text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                      Get AI‑powered insights that reveal what's changing in your skin and why, using your notes, photos, and routines.
-                      <div className="absolute -top-1 right-3 w-2 h-2 bg-deep rotate-45"></div>
-                    </div>
-                  </div>
-                </div>
-                <Link
-                  to="/my-skin"
-                  className="px-4 py-2 bg-cream text-warm-gray rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-                >
-                  <i className="ri-calendar-check-line mr-1"></i>
-                  View Progress
-                </Link>
-              </div>
+              <Link
+                to="/routines?tab=notes&openAssessment=true&fromAiChat=true"
+                className="px-4 py-2 bg-cream text-warm-gray rounded-lg text-sm font-medium hover:bg-blush transition-colors"
+              >
+                <i className="ri-line-chart-line mr-1"></i>
+                View Progress
+              </Link>
             </div>
 
             {/* AI Journey Insights */}
@@ -1669,14 +1688,6 @@ const AIChatPage = () => {
                           : 'bg-cream text-deep'
                       }`}
                     >
-                      {message.sender === 'ai' && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
-                            <i className="ri-sparkling-2-fill text-white text-xs"></i>
-                          </div>
-                          <span className="text-xs font-medium text-deep">Curae</span>
-                        </div>
-                      )}
                       <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
                     </div>
 
@@ -1723,12 +1734,8 @@ const AIChatPage = () => {
                 <div className="flex justify-start motion-safe:animate-fade-in">
                   <div className="max-w-[80%]">
                     <div className="bg-cream rounded-2xl px-4 py-3">
-                      {/* AI Avatar and Thinking State */}
+                      {/* AI Thinking State */}
                       <div className="flex items-center gap-2 mb-3">
-                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-primary to-dark flex items-center justify-center">
-                          <i className="ri-sparkling-2-fill text-white text-xs"></i>
-                        </div>
-                        <span className="text-xs font-medium text-deep">Curae</span>
                         <span className="text-xs text-warm-gray/70 flex items-center gap-1">
                           <i className="ri-loader-4-line motion-safe:animate-spin text-primary"></i>
                           Thinking...
@@ -1754,27 +1761,6 @@ const AIChatPage = () => {
               )}
               <div ref={messagesEndRef} />
             </div>
-
-            {/* Quick Prompts */}
-            {messages.length <= 1 && (
-              <div className="px-6 py-3 border-t border-blush">
-                <p className="text-xs text-warm-gray/80 mb-2">Quick questions:</p>
-                <div className="flex flex-wrap gap-2">
-                  {quickPrompts.map((prompt, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setInputMessage(prompt);
-                        sessionState.trackInteraction('click', 'quick-prompt', { prompt });
-                      }}
-                      className="px-3 py-1.5 bg-cream text-deep text-sm rounded-full hover:bg-primary/10 transition-colors whitespace-nowrap cursor-pointer"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
 
             {/* Input Area */}
             <div className="p-6 border-t border-blush">
@@ -1802,9 +1788,29 @@ const AIChatPage = () => {
                   <i className="ri-send-plane-fill text-xl"></i>
                 </button>
               </div>
-              <p className="text-xs text-warm-gray/80 mt-2">
-                Press Enter to send, Shift+Enter for new line
-              </p>
+              {/* Quick Prompts - shown below input when conversation is new */}
+              {messages.length <= 1 ? (
+                <div className="mt-3">
+                  <div className="flex flex-wrap gap-2">
+                    {quickPrompts.map((prompt, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setInputMessage(prompt);
+                          sessionState.trackInteraction('click', 'quick-prompt', { prompt });
+                        }}
+                        className="px-3 py-1.5 bg-cream text-deep text-sm rounded-full hover:bg-primary/10 transition-colors whitespace-nowrap cursor-pointer"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-warm-gray/80 mt-2">
+                  Press Enter to send, Shift+Enter for new line
+                </p>
+              )}
             </div>
           </div>
         </div>

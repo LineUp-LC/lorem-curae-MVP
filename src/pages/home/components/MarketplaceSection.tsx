@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+const MotionLink = motion.create(Link);
 import {
   fadeInUpSoft,
   slideInFromLeft,
@@ -286,15 +288,14 @@ export default function MarketplaceSection() {
             <p>
               Big-box retailers prioritize bestsellers. We prioritize fit. Our marketplace connects you directly with independent creators who formulate with intention.
             </p>
-            <motion.div
+            <MotionLink
+              to="/marketplace"
+              className="lc-btn-primary"
               whileHover={buttonHover}
               whileTap={buttonTap}
-              style={{ display: 'inline-block' }}
             >
-              <Link to="/marketplace" className="lc-btn-primary">
-                Explore Marketplace
-              </Link>
-            </motion.div>
+              Browse Products
+            </MotionLink>
           </motion.div>
         </div>
       </motion.div>

@@ -146,8 +146,8 @@ export interface ComparisonMetrics {
   worstValueProductId: number | null;
   /** Highest PPML value */
   worstPPML: number | null;
-  /** Map of ingredient name -> { productId, concentration } for highest concentration */
-  highestConcentrations: Map<string, { productId: number; concentration: number }>;
+  /** Map of ingredient name -> { productId, concentration, count } for highest concentration */
+  highestConcentrations: Map<string, { productId: number; concentration: number; count: number }>;
   /** Number of products with valid PPML data */
   productsWithPPML: number;
   /** Number of products with concentration data */
@@ -196,17 +196,34 @@ export function calculateComparisonMetrics(products: Product[]): ComparisonMetri
   }
 
   // Calculate highest concentrations per ingredient
+  // First pass: count products per ingredient
+  const ingredientCounts = new Map<string, number>();
+  for (const product of products) {
+    if (!product.activeIngredients) continue;
+    for (const ingredient of product.activeIngredients) {
+      if (typeof ingredient.concentration !== 'number') continue;
+      const normalizedName = ingredient.name.toLowerCase().trim();
+      ingredientCounts.set(normalizedName, (ingredientCounts.get(normalizedName) || 0) + 1);
+    }
+  }
+
+  // Second pass: find highest concentration per ingredient
   for (const product of products) {
     if (!product.activeIngredients) continue;
 
     for (const ingredient of product.activeIngredients) {
       if (typeof ingredient.concentration !== 'number') continue;
 
-      const existing = metrics.highestConcentrations.get(ingredient.name);
+      // Normalize ingredient name for comparison (case-insensitive)
+      const normalizedName = ingredient.name.toLowerCase().trim();
+      const existing = metrics.highestConcentrations.get(normalizedName);
+      const count = ingredientCounts.get(normalizedName) || 1;
+
       if (!existing || ingredient.concentration > existing.concentration) {
-        metrics.highestConcentrations.set(ingredient.name, {
+        metrics.highestConcentrations.set(normalizedName, {
           productId: product.id,
           concentration: ingredient.concentration,
+          count: count,
         });
       }
     }
@@ -217,14 +234,17 @@ export function calculateComparisonMetrics(products: Product[]): ComparisonMetri
 
 /**
  * Check if a product has the highest concentration for a given ingredient
+ * Only returns true if there are at least 2 products with this ingredient to compare
  */
 export function hasHighestConcentration(
   productId: number,
   ingredientName: string,
   metrics: ComparisonMetrics
 ): boolean {
-  const highest = metrics.highestConcentrations.get(ingredientName);
-  return highest?.productId === productId;
+  const normalizedName = ingredientName.toLowerCase().trim();
+  const highest = metrics.highestConcentrations.get(normalizedName);
+  // Only show trophy if this product has highest AND at least 2 products have this ingredient
+  return highest?.productId === productId && highest?.count >= 2;
 }
 
 /**

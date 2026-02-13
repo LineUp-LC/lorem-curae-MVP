@@ -1,25 +1,20 @@
 import { useState, useEffect } from 'react';
 import { productData } from '../../../mocks/products';
 import { useNavigate } from 'react-router-dom';
+import ComparisonPickerModal from '../../../components/feature/ComparisonPickerModal';
+import type { Product } from '../../../types/product';
 
-// FIXED: Made onAddToComparison and selectedForComparison optional
 interface SimilarProductsProps {
   productId: number;
-  onAddToComparison?: (id: number) => void;
-  selectedForComparison?: number[];
-  onOpenComparison?: () => void;
 }
 
-const SimilarProducts = ({ 
-  productId, 
-  onAddToComparison, 
-  selectedForComparison = [], // Default to empty array
-  onOpenComparison
-}: SimilarProductsProps) => {
+const SimilarProducts = ({ productId }: SimilarProductsProps) => {
   const navigate = useNavigate();
   const currentProduct = productData.find(p => p.id === productId);
   const [userPreferences, setUserPreferences] = useState<Record<string, boolean>>({});
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
+  const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
 
   // Load user preferences and concerns
   useEffect(() => {
@@ -85,7 +80,29 @@ const SimilarProducts = ({
     plantBased: 'Plant-Based',
     chemicalFree: 'Chemical-Free',
   };
-  
+
+  const handleToggleComparison = (id: number) => {
+    setSelectedForComparison(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(pId => pId !== id);
+      }
+      // Max 3 products (including current product which will be added)
+      if (prev.length < 2) {
+        return [...prev, id];
+      }
+      return prev;
+    });
+  };
+
+  const handleOpenComparisonModal = () => {
+    setShowComparisonModal(true);
+  };
+
+  // Get selected products for the modal
+  const getSelectedProducts = (): Product[] => {
+    return productData.filter(p => selectedForComparison.includes(p.id));
+  };
+
   if (!currentProduct) return null;
 
   // Find similar products based on category and concerns
@@ -115,9 +132,6 @@ const SimilarProducts = ({
     return stars;
   };
 
-  // FIXED: Check if comparison feature is enabled
-  const comparisonEnabled = typeof onAddToComparison === 'function';
-
   return (
     <div className="py-12 px-6 lg:px-12 bg-cream-50">
       <div className="max-w-7xl mx-auto">
@@ -133,7 +147,8 @@ const SimilarProducts = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {similarProducts.map((product) => {
             const isSelected = selectedForComparison.includes(product.id);
-            const canSelect = selectedForComparison.length < 3 || isSelected;
+            // Max 2 similar products can be selected (+ current product = 3 total)
+            const canSelect = selectedForComparison.length < 2 || isSelected;
 
             return (
               <div
@@ -153,31 +168,28 @@ const SimilarProducts = ({
                     className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300"
                   />
                   
-                  {/* FIXED: Only render compare button if comparison is enabled */}
-                  {comparisonEnabled && (
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (canSelect && onAddToComparison) {
-                          onAddToComparison(product.id);
-                        }
-                      }}
-                      disabled={!canSelect}
-                      className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all ${
-                        isSelected
-                          ? 'bg-cream-900 text-white'
-                          : canSelect
-                          ? 'bg-white/90 text-gray-700 hover:bg-cream-900 hover:text-white'
-                          : 'bg-cream-300 text-gray-500 cursor-not-allowed'
-                      }`}
-                    >
-                      {isSelected ? (
-                        <i className="ri-check-line text-xl"></i>
-                      ) : (
-                        <i className="ri-scales-line text-xl"></i>
-                      )}
-                    </button>
-                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (canSelect) {
+                        handleToggleComparison(product.id);
+                      }
+                    }}
+                    disabled={!canSelect}
+                    className={`absolute top-4 right-4 w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+                      isSelected
+                        ? 'bg-primary text-white'
+                        : canSelect
+                        ? 'bg-white/90 text-gray-700 hover:bg-primary hover:text-white'
+                        : 'bg-cream-300 text-gray-500 cursor-not-allowed'
+                    }`}
+                  >
+                    {isSelected ? (
+                      <i className="ri-check-line text-xl"></i>
+                    ) : (
+                      <i className="ri-scales-line text-xl"></i>
+                    )}
+                  </button>
                 </div>
 
                 {/* Product Info */}
@@ -287,13 +299,13 @@ const SimilarProducts = ({
                         {product.price !== currentProduct.price && (
                           <p className="text-xs mt-1">
                             {product.price < currentProduct.price ? (
-                              <span className="text-taupe font-medium">
-                                <i className="ri-arrow-down-line"></i> 
+                              <span className="text-green-600 font-medium">
+                                <i className="ri-arrow-down-line"></i>
                                 ${(currentProduct.price - product.price).toFixed(2)} less
                               </span>
                             ) : (
                               <span className="text-red-600 font-medium">
-                                <i className="ri-arrow-up-line"></i> 
+                                <i className="ri-arrow-up-line"></i>
                                 ${(product.price - currentProduct.price).toFixed(2)} more
                               </span>
                             )}
@@ -308,39 +320,32 @@ const SimilarProducts = ({
           })}
         </div>
 
-        {/* FIXED: Only show comparison hint if comparison is enabled AND items are selected */}
-        {comparisonEnabled && selectedForComparison.length > 0 && (
-          <div className="mt-8 p-6 bg-taupe-50 border border-taupe-200 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 rounded-full">
-                  <i className="ri-scales-line text-2xl text-taupe"></i>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-deep-900">
-                    {selectedForComparison.length} product{selectedForComparison.length > 1 ? 's' : ''} selected for comparison
-                  </h3>
-                  <p className="text-sm text-gray-600">
-                    {selectedForComparison.length < 2 
-                      ? `Select at least ${2 - selectedForComparison.length} more to compare side-by-side`
-                      : 'Click the compare button to view detailed comparison'
-                    }
-                  </p>
-                </div>
-              </div>
-              {selectedForComparison.length >= 2 && onOpenComparison && (
-                <button
-                  onClick={onOpenComparison}
-                  className="px-6 py-3 bg-deep text-white rounded-full font-semibold hover:bg-light-30 transition-all cursor-pointer flex items-center gap-2"
-                >
-                  <i className="ri-scales-line text-lg"></i>
-                  Compare Products
-                </button>
-              )}
-            </div>
+        {/* Compare Button - shows when products are selected */}
+        {selectedForComparison.length > 0 && (
+          <div className="mt-8 flex justify-center">
+            <button
+              onClick={handleOpenComparisonModal}
+              className="px-8 py-4 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all cursor-pointer flex items-center gap-3 shadow-lg hover:shadow-xl"
+            >
+              <i className="ri-scales-line text-xl"></i>
+              Compare {selectedForComparison.length + 1} Products
+            </button>
           </div>
         )}
       </div>
+
+      {/* Comparison Modal */}
+      <ComparisonPickerModal
+        isOpen={showComparisonModal}
+        onClose={() => {
+          setShowComparisonModal(false);
+          setSelectedForComparison([]);
+        }}
+        currentlyViewingProduct={currentProduct}
+        preSelectedProducts={[currentProduct, ...getSelectedProducts()]}
+        userConcerns={userConcerns}
+        showSelectionView={true}
+      />
     </div>
   );
 };

@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
+import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
 import { supabase } from '../../lib/supabase-browser';
 
 const MarketplacePage = () => {
@@ -274,15 +275,13 @@ const MarketplacePage = () => {
                 </div>
               )}
               <div className="flex items-center justify-center">
-                <div className="relative w-full max-w-md">
+                <div className="relative w-full max-w-2xl">
+                  <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-warm-gray/60"></i>
                   <input
                     type="text"
-                    placeholder="Search storefronts..."
-                    className="w-full px-6 py-4 pr-12 bg-white border-2 border-blush rounded-2xl text-base focus:outline-none focus:border-primary transition-colors"
+                    placeholder="Search storefronts, products, or brands..."
+                    className="w-full pl-12 pr-4 py-3 sm:py-4 rounded-full border-2 border-blush focus:border-primary focus:outline-none text-sm transition-all"
                   />
-                  <button className="absolute right-4 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center text-warm-gray/60 hover:text-primary cursor-pointer transition-colors">
-                    <i className="ri-search-line text-xl"></i>
-                  </button>
                 </div>
               </div>
             </div>
@@ -320,7 +319,7 @@ const MarketplacePage = () => {
                       {/* Concern Match Badge */}
                       {isConcernMatch && (
                         <div className="bg-light/20 px-3 py-1.5 flex items-center gap-2 border-b border-blush">
-                          <i className="ri-sparkling-2-fill text-primary text-sm"></i>
+                          <NeuralBloomIcon size={14} className="text-primary" />
                           <span className="text-xs font-medium text-primary-700">Matches your skin concerns</span>
                         </div>
                       )}

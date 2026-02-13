@@ -42,13 +42,6 @@ interface ExtendedSkinProfile {
   environmentalExposure?: string[];
 }
 
-interface Message {
-  id: string;
-  type: 'user' | 'ai';
-  content: string;
-  timestamp: Date;
-}
-
 export default function MySkinPage() {
   const navigate = useNavigate();
   const [skinProfile, setSkinProfile] = useState({
@@ -73,25 +66,10 @@ export default function MySkinPage() {
     preferences: false,
   });
 
-  // Assessment states
-  const [selectedConcern, setSelectedConcern] = useState<string>('');
-  const [showConcernDropdown, setShowConcernDropdown] = useState(false);
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1month');
-  const [assessmentMessages, setAssessmentMessages] = useState<Message[]>([
-    {
-      id: '1',
-      type: 'ai',
-      content: 'Hello! I\'m your AI skin assessment assistant. Select a concern and timeframe to analyze your progress.',
-      timestamp: new Date(),
-    },
-  ]);
-  const [assessmentInput, setAssessmentInput] = useState('');
-  const [isAssessing, setIsAssessing] = useState(false);
   const [showServicePopup, setShowServicePopup] = useState(false);
   const [selectedConcernForService, setSelectedConcernForService] = useState<SkinConcern | null>(null);
   const [showProductPopup, setShowProductPopup] = useState(false);
   const [selectedConcernForProduct, setSelectedConcernForProduct] = useState<SkinConcern | null>(null);
-  const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
   const [showLifestyleCheckin, setShowLifestyleCheckin] = useState(false);
   const [editingLifestyle, setEditingLifestyle] = useState({
@@ -102,6 +80,8 @@ export default function MySkinPage() {
     exerciseFrequency: '',
     environmentalExposure: '',
   });
+  const [showPreferencesEdit, setShowPreferencesEdit] = useState(false);
+  const [editingPreferences, setEditingPreferences] = useState<string[]>([]);
 
   // Lifestyle options for the check-in
   const lifestyleOptions: Record<string, { emoji: string; options: string[] }> = {
@@ -131,6 +111,58 @@ export default function MySkinPage() {
     setShowLifestyleCheckin(false);
   };
 
+  // Product preference options
+  const preferenceOptions = [
+    { id: 'cruelty-free', label: 'Cruelty-Free', icon: 'ri-heart-line' },
+    { id: 'vegan', label: 'Vegan', icon: 'ri-leaf-line' },
+    { id: 'fragrance-free', label: 'Fragrance-Free', icon: 'ri-drop-line' },
+    { id: 'organic', label: 'Organic', icon: 'ri-plant-line' },
+    { id: 'clean-beauty', label: 'Clean Beauty', icon: 'ri-sparkling-line' },
+    { id: 'dermatologist-tested', label: 'Dermatologist Tested', icon: 'ri-stethoscope-line' },
+    { id: 'hypoallergenic', label: 'Hypoallergenic', icon: 'ri-shield-check-line' },
+    { id: 'paraben-free', label: 'Paraben-Free', icon: 'ri-prohibited-line' },
+    { id: 'sulfate-free', label: 'Sulfate-Free', icon: 'ri-water-flash-line' },
+    { id: 'sustainable', label: 'Sustainable Packaging', icon: 'ri-recycle-line' },
+    { id: 'budget-friendly', label: 'Budget-Friendly', icon: 'ri-money-dollar-circle-line' },
+    { id: 'luxury', label: 'Luxury/Premium', icon: 'ri-vip-diamond-line' },
+  ];
+
+  const handleTogglePreference = (prefLabel: string) => {
+    setEditingPreferences(prev =>
+      prev.includes(prefLabel)
+        ? prev.filter(p => p !== prefLabel)
+        : [...prev, prefLabel]
+    );
+  };
+
+  const handleSavePreferences = () => {
+    // Convert to UserPreference format
+    const newPreferences: UserPreference[] = editingPreferences.map((pref, index) => ({
+      id: `pref-${index}`,
+      category: 'Product Preference',
+      value: pref,
+    }));
+
+    setPreferences(newPreferences);
+
+    // Save to localStorage
+    const existingData = JSON.parse(localStorage.getItem('skinSurveyData') || '{}');
+    existingData.preferences = editingPreferences;
+    localStorage.setItem('skinSurveyData', JSON.stringify(existingData));
+
+    // Update session state
+    sessionState.updatePreferences({ goals: editingPreferences });
+
+    setShowPreferencesEdit(false);
+  };
+
+  const openPreferencesEdit = () => {
+    // Initialize with current preferences
+    const currentPrefs = preferences.map(p => p.value);
+    setEditingPreferences(currentPrefs);
+    setShowPreferencesEdit(true);
+  };
+
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
     loadSurveyData();
@@ -151,11 +183,6 @@ export default function MySkinPage() {
           category: 'User Added'
         }));
         const mappedPreferences = mapSurveyPreferences(surveyData);
-
-        // Save raw concern strings for matching, not SkinConcern objects
-        // This ensures DiscoverPage can use these directly with matching.ts
-        localStorage.setItem('userConcerns', JSON.stringify(surveyData.concerns || []));
-
 
         // Update state
         setSkinProfile({
@@ -422,14 +449,6 @@ export default function MySkinPage() {
     },
   ];
 
-  const timeframes = [
-    { id: '1day', label: '1 Day', value: '1 day' },
-    { id: '1week', label: '1 Week', value: '1 week' },
-    { id: '1month', label: '1 Month', value: '1 month' },
-    { id: '3months', label: '3 Months', value: '3 months' },
-    { id: '6months', label: '6 Months', value: '6 months' },
-  ];
-
   const handlePrioritize = (concern: SkinConcern, destination: 'products' | 'services') => {
     try {
       sessionState.trackInteraction('click', 'prioritize-concern', { concern: concern.name, destination });
@@ -498,97 +517,6 @@ export default function MySkinPage() {
     } catch (error) {
       console.error('Navigation error:', error);
     }
-  };
-
-  const handleSelectConcern = (concern: SkinConcern) => {
-    setSelectedConcern(concern.name);
-    setShowConcernDropdown(false);
-    
-    sessionState.trackInteraction('selection', 'assessment-concern', { concern: concern.name });
-    
-    // Generate initial assessment
-    const initialAssessment: Message = {
-      id: Date.now().toString(),
-      type: 'ai',
-      content: `Great! I'll assess your progress with ${concern.name} over the ${timeframes.find(t => t.id === selectedTimeframe)?.label.toLowerCase()} timeframe. Based on your routine and notes, I can provide insights on improvements, setbacks, and recommendations.`,
-      timestamp: new Date(),
-    };
-    setAssessmentMessages([assessmentMessages[0], initialAssessment]);
-  };
-
-  const handleTimeframeChange = (timeframeId: string) => {
-    setSelectedTimeframe(timeframeId);
-    
-    sessionState.trackInteraction('selection', 'assessment-timeframe', { timeframe: timeframeId });
-    
-    if (selectedConcern) {
-      const timeframeLabel = timeframes.find(t => t.id === timeframeId)?.label.toLowerCase();
-      const updateMessage: Message = {
-        id: Date.now().toString(),
-        type: 'ai',
-        content: `Timeframe updated to ${timeframeLabel}. I'll now analyze your ${selectedConcern} progress over this period.`,
-        timestamp: new Date(),
-      };
-      setAssessmentMessages(prev => [...prev, updateMessage]);
-    }
-  };
-
-  const handleSendAssessmentMessage = () => {
-    if (!assessmentInput.trim()) return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      type: 'user',
-      content: assessmentInput,
-      timestamp: new Date(),
-    };
-    setAssessmentMessages(prev => [...prev, userMessage]);
-    
-    sessionState.trackInteraction('input', 'assessment-query', { query: assessmentInput });
-    
-    setAssessmentInput('');
-    setIsAssessing(true);
-
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = generateAssessmentResponse(assessmentInput, selectedConcern, selectedTimeframe);
-      const aiMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        type: 'ai',
-        content: aiResponse,
-        timestamp: new Date(),
-      };
-      setAssessmentMessages(prev => [...prev, aiMessage]);
-      setIsAssessing(false);
-    }, 1500);
-  };
-
-  const generateAssessmentResponse = (query: string, concern: string, timeframe: string): string => {
-    const timeframeLabel = timeframes.find(t => t.id === timeframe)?.label.toLowerCase() || '1 month';
-    
-    if (!concern) {
-      return 'Please select a concern first so I can provide a targeted assessment of your progress.';
-    }
-
-    const lowerQuery = query.toLowerCase();
-    
-    // Personalized responses based on user's actual concerns
-    const concernData = concerns.find(c => c.name === concern);
-    const ingredients = concernData?.recommendedIngredients.slice(0, 3).join(', ') || 'targeted ingredients';
-    
-    if (lowerQuery.includes('progress') || lowerQuery.includes('improvement')) {
-      return `Based on your ${timeframeLabel} journey with ${concern}:\n\n📊 **Progress Analysis:**\n• Visible improvements in affected areas\n• Reduced severity of symptoms\n• Better skin texture and tone\n\n✨ **Key Observations:**\n• Your consistent routine is showing results\n• Products with ${ingredients} are working well\n• Continue current regimen for optimal results\n\n💡 **Recommendation:** Keep tracking your progress with photos and notes. You're on the right path!`;
-    }
-    
-    if (lowerQuery.includes('product') || lowerQuery.includes('routine')) {
-      return `For your ${concern} over ${timeframeLabel}:\n\n🎯 **Product Effectiveness:**\n• Active ingredients (${ingredients}) are showing positive results\n• No adverse reactions detected\n• Absorption and application timing are optimal\n\n📋 **Routine Assessment:**\n• Morning routine: Well-balanced\n• Evening routine: Effective treatment application\n• Consistency: Excellent (95%+)\n\n💡 **Suggestion:** Consider adding a weekly treatment for enhanced results.`;
-    }
-    
-    if (lowerQuery.includes('concern') || lowerQuery.includes('issue')) {
-      return `Analyzing your ${concern} over ${timeframeLabel}:\n\n⚠️ **Current Status:**\n• Overall improvement: 65%\n• Active concerns: Decreasing\n• New issues: Minimal\n\n🔍 **Detailed Insights:**\n• Initial phase showed adjustment period\n• Mid-period demonstrated clear improvements\n• Recent progress is steady and consistent\n\n💡 **Next Steps:** Continue current routine and reassess in 2 weeks.`;
-    }
-    
-    return `Assessment for ${concern} (${timeframeLabel}):\n\n📈 **Overall Progress:** Positive trajectory\n\n🎯 **Key Findings:**\n• Your skin is responding well to treatment\n• Consistency in routine is paying off\n• Recommended ingredients (${ingredients}) are effective\n\n💪 **Strengths:**\n• Regular product application\n• Good documentation in notes\n• Following recommended guidelines\n\n💡 **Recommendations:**\n• Continue current routine\n• Take weekly progress photos\n• Stay patient - results take time\n\nWhat specific aspect would you like me to analyze further?`;
   };
 
   // Helper function to get Fitzpatrick color
@@ -672,33 +600,6 @@ export default function MySkinPage() {
             <p className="text-sm text-warm-gray">
               Your personalized skin analysis
             </p>
-          </div>
-
-          {/* AI Assessment Section */}
-          <div className="mb-6">
-            <button
-              onClick={() => setShowAssessmentModal(true)}
-              className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white rounded-xl p-4 shadow-sm transition-all cursor-pointer group"
-            >
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center">
-                    <i className="ri-line-chart-line text-xl"></i>
-                  </div>
-                  <div className="text-left">
-                    <h2 className="font-medium text-base">
-                      Curae AI Assessment
-                    </h2>
-                    <p className="text-xs text-white/80">
-                      Track your skincare journey
-                    </p>
-                  </div>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center group-hover:bg-white/30 transition-colors">
-                  <i className="ri-arrow-right-line text-lg"></i>
-                </div>
-              </div>
-            </button>
           </div>
 
           {/* Category Cards */}
@@ -936,8 +837,8 @@ export default function MySkinPage() {
                 className="w-full px-5 py-4 flex items-center justify-between hover:bg-cream/50 transition-colors cursor-pointer"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-sage/10 flex items-center justify-center">
-                    <i className="ri-sun-foggy-line text-sage text-lg"></i>
+                  <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <i className="ri-sun-foggy-line text-primary text-lg"></i>
                   </div>
                   <div className="text-left">
                     <h2 className="font-serif text-lg font-bold text-deep">Lifestyle & Environment</h2>
@@ -958,9 +859,9 @@ export default function MySkinPage() {
                       });
                       setShowLifestyleCheckin(true);
                     }}
-                    className="px-3 py-1.5 bg-sage/10 text-sage rounded-lg text-xs font-medium hover:bg-sage/20 transition-colors cursor-pointer"
+                    className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer"
                   >
-                    <i className="ri-refresh-line mr-1"></i>Update
+                    <i className="ri-edit-line mr-1"></i>Update
                   </button>
                   <i className={`ri-arrow-${expandedCategories.lifestyle ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
                 </div>
@@ -1070,7 +971,18 @@ export default function MySkinPage() {
                     <p className="text-xs text-warm-gray">{preferences.length} preferences set</p>
                   </div>
                 </div>
-                <i className={`ri-arrow-${expandedCategories.preferences ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openPreferencesEdit();
+                    }}
+                    className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer"
+                  >
+                    <i className="ri-edit-line mr-1"></i>Update
+                  </button>
+                  <i className={`ri-arrow-${expandedCategories.preferences ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
+                </div>
               </button>
 
               {expandedCategories.preferences && (
@@ -1229,187 +1141,12 @@ export default function MySkinPage() {
         </div>
       )}
 
-      {/* AI Assessment Modal */}
-      {showAssessmentModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-cream rounded-xl shadow-2xl max-w-xl w-full max-h-[85vh] overflow-y-auto p-6 relative">
-            <button
-              onClick={() => setShowAssessmentModal(false)}
-              className="absolute top-4 right-4 text-warm-gray/60 hover:text-warm-gray transition-colors cursor-pointer"
-            >
-              <i className="ri-close-line text-2xl"></i>
-            </button>
-
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary flex items-center justify-center">
-                <i className="ri-line-chart-line text-white text-2xl"></i>
-              </div>
-              <div>
-                <h2 className="font-serif text-2xl font-bold text-deep">
-                  Curae AI Assessment
-                </h2>
-                <p className="text-sm text-warm-gray">
-                  Track your skincare journey
-                </p>
-              </div>
-            </div>
-
-            {/* Assessment Controls */}
-            <div className="space-y-4 mb-4">
-              {/* Select Concern */}
-              <div>
-                <label className="block text-sm font-medium text-deep mb-2">
-                  Select Your Concern
-                </label>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowConcernDropdown(!showConcernDropdown)}
-                    className="w-full px-4 py-3 bg-white border-2 border-blush rounded-lg text-left flex items-center justify-between hover:border-primary/30 transition-colors cursor-pointer"
-                  >
-                    <span className={selectedConcern ? 'text-deep font-medium' : 'text-warm-gray/80'}>
-                      {selectedConcern || 'Choose a concern...'}
-                    </span>
-                    <i className={`ri-arrow-${showConcernDropdown ? 'up' : 'down'}-s-line text-deep`}></i>
-                  </button>
-
-                  {showConcernDropdown && (
-                    <div className="absolute z-10 w-full mt-2 bg-white border-2 border-blush rounded-lg shadow-lg max-h-48 overflow-y-auto">
-                      {concerns.map((concern) => (
-                        <button
-                          key={concern.id}
-                          onClick={() => handleSelectConcern(concern)}
-                          className="w-full px-4 py-2 text-left hover:bg-cream transition-colors flex items-center gap-3 cursor-pointer"
-                        >
-                          <i className={`${concern.icon} text-deep text-lg`}></i>
-                          <div>
-                            <p className="font-medium text-deep text-sm">{concern.name}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Timeframe Selection - 3 columns */}
-              <div>
-                <label className="block text-sm font-medium text-deep mb-2">
-                  Assessment Timeframe
-                </label>
-                <div className="grid grid-cols-3 gap-2">
-                  {timeframes.map((timeframe) => (
-                    <button
-                      key={timeframe.id}
-                      onClick={() => handleTimeframeChange(timeframe.id)}
-                      className={`px-3 py-2 rounded-lg text-sm font-medium transition-all cursor-pointer ${
-                        selectedTimeframe === timeframe.id
-                          ? 'bg-primary text-white shadow-md'
-                          : 'bg-white text-warm-gray hover:bg-blush'
-                      }`}
-                    >
-                      {timeframe.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* AI Chat Box */}
-            <div className="flex flex-col bg-white rounded-xl border-2 border-blush overflow-hidden">
-              {/* Chat Header */}
-              <div className="bg-gradient-to-r from-primary to-primary/80 text-white p-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center relative">
-                    <i className="ri-sparkling-2-fill text-lg"></i>
-                    <div className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-sage rounded-full border border-white"></div>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-sm">Curae AI</h3>
-                    <p className="text-xs text-white/80">Ready to help</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3 min-h-[250px] max-h-[300px]">
-                {assessmentMessages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                  >
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-2 ${
-                        message.type === 'user'
-                          ? 'bg-primary text-white'
-                          : 'bg-cream text-deep border border-blush'
-                      }`}
-                    >
-                      {message.type === 'ai' && (
-                        <div className="flex items-center gap-2 mb-1">
-                          <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                            <i className="ri-sparkling-2-fill text-primary text-xs"></i>
-                          </div>
-                          <span className="text-xs font-medium text-deep">Curae</span>
-                        </div>
-                      )}
-                      <p className="text-sm whitespace-pre-line leading-relaxed">{message.content}</p>
-                      <p className={`text-xs mt-1 ${message.type === 'user' ? 'text-white/70' : 'text-warm-gray/60'}`}>
-                        {message.timestamp.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-
-                {isAssessing && (
-                  <div className="flex justify-start">
-                    <div className="bg-cream rounded-2xl px-4 py-2 border border-blush">
-                      <div className="flex items-center gap-2">
-                        <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center">
-                          <i className="ri-sparkling-2-fill text-primary text-xs"></i>
-                        </div>
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce"></div>
-                          <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 rounded-full bg-primary motion-safe:animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Input */}
-              <div className="p-3 bg-cream/50 border-t border-blush">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={assessmentInput}
-                    onChange={(e) => setAssessmentInput(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendAssessmentMessage()}
-                    placeholder={selectedConcern ? 'Ask about your progress...' : 'Select a concern first...'}
-                    disabled={!selectedConcern}
-                    className="flex-1 px-4 py-2 border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm disabled:bg-cream disabled:cursor-not-allowed"
-                  />
-                  <button
-                    onClick={handleSendAssessmentMessage}
-                    disabled={!assessmentInput.trim() || !selectedConcern}
-                    className="w-10 h-10 rounded-lg bg-primary text-white flex items-center justify-center hover:bg-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-                  >
-                    <i className="ri-send-plane-fill text-lg"></i>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Lifestyle Check-in Modal */}
       {showLifestyleCheckin && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-cream rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-gradient-to-r from-sage to-sage/80 text-white p-6 rounded-t-2xl">
+            <div className="sticky top-0 z-10 bg-sage text-white p-6 rounded-t-2xl">
               <button
                 onClick={() => setShowLifestyleCheckin(false)}
                 className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors cursor-pointer"
@@ -1469,6 +1206,101 @@ export default function MySkinPage() {
                 >
                   <i className="ri-check-line"></i>
                   Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Product Preferences Edit Modal */}
+      {showPreferencesEdit && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-cream rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 z-10 bg-primary text-white p-6 rounded-t-2xl">
+              <button
+                onClick={() => setShowPreferencesEdit(false)}
+                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                  <i className="ri-settings-3-line text-2xl"></i>
+                </div>
+                <div>
+                  <h3 className="text-xl font-serif font-bold">Product Preferences</h3>
+                  <p className="text-sm text-white/80">Select what matters to you</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6">
+              <p className="text-sm text-warm-gray mb-4">
+                Choose the product qualities that are important to you. We'll use these to personalize your recommendations.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                {preferenceOptions.map((option) => {
+                  const isSelected = editingPreferences.includes(option.label);
+                  return (
+                    <button
+                      key={option.id}
+                      onClick={() => handleTogglePreference(option.label)}
+                      className={`p-4 rounded-xl text-left transition-all cursor-pointer flex items-start gap-3 ${
+                        isSelected
+                          ? 'bg-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
+                          : 'bg-white text-deep border border-blush hover:border-primary/30 hover:shadow-sm'
+                      }`}
+                    >
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                        isSelected ? 'bg-white/20' : 'bg-primary/10'
+                      }`}>
+                        <i className={`${option.icon} text-lg ${isSelected ? 'text-white' : 'text-primary'}`}></i>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-deep'}`}>
+                          {option.label}
+                        </p>
+                      </div>
+                      {isSelected && (
+                        <i className="ri-check-line text-lg text-white flex-shrink-0"></i>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="sticky bottom-0 bg-cream border-t border-blush p-4 rounded-b-2xl">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-sm text-warm-gray">
+                  {editingPreferences.length} preference{editingPreferences.length !== 1 ? 's' : ''} selected
+                </span>
+                {editingPreferences.length > 0 && (
+                  <button
+                    onClick={() => setEditingPreferences([])}
+                    className="text-xs text-primary hover:underline cursor-pointer"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowPreferencesEdit(false)}
+                  className="flex-1 px-6 py-3 bg-white text-warm-gray border border-blush rounded-xl font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSavePreferences}
+                  className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-dark transition-colors cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <i className="ri-check-line"></i>
+                  Save Preferences
                 </button>
               </div>
             </div>

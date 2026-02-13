@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import RetailerComparisonModal from '../../../components/feature/RetailerComparisonModal';
 
 interface Retailer {
   id: number;
@@ -24,10 +25,11 @@ interface PurchaseOptionsProps {
 
 const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
   const [sortBy, setSortBy] = useState<string>('trust');
-  const [showTaxInfo, setShowTaxInfo] = useState(false);
-  const [showComparison, setShowComparison] = useState(false);
+  const [showComparisonMode, setShowComparisonMode] = useState(false);
   const [selectedRetailers, setSelectedRetailers] = useState<number[]>([]);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
+  const [showPricingTooltip, setShowPricingTooltip] = useState(false);
 
   const sortOptions = [
     { value: 'trust', label: 'Trust Score', icon: 'ri-shield-star-line' },
@@ -152,33 +154,6 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
   const compareRetailers = retailers.filter(r => selectedRetailers.includes(r.id));
 
-  // Calculate highlights for comparison
-  const getComparisonHighlights = () => {
-    if (compareRetailers.length < 2) return {};
-
-    const prices = compareRetailers.map(r => r.totalPrice);
-    const trustScores = compareRetailers.map(r => r.trustScore);
-    const deliveryDays = compareRetailers.map(r => parseInt(r.deliveryDays.split('-')[0]));
-
-    const minPrice = Math.min(...prices);
-    const maxPrice = Math.max(...prices);
-    const maxTrust = Math.max(...trustScores);
-    const minTrust = Math.min(...trustScores);
-    const minDelivery = Math.min(...deliveryDays);
-    const maxDelivery = Math.max(...deliveryDays);
-
-    return {
-      minPrice,
-      maxPrice,
-      maxTrust,
-      minTrust,
-      minDelivery,
-      maxDelivery,
-    };
-  };
-
-  const highlights = getComparisonHighlights();
-
   const renderTrustScore = (score: number) => {
     const percentage = (score / 10) * 100;
     let color = 'bg-green-500';
@@ -250,225 +225,70 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => {
-                setShowComparison(!showComparison);
-                if (showComparison) setSelectedRetailers([]);
+                setShowComparisonMode(!showComparisonMode);
+                if (showComparisonMode) setSelectedRetailers([]);
               }}
               className={`flex items-center space-x-2 px-4 py-2 rounded-full font-medium transition-all cursor-pointer whitespace-nowrap ${
-                showComparison
-                  ? 'bg-cream-600 text-white'
-                  : 'bg-cream-300 text-cream-700 hover:bg-cream-200'
+                showComparisonMode
+                  ? 'bg-primary text-white'
+                  : 'bg-cream text-deep hover:bg-blush'
               }`}
             >
               <i className="ri-scales-line text-lg"></i>
-              <span>{showComparison ? 'Exit Compare' : 'Compare Stores'}</span>
+              <span>{showComparisonMode ? 'Exit Compare' : 'Compare Stores'}</span>
               {selectedRetailers.length > 0 && (
-                <span className="bg-white text-cream-700 px-2 py-0.5 rounded-full text-xs font-bold">
+                <span className="bg-white text-primary px-2 py-0.5 rounded-full text-xs font-bold">
                   {selectedRetailers.length}
                 </span>
               )}
             </button>
 
-            <button
-              onClick={() => setShowTaxInfo(!showTaxInfo)}
-              className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer"
-            >
-              <i className="ri-information-line text-lg"></i>
-              <span className="font-medium">About Pricing</span>
-            </button>
+            {/* Compare Button - Opens Modal */}
+            {selectedRetailers.length >= 2 && (
+              <button
+                onClick={() => setShowComparisonModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-full font-medium transition-all cursor-pointer whitespace-nowrap hover:bg-dark"
+              >
+                <i className="ri-bar-chart-box-line text-lg"></i>
+                <span>Compare ({selectedRetailers.length})</span>
+              </button>
+            )}
+
+            <div className="relative">
+              <button
+                onMouseEnter={() => setShowPricingTooltip(true)}
+                onMouseLeave={() => setShowPricingTooltip(false)}
+                className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer"
+              >
+                <i className="ri-information-line text-lg"></i>
+                <span className="font-medium">About Pricing</span>
+              </button>
+              {showPricingTooltip && (
+                <div className="absolute right-0 top-full mt-2 w-80 p-4 bg-gray-900 text-white text-sm rounded-xl shadow-xl z-50">
+                  <div className="absolute -top-2 right-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-gray-900"></div>
+                  <p className="font-semibold mb-2">Understanding Total Costs</p>
+                  <ul className="space-y-1.5 text-gray-300 text-xs">
+                    <li><strong className="text-white">Estimated taxes</strong> are based on your location</li>
+                    <li><strong className="text-white">Shipping costs</strong> may vary by delivery speed</li>
+                    <li><strong className="text-white">Total price</strong> = product + shipping + tax</li>
+                    <li>Final price confirmed at retailer checkout</li>
+                  </ul>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Comparison View */}
-        {showComparison && selectedRetailers.length > 0 && (
-          <div className="mb-8 bg-gradient-to-br from-taupe-50 to-cream-50 rounded-2xl p-6 border-2 border-taupe-200">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-xl font-semibold text-cream-900 flex items-center space-x-2">
-                <i className="ri-scales-line text-taupe"></i>
-                <span>Store Comparison</span>
-              </h3>
-              <button
-                onClick={() => setSelectedRetailers([])}
-                className="text-sm text-gray-600 hover:text-gray-800 cursor-pointer"
-              >
-                Clear All
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {compareRetailers.map((retailer) => {
-                const isBestPrice = compareRetailers.length >= 2 && retailer.totalPrice === highlights.minPrice;
-                const isHighestPrice = compareRetailers.length >= 2 && retailer.totalPrice === highlights.maxPrice && highlights.minPrice !== highlights.maxPrice;
-                const hasFreeShipping = retailer.shipping === 0;
-                const isHighestTrust = compareRetailers.length >= 2 && retailer.trustScore === highlights.maxTrust;
-                const isLowestTrust = compareRetailers.length >= 2 && retailer.trustScore === highlights.minTrust && highlights.minTrust !== highlights.maxTrust;
-                const isFastestDelivery = compareRetailers.length >= 2 && parseInt(retailer.deliveryDays.split('-')[0]) === highlights.minDelivery;
-                const isSlowestDelivery = compareRetailers.length >= 2 && parseInt(retailer.deliveryDays.split('-')[0]) === highlights.maxDelivery && highlights.minDelivery !== highlights.maxDelivery;
-
-                return (
-                  <div key={retailer.id} className="bg-white rounded-xl p-5 border-2 border-taupe-300 relative">
-                    <button
-                      onClick={() => toggleRetailerSelection(retailer.id)}
-                      className="absolute top-3 right-3 w-6 h-6 flex items-center justify-center bg-taupe text-white rounded-full hover:bg-taupe-700 cursor-pointer"
-                    >
-                      <i className="ri-close-line text-sm"></i>
-                    </button>
-
-                    <div className="flex items-center space-x-3 mb-4">
-                      <div className="w-12 h-12 flex items-center justify-center bg-cream-50 rounded-lg overflow-hidden">
-                        <img src={retailer.logo} alt={retailer.name} className="w-full h-full object-cover" />
-                      </div>
-                      <h4 className="font-semibold text-cream-900 text-sm">{retailer.name}</h4>
-                    </div>
-
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Total Price:</span>
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-lg font-bold ${isBestPrice ? 'text-taupe' : isHighestPrice ? 'text-orange-600' : 'text-gray-900'}`}>
-                            ${retailer.totalPrice.toFixed(2)}
-                          </span>
-                          {isBestPrice && (
-                            <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                              Best Price
-                            </span>
-                          )}
-                          {isHighestPrice && (
-                            <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                              Highest
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Product:</span>
-                        <span className="text-sm font-medium text-gray-900">${retailer.price.toFixed(2)}</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Shipping:</span>
-                        <div className="flex items-center space-x-2">
-                          <span className={`text-sm font-medium ${hasFreeShipping ? 'text-taupe font-semibold' : 'text-gray-900'}`}>
-                            {retailer.shipping === 0 ? 'FREE' : `$${retailer.shipping.toFixed(2)}`}
-                          </span>
-                          {hasFreeShipping && (
-                            <i className="ri-check-line text-taupe"></i>
-                          )}
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-gray-600">Est. Tax:</span>
-                        <span className="text-sm font-medium text-gray-900">${retailer.estimatedTax.toFixed(2)}</span>
-                      </div>
-                      <div className="pt-3 border-t border-gray-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-xs text-gray-600">Trust Score:</span>
-                          <div className="flex items-center space-x-2">
-                            <span className={`text-sm font-semibold ${isHighestTrust ? 'text-taupe' : isLowestTrust ? 'text-orange-600' : 'text-gray-900'}`}>
-                              {retailer.trustScore}/10
-                            </span>
-                            {isHighestTrust && (
-                              <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                                Highest Rated
-                              </span>
-                            )}
-                            {isLowestTrust && (
-                              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                                Lowest
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-600">Delivery:</span>
-                          <div className="flex items-center space-x-2">
-                            <span className={`text-sm font-medium ${isFastestDelivery ? 'text-taupe font-semibold' : isSlowestDelivery ? 'text-orange-600' : 'text-gray-900'}`}>
-                              {retailer.deliveryDays} days
-                            </span>
-                            {isFastestDelivery && (
-                              <span className="px-2 py-0.5 bg-taupe-100 text-taupe-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                                Fastest
-                              </span>
-                            )}
-                            {isSlowestDelivery && (
-                              <span className="px-2 py-0.5 bg-orange-100 text-orange-700 text-xs font-semibold rounded-full whitespace-nowrap">
-                                Slowest
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <a
-                      href={retailer.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="mt-4 w-full flex items-center justify-center space-x-2 px-4 py-2 bg-cream-600 text-white rounded-full font-semibold hover:bg-cream-700 transition-all cursor-pointer text-sm whitespace-nowrap"
-                    >
-                      <span>Visit Store</span>
-                      <i className="ri-external-link-line"></i>
-                    </a>
-                  </div>
-                );
-              })}
-            </div>
-
-            {selectedRetailers.length < 3 && (
-              <p className="text-center text-sm text-gray-600 mt-4">
-                Select up to {3 - selectedRetailers.length} more store{3 - selectedRetailers.length !== 1 ? 's' : ''} to compare
-              </p>
-            )}
-
-            {/* Legend */}
-            {compareRetailers.length >= 2 && (
-              <div className="mt-6 pt-6 border-t border-taupe-200">
-                <div className="flex items-center justify-center gap-6 flex-wrap">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-primary-100 rounded"></div>
-                    <span className="text-sm text-gray-700">Best Value</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-4 h-4 bg-orange-100 rounded"></div>
-                    <span className="text-sm text-gray-700">Needs Attention</span>
-                  </div>
-                </div>
-              </div>
-            )}
+        {/* Selection hint when in comparison mode */}
+        {showComparisonMode && selectedRetailers.length > 0 && selectedRetailers.length < 2 && (
+          <div className="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-xl">
+            <p className="text-sm text-deep text-center">
+              <i className="ri-information-line mr-1"></i>
+              Select {2 - selectedRetailers.length} more store{2 - selectedRetailers.length !== 1 ? 's' : ''} to compare
+            </p>
           </div>
         )}
 
-        {/* Tax Info Banner */}
-        {showTaxInfo && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-full flex-shrink-0">
-                <i className="ri-information-line text-xl text-blue-600"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Understanding Total Costs
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Estimated taxes</strong> are calculated based on your location and may vary at checkout</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Shipping costs</strong> are provided by each retailer and may change based on delivery speed</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Total price</strong> includes product price + shipping + estimated tax for easy comparison</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span>Final price will be confirmed at the retailer's checkout</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Retailer List */}
         <div className="space-y-4">
@@ -486,13 +306,13 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
               <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 {/* Retailer Info */}
                 <div className="flex items-start space-x-4 flex-1">
-                  {showComparison && retailer.inStock && (
+                  {showComparisonMode && retailer.inStock && (
                     <button
                       onClick={() => toggleRetailerSelection(retailer.id)}
                       className={`w-6 h-6 flex items-center justify-center rounded border-2 cursor-pointer transition-all flex-shrink-0 mt-1 ${
                         selectedRetailers.includes(retailer.id)
-                          ? 'bg-taupe border-taupe'
-                          : 'bg-white border-gray-300 hover:border-taupe-400'
+                          ? 'bg-primary border-primary'
+                          : 'bg-white border-gray-300 hover:border-primary'
                       }`}
                     >
                       {selectedRetailers.includes(retailer.id) && (
@@ -593,7 +413,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                           href={retailer.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center space-x-2 px-6 py-3 bg-cream-600 text-white rounded-full font-semibold hover:bg-cream-700 transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap"
+                          className="flex items-center space-x-2 px-6 py-3 bg-cream text-deep rounded-full font-semibold hover:bg-blush transition-all shadow-md hover:shadow-lg cursor-pointer whitespace-nowrap border border-blush"
                         >
                           <span>Visit Store</span>
                           <i className="ri-external-link-line"></i>
@@ -634,12 +454,25 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
         {/* Disclaimer */}
         <div className="mt-8 p-4 bg-gray-50 rounded-xl">
           <p className="text-xs text-gray-600 text-center">
-            <i className="ri-information-line"></i> Prices and availability are subject to change. 
-            Lorem Curae is not responsible for pricing discrepancies. 
+            <i className="ri-information-line"></i> Prices and availability are subject to change.
+            Lorem Curae is not responsible for pricing discrepancies.
             Final prices will be confirmed at retailer checkout. Sponsored listings and affiliate partners help support our platform.
           </p>
         </div>
       </div>
+
+      {/* Retailer Comparison Modal */}
+      <RetailerComparisonModal
+        isOpen={showComparisonModal}
+        onClose={() => setShowComparisonModal(false)}
+        retailers={compareRetailers}
+        onRemoveRetailer={(id) => {
+          setSelectedRetailers(prev => prev.filter(r => r !== id));
+          if (selectedRetailers.length <= 2) {
+            setShowComparisonModal(false);
+          }
+        }}
+      />
     </div>
   );
 };

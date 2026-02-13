@@ -99,8 +99,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   });
   const [allergenInput, setAllergenInput] = useState('');
   const [allergenSuggestions, setAllergenSuggestions] = useState<string[]>([]);
+  const [showOtherConcern, setShowOtherConcern] = useState(false);
+  const [otherConcernInput, setOtherConcernInput] = useState('');
 
-  const totalSteps = 14; // Updated total steps to include new lifestyle questions
+  const totalSteps = 15; // Updated total steps to include routine preferences
 
   const allergensList = [
     'Fragrance', 'Parabens', 'Sulfates', 'Alcohol', 'Silicones', 'Essential oils',
@@ -197,11 +199,12 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 7: return true; // Allergens are optional
       case 8: return surveyData.preferences.length > 0;
       case 9: return surveyData.lifestyle.length > 0;
-      case 10: return surveyData.sleepPattern !== '';
-      case 11: return surveyData.stressLevel !== '';
-      case 12: return surveyData.dietPattern !== '';
-      case 13: return surveyData.waterIntake !== '';
-      case 14: return surveyData.exerciseFrequency !== '';
+      case 10: return surveyData.routine.length > 0;
+      case 11: return surveyData.sleepPattern !== '';
+      case 12: return surveyData.stressLevel !== '';
+      case 13: return surveyData.dietPattern !== '';
+      case 14: return surveyData.waterIntake !== '';
+      case 15: return surveyData.exerciseFrequency !== '';
       default: return false;
     }
   };
@@ -212,17 +215,17 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 1:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What is your sex assigned at birth?</h2>
-            <p className="text-warm-gray mb-8">This helps us tailor recommendations based on biological skin differences</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What is your sex assigned at birth?</h2>
+            <p className="text-warm-gray text-sm mb-6">This helps us tailor recommendations based on biological skin differences</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['Male', 'Female'].map((option) => (
                 <button
                   key={option}
                   onClick={() => handleSingleSelect('sexAtBirth', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.sexAtBirth === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {option}
@@ -235,17 +238,17 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 2:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What's your skin type?</h2>
-            <p className="text-warm-gray mb-8">Select all that apply to your skin</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What's your skin type?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select the option that best describes your skin</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['Normal', 'Dry', 'Oily', 'Combination', 'Sensitive'].map((type) => (
                 <button
                   key={type}
-                  onClick={() => handleMultiSelect('skinType', type)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  onClick={() => setSurveyData(prev => ({ ...prev, skinType: [type] }))}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.skinType.includes(type)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {type}
@@ -258,8 +261,8 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 3:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What are your skin concerns?</h2>
-            <p className="text-warm-gray mb-8">Select all that apply</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What are your skin concerns?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Uneven Skin Tone', 'Dullness', 'Enlarged Pores', 'Textural Irregularities',
@@ -270,33 +273,102 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 <button
                   key={concern}
                   onClick={() => handleMultiSelect('concerns', concern)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.concerns.includes(concern)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {concern}
                 </button>
               ))}
+
+              {/* Other Option */}
+              <button
+                onClick={() => setShowOtherConcern(!showOtherConcern)}
+                className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                  showOtherConcern || surveyData.concerns.some(c => c.startsWith('Other:'))
+                    ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                    : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <i className="ri-add-line"></i>
+                  Other
+                </span>
+              </button>
             </div>
+
+            {/* Other Concern Input */}
+            {showOtherConcern && (
+              <div className="mt-4 p-4 bg-cream/50 rounded-lg border border-blush">
+                <label className="block text-sm font-medium text-deep mb-2">
+                  Describe your other concern
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={otherConcernInput}
+                    onChange={(e) => setOtherConcernInput(e.target.value)}
+                    placeholder="Type your specific concern..."
+                    className="flex-1 p-3 border-2 border-blush rounded-lg focus:border-primary focus:outline-none bg-white text-deep"
+                  />
+                  <button
+                    onClick={() => {
+                      if (otherConcernInput.trim()) {
+                        handleMultiSelect('concerns', `Other: ${otherConcernInput.trim()}`);
+                        setOtherConcernInput('');
+                      }
+                    }}
+                    disabled={!otherConcernInput.trim()}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                      otherConcernInput.trim()
+                        ? 'bg-primary text-white hover:bg-dark'
+                        : 'bg-blush text-warm-gray/50 cursor-not-allowed'
+                    }`}
+                  >
+                    Add
+                  </button>
+                </div>
+
+                {/* Show added custom concerns */}
+                {surveyData.concerns.filter(c => c.startsWith('Other:')).length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {surveyData.concerns.filter(c => c.startsWith('Other:')).map((concern) => (
+                      <span
+                        key={concern}
+                        className="inline-flex items-center gap-2 bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm"
+                      >
+                        {concern.replace('Other: ', '')}
+                        <button
+                          onClick={() => handleMultiSelect('concerns', concern)}
+                          className="hover:text-dark cursor-pointer"
+                        >
+                          <i className="ri-close-line"></i>
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
 
       case 4:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What type of scarring?</h2>
-            <p className="text-warm-gray mb-8">Select all that apply</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What type of scarring?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['Ice Pick', 'Rolling', 'Boxcar'].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleMultiSelect('scarringType', type)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.scarringType.includes(type)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {type}
@@ -309,17 +381,17 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 5:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What type of acne?</h2>
-            <p className="text-warm-gray mb-8">Select all that apply</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What type of acne?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['Blackheads', 'Whiteheads', 'Papules', 'Pustules', 'Nodules', 'Cysts'].map((type) => (
                 <button
                   key={type}
                   onClick={() => handleMultiSelect('acneType', type)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.acneType.includes(type)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {type}
@@ -332,7 +404,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 6:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">What's your skin tone?</h2>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What's your skin tone?</h2>
             <p className="text-warm-gray mb-4">Select your Fitzpatrick skin type. Hover over swatches for details.</p>
 
             {/* Why we ask this explanation */}
@@ -361,10 +433,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 <button
                   key={tone.value}
                   onClick={() => handleSingleSelect('complexion', tone.value)}
-                  className={`group relative p-4 rounded-lg border-2 transition-all text-left cursor-pointer ${
+                  className={`group relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer ${
                     surveyData.complexion === tone.value
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -410,8 +482,8 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 7:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">Any known allergens?</h2>
-            <p className="text-warm-gray mb-8">Type to search and add allergens (maximum 10)</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Any known allergens?</h2>
+            <p className="text-warm-gray text-sm mb-6">Type to search and add allergens (maximum 10)</p>
             
             <div className="relative mb-6">
               <input
@@ -470,8 +542,8 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 8:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">Product preferences</h2>
-            <p className="text-warm-gray mb-8">Select your preferences</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Product preferences</h2>
+            <p className="text-warm-gray text-sm mb-6">Select your preferences</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Chemicals', 'Vegan', 'Plant-Based', 'Fragrance-free', 'Gluten-Free',
@@ -480,10 +552,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 <button
                   key={preference}
                   onClick={() => handleMultiSelect('preferences', preference)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.preferences.includes(preference)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {preference}
@@ -496,21 +568,19 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 9:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">Lifestyle factors</h2>
-            <p className="text-warm-gray mb-8">Tell us about your routine preferences</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Lifestyle factors</h2>
+            <p className="text-warm-gray text-sm mb-6">Tell us about your daily environment</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Active lifestyle', 'Indoor work environment', 'Frequent travel',
-                'High stress levels', 'Limited time for routine', 'Detailed routine preferred',
-                'Budget conscious', 'Premium products preferred'
+                'Active lifestyle', 'Indoor work environment', 'Frequent travel', 'High stress levels'
               ].map((factor) => (
                 <button
                   key={factor}
                   onClick={() => handleMultiSelect('lifestyle', factor)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.lifestyle.includes(factor)
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {factor}
@@ -520,12 +590,38 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      // NEW LIFESTYLE QUESTIONS
       case 10:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">How would you describe your sleep patterns?</h2>
-            <p className="text-warm-gray mb-8">Sleep significantly impacts skin health and recovery</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Routine & Product Preferences</h2>
+            <p className="text-warm-gray text-sm mb-6">Tell us about your skincare habits and preferences</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Limited time for routine', 'Detailed routine preferred',
+                'Budget conscious', 'Premium products preferred'
+              ].map((preference) => (
+                <button
+                  key={preference}
+                  onClick={() => handleMultiSelect('routine', preference)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.routine.includes(preference)
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {preference}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // NEW LIFESTYLE QUESTIONS
+      case 11:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How would you describe your sleep patterns?</h2>
+            <p className="text-warm-gray text-sm mb-6">Sleep significantly impacts skin health and recovery</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Less than 5 hours',
@@ -537,38 +633,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 <button
                   key={option}
                   onClick={() => handleSingleSelect('sleepPattern', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.sleepPattern === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
-                  }`}
-                >
-                  {option}
-                </button>
-              ))}
-            </div>
-          </div>
-        );
-
-      case 11:
-        return (
-          <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">How would you rate your stress levels?</h2>
-            <p className="text-warm-gray mb-8">Stress can trigger various skin conditions and affect healing</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[
-                'Low - Generally calm',
-                'Moderate - Occasional stress',
-                'High - Frequently stressed',
-                'Very High - Chronic stress'
-              ].map((option) => (
-                <button
-                  key={option}
-                  onClick={() => handleSingleSelect('stressLevel', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
-                    surveyData.stressLevel === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {option}
@@ -581,24 +649,22 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 12:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">How would you describe your diet?</h2>
-            <p className="text-warm-gray mb-8">Nutrition plays a key role in skin health</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How would you rate your stress levels?</h2>
+            <p className="text-warm-gray text-sm mb-6">Stress can trigger various skin conditions and affect healing</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Balanced - Variety of whole foods',
-                'Plant-based/Vegetarian',
-                'High protein focus',
-                'Processed/Fast food heavy',
-                'Limited/Restricted diet',
-                'Variable/Inconsistent'
+                'Low - Generally calm',
+                'Moderate - Occasional stress',
+                'High - Frequently stressed',
+                'Very High - Chronic stress'
               ].map((option) => (
                 <button
                   key={option}
-                  onClick={() => handleSingleSelect('dietPattern', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
-                    surveyData.dietPattern === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                  onClick={() => handleSingleSelect('stressLevel', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.stressLevel === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {option}
@@ -611,22 +677,24 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 13:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">How much water do you typically drink daily?</h2>
-            <p className="text-warm-gray mb-8">Hydration is essential for healthy, glowing skin</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How would you describe your diet?</h2>
+            <p className="text-warm-gray text-sm mb-6">Nutrition plays a key role in skin health</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Less than 4 glasses',
-                '4-6 glasses',
-                '7-8 glasses',
-                'More than 8 glasses'
+                'Balanced - Variety of whole foods',
+                'Plant-based/Vegetarian',
+                'High protein focus',
+                'Processed/Fast food heavy',
+                'Limited/Restricted diet',
+                'Variable/Inconsistent'
               ].map((option) => (
                 <button
                   key={option}
-                  onClick={() => handleSingleSelect('waterIntake', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
-                    surveyData.waterIntake === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                  onClick={() => handleSingleSelect('dietPattern', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.dietPattern === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {option}
@@ -639,8 +707,36 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 14:
         return (
           <div>
-            <h2 className="text-3xl font-bold text-deep mb-4">How often do you exercise?</h2>
-            <p className="text-warm-gray mb-8">Exercise affects circulation and skin health</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How much water do you typically drink daily?</h2>
+            <p className="text-warm-gray text-sm mb-6">Hydration is essential for healthy, glowing skin</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Less than 4 glasses',
+                '4-6 glasses',
+                '7-8 glasses',
+                'More than 8 glasses'
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('waterIntake', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.waterIntake === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      case 15:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How often do you exercise?</h2>
+            <p className="text-warm-gray text-sm mb-6">Exercise affects circulation and skin health</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
                 'Rarely/Never',
@@ -652,10 +748,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 <button
                   key={option}
                   onClick={() => handleSingleSelect('exerciseFrequency', option)}
-                  className={`p-4 rounded-lg border-2 transition-all text-left cursor-pointer whitespace-nowrap ${
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.exerciseFrequency === option
-                      ? 'border-primary bg-primary-50 text-primary-700'
-                      : 'border-blush hover:border-primary-300'
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
                   {option}
@@ -688,21 +784,21 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
 
   if (currentStep > totalSteps) {
     return (
-      <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
+      <main className="max-w-2xl mx-auto px-6 lg:px-12 py-24">
         <div className="text-center">
-          <div className="w-20 h-20 mx-auto mb-6 bg-light/30 rounded-full flex items-center justify-center">
-            <i className="ri-check-line text-3xl text-primary"></i>
+          <div className="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-full flex items-center justify-center">
+            <i className="ri-check-line text-2xl text-primary"></i>
           </div>
-          <h1 className="text-4xl font-bold text-deep mb-4">Survey Completed!</h1>
-          <p className="text-lg text-warm-gray mb-8 max-w-2xl mx-auto">
+          <h1 className="font-serif text-2xl font-semibold text-deep mb-3">Survey Complete</h1>
+          <p className="text-warm-gray text-sm mb-6">
             Thank you for completing your skin survey. We're analyzing your responses to create your personalized skincare profile.
           </p>
           <Link
             to="/my-skin"
             onClick={handleViewResults}
-            className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-8 py-4 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap"
           >
-            <span>Check skin profile</span>
+            <span>View Your Skin Profile</span>
             <i className="ri-arrow-right-line"></i>
           </Link>
         </div>

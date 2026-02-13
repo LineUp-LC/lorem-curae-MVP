@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../../../lib/supabase-browser';
 
 interface IngredientDetailProps {
@@ -18,24 +18,115 @@ interface Review {
   fitzpatrickType?: string;
 }
 
+// Fractional star component
+const StarRating = ({ rating, size = 'text-lg', showNumeric = false, onClick }: {
+  rating: number;
+  size?: string;
+  showNumeric?: boolean;
+  onClick?: () => void;
+}) => {
+  const fullStars = Math.floor(rating);
+  const fractionalPart = rating - fullStars;
+  const emptyStars = 5 - fullStars - (fractionalPart > 0 ? 1 : 0);
+
+  return (
+    <div
+      className={`flex items-center gap-1.5 ${onClick ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      onClick={onClick}
+    >
+      <div className="flex items-center">
+        {/* Full stars */}
+        {[...Array(fullStars)].map((_, i) => (
+          <i key={`full-${i}`} className={`ri-star-fill ${size} text-amber-400`}></i>
+        ))}
+        {/* Fractional star */}
+        {fractionalPart > 0 && (
+          <div className="relative">
+            <i className={`ri-star-fill ${size} text-blush`}></i>
+            <div
+              className="absolute inset-0 overflow-hidden"
+              style={{ width: `${fractionalPart * 100}%` }}
+            >
+              <i className={`ri-star-fill ${size} text-amber-400`}></i>
+            </div>
+          </div>
+        )}
+        {/* Empty stars */}
+        {[...Array(emptyStars)].map((_, i) => (
+          <i key={`empty-${i}`} className={`ri-star-fill ${size} text-blush`}></i>
+        ))}
+      </div>
+      {showNumeric && (
+        <span className={`font-semibold text-deep ml-1 ${size}`}>{rating.toFixed(1)}</span>
+      )}
+    </div>
+  );
+};
+
 const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showSimilarProfileReviews, setShowSimilarProfileReviews] = useState(false);
   const [showAllReviewsModal, setShowAllReviewsModal] = useState(false);
+  const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
+  const [animatingReview, setAnimatingReview] = useState<number | null>(null);
+  const [reportedReviews, setReportedReviews] = useState<Set<number>>(new Set());
+  const [showReportConfirm, setShowReportConfirm] = useState<number | null>(null);
+  const [showReportModal, setShowReportModal] = useState<number | null>(null);
+  const [reportReason, setReportReason] = useState<string>('');
+  const [reportDetails, setReportDetails] = useState<string>('');
+  const reviewsRef = useRef<HTMLDivElement>(null);
+
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleHelpfulClick = (reviewId: number) => {
+    if (helpfulReviews.has(reviewId)) {
+      // Remove from helpful
+      setHelpfulReviews(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(reviewId);
+        return newSet;
+      });
+    } else {
+      // Add to helpful with animation
+      setAnimatingReview(reviewId);
+      setHelpfulReviews(prev => new Set(prev).add(reviewId));
+      setTimeout(() => setAnimatingReview(null), 300);
+    }
+  };
+
+  const getHelpfulCount = (reviewId: number, originalCount: number) => {
+    return originalCount + (helpfulReviews.has(reviewId) ? 1 : 0);
+  };
+
+  const handleReportReview = (reviewId: number) => {
+    setShowReportModal(reviewId);
+    setShowReportConfirm(null);
+  };
+
+  const handleSubmitReport = () => {
+    if (showReportModal && reportReason) {
+      setReportedReviews(prev => new Set(prev).add(showReportModal));
+      setShowReportModal(null);
+      setReportReason('');
+      setReportDetails('');
+    }
+  };
 
   useEffect(() => {
     loadUserProfile();
   }, []);
 
   const loadUserProfile = () => {
-    const savedProfile = localStorage.getItem('user_skin_profile');
-    if (savedProfile) {
-      setUserProfile(JSON.parse(savedProfile));
-    } else {
-      const quizResults = localStorage.getItem('skin_quiz_results');
-      if (quizResults) {
-        setUserProfile(JSON.parse(quizResults));
-      }
+    const savedSurvey = localStorage.getItem('skinSurveyData');
+    if (savedSurvey) {
+      const surveyData = JSON.parse(savedSurvey);
+      setUserProfile({
+        skinType: surveyData.skinType?.[0] || '',
+        concerns: surveyData.concerns || [],
+        fitzpatrickType: surveyData.fitzpatrickType?.[0] || '',
+      });
     }
   };
 
@@ -209,101 +300,96 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
   };
 
   return (
-    <div className="min-h-screen py-12 px-6 lg:px-12">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen py-8 px-6 lg:px-12 bg-cream">
+      <div className="max-w-5xl mx-auto">
         {/* Back Button */}
         <button
           onClick={onBack}
-          className="flex items-center space-x-2 text-warm-gray hover:text-primary mb-8 transition-colors cursor-pointer"
+          className="flex items-center gap-2 text-warm-gray hover:text-primary mb-6 transition-colors cursor-pointer text-sm"
         >
-          <i className="ri-arrow-left-line text-xl"></i>
+          <i className="ri-arrow-left-line text-lg"></i>
           <span className="font-medium">Back to Library</span>
         </button>
 
         {/* Header */}
-        <div className="bg-white rounded-3xl p-8 lg:p-12 shadow-lg mb-8">
-          <div className="flex flex-col lg:flex-row gap-8 items-start">
-            <div className={`w-24 h-24 flex items-center justify-center ${ingredient.bgColor} rounded-2xl flex-shrink-0`}>
-              <i className={`${ingredient.icon} text-5xl ${ingredient.color}`}></i>
+        <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-md border border-blush/30 mb-6">
+          {/* Clickable Rating - Top */}
+          <button
+            onClick={scrollToReviews}
+            className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 bg-cream rounded-full hover:bg-blush/30 transition-colors cursor-pointer"
+          >
+            <StarRating rating={ingredient.rating} size="text-sm" showNumeric />
+            <span className="text-xs text-warm-gray hover:text-primary transition-colors">
+              ({ingredient.reviews} reviews)
+            </span>
+          </button>
+
+          <div className="flex flex-col lg:flex-row gap-6 items-start">
+            <div className={`w-16 h-16 lg:w-20 lg:h-20 flex items-center justify-center ${ingredient.bgColor} rounded-xl flex-shrink-0`}>
+              <i className={`${ingredient.icon} text-3xl lg:text-4xl ${ingredient.color}`}></i>
             </div>
             <div className="flex-1">
-              <div className="flex flex-wrap items-start justify-between gap-4 mb-4">
+              <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
                 <div>
-                  <h1 className="text-4xl lg:text-5xl font-serif text-deep mb-2">
+                  <h1 className="font-serif text-2xl lg:text-3xl font-semibold text-deep mb-1">
                     {ingredient.name}
                   </h1>
-                  <p className="text-xl text-warm-gray">{ingredient.scientificName}</p>
+                  <p className="text-sm text-warm-gray">{ingredient.scientificName}</p>
                 </div>
-                <div className={`px-4 py-2 rounded-full text-sm font-semibold ${
-                  ingredient.safetyRating === 'Excellent' 
-                    ? 'bg-taupe-100 text-taupe-700' 
+                <div className={`px-3 py-1.5 rounded-full text-xs font-semibold ${
+                  ingredient.safetyRating === 'Excellent'
+                    ? 'bg-primary/10 text-primary'
                     : 'bg-amber-100 text-amber-700'
                 }`}>
                   Safety: {ingredient.safetyRating}
                 </div>
               </div>
-              <div className="flex items-center space-x-4 mb-6">
-                <div className="flex items-center space-x-2">
-                  <div className="flex items-center">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <i
-                        key={star}
-                        className={`ri-star-fill text-lg ${
-                          star <= Math.round(ingredient.rating) ? 'text-amber-400' : 'text-blush'
-                        }`}
-                      ></i>
-                    ))}
-                  </div>
-                  <span className="text-lg font-semibold text-deep">{ingredient.rating}</span>
-                  <span className="text-warm-gray">({ingredient.reviews} reviews)</span>
-                </div>
-              </div>
-              <p className="text-lg text-warm-gray leading-relaxed">
+              <p className="text-sm text-warm-gray leading-relaxed">
                 {ingredient.description}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Benefits */}
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-deep mb-6">Key Benefits</h2>
-              <ul className="space-y-3">
+            <div className="bg-white rounded-2xl p-6 shadow-md border border-blush/30">
+              <h2 className="font-serif text-xl font-semibold text-deep mb-4">Key Benefits</h2>
+              <ul className="space-y-2.5">
                 {ingredient.benefits.map((benefit, index) => (
-                  <li key={index} className="flex items-start space-x-3">
-                    <i className="ri-checkbox-circle-fill text-xl text-primary flex-shrink-0 mt-0.5"></i>
-                    <span className="text-warm-gray">{benefit}</span>
+                  <li key={index} className="flex items-start gap-2.5">
+                    <i className="ri-checkbox-circle-fill text-lg text-primary flex-shrink-0 mt-0.5"></i>
+                    <span className="text-sm text-warm-gray">{benefit}</span>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* How to Use */}
-            <div className="bg-gradient-to-br from-light/20 to-cream rounded-2xl p-8">
-              <h2 className="text-2xl font-serif text-deep mb-4">How to Use</h2>
-              <p className="text-warm-gray leading-relaxed mb-4">{ingredient.howToUse}</p>
-              <div className="bg-white rounded-xl p-4 border-l-4 border-primary">
-                <p className="text-sm font-semibold text-deep mb-1">Optimal Concentration</p>
+            <div className="bg-cream/50 rounded-2xl p-6 border border-blush/30">
+              <h2 className="font-serif text-xl font-semibold text-deep mb-3">How to Use</h2>
+              <p className="text-sm text-warm-gray leading-relaxed mb-4">{ingredient.howToUse}</p>
+              <div className="bg-white rounded-xl p-4 border-l-3 border-primary">
+                <p className="text-xs font-semibold text-deep mb-1">Optimal Concentration</p>
                 <p className="text-sm text-warm-gray">{ingredient.concentration}</p>
               </div>
             </div>
 
             {/* Myth Busting */}
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-deep mb-6">Myth Busting</h2>
-              <div className="space-y-6">
+            <div className="bg-white rounded-2xl p-6 shadow-md border border-blush/30">
+              <h2 className="font-serif text-xl font-semibold text-deep mb-4">Myth Busting</h2>
+              <div className="space-y-5">
                 {ingredient.myths.map((item, index) => (
-                  <div key={index} className="border-l-4 border-primary pl-6">
-                    <div className="flex items-start space-x-2 mb-2">
-                      <i className="ri-close-circle-line text-xl text-primary flex-shrink-0 mt-0.5"></i>
-                      <p className="font-semibold text-deep">{item.myth}</p>
+                  <div key={index} className="border-l-3 border-primary pl-4">
+                    <div className="flex items-start gap-2 mb-2">
+                      <i className="ri-close-circle-line text-lg text-terracotta flex-shrink-0 mt-0.5"></i>
+                      <p className="text-sm font-medium text-deep">{item.myth}</p>
                     </div>
-                    <div className="flex items-start space-x-2">
-                      <i className="ri-checkbox-circle-line text-xl text-primary flex-shrink-0 mt-0.5"></i>
-                      <p className="text-warm-gray">{item.truth}</p>
+                    <div className="flex items-start gap-2">
+                      <i className="ri-checkbox-circle-line text-lg text-primary flex-shrink-0 mt-0.5"></i>
+                      <p className="text-sm text-warm-gray">{item.truth}</p>
                     </div>
                   </div>
                 ))}
@@ -311,8 +397,8 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             </div>
 
             {/* Community Reviews */}
-            <div className="bg-white rounded-2xl p-8 shadow-md">
-              <h2 className="text-2xl font-serif text-deep mb-6">Community Reviews</h2>
+            <div ref={reviewsRef} className="bg-white rounded-2xl p-6 shadow-md border border-blush/30 scroll-mt-24">
+              <h2 className="font-serif text-xl font-semibold text-deep mb-5">Community Reviews</h2>
               
               {/* Reviews from Similar Profiles */}
               {userProfile && similarProfileReviews.length > 0 && (
@@ -375,24 +461,55 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center flex-shrink-0">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <i
-                                key={star}
-                                className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
-                                }`}
-                              ></i>
-                            ))}
-                          </div>
+                          <StarRating rating={review.rating} size="text-sm" showNumeric />
                         </div>
                         <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
-                        <div className="flex items-center justify-between pt-3 border-t border-blush">
-                          <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
-                            <i className="ri-thumb-up-line"></i>
-                            <span>Helpful ({review.helpful})</span>
-                          </button>
-                          <span className="text-xs text-warm-gray/80">{review.date}</span>
+                        <div className="flex items-center justify-between pt-3 border-t border-blush/50">
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleHelpfulClick(review.id)}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                                helpfulReviews.has(review.id)
+                                  ? 'bg-primary/10 text-primary'
+                                  : 'text-warm-gray hover:bg-cream'
+                              } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                              style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                            >
+                              <i className={`text-sm ${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                              <span className="text-xs">Helpful ({getHelpfulCount(review.id, review.helpful)})</span>
+                            </button>
+                            {reportedReviews.has(review.id) ? (
+                              <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                                <i className="ri-flag-fill text-xs"></i>
+                                Reported
+                              </span>
+                            ) : showReportConfirm === review.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-warm-gray">Report?</span>
+                                <button
+                                  onClick={() => handleReportReview(review.id)}
+                                  className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  onClick={() => setShowReportConfirm(null)}
+                                  className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setShowReportConfirm(review.id)}
+                                className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer"
+                                title="Report review"
+                              >
+                                <i className="ri-flag-line"></i>
+                              </button>
+                            )}
+                          </div>
+                          <span className="text-xs text-warm-gray/70">{review.date}</span>
                         </div>
                       </div>
                     ))}
@@ -414,31 +531,65 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                             <p className="font-semibold text-deep">{review.author}</p>
                             <p className="text-sm text-warm-gray">{review.skinType} • {review.date}</p>
                           </div>
-                          <div className="flex items-center">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <i
-                                key={star}
-                                className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
-                                }`}
-                              ></i>
-                            ))}
-                          </div>
+                          <StarRating rating={review.rating} size="text-sm" showNumeric />
                         </div>
-                        <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
-                        <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
-                          <i className="ri-thumb-up-line"></i>
-                          <span>Helpful ({review.helpful})</span>
-                        </button>
+                        <p className="text-warm-gray leading-relaxed text-sm mb-3">{review.comment}</p>
+                        <div className="flex items-center justify-between pt-3 border-t border-blush/50">
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleHelpfulClick(review.id)}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                                helpfulReviews.has(review.id)
+                                  ? 'bg-primary/10 text-primary'
+                                  : 'text-warm-gray hover:bg-cream'
+                              } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                              style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                            >
+                              <i className={`text-sm ${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                              <span className="text-xs">Helpful ({getHelpfulCount(review.id, review.helpful)})</span>
+                            </button>
+                            {reportedReviews.has(review.id) ? (
+                              <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                                <i className="ri-flag-fill text-xs"></i>
+                                Reported
+                              </span>
+                            ) : showReportConfirm === review.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-warm-gray">Report?</span>
+                                <button
+                                  onClick={() => handleReportReview(review.id)}
+                                  className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  onClick={() => setShowReportConfirm(null)}
+                                  className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setShowReportConfirm(review.id)}
+                                className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer"
+                                title="Report review"
+                              >
+                                <i className="ri-flag-line"></i>
+                              </button>
+                            )}
+                          </div>
+                          <span className="text-xs text-warm-gray/70">{review.date}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              <button 
+              <button
                 onClick={() => setShowAllReviewsModal(true)}
-                className="w-full mt-6 py-3 border-2 border-primary text-primary rounded-full font-semibold hover:bg-primary-50 transition-colors whitespace-nowrap cursor-pointer"
+                className="w-full mt-5 py-2.5 border border-primary text-primary rounded-lg font-medium text-sm hover:bg-primary/5 transition-colors whitespace-nowrap cursor-pointer"
               >
                 Read All Reviews
               </button>
@@ -446,18 +597,18 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
           </div>
 
           {/* Sidebar */}
-          <div className="space-y-6">
+          <div className="space-y-5">
             {/* Best For */}
-            <div className="bg-white rounded-2xl p-6 shadow-md">
-              <h3 className="text-lg font-semibold text-deep mb-4">Best For</h3>
+            <div className="bg-white rounded-2xl p-5 shadow-md border border-blush/30">
+              <h3 className="font-medium text-deep text-sm mb-4">Best For</h3>
               <div className="space-y-4">
                 <div>
-                  <p className="text-sm font-medium text-warm-gray mb-2">Skin Types</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-xs font-medium text-warm-gray mb-2">Skin Types</p>
+                  <div className="flex flex-wrap gap-1.5">
                     {ingredient.skinTypes.map((type, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-light/30 text-primary-700 text-xs font-medium rounded-full"
+                        className="px-2.5 py-1 bg-primary/10 text-primary text-xs font-medium rounded-full"
                       >
                         {type}
                       </span>
@@ -465,12 +616,12 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-warm-gray mb-2">Concerns</p>
-                  <div className="flex flex-wrap gap-2">
+                  <p className="text-xs font-medium text-warm-gray mb-2">Concerns</p>
+                  <div className="flex flex-wrap gap-1.5">
                     {ingredient.concerns.map((concern, index) => (
                       <span
                         key={index}
-                        className="px-3 py-1 bg-light/30 text-primary-700 text-xs font-medium rounded-full"
+                        className="px-2.5 py-1 bg-cream text-deep text-xs font-medium rounded-full"
                       >
                         {concern}
                       </span>
@@ -481,14 +632,14 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             </div>
 
             {/* CTA */}
-            <div className="bg-gradient-to-br from-primary to-dark rounded-2xl p-6 text-white">
-              <h3 className="text-xl font-serif mb-3">Find Products</h3>
-              <p className="text-light text-sm mb-6">
+            <div className="bg-gradient-to-br from-primary to-dark rounded-2xl p-5 text-white">
+              <h3 className="font-serif text-lg font-semibold mb-2">Find Products</h3>
+              <p className="text-white/80 text-xs mb-4">
                 Discover products featuring this ingredient in our curated marketplace.
               </p>
-              <a 
+              <a
                 href="/marketplace"
-                className="block w-full py-3 bg-white text-deep rounded-full font-semibold hover:bg-cream transition-colors whitespace-nowrap cursor-pointer text-center"
+                className="block w-full py-2.5 bg-white text-deep rounded-lg font-medium text-sm hover:bg-cream transition-colors whitespace-nowrap cursor-pointer text-center"
               >
                 Shop Now
               </a>
@@ -499,19 +650,19 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
 
       {/* All Reviews Modal */}
       {showAllReviewsModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-deep/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
             {/* Modal Header */}
-            <div className="flex items-center justify-between p-6 border-b border-blush">
+            <div className="flex items-center justify-between p-5 border-b border-blush/30">
               <div>
-                <h2 className="text-2xl font-serif text-deep">All Reviews</h2>
-                <p className="text-sm text-warm-gray mt-1">{allReviewsCombined.length} total reviews</p>
+                <h2 className="font-serif text-xl font-semibold text-deep">All Reviews</h2>
+                <p className="text-xs text-warm-gray mt-1">{allReviewsCombined.length} total reviews</p>
               </div>
               <button
                 onClick={() => setShowAllReviewsModal(false)}
-                className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-cream transition-colors cursor-pointer"
               >
-                <i className="ri-close-line text-2xl text-warm-gray"></i>
+                <i className="ri-close-line text-xl text-warm-gray"></i>
               </button>
             </div>
 
@@ -570,24 +721,55 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                               </div>
                             )}
                           </div>
-                          <div className="flex items-center ml-4 flex-shrink-0">
-                            {[1, 2, 3, 4, 5].map((star) => (
-                              <i
-                                key={star}
-                                className={`ri-star-fill text-sm ${
-                                  star <= review.rating ? 'text-amber-400' : 'text-blush'
-                                }`}
-                              ></i>
-                            ))}
-                          </div>
+                          <StarRating rating={review.rating} size="text-sm" showNumeric />
                         </div>
-                        <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
-                        <div className="flex items-center justify-between pt-3 border-t border-blush">
-                          <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
-                            <i className="ri-thumb-up-line"></i>
-                            <span>Helpful ({review.helpful})</span>
-                          </button>
-                          <span className="text-xs text-warm-gray/80">{review.date}</span>
+                        <p className="text-warm-gray leading-relaxed text-sm mb-3">{review.comment}</p>
+                        <div className="flex items-center justify-between pt-3 border-t border-blush/50">
+                          <div className="flex items-center gap-3">
+                            <button
+                              onClick={() => handleHelpfulClick(review.id)}
+                              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                                helpfulReviews.has(review.id)
+                                  ? 'bg-primary/10 text-primary'
+                                  : 'text-warm-gray hover:bg-cream'
+                              } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                              style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                            >
+                              <i className={`text-sm ${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                              <span className="text-xs">Helpful ({getHelpfulCount(review.id, review.helpful)})</span>
+                            </button>
+                            {reportedReviews.has(review.id) ? (
+                              <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                                <i className="ri-flag-fill text-xs"></i>
+                                Reported
+                              </span>
+                            ) : showReportConfirm === review.id ? (
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs text-warm-gray">Report?</span>
+                                <button
+                                  onClick={() => handleReportReview(review.id)}
+                                  className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                                >
+                                  Yes
+                                </button>
+                                <button
+                                  onClick={() => setShowReportConfirm(null)}
+                                  className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setShowReportConfirm(review.id)}
+                                className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer"
+                                title="Report review"
+                              >
+                                <i className="ri-flag-line"></i>
+                              </button>
+                            )}
+                          </div>
+                          <span className="text-xs text-warm-gray/70">{review.date}</span>
                         </div>
                       </div>
                     ))}
@@ -628,24 +810,55 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center ml-4 flex-shrink-0">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <i
-                              key={star}
-                              className={`ri-star-fill text-sm ${
-                                star <= review.rating ? 'text-amber-400' : 'text-blush'
-                              }`}
-                            ></i>
-                          ))}
-                        </div>
+                        <StarRating rating={review.rating} size="text-sm" showNumeric />
                       </div>
-                      <p className="text-warm-gray leading-relaxed mb-3">{review.comment}</p>
-                      <div className="flex items-center justify-between pt-3 border-t border-blush">
-                        <button className="flex items-center space-x-2 text-sm text-warm-gray hover:text-primary transition-colors cursor-pointer">
-                          <i className="ri-thumb-up-line"></i>
-                          <span>Helpful ({review.helpful})</span>
-                        </button>
-                        <span className="text-xs text-warm-gray/80">{review.date}</span>
+                      <p className="text-warm-gray leading-relaxed text-sm mb-3">{review.comment}</p>
+                      <div className="flex items-center justify-between pt-3 border-t border-blush/50">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => handleHelpfulClick(review.id)}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full transition-all cursor-pointer ${
+                              helpfulReviews.has(review.id)
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-warm-gray hover:bg-cream'
+                            } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                            style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                          >
+                            <i className={`text-sm ${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                            <span className="text-xs">Helpful ({getHelpfulCount(review.id, review.helpful)})</span>
+                          </button>
+                          {reportedReviews.has(review.id) ? (
+                            <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                              <i className="ri-flag-fill text-xs"></i>
+                              Reported
+                            </span>
+                          ) : showReportConfirm === review.id ? (
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-warm-gray">Report?</span>
+                              <button
+                                onClick={() => handleReportReview(review.id)}
+                                className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                              >
+                                Yes
+                              </button>
+                              <button
+                                onClick={() => setShowReportConfirm(null)}
+                                className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                              >
+                                No
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              onClick={() => setShowReportConfirm(review.id)}
+                              className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer"
+                              title="Report review"
+                            >
+                              <i className="ri-flag-line"></i>
+                            </button>
+                          )}
+                        </div>
+                        <span className="text-xs text-warm-gray/70">{review.date}</span>
                       </div>
                     </div>
                   ))}
@@ -654,12 +867,83 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-blush bg-cream">
+            <div className="p-4 border-t border-blush/30 bg-cream/30">
               <button
                 onClick={() => setShowAllReviewsModal(false)}
-                className="w-full py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-colors cursor-pointer whitespace-nowrap"
+                className="w-full py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-dark transition-colors cursor-pointer whitespace-nowrap"
               >
                 Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Review Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-deep/50 backdrop-blur-sm z-[60] flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-5 border-b border-blush/30 flex items-center justify-between">
+              <h3 className="font-serif text-lg font-semibold text-deep">Report Review</h3>
+              <button
+                onClick={() => {
+                  setShowReportModal(null);
+                  setReportReason('');
+                  setReportDetails('');
+                }}
+                className="text-warm-gray hover:text-deep transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-xl"></i>
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Reason for reporting</label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                >
+                  <option value="">Select a reason...</option>
+                  <option value="spam">Spam or fake review</option>
+                  <option value="inappropriate">Inappropriate content</option>
+                  <option value="misleading">Misleading information</option>
+                  <option value="harassment">Harassment or bullying</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Additional details (optional)</label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Provide more context..."
+                  rows={3}
+                  className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+            </div>
+            <div className="p-5 border-t border-blush/30 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowReportModal(null);
+                  setReportReason('');
+                  setReportDetails('');
+                }}
+                className="px-4 py-2 text-warm-gray hover:text-deep transition-colors cursor-pointer text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReport}
+                disabled={!reportReason}
+                className={`px-5 py-2 rounded-lg font-medium text-sm transition-colors cursor-pointer ${
+                  reportReason
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-blush text-warm-gray cursor-not-allowed'
+                }`}
+              >
+                Submit Report
               </button>
             </div>
           </div>

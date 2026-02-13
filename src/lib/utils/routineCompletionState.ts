@@ -108,6 +108,51 @@ class RoutineCompletionStateManager {
 // Singleton instance
 export const routineCompletionState = new RoutineCompletionStateManager();
 
+// Helper to get real completion rate from RoutineBuilder data
+export function getRoutineBuilderCompletionRate(timeOfDay: 'morning' | 'evening'): {
+  completedCount: number;
+  totalWithProducts: number;
+  percentage: number;
+} {
+  try {
+    // Get completion tracker data
+    const trackerData = localStorage.getItem('routine_completion_tracker');
+    const tracker = trackerData ? JSON.parse(trackerData) : {
+      morning: [],
+      evening: [],
+      morningFilledCount: 0,
+      eveningFilledCount: 0,
+      lastResetDate: ''
+    };
+
+    // Check if data is from today for completed steps
+    const today = new Date().toDateString();
+    const isToday = tracker.lastResetDate === today;
+
+    // Get completed steps (only count if from today)
+    const completedSteps: string[] = isToday ? (tracker[timeOfDay] || []) : [];
+    const completedCount = completedSteps.length;
+
+    // Get filled count (steps with products) - this persists across days
+    const filledCountKey = timeOfDay === 'morning' ? 'morningFilledCount' : 'eveningFilledCount';
+    const totalWithProducts = tracker[filledCountKey] || 0;
+
+    // Calculate percentage based on steps with products
+    const percentage = totalWithProducts > 0
+      ? Math.round((completedCount / totalWithProducts) * 100)
+      : 0;
+
+    return {
+      completedCount,
+      totalWithProducts,
+      percentage: Math.min(percentage, 100)
+    };
+  } catch (e) {
+    console.error('Failed to get routine builder completion rate:', e);
+    return { completedCount: 0, totalWithProducts: 0, percentage: 0 };
+  }
+}
+
 // React hook
 export function useRoutineCompletion(routineId: string): {
   isCompletedToday: boolean;

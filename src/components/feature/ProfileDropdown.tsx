@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import NeuralBloomIcon from '../icons/NeuralBloomIcon';
 
 /**
  * ProfileDropdown Component
@@ -241,7 +242,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             onClick={onClose}
           >
             <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
-              <i className="ri-sparkling-2-fill text-sm"></i>
+              <NeuralBloomIcon size={14} />
             </div>
             <div className="ml-2.5 flex-1">
               <p className="text-xs font-medium text-[#2D2A26]">Curae AI</p>
@@ -286,18 +287,6 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
           </button>
         </div>
 
-        {/* Curae AI Branding */}
-        <div className="px-4 py-3 border-t border-[#E8D4CC]/30 bg-gradient-to-b from-[#FDF8F5]/50 to-[#FDF8F5]">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#C4704D] to-[#8B4D35] flex items-center justify-center">
-              <i className="ri-sparkling-2-fill text-white text-xs"></i>
-            </div>
-            <div>
-              <p className="text-[10px] font-medium text-[#2D2A26]">Powered by Curae AI</p>
-              <p className="text-[9px] text-[#6B635A]">Your personalized skincare assistant</p>
-            </div>
-          </div>
-        </div>
       </div>
     </>
   );

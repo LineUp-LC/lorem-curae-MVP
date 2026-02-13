@@ -3,6 +3,8 @@ import { useSearchParams, Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
 import { cartState } from '../../../lib/utils/cartState';
+import { useFavorites } from '../../../lib/utils/favoritesState';
+import ComparisonPickerModal from '../../../components/feature/ComparisonPickerModal';
 
 interface MarketplaceProduct {
   id: number;
@@ -73,12 +75,21 @@ export default function MarketplaceProductDetailPage() {
   const [addingToCart, setAddingToCart] = useState(false);
   const [showAddedToCart, setShowAddedToCart] = useState(false);
   const [userSkinProfile, setUserSkinProfile] = useState<any>(null);
+  const [showComparisonPicker, setShowComparisonPicker] = useState(false);
+  const [userConcerns, setUserConcerns] = useState<string[]>([]);
+
+  // Favorites state
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   useEffect(() => {
     // Load user skin profile for preference highlighting
     const savedProfile = localStorage.getItem('skinSurveyData');
     if (savedProfile) {
-      setUserSkinProfile(JSON.parse(savedProfile));
+      const parsed = JSON.parse(savedProfile);
+      setUserSkinProfile(parsed);
+      if (parsed.concerns) {
+        setUserConcerns(parsed.concerns.map((c: string) => c.toLowerCase()));
+      }
     }
   }, []);
 
@@ -194,16 +205,44 @@ export default function MarketplaceProductDetailPage() {
                   <span className="text-sm text-gray-500">({product.reviewCount} reviews)</span>
                 </div>
 
-                <div className="flex items-baseline gap-3 mb-6">
-                  <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
-                  {product.originalPrice && (
-                    <span className="text-lg text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
-                  )}
-                  {product.originalPrice && (
-                    <span className="px-2 py-1 bg-primary-100 text-dark text-sm font-medium rounded-full">
-                      Save ${(product.originalPrice - product.price).toFixed(2)}
-                    </span>
-                  )}
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-baseline gap-3">
+                    <span className="text-3xl font-bold text-gray-900">${product.price.toFixed(2)}</span>
+                    {product.originalPrice && (
+                      <span className="text-lg text-gray-400 line-through">${product.originalPrice.toFixed(2)}</span>
+                    )}
+                    {product.originalPrice && (
+                      <span className="px-2 py-1 bg-primary-100 text-dark text-sm font-medium rounded-full">
+                        Save ${(product.originalPrice - product.price).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleFavorite({
+                        id: product.id,
+                        name: product.name,
+                        brand: product.brand,
+                        image: product.images[0],
+                        priceRange: `$${product.price.toFixed(2)}`,
+                      })}
+                      className={`w-12 h-12 flex items-center justify-center rounded-full transition-all cursor-pointer ${
+                        isFavorite(product.id)
+                          ? 'bg-primary text-white'
+                          : 'bg-cream-100 text-gray-500 hover:bg-cream-200'
+                      }`}
+                      title={isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'}
+                    >
+                      <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+                    </button>
+                    <button
+                      onClick={() => setShowComparisonPicker(true)}
+                      className="w-12 h-12 flex items-center justify-center rounded-full transition-all cursor-pointer bg-cream-100 text-gray-500 hover:bg-cream-200"
+                      title="Add to Comparison"
+                    >
+                      <i className="ri-scales-line text-xl"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -336,6 +375,14 @@ export default function MarketplaceProductDetailPage() {
           </div>
         </div>
       </main>
+
+      {/* Comparison Picker Modal */}
+      <ComparisonPickerModal
+        isOpen={showComparisonPicker}
+        onClose={() => setShowComparisonPicker(false)}
+        initialProductId={product.id}
+        userConcerns={userConcerns}
+      />
 
       <Footer />
     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../../../components/feature/Navbar';
 import Footer from '../../../components/feature/Footer';
+import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 const MarketplaceAllPage = () => {
   const [filterType, setFilterType] = useState<'all' | 'featured' | 'forYou' | 'services' | 'products'>('all');
@@ -212,7 +213,7 @@ const MarketplaceAllPage = () => {
                       : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                   }`}
                 >
-                  <i className="ri-sparkling-line mr-1"></i>For You
+                  <NeuralBloomIcon size={14} className="mr-1 inline" />For You
                 </button>
                 <button
                   onClick={() => setFilterType('products')}
@@ -267,7 +268,7 @@ const MarketplaceAllPage = () => {
                     {/* Concern Match Badge */}
                     {isConcernMatch && (
                       <div className="bg-primary-50 px-4 py-2 flex items-center gap-2 border-b border-blush">
-                        <i className="ri-sparkling-2-fill text-primary text-sm"></i>
+                        <NeuralBloomIcon size={14} className="text-primary" />
                         <span className="text-xs font-medium text-primary-700">Matches your skin concerns</span>
                       </div>
                     )}

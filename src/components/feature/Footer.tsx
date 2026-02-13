@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   fadeInUpSoft,
@@ -11,19 +11,19 @@ import {
 
 /**
  * Footer Component
- * 
+ *
  * Motion design:
  * - Micro-value statement: soft fade + lift
  * - Links: underline slide-in on hover
  * - Logo: gentle opacity pulse
  * - Columns: staggered fade-in
- * 
- * Link Updates:
- * - FAQ -> /faq
- * - AI Guide -> /ai-chat
- * - Ingredient Library -> /ingredients
- * - Routine Tracker renamed to Routine Notes -> /routines?id=1
- * - Product Compare -> /discover (opens comparison UI)
+ *
+ * Footer Sections:
+ * - Explore: Discover, Ingredients, Routines, Curae AI
+ * - Community: Nutrire, Indie Market, Product Reviews, Retailer Reviews
+ * - Support: FAQ, Contact Us, Accessibility
+ * - Company: About, Privacy, Guidelines
+ * - Newsletter: Email signup
  */
 
 const footerVariants = {
@@ -55,13 +55,12 @@ const linkHover = {
   transition: { duration: 0.2 },
 };
 
-// Tool items with their proper routes
-const toolLinks = [
-  { name: 'Product Finder', path: '/discover' },
-  { name: 'AI Guide', path: '/ai-chat' },
-  { name: 'Product Compare', path: '/discover', action: 'openComparison' },
-  { name: 'Ingredient Library', path: '/ingredients' },
-  { name: 'Routine Notes', path: '/routines?id=1' },
+// Explore items with their proper routes
+const exploreLinks = [
+  { name: 'Discover', path: '/discover' },
+  { name: 'Ingredients', path: '/ingredients' },
+  { name: 'Routines', path: '/routines-list' },
+  { name: 'Curae AI', path: '/ai-chat' },
 ];
 
 // Support items with their proper routes
@@ -73,23 +72,20 @@ const supportLinks = [
 
 // Community items with their proper routes
 const communityLinks = [
-  { name: 'Stories', path: '/community' },
-  { name: 'Marketplace', path: '/marketplace' },
-  { name: 'Reviews', path: '/reviews-products' },
+  { name: 'Nutrire', path: '/community' },
+  { name: 'Indie Market', path: '/marketplace' },
+  { name: 'Product Reviews', path: '/reviews-products' },
+  { name: 'Retailer Reviews', path: '/retailer-reviews' },
+];
+
+// Company items with their proper routes
+const companyLinks = [
+  { name: 'About', path: '/about' },
+  { name: 'Privacy', path: '/privacy' },
+  { name: 'Guidelines', path: '/community-guidelines' },
 ];
 
 export default function Footer() {
-  const navigate = useNavigate();
-
-  const handleToolClick = (item: typeof toolLinks[0], e: React.MouseEvent) => {
-    if (item.action === 'openComparison') {
-      e.preventDefault();
-      // Navigate to discover and trigger comparison mode
-      localStorage.setItem('openComparisonOnLoad', 'true');
-      navigate('/discover');
-    }
-  };
-
   return (
     <footer className="lc-footer">
       <style>{`
@@ -101,7 +97,7 @@ export default function Footer() {
         
         .lc-footer-grid {
           display: grid;
-          grid-template-columns: 2fr repeat(4, 1fr);
+          grid-template-columns: 2fr repeat(5, 1fr);
           gap: 3rem;
           max-width: 1200px;
           margin: 0 auto 3rem;
@@ -335,18 +331,14 @@ export default function Footer() {
           </div>
         </motion.div>
 
-        {/* Tools Column */}
+        {/* Explore Column */}
         <motion.div className="lc-footer-column" variants={columnVariants}>
-          <h4>Tools</h4>
+          <h4>Explore</h4>
           <ul>
-            {toolLinks.map((item) => (
+            {exploreLinks.map((item) => (
               <li key={item.name}>
                 <motion.div whileHover={linkHover}>
-                  <Link 
-                    to={item.path} 
-                    className="lc-footer-link"
-                    onClick={(e) => handleToolClick(item, e)}
-                  >
+                  <Link to={item.path} className="lc-footer-link">
                     {item.name}
                   </Link>
                 </motion.div>
@@ -383,16 +375,32 @@ export default function Footer() {
           </ul>
         </motion.div>
 
+        {/* Company Column */}
+        <motion.div className="lc-footer-column" variants={columnVariants}>
+          <h4>Company</h4>
+          <ul>
+            {companyLinks.map((item) => (
+              <li key={item.name}>
+                <motion.div whileHover={linkHover}>
+                  <Link to={item.path} className="lc-footer-link">
+                    {item.name}
+                  </Link>
+                </motion.div>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
+
         {/* Newsletter Column */}
         <motion.div className="lc-footer-column" variants={columnVariants}>
           <h4>Stay Connected</h4>
           <div className="lc-footer-newsletter">
-            <input 
-              type="email" 
-              placeholder="Your email" 
+            <input
+              type="email"
+              placeholder="Your email"
               className="lc-footer-input"
             />
-            <motion.button 
+            <motion.button
               className="lc-footer-submit"
               whileHover={{ x: 3 }}
               whileTap={{ scale: 0.95 }}
@@ -400,9 +408,6 @@ export default function Footer() {
               →
             </motion.button>
           </div>
-          <motion.div whileHover={linkHover}>
-            <Link to="/privacy" className="lc-footer-link">Privacy Policy</Link>
-          </motion.div>
         </motion.div>
       </motion.div>
 
@@ -420,12 +425,6 @@ export default function Footer() {
               <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>
             WCAG 2.1 AA
-          </span>
-          <span className="lc-badge">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-            </svg>
-            Cruelty-Free
           </span>
           <span className="lc-badge">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

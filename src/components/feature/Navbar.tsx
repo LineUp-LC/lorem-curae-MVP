@@ -27,8 +27,8 @@ import { useCartCount } from '../../lib/utils/cartState';
 
 const navLinks = [
   { name: 'Home', path: '/' },
-  { name: 'Discover', path: '/discover' },
   { name: 'Skin Survey', path: '/skin-survey-account' },
+  { name: 'Discover', path: '/discover' },
   { name: 'Ingredients', path: '/ingredients' },
   { name: 'Marketplace', path: '/marketplace' },
   { name: 'Nutrire', path: '/community' },

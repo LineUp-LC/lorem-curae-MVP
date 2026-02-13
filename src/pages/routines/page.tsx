@@ -30,14 +30,21 @@ export default function RoutinesPage() {
   const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);
   const [savedProducts, setSavedProducts] = useState<any[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [pendingFromAiChat, setPendingFromAiChat] = useState(false);
 
   // Check if tutorial should show on first visit
   useEffect(() => {
     const tutorialComplete = localStorage.getItem('routineBuilderTutorialComplete');
+    const fromAiChat = searchParams.get('fromAiChat') === 'true';
+
     if (!tutorialComplete) {
       setShowTutorial(true);
+      // If coming from AI chat, remember to navigate to notes after tutorial
+      if (fromAiChat) {
+        setPendingFromAiChat(true);
+      }
     }
-  }, []);
+  }, [searchParams]);
 
   useEffect(() => {
     sessionState.navigateTo('/routines');
@@ -195,7 +202,7 @@ export default function RoutinesPage() {
             <p className="text-xs text-warm-gray/70">
               {activeTab === 'routine'
                 ? 'Add products and customize your daily routine steps'
-                : 'Track how your skin responds over time'}
+                : 'Track and receive insights on your skin\'s progress'}
             </p>
           </div>
 
@@ -210,7 +217,7 @@ export default function RoutinesPage() {
               onBrowseClick={() => setShowBrowsePopup(true)}
             />
           ) : (
-            <NotesSection />
+            <NotesSection autoOpenAssessment={searchParams.get('openAssessment') === 'true'} />
           )}
         </div>
       </main>
@@ -331,7 +338,22 @@ export default function RoutinesPage() {
 
       {/* First-Time Tutorial */}
       {showTutorial && (
-        <RoutineTutorial onComplete={() => setShowTutorial(false)} />
+        <RoutineTutorial onComplete={() => {
+          setShowTutorial(false);
+          // If user came from AI chat, navigate to notes tab after tutorial
+          if (pendingFromAiChat) {
+            setPendingFromAiChat(false);
+            setActiveTab('notes');
+            // Small delay to allow tab switch animation
+            setTimeout(() => {
+              const openAssessment = searchParams.get('openAssessment') === 'true';
+              if (openAssessment) {
+                // Trigger assessment opening via custom event
+                window.dispatchEvent(new CustomEvent('openProgressAssessment'));
+              }
+            }, 300);
+          }
+        }} />
       )}
 
       <Footer />

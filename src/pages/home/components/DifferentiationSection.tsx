@@ -58,13 +58,13 @@ const quoteVariants = {
 
 // EDIT 4: Enhanced Lorem Curae description with all requested elements
 const competitors = [
-  { name: "Sephora & Ulta", issue: "Inventory first, fit second. Reviews aren't filtered by skin type.", isUs: false },
+  { name: "Sephora & Ulta", issue: "Inventory first, fit second. Product suggestions aren't personalized and don't adapt to your skin type, concerns, or progress, leaving you to guess what works for you.", isUs: false },
   { name: 'Amazon', issue: 'Counterfeit risk. Zero personalization. Review manipulation.', isUs: false },
   { name: 'Google', issue: 'SEO-gamed results. Sponsored content disguised as advice.', isUs: false },
   { name: 'INCIdecoder', issue: 'Great for data, but no personalization or guidance.', isUs: false },
   {
     name: 'Lorem Curae',
-    issue: 'Personalized recommendations, community-reviewed retailers with comparison tools, verified marketplace products, science-backed guidance, and a supportive community that walks the journey with you.',
+    issue: 'Personalized recommendations, community-reviewed retailers, product and retailer comparison tools, verified marketplace products, science-backed guidance, and a supportive community with a personal AI skincare assistant that walks the journey with you.',
     isUs: true
   },
 ];

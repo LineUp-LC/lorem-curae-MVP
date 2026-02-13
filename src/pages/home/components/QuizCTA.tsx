@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
+const MotionLink = motion.create(Link);
 import {
   buttonHover,
   buttonTap,
@@ -150,15 +152,14 @@ export default function QuizCTA() {
         
         {/* CTA matches Hero for consistency */}
         <motion.div variants={contentVariants}>
-          <motion.div
+          <MotionLink
+            to="/skin-survey"
+            className="lc-btn-primary"
             whileHover={buttonHover}
             whileTap={buttonTap}
-            style={{ display: 'inline-block' }}
           >
-            <Link to="/skin-survey" className="lc-btn-primary">
-              Begin your journey
-            </Link>
-          </motion.div>
+            Begin your journey
+          </MotionLink>
         </motion.div>
         
         <motion.p

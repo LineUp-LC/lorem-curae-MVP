@@ -46,7 +46,7 @@ const Toast = ({ message, onClose }: ToastProps) => {
       style={{ fontFamily: 'var(--lc-font-sans, "DM Sans", sans-serif)' }}
     >
       <div className="flex items-center space-x-2">
-        <i className="ri-heart-fill text-primary"></i>
+        <i className="ri-check-line text-primary"></i>
         <span className="text-sm font-medium">{message}</span>
       </div>
     </div>

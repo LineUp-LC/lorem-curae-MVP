@@ -170,7 +170,7 @@ export const productData: Product[] = [
     price: 36.00,
     rating: 4.8,
     reviewCount: 2087,
-    image: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=400&h=500&fit=crop&q=80',
+    image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=400&h=500&fit=crop&q=80',
     description: 'Multi-tasking serum that minimizes pores, controls oil, and evens skin tone.',
     skinTypes: ['oily', 'combination', 'normal'],
     concerns: ['pores', 'oil control', 'texture'],

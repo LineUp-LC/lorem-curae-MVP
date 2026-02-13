@@ -403,8 +403,84 @@ Components should scale across:
 5. Motion Systems Layer (12.4)
 6. Typography & Spacing Philosophy Layer (12.5)
 7. Component Architecture Layer (12.6)
+8. Intelligent UX Reasoning & Common-Sense Additions Layer (12.8)
 
 These layers remain active for all design, motion, UX, and component tasks unless explicitly disabled.
+
+---
+
+## 12.8 Intelligent UX Reasoning & Common‑Sense Additions Layer
+
+**Applies to:** All feature implementation, interaction design, and state management
+
+### Intelligent UX Reasoning
+
+When implementing features, Claude must use reasoning, common sense, and UX intuition to identify missing or incomplete behaviors.
+If a feature clearly requires a natural or expected interaction pattern, Claude should recognize it and propose it — even if the user did not explicitly describe every detail.
+
+### Examples of Intelligent Additions to Identify
+
+- If a button has an active state, it should also support an inactive or unselected state.
+- If a toggle or filter can be applied, it should also be removable.
+- If a click triggers a visual state, it should also reset or reverse properly.
+- If an animation plays on interaction, it should also return to its default state.
+- If a flow requires validation, success, or error feedback, propose it.
+- If a user action implies a reversible or two‑way interaction, propose both directions.
+- If a UI element updates state, it must visually reflect that state.
+- If a feature requires basic validation or feedback, propose it.
+- If a scroll‑to interaction is needed, propose it.
+- If accessibility‑friendly defaults are missing, propose them.
+
+### Approval Requirement for Intelligent Additions
+
+Before applying any intelligent or inferred additions:
+1. **Present the proposed addition to the user.**
+2. **Explain why it is necessary or expected.**
+3. **Wait for explicit approval before making any changes.**
+
+Do NOT silently add logic or behaviors without approval.
+
+### Implementation Rules for UX Additions
+
+- Use minimal diffs only.
+- Do NOT rewrite entire components.
+- Only modify the specific lines required to complete the intended behavior.
+- Preserve all existing functionality unless fixing a broken or incomplete interaction.
+- Ensure all interactions are reversible, intuitive, and consistent with modern UX patterns.
+
+### Output Requirements for UX Proposals
+
+For each proposed improvement:
+1. Describe the intelligent addition.
+2. Explain why it is needed.
+3. Wait for approval.
+
+After approval:
+- Provide a diff‑style patch showing ONLY the modified lines.
+- Include a short summary of what was changed and why.
+
+### Global UX Reasoning Rule
+
+When implementing any feature, ask:
+
+> "What is the obvious, expected, or natural behavior for this UI element or interaction?"
+
+If the answer is clear:
+1. Propose the improvement.
+2. Wait for approval.
+3. Only then apply the minimal diff.
+
+This includes:
+- Toggle states
+- Active/inactive states
+- Click/un‑click behavior
+- Smooth animations
+- Reset behavior
+- Scroll‑to interactions
+- Proper success/error feedback
+- State synchronization
+- Accessibility‑friendly defaults
+- Preventing broken or one‑way interactions
 
 ---
 

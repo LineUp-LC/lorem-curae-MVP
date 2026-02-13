@@ -99,43 +99,43 @@ export default function SubscriptionPage() {
       
       <main className="pt-24 pb-16">
         {/* Hero Section */}
-        <div className="py-16 mb-12">
+        <div className="py-12 mb-8">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-5xl font-serif font-bold mb-4 text-deep">Choose Your Plan</h1>
-            <p className="text-xl mb-8" style={{ color: 'rgba(45, 42, 38, 0.7)' }}>Unlock premium features and support sustainable skincare</p>
+            <h1 className="text-3xl sm:text-4xl font-serif font-semibold mb-3 text-deep">Choose Your Plan</h1>
+            <p className="text-base text-warm-gray mb-6 max-w-lg mx-auto">Unlock premium features to enhance your skincare journey</p>
 
             {/* Billing Toggle */}
-            <div className="inline-flex items-center gap-2 rounded-full p-1" style={{ border: '1px solid rgba(107, 99, 90, 0.2)' }}>
+            <div className="inline-flex items-center gap-1 bg-white rounded-full p-1 border border-blush/50 shadow-sm">
               <button
                 onClick={() => setBillingCycle('monthly')}
-                className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
                   billingCycle === 'monthly'
-                    ? 'bg-deep text-cream shadow-md'
-                    : 'text-deep hover:text-deep/80'
+                    ? 'bg-deep text-white shadow-sm'
+                    : 'text-warm-gray hover:text-deep'
                 }`}
               >
                 Monthly
               </button>
               <button
                 onClick={() => setBillingCycle('yearly')}
-                className={`px-8 py-3 rounded-full font-medium transition-all whitespace-nowrap ${
+                className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
                   billingCycle === 'yearly'
-                    ? 'bg-deep text-cream shadow-md'
-                    : 'text-deep hover:text-deep/80'
+                    ? 'bg-deep text-white shadow-sm'
+                    : 'text-warm-gray hover:text-deep'
                 }`}
               >
                 Yearly
-                <span className="ml-2 px-2 py-1 bg-primary text-cream rounded-full text-xs font-bold">
-                  Save 25%
+                <span className="px-1.5 py-0.5 bg-primary text-white rounded-full text-xs font-medium">
+                  -25%
                 </span>
               </button>
             </div>
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Pricing Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
             {plans.map((plan) => {
               const isCurrent = isCurrentPlan(plan.name);
               const isPremium = plan.name.toLowerCase().includes('premium');
@@ -146,88 +146,88 @@ export default function SubscriptionPage() {
               return (
                 <div
                   key={plan.id}
-                  className={`bg-white rounded-2xl shadow-lg overflow-hidden border-2 ${
-                    isPremium ? 'border-primary relative transform scale-105' : 'border-blush'
+                  className={`bg-white rounded-xl overflow-hidden border transition-all ${
+                    isPremium ? 'border-primary shadow-lg ring-1 ring-primary/20' : 'border-blush/50 shadow-sm hover:shadow-md'
                   }`}
                 >
                   {isPremium && (
-                    <div className="bg-gradient-to-r from-dark via-primary to-dark text-white text-center py-3 font-bold text-sm tracking-wide">
-                      ⭐ PREMIUM - MOST POPULAR
+                    <div className="bg-primary text-white text-center py-2 text-xs font-medium tracking-wide">
+                      Most Popular
                     </div>
                   )}
-                  
-                  <div className="p-8">
-                    <h3 className={`text-2xl font-serif font-bold mb-2 ${isPremium ? 'text-primary' : 'text-deep'}`}>
+
+                  <div className="p-5">
+                    <h3 className={`text-lg font-semibold mb-1 ${isPremium ? 'text-primary' : 'text-deep'}`}>
                       {plan.name}
                     </h3>
-                    <div className="mb-6">
-                      <div className="flex items-baseline gap-2">
-                        <span className={`text-5xl font-bold ${isPremium ? 'text-primary' : 'text-deep'}`}>
+                    <div className="mb-4">
+                      <div className="flex items-baseline gap-1">
+                        <span className={`text-3xl font-bold ${isPremium ? 'text-primary' : 'text-deep'}`}>
                           ${price}
                         </span>
-                        <span className="text-warm-gray">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
+                        <span className="text-sm text-warm-gray">/{billingCycle === 'monthly' ? 'mo' : 'yr'}</span>
                       </div>
                       {monthlyEquivalent && (
-                        <p className={`text-sm mt-1 ${isPremium ? 'text-primary' : 'text-primary'}`}>
-                          ${monthlyEquivalent}/month when billed annually
+                        <p className="text-xs text-warm-gray mt-0.5">
+                          ${monthlyEquivalent}/mo billed annually
                         </p>
                       )}
                     </div>
 
                     {isCurrent ? (
-                      <div className={`w-full py-3 rounded-lg font-medium text-center ${getTierBadge(userProfile?.subscription_tier || 'free').color}`}>
+                      <div className={`w-full py-2.5 rounded-lg text-sm font-medium text-center ${getTierBadge(userProfile?.subscription_tier || 'free').color}`}>
                         {getTierBadge(userProfile?.subscription_tier || 'free').text}
                       </div>
                     ) : (
                       <button
                         onClick={() => handleSubscribe(plan.name)}
-                        className={`w-full py-3 rounded-lg font-bold transition-colors whitespace-nowrap ${
+                        className={`w-full py-2.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap cursor-pointer ${
                           isPremium
-                            ? 'bg-gradient-to-r from-dark to-primary text-white hover:from-deep hover:to-dark shadow-lg'
-                            : 'bg-gray-900 text-white hover:bg-gray-800'
+                            ? 'bg-primary text-white hover:bg-dark'
+                            : 'bg-deep text-white hover:bg-deep/90'
                         }`}
                       >
-                        {plan.price_monthly === 0 ? 'Get Started' : 'Subscribe Now'}
+                        {plan.price_monthly === 0 ? 'Get Started' : 'Subscribe'}
                       </button>
                     )}
 
-                    <div className="mt-8 space-y-4">
-                      <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                        <p className="text-warm-gray text-sm">
-                          Join up to <strong>{plan.max_communities === 999 ? 'unlimited' : plan.max_communities}</strong> communities
+                    <div className="mt-4 pt-4 border-t border-blush/30 space-y-2.5">
+                      <div className="flex items-center gap-2">
+                        <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                        <p className="text-warm-gray text-xs">
+                          <span className="font-medium text-deep">{plan.max_communities === 999 ? 'Unlimited' : plan.max_communities}</span> communities
                         </p>
                       </div>
                       {plan.can_create_communities && (
-                        <div className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                          <p className="text-warm-gray text-sm">Create your own communities</p>
+                        <div className="flex items-center gap-2">
+                          <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                          <p className="text-warm-gray text-xs">Create communities</p>
                         </div>
                       )}
-                      <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                        <p className="text-warm-gray text-sm">
-                          <strong>{plan.storage_limit_mb}MB</strong> storage for uploads
+                      <div className="flex items-center gap-2">
+                        <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                        <p className="text-warm-gray text-xs">
+                          <span className="font-medium text-deep">{plan.storage_limit_mb}MB</span> storage
                         </p>
                       </div>
                       {plan.marketplace_discount > 0 && (
-                        <div className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                          <p className="text-warm-gray text-sm">
-                            <strong>{plan.marketplace_discount}%</strong> marketplace discount
+                        <div className="flex items-center gap-2">
+                          <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                          <p className="text-warm-gray text-xs">
+                            <span className="font-medium text-deep">{plan.marketplace_discount}%</span> marketplace discount
                           </p>
                         </div>
                       )}
-                      <div className="flex items-start gap-3">
-                        <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                        <p className="text-warm-gray text-sm">
-                          <strong>{plan.cashback_percentage}%</strong> affiliate cashback
+                      <div className="flex items-center gap-2">
+                        <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                        <p className="text-warm-gray text-xs">
+                          <span className="font-medium text-deep">{plan.cashback_percentage}%</span> cashback
                         </p>
                       </div>
-                      {featuresArray.map((feature, index) => (
-                        <div key={index} className="flex items-start gap-3">
-                          <i className={`ri-check-line text-xl flex-shrink-0 ${isPremium ? 'text-primary' : 'text-primary'}`}></i>
-                          <p className="text-warm-gray text-sm">{feature}</p>
+                      {featuresArray.slice(0, 2).map((feature, index) => (
+                        <div key={index} className="flex items-center gap-2">
+                          <i className="ri-check-line text-base text-primary flex-shrink-0"></i>
+                          <p className="text-warm-gray text-xs">{feature}</p>
                         </div>
                       ))}
                     </div>
@@ -238,9 +238,9 @@ export default function SubscriptionPage() {
           </div>
 
           {/* Feature Comparison Table */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-16 border border-blush">
-            <div className="bg-gradient-to-r from-primary to-dark text-white p-6">
-              <h2 className="text-3xl font-serif font-bold text-center">Feature Comparison</h2>
+          <div className="bg-white rounded-xl overflow-hidden mb-12 border border-blush/50 shadow-sm">
+            <div className="bg-cream/50 border-b border-blush/30 p-4">
+              <h2 className="text-lg font-semibold text-deep text-center">Feature Comparison</h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -353,49 +353,58 @@ export default function SubscriptionPage() {
           </div>
 
           {/* FAQ Section */}
-          <div className="max-w-3xl mx-auto">
-            <h2 className="text-3xl font-serif font-bold text-deep text-center mb-12">Frequently Asked Questions</h2>
-            <div className="space-y-6">
-              <div className="bg-cream rounded-xl shadow-sm p-6 border border-blush">
-                <h3 className="text-lg font-semibold text-deep mb-2">Can I change plans anytime?</h3>
-                <p className="text-warm-gray">
-                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately, 
-                  and we'll prorate any charges or credits.
+          <div className="max-w-2xl mx-auto">
+            <h2 className="text-xl font-semibold text-deep text-center mb-6">Frequently Asked Questions</h2>
+            <div className="space-y-3">
+              <details className="bg-white rounded-xl border border-blush/30 group">
+                <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-deep">
+                  Can I change plans anytime?
+                  <i className="ri-arrow-down-s-line text-warm-gray group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <p className="px-5 pb-4 text-sm text-warm-gray">
+                  Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
                 </p>
-              </div>
+              </details>
 
-              <div className="bg-cream rounded-xl shadow-sm p-6 border border-blush">
-                <h3 className="text-lg font-semibold text-deep mb-2">What payment methods do you accept?</h3>
-                <p className="text-warm-gray">
-                  We accept all major credit cards, debit cards, and digital wallets through our secure 
-                  payment processor Stripe.
+              <details className="bg-white rounded-xl border border-blush/30 group">
+                <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-deep">
+                  What payment methods do you accept?
+                  <i className="ri-arrow-down-s-line text-warm-gray group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <p className="px-5 pb-4 text-sm text-warm-gray">
+                  We accept all major credit cards, debit cards, and digital wallets through Stripe.
                 </p>
-              </div>
+              </details>
 
-              <div className="bg-cream rounded-xl shadow-sm p-6 border border-blush">
-                <h3 className="text-lg font-semibold text-deep mb-2">Is there a free trial?</h3>
-                <p className="text-warm-gray">
-                  Our Free plan gives you full access to core features with no time limit. You can upgrade 
-                  anytime to unlock premium features.
+              <details className="bg-white rounded-xl border border-blush/30 group">
+                <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-deep">
+                  Is there a free trial?
+                  <i className="ri-arrow-down-s-line text-warm-gray group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <p className="px-5 pb-4 text-sm text-warm-gray">
+                  Our Free plan gives you access to core features with no time limit.
                 </p>
-              </div>
+              </details>
 
-              <div className="bg-cream rounded-xl shadow-sm p-6 border border-blush">
-                <h3 className="text-lg font-semibold text-deep mb-2">How does the cashback work?</h3>
-                <p className="text-warm-gray">
-                  When you purchase through our affiliate links, you earn cashback credits based on your tier. 
-                  Credits can be redeemed for marketplace discounts or future purchases.
+              <details className="bg-white rounded-xl border border-blush/30 group">
+                <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-deep">
+                  How does cashback work?
+                  <i className="ri-arrow-down-s-line text-warm-gray group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <p className="px-5 pb-4 text-sm text-warm-gray">
+                  Earn cashback credits on affiliate purchases based on your tier, redeemable for discounts.
                 </p>
-              </div>
+              </details>
 
-              <div className="bg-cream rounded-xl shadow-sm p-6 border border-blush">
-                <h3 className="text-lg font-semibold text-deep mb-2">What happens to my data if I cancel?</h3>
-                <p className="text-warm-gray">
-                  Your personal data remains yours. If you cancel, you'll revert to the Free plan and keep 
-                  access to your routines and communities (within Free tier limits). You can delete your 
-                  account anytime.
+              <details className="bg-white rounded-xl border border-blush/30 group">
+                <summary className="px-5 py-4 cursor-pointer flex items-center justify-between text-sm font-medium text-deep">
+                  What happens if I cancel?
+                  <i className="ri-arrow-down-s-line text-warm-gray group-open:rotate-180 transition-transform"></i>
+                </summary>
+                <p className="px-5 pb-4 text-sm text-warm-gray">
+                  You'll revert to the Free plan and keep access to your data within Free tier limits.
                 </p>
-              </div>
+              </details>
             </div>
           </div>
         </div>

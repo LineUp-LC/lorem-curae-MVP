@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 
 interface Review {
@@ -52,7 +52,49 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
   const [showPersonalized, setShowPersonalized] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [filterSkinType, setFilterSkinType] = useState<string>('all');
+  const [filterConcern, setFilterConcern] = useState<string>('all');
+  const [filterRating, setFilterRating] = useState<number>(0);
   const [selectedReviewer, setSelectedReviewer] = useState<Review | null>(null);
+  const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
+  const [animatingReview, setAnimatingReview] = useState<number | null>(null);
+  const [reportedReviews, setReportedReviews] = useState<Set<number>>(new Set());
+  const [showReportConfirm, setShowReportConfirm] = useState<number | null>(null);
+  const [showReportModal, setShowReportModal] = useState<number | null>(null);
+  const [reportReason, setReportReason] = useState<string>('');
+  const [reportDetails, setReportDetails] = useState<string>('');
+
+  const handleHelpfulClick = (reviewId: number) => {
+    if (helpfulReviews.has(reviewId)) {
+      // Remove from helpful
+      setHelpfulReviews(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(reviewId);
+        return newSet;
+      });
+    } else {
+      // Add to helpful with animation
+      setAnimatingReview(reviewId);
+      setHelpfulReviews(prev => new Set(prev).add(reviewId));
+      setTimeout(() => setAnimatingReview(null), 300);
+    }
+  };
+
+  const handleReportReview = (reviewId: number) => {
+    setShowReportModal(reviewId);
+    setShowReportConfirm(null);
+  };
+
+  const handleSubmitReport = () => {
+    if (showReportModal && reportReason) {
+      setReportedReviews(prev => new Set(prev).add(showReportModal));
+      // Here you would send to API: { reviewId: showReportModal, reason: reportReason, details: reportDetails }
+      console.log('Report submitted:', { reviewId: showReportModal, reason: reportReason, details: reportDetails });
+      setShowReportModal(null);
+      setReportReason('');
+      setReportDetails('');
+    }
+  };
 
   // Mock reviewer profile data
   const getReviewerProfile = (review: Review): UserProfileData => ({
@@ -208,9 +250,19 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     .sort((a, b) => b.similarityScore - a.similarityScore)
     .slice(0, 3);
 
-  const featuredReviews = showPersonalized && personalizedReviews.length > 0 
-    ? personalizedReviews 
-    : allReviews.slice(0, 3);
+  // Apply user-selected filters
+  const filteredReviews = useMemo(() => {
+    return allReviews.filter((review) => {
+      const matchesSkinType = filterSkinType === 'all' || review.skinType === filterSkinType;
+      const matchesConcern = filterConcern === 'all' || review.skinConcerns.includes(filterConcern);
+      const matchesRating = review.rating >= filterRating;
+      return matchesSkinType && matchesConcern && matchesRating;
+    });
+  }, [allReviews, filterSkinType, filterConcern, filterRating]);
+
+  const featuredReviews = showPersonalized && personalizedReviews.length > 0 && filterSkinType === 'all' && filterConcern === 'all' && filterRating === 0
+    ? personalizedReviews
+    : filteredReviews.slice(0, 6);
 
   const totalReviews = 247;
   const averageRating = 4.3;
@@ -289,13 +341,6 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   </div>
                 </div>
               </div>
-              <Link
-                to="/my-skin"
-                className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer flex items-center space-x-1"
-              >
-                <i className="ri-settings-3-line"></i>
-                <span>Update Profile</span>
-              </Link>
             </div>
           </div>
         )}
@@ -340,6 +385,118 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   );
                 })}
               </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Smart Review Filters */}
+        <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
+          <div className="flex items-center gap-2 mb-4">
+            <i className="ri-filter-3-line text-taupe"></i>
+            <h3 className="text-lg font-semibold text-deep-900">Filter Reviews</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Skin Type Filter */}
+            <div>
+              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
+                Skin Type
+              </label>
+              <select
+                value={filterSkinType}
+                onChange={(e) => setFilterSkinType(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
+              >
+                <option value="all">All Skin Types</option>
+                <option value="dry">Dry</option>
+                <option value="oily">Oily</option>
+                <option value="combination">Combination</option>
+                <option value="sensitive">Sensitive</option>
+                <option value="normal">Normal</option>
+              </select>
+            </div>
+            {/* Concern Filter */}
+            <div>
+              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
+                Skin Concern
+              </label>
+              <select
+                value={filterConcern}
+                onChange={(e) => setFilterConcern(e.target.value)}
+                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
+              >
+                <option value="all">All Concerns</option>
+                <option value="Acne & Breakouts">Acne & Breakouts</option>
+                <option value="Hyperpigmentation">Hyperpigmentation</option>
+                <option value="Dryness & Dehydration">Dryness & Dehydration</option>
+                <option value="Fine Lines & Wrinkles">Fine Lines & Wrinkles</option>
+                <option value="Sensitivity">Sensitivity</option>
+                <option value="Large Pores">Large Pores</option>
+                <option value="Redness">Redness</option>
+              </select>
+            </div>
+            {/* Rating Filter */}
+            <div>
+              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
+                Minimum Rating
+              </label>
+              <select
+                value={filterRating}
+                onChange={(e) => setFilterRating(Number(e.target.value))}
+                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
+              >
+                <option value={0}>All Ratings</option>
+                <option value={5}>5 Stars Only</option>
+                <option value={4}>4+ Stars</option>
+                <option value={3}>3+ Stars</option>
+              </select>
+            </div>
+          </div>
+          {/* Quick filter buttons based on user's skin survey */}
+          <div className="mt-4 pt-4 border-t border-blush/50">
+            <p className="text-xs text-warm-gray mb-2">Quick filters based on your profile:</p>
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => {
+                  setFilterSkinType(userSkinProfile.skinType);
+                  setFilterConcern('all');
+                }}
+                className={`px-3 py-1.5 text-xs rounded-full transition-colors cursor-pointer ${
+                  filterSkinType === userSkinProfile.skinType && filterConcern === 'all'
+                    ? 'bg-taupe text-white'
+                    : 'bg-taupe-100 text-taupe-700 hover:bg-taupe-200'
+                }`}
+              >
+                My Skin Type ({userSkinProfile.skinType})
+              </button>
+              {userSkinProfile.primaryConcerns.slice(0, 2).map((concern) => (
+                <button
+                  key={concern}
+                  onClick={() => {
+                    setFilterConcern(concern);
+                    setFilterSkinType('all');
+                  }}
+                  className={`px-3 py-1.5 text-xs rounded-full transition-colors cursor-pointer ${
+                    filterConcern === concern
+                      ? 'bg-taupe text-white'
+                      : 'bg-taupe-100 text-taupe-700 hover:bg-taupe-200'
+                  }`}
+                >
+                  {concern}
+                </button>
+              ))}
+              {(filterSkinType !== 'all' || filterConcern !== 'all' || filterRating > 0) && (
+                <button
+                  onClick={() => {
+                    setFilterSkinType('all');
+                    setFilterConcern('all');
+                    setFilterRating(0);
+                  }}
+                  className="px-3 py-1.5 text-xs rounded-full bg-gray-100 text-warm-gray hover:bg-gray-200 transition-colors cursor-pointer flex items-center gap-1"
+                >
+                  <i className="ri-close-line"></i>
+                  Clear filters
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -425,16 +582,56 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
                 {/* Review Footer */}
                 <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <div className="flex items-center space-x-2 text-gray-600">
-                    <i className="ri-thumb-up-line"></i>
-                    <span className="text-sm">Helpful ({review.helpful})</span>
-                  </div>
-                  <Link
-                    to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-                    className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
+                  <button
+                    onClick={() => handleHelpfulClick(review.id)}
+                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                      helpfulReviews.has(review.id)
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-gray-600 hover:bg-gray-100'
+                    } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                    style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
                   >
-                    Read full review
-                  </Link>
+                    <i className={`${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                    <span className="text-sm">Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
+                  </button>
+                  <div className="flex items-center gap-3">
+                    {reportedReviews.has(review.id) ? (
+                      <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                        <i className="ri-flag-fill"></i>
+                        Reported
+                      </span>
+                    ) : showReportConfirm === review.id ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-warm-gray">Report this review?</span>
+                        <button
+                          onClick={() => handleReportReview(review.id)}
+                          className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                        >
+                          Yes
+                        </button>
+                        <button
+                          onClick={() => setShowReportConfirm(null)}
+                          className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setShowReportConfirm(review.id)}
+                        className="text-warm-gray/60 hover:text-warm-gray text-sm cursor-pointer flex items-center gap-1"
+                        title="Report review"
+                      >
+                        <i className="ri-flag-line"></i>
+                      </button>
+                    )}
+                    <Link
+                      to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
+                      className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
+                    >
+                      Read full review
+                    </Link>
+                  </div>
                 </div>
               </div>
             );
@@ -445,10 +642,10 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         <div className="text-center mt-8">
           <Link
             to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-            className="inline-flex items-center space-x-2 px-8 py-4 bg-deep-900 text-white rounded-full font-semibold text-lg hover:bg-deep transition-all shadow-lg hover:shadow-xl cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-taupe hover:text-dark text-sm font-medium transition-colors cursor-pointer"
           >
-            <i className="ri-chat-3-line text-xl"></i>
             <span>Read All {totalReviews} Reviews</span>
+            <i className="ri-arrow-right-line"></i>
           </Link>
         </div>
       </div>
@@ -586,6 +783,77 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Report Review Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-gray-900">Report Review</h3>
+              <button
+                onClick={() => {
+                  setShowReportModal(null);
+                  setReportReason('');
+                  setReportDetails('');
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Reason for reporting</label>
+                <select
+                  value={reportReason}
+                  onChange={(e) => setReportReason(e.target.value)}
+                  className="w-full px-4 py-3 rounded-lg border border-blush bg-white text-deep focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+                >
+                  <option value="">Select a reason...</option>
+                  <option value="spam">Spam or fake review</option>
+                  <option value="inappropriate">Inappropriate content</option>
+                  <option value="misleading">Misleading information</option>
+                  <option value="harassment">Harassment or bullying</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Additional details (optional)</label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Provide more context..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-lg border border-blush bg-white text-deep focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => {
+                  setShowReportModal(null);
+                  setReportReason('');
+                  setReportDetails('');
+                }}
+                className="px-4 py-2 text-warm-gray hover:text-deep transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReport}
+                disabled={!reportReason}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+                  reportReason
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Submit Report
+              </button>
             </div>
           </div>
         </div>

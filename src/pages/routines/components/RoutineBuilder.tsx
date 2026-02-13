@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   DndContext,
@@ -13,13 +13,16 @@ import {
 import {
   arrayMove,
   SortableContext,
-  horizontalListSortingStrategy,
+  verticalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import { routineProgressState } from '../../../lib/utils/routineProgressState';
+import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 import ConflictDetectionPopup from './ConflictDetectionPopup';
+import ProductPickerModal from './ProductPickerModal';
+import CustomStepModal from './CustomStepModal';
 
 interface Product {
   id: string;
@@ -30,6 +33,7 @@ interface Product {
   purchasedFrom?: string; // Store URL if purchased from marketplace
   purchaseDate?: Date;
   expirationDate?: Date;
+  source?: 'discovery' | 'marketplace';
 }
 
 interface RoutineStep {
@@ -46,10 +50,11 @@ interface RoutineStep {
 interface SortableStepCardProps {
   step: RoutineStep;
   index: number;
+  isFirst?: boolean;
   children: React.ReactNode;
 }
 
-function SortableStepCard({ step, children }: SortableStepCardProps) {
+function SortableStepCard({ step, isFirst, children }: SortableStepCardProps) {
   const {
     attributes,
     listeners,
@@ -62,8 +67,6 @@ function SortableStepCard({ step, children }: SortableStepCardProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    width: '380px',
-    flexShrink: 0,
     opacity: isDragging ? 0.5 : 1,
     zIndex: isDragging ? 1000 : 1,
   };
@@ -72,7 +75,7 @@ function SortableStepCard({ step, children }: SortableStepCardProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className={`border border-blush rounded-xl p-6 hover:border-primary/30 transition-all bg-white relative ${
+      className={`border border-blush rounded-xl p-3 sm:p-4 hover:border-primary/30 transition-all bg-white relative h-full flex flex-col ${
         isDragging ? 'shadow-2xl ring-2 ring-primary' : ''
       }`}
     >
@@ -80,8 +83,9 @@ function SortableStepCard({ step, children }: SortableStepCardProps) {
       <div
         {...attributes}
         {...listeners}
-        className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-cream hover:bg-blush flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-cream hover:bg-blush flex items-center justify-center cursor-grab active:cursor-grabbing touch-none"
         title="Drag to reorder"
+        {...(isFirst ? { 'data-tutorial': 'first-drag-handle' } : {})}
       >
         <i className="ri-draggable text-warm-gray"></i>
       </div>
@@ -213,40 +217,44 @@ const savedProducts: Product[] = [
     id: '1',
     name: 'Gentle Hydrating Cleanser',
     brand: 'Pure Essence',
-    image: 'https://readdy.ai/api/search-image?query=minimalist%20white%20bottle%20gentle%20hydrating%20facial%20cleanser%20on%20clean%20white%20surface%20with%20water%20droplets%20soft%20natural%20lighting%20product%20photography&width=300&height=300&seq=routine-cleanser-1&orientation=squarish',
+    image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300&h=300&fit=crop',
     category: 'Cleanser',
     purchasedFrom: 'https://example.com/store',
     purchaseDate: new Date('2024-01-10'),
     expirationDate: new Date('2025-01-10'),
+    source: 'marketplace',
   },
   {
     id: '2',
     name: 'Vitamin C Brightening Serum',
     brand: 'Glow Naturals',
-    image: 'https://readdy.ai/api/search-image?query=elegant%20amber%20glass%20dropper%20bottle%20vitamin%20c%20serum%20on%20white%20marble%20surface%20with%20orange%20slices%20soft%20lighting%20minimalist%20product%20photography&width=300&height=300&seq=routine-serum-1&orientation=squarish',
+    image: 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=300&h=300&fit=crop',
     category: 'Serum',
     purchasedFrom: 'https://example.com/store',
     purchaseDate: new Date('2024-01-05'),
     expirationDate: new Date('2024-07-05'),
+    source: 'discovery',
   },
   {
     id: '3',
     name: 'Deep Hydration Moisturizer',
     brand: 'Skin Harmony',
-    image: 'https://readdy.ai/api/search-image?query=luxurious%20white%20jar%20moisturizer%20cream%20on%20clean%20surface%20with%20green%20leaves%20soft%20natural%20lighting%20minimalist%20skincare%20photography&width=300&height=300&seq=routine-moisturizer-1&orientation=squarish',
+    image: 'https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=300&h=300&fit=crop',
     category: 'Moisturizer',
     purchaseDate: new Date('2023-12-20'),
     expirationDate: new Date('2024-12-20'),
+    source: 'discovery',
   },
   {
     id: '4',
     name: 'Mineral Sunscreen SPF 50',
     brand: 'Clarity Labs',
-    image: 'https://readdy.ai/api/search-image?query=modern%20white%20tube%20sunscreen%20spf%2050%20on%20beach%20sand%20with%20blue%20sky%20background%20clean%20product%20photography%20natural%20lighting&width=300&height=300&seq=routine-sunscreen-1&orientation=squarish',
+    image: 'https://images.unsplash.com/photo-1556227702-d1e4e7b5c232?w=300&h=300&fit=crop',
     category: 'Sunscreen',
     purchasedFrom: 'https://example.com/store',
     purchaseDate: new Date('2024-01-15'),
     expirationDate: new Date('2025-06-15'),
+    source: 'marketplace',
   },
 ];
 
@@ -263,17 +271,235 @@ interface RoutineBuilderProps {
 export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
 
-  // Initialize time filter from saved progress if unfinished session exists
+  // Initialize time filter - default to morning
   const [timeFilter, setTimeFilter] = useLocalStorageState<'morning' | 'evening'>(
     'routine_builder_time_filter',
-    () => {
-      const progress = routineProgressState.getProgress();
-      return progress.hasUnfinishedSession ? progress.lastTimeFilter : 'morning';
-    }
+    'morning'
   );
   const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
+
+  // Check for unfinished session on mount and restore if needed
+  useEffect(() => {
+    const progress = routineProgressState.getProgress();
+    if (progress.hasUnfinishedSession && progress.lastTimeFilter) {
+      setTimeFilter(progress.lastTimeFilter);
+    }
+  }, []);
   const [showProductSelector, setShowProductSelector] = useState<string | null>(null);
   const [showConflictPopup, setShowConflictPopup] = useState(false);
+  const [showBrowseModal, setShowBrowseModal] = useState(false);
+  const [browseCategory, setBrowseCategory] = useState('');
+  const [browseStepId, setBrowseStepId] = useState<string | null>(null);
+  const [showCustomStepModal, setShowCustomStepModal] = useState(false);
+
+  // Get user's skin profile for keyword highlighting
+  const userSkinType = getEffectiveSkinType();
+  const userConcerns = getEffectiveConcerns();
+
+  // Generate tailored tips based on user's skin profile and routine
+  const proTips = useMemo(() => {
+    // Basic tips everyone gets
+    const basicTips = [
+      "Wait 30-60 seconds between each step for better absorption",
+      "Apply products from thinnest to thickest consistency",
+      "Introduce new products one at a time to monitor reactions",
+      "Check expiration dates regularly and replace expired products",
+      "Cleanse for at least 60 seconds to properly remove impurities",
+      "Pat, don't rub, products into your skin for better absorption",
+      "Consistency beats perfection - a simple routine done daily works best",
+    ];
+
+    // Morning-specific tips
+    const morningTips = timeFilter === 'morning' ? [
+      "Always use sunscreen as your final morning step",
+      "Vitamin C works best in the morning to protect against environmental damage",
+      "Reapply sunscreen every 2 hours when exposed to direct sunlight",
+      "A lighter moisturizer works better under makeup and sunscreen",
+    ] : [];
+
+    // Evening-specific tips
+    const eveningTips = timeFilter === 'evening' ? [
+      "Double cleanse at night to remove sunscreen and makeup thoroughly",
+      "Retinol and AHAs work best at night when skin is in repair mode",
+      "Apply eye cream with your ring finger for the gentlest touch",
+      "Let your skin rest - not every night needs actives",
+      "Night is the best time for heavier, more nourishing products",
+    ] : [];
+
+    // Skin type specific tips
+    const skinTypeTips: Record<string, string[]> = {
+      'dry': [
+        "Layer hydrating products - toner, serum, then moisturizer for dry skin",
+        "Look for hyaluronic acid and ceramides to boost hydration",
+        "Avoid hot water when cleansing - it strips natural oils",
+        "Consider a facial oil as your last step to lock in moisture",
+      ],
+      'oily': [
+        "Don't skip moisturizer - dehydrated oily skin produces more oil",
+        "Use a gentle foaming cleanser to control excess sebum",
+        "Niacinamide helps regulate oil production and minimize pores",
+        "Blotting papers are your friend for midday shine control",
+      ],
+      'combination': [
+        "Apply richer products to dry areas, lighter ones to oily zones",
+        "Your T-zone and cheeks may need different products",
+        "Gel-cream moisturizers work well for combination skin",
+      ],
+      'sensitive': [
+        "Patch test new products on your inner arm before applying to face",
+        "Fragrance-free products are gentler on sensitive skin",
+        "Centella asiatica and aloe vera are great soothing ingredients",
+        "Less is more - keep your routine simple to avoid irritation",
+      ],
+      'normal': [
+        "Focus on prevention and maintenance with antioxidants",
+        "Your skin is balanced - don't overcomplicate your routine",
+      ],
+    };
+
+    // Concern-specific tips
+    const concernTips: Record<string, string[]> = {
+      'acne': [
+        "Don't pick or pop pimples - it can lead to scarring",
+        "Salicylic acid helps unclog pores and prevent breakouts",
+        "Change your pillowcase frequently to reduce bacteria",
+        "Non-comedogenic products won't clog your pores",
+      ],
+      'aging': [
+        "Retinol is the gold standard for anti-aging - start slow",
+        "Peptides help stimulate collagen production",
+        "Don't forget your neck and hands - they show age too",
+        "SPF is the best anti-aging product you can use",
+      ],
+      'hyperpigmentation': [
+        "Vitamin C and niacinamide help fade dark spots over time",
+        "Always wear SPF - sun exposure worsens pigmentation",
+        "Alpha arbutin is a gentle alternative for brightening",
+        "Be patient - fading dark spots takes 3-6 months",
+      ],
+      'dryness': [
+        "Apply products to damp skin to lock in more hydration",
+        "Humectants like glycerin draw moisture into skin",
+        "Occlusive ingredients like squalane prevent water loss",
+      ],
+      'dullness': [
+        "Exfoliate 1-2 times weekly to reveal brighter skin",
+        "Vitamin C in the morning gives you that glow",
+        "Hydration is key - dehydrated skin looks dull",
+      ],
+      'texture': [
+        "AHAs like glycolic acid smooth skin texture over time",
+        "Retinoids help with cell turnover for smoother skin",
+        "Don't over-exfoliate - it can worsen texture issues",
+      ],
+      'pores': [
+        "Niacinamide helps minimize the appearance of pores",
+        "Clay masks once a week can help deep clean pores",
+        "BHAs penetrate pores to clear out buildup",
+      ],
+    };
+
+    // Build personalized tips array
+    const personalizedTips: string[] = [];
+
+    // Add skin type tips
+    if (userSkinType) {
+      const skinLower = userSkinType.toLowerCase();
+      Object.entries(skinTypeTips).forEach(([key, tips]) => {
+        if (skinLower.includes(key)) {
+          personalizedTips.push(...tips);
+        }
+      });
+    }
+
+    // Add concern tips
+    userConcerns.forEach(concern => {
+      const concernLower = concern.toLowerCase();
+      Object.entries(concernTips).forEach(([key, tips]) => {
+        if (concernLower.includes(key) || key.includes(concernLower)) {
+          personalizedTips.push(...tips);
+        }
+      });
+    });
+
+    // Combine all tips: basic + time-specific + personalized
+    const allTips = [...basicTips, ...morningTips, ...eveningTips, ...personalizedTips];
+
+    // Remove duplicates and shuffle
+    const uniqueTips = [...new Set(allTips)];
+    return uniqueTips.sort(() => Math.random() - 0.5);
+  }, [userSkinType, userConcerns, timeFilter]);
+
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
+  const [tipFading, setTipFading] = useState(false);
+
+  // Cycle through tips
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTipFading(true);
+      setTimeout(() => {
+        setCurrentTipIndex(prev => (prev + 1) % proTips.length);
+        setTipFading(false);
+      }, 500);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [proTips.length]);
+
+  // Helper to highlight keywords in custom step descriptions
+  const highlightKeywords = (text: string, isCustomStep: boolean): React.ReactNode => {
+    if (!isCustomStep || (!userSkinType && userConcerns.length === 0)) {
+      return text;
+    }
+
+    // Build keywords from user profile
+    const keywords: string[] = [];
+    if (userSkinType) keywords.push(userSkinType.toLowerCase());
+    userConcerns.forEach(c => keywords.push(c.toLowerCase()));
+
+    // Common skincare keywords that might match
+    const skinKeywords: Record<string, string[]> = {
+      'dry': ['hydration', 'moisture', 'nourishing', 'hydrating', 'dry'],
+      'oily': ['oil', 'sebum', 'shine', 'pores', 'oily', 'mattifying'],
+      'combination': ['balance', 'combination', 'zone'],
+      'sensitive': ['gentle', 'soothing', 'calming', 'sensitive', 'irritation'],
+      'acne': ['breakouts', 'blemishes', 'acne', 'spots', 'pores'],
+      'aging': ['wrinkles', 'fine lines', 'aging', 'firmness', 'elasticity'],
+      'dullness': ['brightness', 'radiance', 'glow', 'dullness', 'luminosity'],
+      'texture': ['texture', 'smooth', 'rough', 'uneven'],
+      'hyperpigmentation': ['dark spots', 'hyperpigmentation', 'discoloration', 'tone'],
+      'hydration': ['hydration', 'moisture', 'plumping', 'dehydration'],
+    };
+
+    // Expand keywords based on user profile
+    const expandedKeywords: string[] = [...keywords];
+    keywords.forEach(keyword => {
+      Object.entries(skinKeywords).forEach(([key, values]) => {
+        if (keyword.includes(key) || key.includes(keyword)) {
+          expandedKeywords.push(...values);
+        }
+      });
+    });
+
+    const uniqueKeywords = [...new Set(expandedKeywords)].filter(k => k.length > 2);
+    if (uniqueKeywords.length === 0) return text;
+
+    // Create regex pattern
+    const pattern = new RegExp(`(${uniqueKeywords.map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`, 'gi');
+    const parts = text.split(pattern);
+
+    return parts.map((part, index) => {
+      const isMatch = uniqueKeywords.some(k => k.toLowerCase() === part.toLowerCase());
+      if (isMatch) {
+        return (
+          <span key={index} className="text-primary font-medium bg-primary/10 px-1 rounded">
+            {part}
+          </span>
+        );
+      }
+      return part;
+    });
+  };
 
   // Mock conflict count - in real app this would come from conflict detection logic
   const conflictCount = 2;
@@ -282,10 +508,14 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
   const [completedSteps, setCompletedSteps] = useLocalStorageState<{
     morning: string[];
     evening: string[];
+    morningFilledCount: number;
+    eveningFilledCount: number;
     lastResetDate: string;
   }>('routine_completion_tracker', {
     morning: [],
     evening: [],
+    morningFilledCount: 0,
+    eveningFilledCount: 0,
     lastResetDate: new Date().toDateString()
   });
 
@@ -293,35 +523,37 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
   useEffect(() => {
     const today = new Date().toDateString();
     if (completedSteps.lastResetDate !== today) {
-      setCompletedSteps({ morning: [], evening: [], lastResetDate: today });
+      setCompletedSteps({
+        morning: [],
+        evening: [],
+        morningFilledCount: completedSteps.morningFilledCount || 0,
+        eveningFilledCount: completedSteps.eveningFilledCount || 0,
+        lastResetDate: today
+      });
     }
   }, [completedSteps.lastResetDate, setCompletedSteps]);
+
+  // Update filled counts whenever routine steps change
+  useEffect(() => {
+    const morningSteps = routineSteps.filter(s => s.timeOfDay === 'morning');
+    const eveningSteps = routineSteps.filter(s => s.timeOfDay === 'evening');
+    const morningFilled = morningSteps.filter(s => s.product).length;
+    const eveningFilled = eveningSteps.filter(s => s.product).length;
+
+    if (morningFilled !== completedSteps.morningFilledCount || eveningFilled !== completedSteps.eveningFilledCount) {
+      setCompletedSteps(prev => ({
+        ...prev,
+        morningFilledCount: morningFilled,
+        eveningFilledCount: eveningFilled
+      }));
+    }
+  }, [routineSteps]);
 
   // State for save confirmation toast
   const [saveConfirmation, setSaveConfirmation] = useState<{
     visible: boolean;
     routineType: 'morning' | 'evening';
   } | null>(null);
-
-  // Ref for horizontal scroll container
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  // Restore scroll position to last interacted step on mount
-  useEffect(() => {
-    const progress = routineProgressState.getProgress();
-    if (progress.hasUnfinishedSession && progress.lastStepIndex > 0 && scrollContainerRef.current) {
-      // Delay to ensure DOM is rendered
-      const timeoutId = setTimeout(() => {
-        const stepWidth = 380 + 24; // card width + gap
-        const scrollPosition = progress.lastStepIndex * stepWidth;
-        scrollContainerRef.current?.scrollTo({
-          left: scrollPosition,
-          behavior: 'smooth'
-        });
-      }, 100);
-      return () => clearTimeout(timeoutId);
-    }
-  }, []);
 
   const filteredSteps = routineSteps.filter(
     step => step.timeOfDay === timeFilter
@@ -421,11 +653,22 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
   };
 
   const handleBrowseProducts = (category: string) => {
-    if (onBrowseClick) {
-      onBrowseClick();
-    } else {
-      navigate('/discover', { state: { filterCategory: category } });
+    setBrowseCategory(category);
+    setShowBrowseModal(true);
+  };
+
+  const handleBrowseForStep = (stepId: string, category: string) => {
+    setBrowseStepId(stepId);
+    setBrowseCategory(category);
+    setShowBrowseModal(true);
+  };
+
+  const handleBrowseProductSelect = (product: any) => {
+    if (browseStepId) {
+      handleAddProduct(browseStepId, product);
+      setBrowseStepId(null);
     }
+    setShowBrowseModal(false);
   };
 
   // Handle save with confirmation
@@ -492,23 +735,6 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
 
   return (
     <div className="bg-white rounded-2xl shadow-sm p-8">
-      {/* Custom scrollbar styles for horizontal scroll area */}
-      <style>{`
-        .routine-builder-scroll::-webkit-scrollbar {
-          height: 8px;
-        }
-        .routine-builder-scroll::-webkit-scrollbar-track {
-          background: #FDF8F5;
-          border-radius: 4px;
-        }
-        .routine-builder-scroll::-webkit-scrollbar-thumb {
-          background: #C4704D;
-          border-radius: 4px;
-        }
-        .routine-builder-scroll::-webkit-scrollbar-thumb:hover {
-          background: #2D2A26;
-        }
-      `}</style>
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div>
@@ -574,15 +800,12 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                 <span className="sm:hidden">PM</span>
               </button>
             </div>
-            <p className="text-xs text-warm-gray/70">
-              Switch between routines
-            </p>
           </div>
         </div>
       </div>
 
       {/* Prominent Routine Type Header */}
-      <div className="mb-6 text-center py-4 bg-gradient-to-r from-cream to-white rounded-xl border border-blush">
+      <div className="mb-6 text-center py-4">
         <h3 className="text-2xl font-serif font-bold text-deep flex items-center justify-center gap-3">
           {timeFilter === 'morning' ? (
             <>
@@ -604,26 +827,22 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         </p>
       </div>
 
-      {/* Horizontal Routine Steps with Drag and Drop */}
+      {/* Vertical Routine Steps with Drag and Drop */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
         onDragEnd={handleDragEnd}
       >
-        <div className="relative mb-8">
-          <div
-            ref={scrollContainerRef}
-            className="overflow-x-auto overflow-y-hidden pb-4 routine-builder-scroll"
-          >
-            <SortableContext items={stepIds} strategy={horizontalListSortingStrategy}>
-              <div className="flex gap-6" style={{ minWidth: 'max-content' }}>
+        <div className="routine-steps-container max-w-5xl mx-auto mb-8 px-3 sm:px-4 py-4 sm:py-6 bg-primary/5 rounded-xl">
+          <SortableContext items={stepIds} strategy={verticalListSortingStrategy}>
+            <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
                 {filteredSteps.map((step, index) => (
-                  <SortableStepCard key={step.id} step={step} index={index}>
+                  <SortableStepCard key={step.id} step={step} index={index} isFirst={index === 0}>
                     {/* Mark as Done Toggle */}
                     {step.product && (
                       <button
                         onClick={() => toggleStepCompletion(step.id)}
-                        className={`absolute top-3 left-3 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                        className={`absolute top-2 left-2 sm:top-3 sm:left-3 w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
                           isStepCompleted(step.id)
                             ? 'bg-sage text-white'
                             : 'bg-cream text-warm-gray hover:bg-blush'
@@ -634,36 +853,51 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       </button>
                     )}
 
+                    {/* Delete button for all steps */}
+                    <button
+                      onClick={() => setRoutineSteps(prev => prev.filter(s => s.id !== step.id))}
+                      className="absolute top-2 right-10 sm:top-3 sm:right-14 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-cream text-warm-gray hover:bg-red-100 hover:text-red-500 flex items-center justify-center transition-all cursor-pointer z-10"
+                      title="Remove step"
+                    >
+                      <i className="ri-close-line text-sm sm:text-base"></i>
+                    </button>
+
                     {/* Step Number & Title */}
-                    <div className="flex items-start gap-4 mb-4 pr-10 pl-10">
-                      <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                    <div className="flex flex-col items-center text-center mb-2 sm:mb-3 pt-4 sm:pt-6">
+                      <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm flex-shrink-0 mb-2">
                         {index + 1}
                       </div>
-                  <div className="flex-1">
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <h3 className="font-serif text-2xl font-bold text-deep">
-                        {step.title}
+                      <h3 className="font-serif text-base sm:text-lg font-bold text-deep">
+                        {step.id.startsWith('custom-') ? highlightKeywords(step.title, true) : step.title}
                       </h3>
                       {step.recommended && (
                         <span
-                          className="px-3 py-1 bg-light/20 text-primary text-xs font-medium rounded-full whitespace-nowrap cursor-help"
+                          className="mt-1 px-2 py-0.5 bg-light/20 text-primary text-xs font-medium rounded-full whitespace-nowrap cursor-help"
                           title="This step is essential for most skin types and recommended by dermatologists"
                         >
                           Recommended
                         </span>
                       )}
                     </div>
-                  </div>
-                </div>
 
-                <p className="text-warm-gray text-sm mb-4">{step.description}</p>
+                <p className="text-warm-gray text-xs mb-3 text-center">
+                      {highlightKeywords(step.description, step.id.startsWith('custom-'))}
+                    </p>
 
                 {/* Product Display or Add Button */}
                 {step.product ? (
-                  <div className="bg-cream rounded-lg p-4">
+                  <div className="bg-cream rounded-lg p-2 sm:p-4 relative mt-auto">
+                    {/* Remove Product X Button */}
+                    <button
+                      onClick={() => handleRemoveProduct(step.id)}
+                      className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-white border border-blush text-warm-gray hover:bg-red-50 hover:text-red-500 hover:border-red-200 flex items-center justify-center transition-all cursor-pointer z-10 shadow-sm"
+                      title="Remove product"
+                    >
+                      <i className="ri-close-line text-sm"></i>
+                    </button>
                     <div className="flex flex-col gap-3 mb-3">
                       <div
-                        className="w-full h-32 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                        className="w-full h-20 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => handleProductClick(step.product!)}
                       >
                         <img
@@ -675,27 +909,17 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       <div>
                         <p className="text-xs text-warm-gray/80 mb-1">{step.product.brand}</p>
                         <h4
-                          className="font-medium text-deep mb-2 cursor-pointer hover:underline"
+                          className="font-medium text-deep mb-2 cursor-pointer hover:underline text-sm line-clamp-2"
                           onClick={() => handleProductClick(step.product!)}
                         >
                           {step.product.name}
                         </h4>
-                        <div className="flex items-center gap-2">
-                          <button
+                        <button
                             onClick={() => handleProductClick(step.product!)}
-                            className="text-sm text-primary hover:underline font-medium cursor-pointer"
+                            className="text-xs sm:text-sm text-primary hover:underline font-medium cursor-pointer"
                           >
                             View Details →
                           </button>
-                          <button
-                            onClick={() => handleRemoveProduct(step.id)}
-                            className="ml-auto px-3 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors whitespace-nowrap cursor-pointer"
-                            title="Remove this product from your routine"
-                            aria-label={`Remove ${step.product.name} from routine`}
-                          >
-                            <i className="ri-delete-bin-line"></i>
-                          </button>
-                        </div>
                       </div>
                     </div>
 
@@ -726,91 +950,25 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       {step.product.purchasedFrom && (
                         <button
                           onClick={() => handlePurchaseAgain(step.product!)}
-                          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                          className="w-full flex items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-1.5 sm:py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-xs sm:text-sm font-medium cursor-pointer"
                         >
                           <i className="ri-refresh-line"></i>
-                          Purchase Again
+                          <span className="hidden xs:inline">Purchase Again</span>
+                          <span className="xs:hidden">Reorder</span>
                         </button>
                       )}
                     </div>
                   </div>
                 ) : (
-                  <div>
-                    <div className="space-y-2">
-                      <button
-                        onClick={() => setShowProductSelector(step.id)}
-                        className="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
-                        title="Choose from products you've previously saved or purchased"
-                      >
-                        <i className="ri-add-line mr-2"></i>
-                        Add from Saved
-                      </button>
-                      {index === 0 && <p className="text-xs text-warm-gray/70 text-center">Products you've bookmarked appear here</p>}
-                      <button
-                        onClick={() => handleBrowseProducts(step.title)}
-                        className="w-full px-6 py-3 bg-white border-2 border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
-                        title="Discover new products for this step"
-                      >
-                        <i className="ri-search-line mr-2"></i>
-                        Browse {step.title}s
-                      </button>
-                      {index === 0 && <p className="text-xs text-warm-gray/70 text-center">Find and save new products</p>}
-                    </div>
-
-                    {/* Product Selector Modal */}
-                    {showProductSelector === step.id && (
-                      <div className="mt-4 p-4 bg-white border border-blush rounded-lg max-h-96 overflow-y-auto">
-                        <div className="flex items-center justify-between mb-4">
-                          <h4 className="font-medium text-deep text-sm">Select Product</h4>
-                          <button
-                            onClick={() => setShowProductSelector(null)}
-                            className="text-warm-gray/60 hover:text-warm-gray cursor-pointer"
-                          >
-                            <i className="ri-close-line text-xl"></i>
-                          </button>
-                        </div>
-                        <div className="space-y-3">
-                          {savedProducts
-                            .filter(p => p.category === step.title)
-                            .map(product => (
-                              <div
-                                key={product.id}
-                                onClick={() => handleAddProduct(step.id, product)}
-                                className="flex items-center gap-3 p-3 border border-blush rounded-lg hover:border-primary hover:bg-cream transition-all cursor-pointer"
-                              >
-                                <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs text-warm-gray/80 mb-1">{product.brand}</p>
-                                  <p className="text-sm font-medium text-deep truncate">
-                                    {product.name}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          {savedProducts.filter(p => p.category === step.title).length === 0 && (
-                            <div className="text-center py-6 text-warm-gray text-sm">
-                              <i className="ri-bookmark-line text-2xl text-blush mb-2 block"></i>
-                              <p className="font-medium text-deep mb-1">No saved {step.title.toLowerCase()}s yet</p>
-                              <p className="text-xs text-warm-gray/80 mb-3">
-                                Browse products and tap the bookmark icon to save them here
-                              </p>
-                              <button
-                                onClick={() => handleBrowseProducts(step.title)}
-                                className="text-primary hover:underline cursor-pointer whitespace-nowrap"
-                              >
-                                Browse {step.title}s →
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    )}
+                  <div className="space-y-2 mt-auto">
+                    <button
+                      onClick={() => handleBrowseForStep(step.id, step.title)}
+                      className="w-full px-3 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-xs font-medium cursor-pointer"
+                      title="Browse and add products for this step"
+                    >
+                      <i className="ri-search-line mr-1"></i>
+                      Browse Products
+                    </button>
                   </div>
                 )}
                   </SortableStepCard>
@@ -819,10 +977,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                 {/* Add Custom Step Button Card */}
                 <div
                   className="group border-2 border-dashed border-primary/40 rounded-xl p-6 hover:border-primary hover:bg-primary/5 transition-all cursor-pointer flex flex-col items-center justify-center text-center"
-                  style={{ width: '380px', flexShrink: 0, minHeight: '300px' }}
-                  onClick={() => {
-                    if (onBrowseClick) onBrowseClick();
-                  }}
+                  onClick={() => setShowCustomStepModal(true)}
                 >
                   <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
                     <i className="ri-add-line text-3xl text-primary group-hover:scale-110 transition-transform"></i>
@@ -840,50 +995,38 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                       </span>
                     ))}
                   </div>
-
-                  <span className="px-4 py-2 bg-primary/10 text-primary text-sm font-medium rounded-full group-hover:bg-primary group-hover:text-white transition-colors">
-                    Browse Products
-                  </span>
                 </div>
               </div>
             </SortableContext>
           </div>
-
-          {/* Drag hint */}
-          <div className="flex justify-center items-center gap-2 mt-4 text-warm-gray text-sm">
-            <i className="ri-drag-move-line"></i>
-            <span>Drag steps to reorder your routine</span>
-          </div>
-
-          {/* Scroll Indicator */}
-          <div className="flex justify-center gap-2 mt-2">
-            {filteredSteps.map((_, index) => (
-              <div
-                key={index}
-                className="w-2 h-2 rounded-full bg-blush"
-              ></div>
-            ))}
-            <div className="w-2 h-2 rounded-full bg-primary/30"></div>
-          </div>
-        </div>
       </DndContext>
 
-      {/* Tips Section */}
-      <div className="p-6 bg-cream rounded-xl mb-8">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-full bg-light/30 flex items-center justify-center flex-shrink-0">
-            <i className="ri-lightbulb-line text-primary text-xl"></i>
+      {/* Tips Section - Rotating Tips */}
+      <div className="p-4 bg-gradient-to-r from-cream to-white rounded-xl mb-8 border border-blush/50">
+        <div className="flex items-center gap-3">
+          <div className="flex-1 min-w-0">
+            <span className="text-xs font-medium text-primary uppercase tracking-wide mb-1 block">Pro Tip</span>
+            <p
+              className={`text-sm text-warm-gray transition-all duration-500 ${
+                tipFading ? 'opacity-0 transform -translate-y-1' : 'opacity-100 transform translate-y-0'
+              }`}
+            >
+              {proTips[currentTipIndex]}
+            </p>
           </div>
-          <div>
-            <h4 className="font-medium text-deep mb-2">Pro Tips for Success</h4>
-            <ul className="text-sm text-warm-gray space-y-1">
-              <li>• Wait 30-60 seconds between each step for better absorption</li>
-              <li>• Apply products from thinnest to thickest consistency</li>
-              <li>• Always use sunscreen as your final morning step</li>
-              <li>• Introduce new products one at a time to monitor reactions</li>
-              <li>• Check expiration dates regularly and replace expired products</li>
-            </ul>
-          </div>
+          <button
+            onClick={() => {
+              setTipFading(true);
+              setTimeout(() => {
+                setCurrentTipIndex(prev => (prev + 1) % proTips.length);
+                setTipFading(false);
+              }, 200);
+            }}
+            className="w-8 h-8 rounded-full bg-white border border-blush hover:border-primary/30 flex items-center justify-center text-warm-gray hover:text-primary transition-all cursor-pointer flex-shrink-0"
+            title="Next tip"
+          >
+            <i className="ri-arrow-right-s-line text-lg"></i>
+          </button>
         </div>
       </div>
 
@@ -913,92 +1056,6 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           )}
         </div>
       )}
-
-      {/* FIX #3: Your Routine Summary Card */}
-      <div className="bg-gradient-to-br from-cream to-white rounded-2xl border-2 border-primary/20 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif text-2xl font-bold text-deep flex items-center gap-2">
-            <i className="ri-list-check-2 text-primary"></i>
-            Your Routine Summary
-          </h3>
-          <span className="px-3 py-1 bg-primary/10 text-primary text-sm font-medium rounded-full">
-            {filledStepsCount} of {filteredSteps.length} steps filled
-          </span>
-        </div>
-        
-        {/* Ordered Summary List */}
-        <div className="space-y-2 mb-6">
-          {filteredSteps.map((step, index) => (
-            <div
-              key={step.id}
-              className={`flex items-center gap-3 p-3 rounded-lg transition-all ${
-                step.product
-                  ? 'bg-white border border-primary/20'
-                  : 'bg-gray-50 border border-gray-200'
-              }`}
-            >
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                step.product
-                  ? 'bg-primary text-white'
-                  : 'bg-gray-200 text-gray-500'
-              }`}>
-                {index + 1}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`font-medium ${step.product ? 'text-deep' : 'text-gray-400'}`}>
-                  {step.title}
-                </p>
-                {step.product && (
-                  <p className="text-sm text-warm-gray truncate">
-                    {step.product.brand} - {step.product.name}
-                  </p>
-                )}
-              </div>
-              <div className="flex-shrink-0">
-                {step.product ? (
-                  <i className="ri-checkbox-circle-fill text-primary text-xl"></i>
-                ) : (
-                  <i className="ri-checkbox-blank-circle-line text-gray-300 text-xl"></i>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Progress Bar */}
-        <div className="mb-6">
-          <div className="flex justify-between text-sm text-warm-gray mb-1">
-            <span>Progress</span>
-            <span>{filteredSteps.length > 0 ? Math.round((filledStepsCount / filteredSteps.length) * 100) : 0}%</span>
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-primary rounded-full transition-all duration-500"
-              style={{ width: `${filteredSteps.length > 0 ? (filledStepsCount / filteredSteps.length) * 100 : 0}%` }}
-            ></div>
-          </div>
-        </div>
-
-        {/* Save Routine Button */}
-        <button
-          onClick={handleSaveWithConfirmation}
-          disabled={filledStepsCount === 0}
-          className={`w-full py-4 rounded-xl font-semibold text-lg transition-all flex items-center justify-center gap-2 ${
-            filledStepsCount > 0
-              ? 'bg-primary text-white hover:bg-dark shadow-lg hover:shadow-xl cursor-pointer'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <i className="ri-save-line text-xl"></i>
-          Save {timeFilter === 'morning' ? 'Morning' : 'Evening'} Routine
-        </button>
-        
-        {filledStepsCount === 0 && (
-          <p className="text-center text-warm-gray text-sm mt-2">
-            Add at least one product to save your routine
-          </p>
-        )}
-      </div>
 
       {/* Save Confirmation Toast */}
       {saveConfirmation && (
@@ -1062,6 +1119,42 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         isOpen={showConflictPopup}
         onClose={() => setShowConflictPopup(false)}
         conflictCount={conflictCount}
+      />
+
+      {/* Product Browse Modal */}
+      <ProductPickerModal
+        isOpen={showBrowseModal}
+        onClose={() => {
+          setShowBrowseModal(false);
+          setBrowseStepId(null);
+        }}
+        category={browseCategory}
+        onSelectProduct={handleBrowseProductSelect}
+        savedProducts={savedProducts}
+      />
+
+      {/* Custom Step Modal */}
+      <CustomStepModal
+        isOpen={showCustomStepModal}
+        onClose={() => setShowCustomStepModal(false)}
+        onSelectCategory={(category) => {
+          const newStepId = `custom-${Date.now()}`;
+          const currentSteps = routineSteps.filter(s => s.timeOfDay === timeFilter);
+          const newStep: RoutineStep = {
+            id: newStepId,
+            stepNumber: currentSteps.length + 1,
+            title: category.name,
+            description: category.description,
+            timeOfDay: timeFilter,
+            recommended: false,
+          };
+          setRoutineSteps(prev => [...prev, newStep]);
+          setShowCustomStepModal(false);
+          // Open browse modal for the new step
+          setBrowseCategory(category.name);
+          setBrowseStepId(newStepId);
+          setShowBrowseModal(true);
+        }}
       />
     </div>
   );

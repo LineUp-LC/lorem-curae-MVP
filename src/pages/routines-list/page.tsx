@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import html2canvas from 'html2canvas';
-import { routineCompletionState } from '../../lib/utils/routineCompletionState';
+import { routineCompletionState, getRoutineBuilderCompletionRate } from '../../lib/utils/routineCompletionState';
 
 interface Routine {
   id: string;
@@ -87,6 +87,45 @@ export default function RoutinesListPage() {
     });
   }, []);
 
+  // Update completion rates from actual RoutineBuilder data
+  useEffect(() => {
+    const updateCompletionRates = () => {
+      const morningRate = getRoutineBuilderCompletionRate('morning');
+      const eveningRate = getRoutineBuilderCompletionRate('evening');
+
+      setRoutines(prev => prev.map(routine => {
+        // Map routines to their corresponding time of day
+        if (routine.name.toLowerCase().includes('morning')) {
+          return { ...routine, completionRate: morningRate.percentage };
+        } else if (routine.name.toLowerCase().includes('evening')) {
+          return { ...routine, completionRate: eveningRate.percentage };
+        }
+        // For other routines, use combined average
+        const combined = Math.round((morningRate.percentage + eveningRate.percentage) / 2);
+        return { ...routine, completionRate: combined };
+      }));
+    };
+
+    updateCompletionRates();
+
+    // Listen for storage changes (when RoutineBuilder updates)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'routine_completion_tracker') {
+        updateCompletionRates();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+
+    // Also poll periodically in case of same-tab updates
+    const interval = setInterval(updateCompletionRates, 2000);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
+    };
+  }, []);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [shareRoutineId, setShareRoutineId] = useState<string | null>(null);
@@ -97,6 +136,9 @@ export default function RoutinesListPage() {
   const [showEducationFlow, setShowEducationFlow] = useState(false);
   const [educationStep, setEducationStep] = useState(0);
   const [showSystemExplanation, setShowSystemExplanation] = useState(false);
+  const [hasSeenRoutineIntro] = useState(() => {
+    return localStorage.getItem('hasSeenRoutineIntro') === 'true';
+  });
   const [userConcerns, setUserConcerns] = useState<string[]>(() => {
     const saved = localStorage.getItem('skinSurveyData');
     if (saved) {
@@ -157,6 +199,11 @@ export default function RoutinesListPage() {
   };
 
   const handleCreateRoutine = () => {
+    // Skip popup if user has already seen it
+    if (hasSeenRoutineIntro) {
+      navigate('/routines');
+      return;
+    }
     setShowFamiliarityPopup(true);
   };
 
@@ -167,6 +214,8 @@ export default function RoutinesListPage() {
     } else {
       setShowIntroPopup(true);
     }
+    // Mark as seen after first interaction
+    localStorage.setItem('hasSeenRoutineIntro', 'true');
   };
 
   const handleIntroResponse = (wantsEducation: boolean) => {
@@ -360,11 +409,6 @@ export default function RoutinesListPage() {
                       <i className="ri-list-check text-deep"></i>
                       <span>{routine.stepCount} steps</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <i className="ri-time-line text-deep"></i>
-                      {/* CHANGED: Shortened "Updated" label for mobile */}
-                      <span>{routine.lastModified.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-                    </div>
                   </div>
 
                   {/* Progress Bar */}
@@ -378,18 +422,11 @@ export default function RoutinesListPage() {
                     </div>
                   </div>
 
-                  {/* Action Buttons: View Notes and Edit Routine */}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleViewNotes(routine.id)}
-                      className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
-                    >
-                      <i className="ri-file-text-line mr-1 sm:mr-2"></i>
-                      View Notes
-                    </button>
+                  {/* Action Button: Edit Routine */}
+                  <div>
                     <button
                       onClick={() => handleEditRoutine(routine.id)}
-                      className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-primary text-primary rounded-lg hover:bg-cream transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
                     >
                       <i className="ri-pencil-line mr-1 sm:mr-2"></i>
                       Edit
@@ -436,7 +473,7 @@ export default function RoutinesListPage() {
           <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-8">
             <div className="text-center mb-6">
               <div className="w-20 h-20 rounded-full bg-light/30 flex items-center justify-center mx-auto mb-6">
-                <i className="ri-sparkle-line text-primary text-4xl"></i>
+                <i className="ri-hand-heart-line text-primary text-4xl"></i>
               </div>
               <h3 className="text-2xl font-serif font-bold text-deep mb-3">
                 Let's Build Your Perfect Routine
@@ -495,7 +532,7 @@ export default function RoutinesListPage() {
                 </li>
                 <li className="flex items-start gap-2 text-sm text-warm-gray">
                   <i className="ri-check-line text-primary mt-0.5"></i>
-                  <span>Why product order matters for absorption</span>
+                  <span>Why product order matters</span>
                 </li>
                 <li className="flex items-start gap-2 text-sm text-warm-gray">
                   <i className="ri-check-line text-primary mt-0.5"></i>

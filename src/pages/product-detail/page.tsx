@@ -5,8 +5,7 @@ import ProductOverview from './components/ProductOverview';
 import ProductReviews from './components/ProductReviews';
 import PurchaseOptions from './components/PurchaseOptions';
 import SimilarProducts from './components/SimilarProducts';
-import ProductComparison from '../discover/components/ProductComparison';
-import { productData } from '../../mocks/products';
+import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
 import { supabase } from '../../lib/supabase-browser';
 import { useFavorites } from '../../lib/utils/favoritesState';
 import { recentlyViewedState } from '../../lib/utils/recentlyViewedState';
@@ -19,13 +18,14 @@ export default function ProductDetailPage() {
     'overview'
   );
   const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+  const [saveNotification, setSaveNotification] = useState<{ show: boolean; isAdding: boolean }>({ show: false, isAdding: true });
   const [isSavedToRoutine, setIsSavedToRoutine] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
   const [showComparison, setShowComparison] = useState(false);
-  const [showProductComparison, setShowProductComparison] = useState(false);
-  const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
+  const [showComparisonPicker, setShowComparisonPicker] = useState(false);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   // Favorites state
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -120,11 +120,15 @@ export default function ProductDetailPage() {
       });
       localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
       setIsSavedToRoutine(true);
+      setSaveNotification({ show: true, isAdding: true });
+      setTimeout(() => setSaveNotification({ show: false, isAdding: true }), 3000);
     } else {
       // Remove from routine
       savedProducts.splice(existingIndex, 1);
       localStorage.setItem('savedProducts', JSON.stringify(savedProducts));
       setIsSavedToRoutine(false);
+      setSaveNotification({ show: true, isAdding: false });
+      setTimeout(() => setSaveNotification({ show: false, isAdding: false }), 3000);
     }
   };
 
@@ -139,18 +143,15 @@ export default function ProductDetailPage() {
   };
 
   const scrollToIngredients = () => {
-    const ingredientsSection = document.getElementById('full-ingredients-section');
-    if (ingredientsSection) {
-      ingredientsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
-
-  const handleAddToComparison = (productId: number) => {
-    setSelectedForComparison(prev => {
-      if (prev.includes(productId)) return prev.filter(id => id !== productId);
-      if (prev.length < 3) return [...prev, productId];
-      return prev;
-    });
+    // First switch to ingredients tab
+    setActiveTab('ingredients');
+    // Then scroll to the tabs section after a brief delay for tab change
+    setTimeout(() => {
+      const tabsSection = document.querySelector('.bg-cream.py-16');
+      if (tabsSection) {
+        tabsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   useEffect(() => {
@@ -335,10 +336,14 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
       
-      {showSaveSuccess && (
+      {/* Save Notification Popup */}
+      {saveNotification.show && (
         <div className="fixed top-24 right-6 z-50 bg-primary text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 motion-safe:animate-fade-in">
-          <i className="ri-checkbox-circle-fill text-xl"></i>
-          <span className="font-medium">Saved to your routine!</span>
+          <i className={`${saveNotification.isAdding ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
+          <div>
+            <p className="font-medium">{saveNotification.isAdding ? 'Saved to Products' : 'Removed from Saved'}</p>
+            <p className="text-sm text-white/80">{product.name}</p>
+          </div>
         </div>
       )}
 
@@ -419,7 +424,7 @@ export default function ProductDetailPage() {
                     return (
                       <span key={index} className={`px-4 py-2 text-sm font-medium rounded-lg ${isMatchingIngredient ? 'bg-primary/10 text-primary border border-primary/30' : 'bg-cream text-warm-gray'}`}>
                         {ingredient}
-                        {isMatchingIngredient && <i className="ri-sparkling-fill ml-1 text-primary"></i>}
+                        {isMatchingIngredient && <i className="ri-check-line ml-1 text-primary"></i>}
                       </span>
                     );
                   })}
@@ -462,7 +467,7 @@ export default function ProductDetailPage() {
                     return productPreferences.map((pref) => {
                       const isMatching = userPrefs[pref.key] === true && pref.value === true;
                       return (
-                        <span key={pref.key} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${pref.value ? isMatching ? 'bg-primary/10 text-primary border-2 border-primary' : 'bg-sage/10 text-sage' : 'bg-blush/30 text-warm-gray/60 line-through'}`}>
+                        <span key={pref.key} className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${pref.value ? isMatching ? 'bg-sage/20 text-sage border border-sage' : 'bg-cream text-warm-gray' : 'bg-blush/30 text-warm-gray/60 line-through'}`}>
                           {pref.value && isMatching && <i className="ri-check-line mr-1"></i>}
                           {pref.value && !isMatching && <i className="ri-leaf-line mr-1"></i>}
                           {!pref.value && <i className="ri-close-line mr-1"></i>}
@@ -475,48 +480,115 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Location Info */}
-              <div className="bg-gradient-to-br from-sage/10 to-light/20 rounded-xl p-6">
-                <div className="flex items-start gap-3 mb-4">
-                  <i className="ri-map-pin-line text-xl text-sage mt-0.5"></i>
-                  <div>
-                    <h3 className="text-sm font-semibold text-deep mb-1">Personalized for Your Location</h3>
-                    <p className="text-sm text-warm-gray">Based on your profile: {locationData.location}</p>
-                  </div>
+              <div className="flex items-center gap-2 text-xs text-warm-gray flex-wrap">
+                <div className="flex items-center gap-2">
+                  <i className="ri-map-pin-line text-sage"></i>
+                  <span>{locationData.location}</span>
+                  <span className="text-blush">•</span>
+                  <span>{locationData.climate}</span>
+                  <span className="text-blush">•</span>
+                  <span>UV {locationData.uvIndex}</span>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div><p className="text-xs font-medium text-warm-gray mb-1">Climate</p><p className="text-sm font-semibold text-deep">{locationData.climate}</p></div>
-                  <div><p className="text-xs font-medium text-warm-gray mb-1">UV Index</p><p className="text-sm font-semibold text-deep">{locationData.uvIndex}</p></div>
-                  <div><p className="text-xs font-medium text-warm-gray mb-1">Pollution Level</p><p className="text-sm font-semibold text-deep">{locationData.pollutionLevel}</p></div>
-                  <div><p className="text-xs font-medium text-warm-gray mb-1">Season</p><p className="text-sm font-semibold text-deep">{locationData.season}</p></div>
-                </div>
+                <button
+                  onClick={() => setShowLocationModal(true)}
+                  className="flex items-center gap-1 text-primary hover:text-dark transition-colors cursor-pointer"
+                >
+                  <i className="ri-question-line"></i>
+                  <span className="underline">How does this relate to me?</span>
+                </button>
               </div>
 
+              {/* Environment Fit Indicator */}
+              <div className="mt-3 inline-flex items-center gap-2 px-3 py-2 bg-sage/10 text-sage rounded-lg text-sm">
+                <i className="ri-check-line"></i>
+                <span className="font-medium">This product fits your environment</span>
+              </div>
+
+              {/* Location Explanation Modal */}
+              {showLocationModal && (
+                <div
+                  className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+                  onClick={() => setShowLocationModal(false)}
+                >
+                  <div
+                    className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 flex items-center justify-center bg-sage/10 rounded-full">
+                          <i className="ri-map-pin-line text-xl text-sage"></i>
+                        </div>
+                        <h3 className="text-lg font-semibold text-deep">Your Location & This Product</h3>
+                      </div>
+                      <button
+                        onClick={() => setShowLocationModal(false)}
+                        className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer"
+                      >
+                        <i className="ri-close-line text-xl"></i>
+                      </button>
+                    </div>
+                    <div className="space-y-4 text-sm text-warm-gray leading-relaxed">
+                      <p>
+                        Based on your location in <span className="font-medium text-deep">{locationData.location}</span>, we've analyzed how this product fits your environmental conditions.
+                      </p>
+                      <div className="bg-cream rounded-xl p-4 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <i className="ri-sun-line text-primary mt-0.5"></i>
+                          <div>
+                            <p className="font-medium text-deep">UV Index: {locationData.uvIndex}</p>
+                            <p className="text-xs">This Vitamin C serum provides antioxidant protection against UV-induced free radicals, complementing your daily SPF in moderate UV conditions.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <i className="ri-cloud-line text-primary mt-0.5"></i>
+                          <div>
+                            <p className="font-medium text-deep">Climate: {locationData.climate}</p>
+                            <p className="text-xs">In humid continental climates, lightweight serums absorb well without feeling heavy. The hyaluronic acid draws moisture from the humid air for added hydration.</p>
+                          </div>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          <i className="ri-leaf-line text-primary mt-0.5"></i>
+                          <div>
+                            <p className="font-medium text-deep">Season: {locationData.season}</p>
+                            <p className="text-xs">Spring is ideal for starting a Vitamin C routine, preparing your skin for increased sun exposure while addressing winter dullness.</p>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-warm-gray/70 italic">
+                        These insights are personalized based on your profile location. Update your location in settings for more accurate recommendations.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Action Buttons */}
-              <div className="space-y-3">
+              <div className="flex flex-wrap gap-2">
                 <button
-                  onClick={handleToggleFavorite}
-                  className={`w-full font-semibold py-4 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 ${
-                    isFavorite(product.id)
-                      ? 'bg-primary/10 text-primary border-2 border-primary hover:bg-primary/20'
+                  onClick={handleSaveToRoutine}
+                  className={`font-medium py-2 px-4 rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 text-sm ${
+                    isSavedToRoutine
+                      ? 'bg-primary/10 text-primary hover:bg-primary/20'
                       : 'bg-primary hover:bg-dark text-white'
                   }`}
                 >
-                  <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-lg`}></i>
-                  {isFavorite(product.id) ? 'Saved to Favorites' : 'Add to Favorites'}
+                  <i className={`${isSavedToRoutine ? 'ri-bookmark-fill' : 'ri-bookmark-line'}`}></i>
+                  {isSavedToRoutine ? 'Saved' : 'Save Product'}
                 </button>
                 <button
-                  onClick={handleSaveToRoutine}
-                  className={`w-full font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary ${
-                    isSavedToRoutine
-                      ? 'bg-primary/10 text-primary hover:bg-primary/20'
-                      : 'bg-white hover:bg-cream text-primary'
-                  }`}
+                  onClick={scrollToReviews}
+                  className="bg-white hover:bg-cream text-primary font-medium py-2 px-4 rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 text-sm border border-primary"
                 >
-                  <i className={`${isSavedToRoutine ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-lg`}></i>
-                  {isSavedToRoutine ? 'Saved to Routine' : 'Save to Routine'}
+                  <i className="ri-chat-3-line"></i>
+                  {product.reviewCount.toLocaleString()} Reviews
                 </button>
-                <button onClick={scrollToReviews} className="w-full bg-white hover:bg-cream text-primary font-semibold py-3 px-6 rounded-xl transition-colors whitespace-nowrap flex items-center justify-center gap-2 border-2 border-primary">
-                  <i className="ri-chat-3-line text-lg"></i>Read {product.reviewCount.toLocaleString()} Reviews
+                <button
+                  onClick={() => setShowComparisonPicker(true)}
+                  className="w-9 h-9 flex items-center justify-center rounded-full transition-colors bg-cream text-warm-gray hover:bg-blush border border-blush"
+                  title="Compare"
+                >
+                  <i className="ri-scales-line"></i>
                 </button>
               </div>
             </div>
@@ -544,12 +616,8 @@ export default function ProductDetailPage() {
             </div>
 
             {activeTab === 'overview' && (
-              <div className="space-y-8">
+              <div className="bg-white rounded-2xl p-8">
                 <ProductOverview />
-                <div id="full-ingredients-section">
-                  <h3 className="text-xl font-semibold text-deep mb-4">Full Ingredient List</h3>
-                  <p className="text-warm-gray leading-relaxed">Water (Aqua), Niacinamide, Glycerin, Hyaluronic Acid, Pentylene Glycol, Zinc PCA, Panthenol, Dimethyl Isosorbide, Tamarindus Indica Seed Gum, Acacia Senegal Gum, Hydrolyzed Wheat Protein, Hydrolyzed Wheat Starch, Carrageenan, Xanthan Gum, Isoceteth-20, Ethoxydiglycol, Phenoxyethanol, Chlorphenesin.</p>
-                </div>
               </div>
             )}
             {activeTab === 'ingredients' && (
@@ -576,18 +644,25 @@ export default function ProductDetailPage() {
                 </div>
               </div>
             )}
-            {activeTab === 'reviews' && <ProductReviews productId={product.id} />}
+            {activeTab === 'reviews' && (
+              <div className="bg-white rounded-2xl p-8">
+                <ProductReviews productId={product.id} />
+              </div>
+            )}
           </div>
         </div>
 
-        <SimilarProducts productId={product.id} onAddToComparison={handleAddToComparison} selectedForComparison={selectedForComparison} onOpenComparison={() => setShowProductComparison(true)} />
+        <SimilarProducts productId={product.id} />
       </main>
 
-      {showProductComparison && selectedForComparison.length >= 2 && (
-        <ProductComparison products={productData.filter(p => selectedForComparison.includes(p.id))} userConcerns={userConcerns} onClose={() => setShowProductComparison(false)}
-          onRemoveProduct={(id) => { setSelectedForComparison(prev => prev.filter(pId => pId !== id)); if (selectedForComparison.length <= 2) setShowProductComparison(false); }}
-        />
-      )}
+
+      {/* Comparison Picker Modal */}
+      <ComparisonPickerModal
+        isOpen={showComparisonPicker}
+        onClose={() => setShowComparisonPicker(false)}
+        initialProductId={product.id}
+        userConcerns={userConcerns}
+      />
 
       <Footer />
     </div>

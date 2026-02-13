@@ -22,10 +22,17 @@ const categories = [
   { value: 'cleanser', label: 'Cleansers', icon: 'ri-drop-line' },
   { value: 'toner', label: 'Toners', icon: 'ri-contrast-drop-line' },
   { value: 'serum', label: 'Serums', icon: 'ri-flask-line' },
+  { value: 'essence', label: 'Essences', icon: 'ri-water-flash-line' },
   { value: 'moisturizer', label: 'Moisturizers', icon: 'ri-contrast-drop-2-line' },
   { value: 'sunscreen', label: 'Sunscreen', icon: 'ri-sun-line' },
   { value: 'treatment', label: 'Treatments', icon: 'ri-heart-pulse-line' },
+  { value: 'eye-care', label: 'Eye Care', icon: 'ri-eye-line' },
+  { value: 'lip-care', label: 'Lip Care', icon: 'ri-chat-smile-3-line' },
   { value: 'mask', label: 'Masks', icon: 'ri-user-smile-line' },
+  { value: 'exfoliator', label: 'Exfoliators', icon: 'ri-refresh-line' },
+  { value: 'oil', label: 'Face Oils', icon: 'ri-drop-fill' },
+  { value: 'mist', label: 'Mists & Sprays', icon: 'ri-cloud-line' },
+  { value: 'tool', label: 'Tools & Devices', icon: 'ri-tools-line' },
 ];
 
 const skinTypes = [
@@ -75,8 +82,15 @@ export default function ProductCatalog({
   );
   const [sortBy, setSortBy] = useLocalStorageState<string>(
     'discover_sort_by',
-    'popular'
+    'rating'
   );
+
+  // Migrate old 'popular' sort value to 'rating'
+  useEffect(() => {
+    if (sortBy === 'popular') {
+      setSortBy('rating');
+    }
+  }, []);
   const [timeOfDay, setTimeOfDay] = useLocalStorageState<string>(
     'discover_filter_time_of_day',
     'all'
@@ -155,7 +169,7 @@ export default function ProductCatalog({
     );
   }, [filteredProducts, matchedProducts]);
 
-  // Final sorting (price, rating, popularity)
+  // Final sorting (price, rating, favorites)
   const sortProducts = (productList: Product[]) => {
     return [...productList].sort((a, b) => {
       switch (sortBy) {
@@ -163,11 +177,15 @@ export default function ProductCatalog({
           return a.price - b.price;
         case 'price-high':
           return b.price - a.price;
-        case 'rating':
+        case 'favorites':
+          // Favorites first, then by rating
+          const aFav = isFavorite(a.id) ? 1 : 0;
+          const bFav = isFavorite(b.id) ? 1 : 0;
+          if (bFav !== aFav) return bFav - aFav;
           return b.rating - a.rating;
-        case 'popular':
+        case 'rating':
         default:
-          return b.reviewCount - a.reviewCount;
+          return b.rating - a.rating;
       }
     });
   };
@@ -217,7 +235,7 @@ export default function ProductCatalog({
     
     if (isInCompareList(product.id)) {
       setCompareList((prev) => prev.filter((p) => p.id !== product.id));
-    } else if (safeCompareList.length < 4) {
+    } else if (safeCompareList.length < 3) {
       setCompareList((prev) => [...prev, product]);
     }
   };
@@ -280,27 +298,35 @@ export default function ProductCatalog({
             aria-label={isFavorite(product.id) ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`}
             aria-pressed={isFavorite(product.id)}
           >
-            <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+            <i className={`${isFavorite(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
           </button>
 
           {/* Comparison Button */}
-          <button
-            onClick={(e) => handleAddToCompare(product, e)}
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-              isSelected
-                ? 'bg-primary text-white'
-                : 'bg-white text-warm-gray hover:bg-light/30'
-            }`}
-            title={isSelected ? 'Remove from comparison' : 'Add to comparison'}
-            aria-label={isSelected ? `Remove ${product.name} from comparison` : `Add ${product.name} to comparison`}
-            aria-pressed={isSelected}
-          >
-            {isSelected ? (
-              <i className="ri-check-line text-xl"></i>
-            ) : (
-              <i className="ri-scales-line text-xl"></i>
-            )}
-          </button>
+          {(() => {
+            const isMaxReached = safeCompareList.length >= 3 && !isSelected;
+            return (
+              <button
+                onClick={(e) => !isMaxReached && handleAddToCompare(product, e)}
+                disabled={isMaxReached}
+                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                  isSelected
+                    ? 'bg-primary text-white cursor-pointer'
+                    : isMaxReached
+                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-white text-warm-gray hover:bg-light/30 cursor-pointer'
+                }`}
+                title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
+                aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
+                aria-pressed={isSelected}
+              >
+                {isSelected ? (
+                  <i className="ri-check-line text-xl"></i>
+                ) : (
+                  <i className="ri-scales-line text-xl"></i>
+                )}
+              </button>
+            );
+          })()}
         </div>
 
         {/* Product Image */}
@@ -384,7 +410,7 @@ export default function ProductCatalog({
       {/* Hero Section */}
       <div className="text-center mb-8 sm:mb-12">
         <h1 className="text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-serif text-deep mb-4 sm:mb-6">
-          Discover Your Perfect Match
+          Discover What's For You
         </h1>
         <p className="text-base sm:text-xl text-warm-gray max-w-3xl mx-auto mb-6 sm:mb-8">
           Discover products that truly fit your skin profile, compare them side‑by‑side, and shop confidently through reputable retailers vetted by our community
@@ -512,10 +538,10 @@ export default function ProductCatalog({
                   onFilterChange('sortBy', value)
                 }}
                 options={[
-                  { value: 'popular', label: 'Most Popular' },
                   { value: 'rating', label: 'Highest Rated' },
                   { value: 'price-low', label: 'Price: Low to High' },
                   { value: 'price-high', label: 'Price: High to Low' },
+                  { value: 'favorites', label: 'Favorites First' },
                 ]}
                 className="min-w-[170px]"
               />
@@ -690,7 +716,7 @@ export default function ProductCatalog({
                       </h3>
                       <p className="text-xs sm:text-sm text-warm-gray" aria-live="polite">
                         <span className="sr-only">Currently </span>
-                        {safeCompareList.length} of 4 products selected
+                        {safeCompareList.length} of 3 products selected
                       </p>
                     </div>
                   </div>
@@ -753,7 +779,7 @@ export default function ProductCatalog({
       {/* Favorite Notification Popup */}
       {favoriteNotification.show && (
         <div className="fixed top-24 right-6 z-50 bg-primary text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 motion-safe:animate-fade-in">
-          <i className={`${favoriteNotification.isAdding ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+          <i className={`${favoriteNotification.isAdding ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
           <div>
             <p className="font-medium">{favoriteNotification.isAdding ? 'Added to Favorites' : 'Removed from Favorites'}</p>
             <p className="text-sm text-white/80">{favoriteNotification.productName}</p>

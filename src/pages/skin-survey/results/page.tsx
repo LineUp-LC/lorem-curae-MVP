@@ -85,7 +85,6 @@ const SurveyResultsPage = () => {
         },
         lifestyle: normalizedData.lifestyle,
       };
-      localStorage.setItem('userProfile', JSON.stringify(userProfile));
     } else {
       // No survey data found - redirect to survey
       navigate('/skin-survey');

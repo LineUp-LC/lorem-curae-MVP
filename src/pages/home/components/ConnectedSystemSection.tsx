@@ -104,9 +104,10 @@ const stepItemVariants = {
   },
 };
 
-// Sequential flow: 1 → 2 → arrow → 3 → arrow → 4 → arrow → 5 → arrow → 6
+// Sequential flow: 1 → arrow → 2 → arrow → 3 → arrow → 4 → arrow → 5 → arrow → 6
 // Each step appears after the previous arrow finishes
-const LOOP_STEP_REVEAL_DELAYS = [0.3, 1.6, 2.9, 4.2]; // by map index: [step2, step3, step4, step5]
+// Step 1: 0s, Arrow 1→2: 0.7s, Step 2: 0.9s, Arrow 2→Circle: 1.6s, Steps 3-6: 2.0s+
+const LOOP_STEP_REVEAL_DELAYS = [2.0, 2.8, 3.6, 4.4]; // by map index: [step3, step4, step5, step6]
 
 const createStepRevealVariants = (delay: number) => ({
   hidden: { opacity: 0, y: 8, scale: 0.95 },
@@ -118,6 +119,30 @@ const createStepRevealVariants = (delay: number) => ({
       duration: TIMING.slow, // 0.8s
       ease: EASING.gentle,
       delay,
+    },
+  },
+});
+
+// Arrow reveal variants for endpoint arrows (between steps 1→2 and 2→circle)
+// Combines reveal animation with continuous floating motion
+// Both arrows sync their float at the same absolute time (2.0s) for unified flow
+const createArrowRevealVariants = (revealDelay: number, floatStartTime: number = 2.0) => ({
+  hidden: { opacity: 0, y: -10 },
+  visible: {
+    opacity: 1,
+    y: [0, 6, 0],
+    transition: {
+      opacity: {
+        duration: 0.4,
+        ease: EASING.gentle,
+        delay: revealDelay,
+      },
+      y: {
+        duration: 2.5,
+        repeat: Infinity,
+        ease: EASING.natural,
+        delay: floatStartTime, // Both arrows start floating at same time for sync
+      },
     },
   },
 });
@@ -147,7 +172,8 @@ const endpointArrowFloat = {
 // Arrow draw animation — each arrow draws after its step appears, before the next step
 const ARROW_DRAW_DURATION = 0.4;
 // Flow: step appears → arrow draws → next step appears
-const ARROW_DRAW_DELAYS = [1.2, 2.5, 3.8, 5.1]; // by map index: [step2, step3, step4, step5]
+// Updated to match new step timing: steps 3-6 at [2.0, 2.8, 3.6, 4.4]
+const ARROW_DRAW_DELAYS = [2.6, 3.4, 4.2, 5.0]; // by map index: [after step3, after step4, after step5, after step6]
 
 const createArrowDrawVariants = (delayIndex: number, isReplay = false) => {
   // On replay (hover), use 0 delay for immediate animation
@@ -996,7 +1022,7 @@ export default function ConnectedSystemSection() {
             className="lc-section-title"
             variants={fadeInUpSoft}
           >
-            One ecosystem. Infinite clarity.
+            An ecosystem designed to bring clarity.
           </motion.h2>
           <motion.p
             className="lc-section-description"
@@ -1025,30 +1051,30 @@ export default function ConnectedSystemSection() {
               <span className="lc-loop-label">{journeySteps[0]}</span>
             </motion.div>
 
-            {/* Arrow: Step 1 → Step 2 */}
+            {/* Arrow: Step 1 → Step 2 (appears at 0.7s, after step 1, then floats) */}
             <motion.span
               className="lc-endpoint-arrow lc-arrow-top lc-arrow-down"
               aria-hidden="true"
-              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
+              variants={prefersReducedMotion ? undefined : createArrowRevealVariants(0.7)}
             >
               <InwardArrow />
             </motion.span>
 
-            {/* Step 2 - mid endpoint (reveals second: delay 0.4s) */}
+            {/* Step 2 - mid endpoint (reveals at 0.9s) */}
             <motion.div
               className="lc-journey-endpoint lc-journey-mid"
-              variants={prefersReducedMotion ? undefined : createStepRevealVariants(0.4)}
+              variants={prefersReducedMotion ? undefined : createStepRevealVariants(0.9)}
               role="listitem"
             >
               <span className="lc-loop-number" aria-hidden="true">2</span>
               <span className="lc-loop-label">{journeySteps[1]}</span>
             </motion.div>
 
-            {/* Arrow: Step 2 → Circle */}
+            {/* Arrow: Step 2 → Circle (appears at 1.6s, after step 2, then floats) */}
             <motion.span
               className="lc-endpoint-arrow lc-arrow-mid lc-arrow-down"
               aria-hidden="true"
-              animate={prefersReducedMotion ? undefined : endpointArrowFloat}
+              variants={prefersReducedMotion ? undefined : createArrowRevealVariants(1.6)}
             >
               <InwardArrow />
             </motion.span>

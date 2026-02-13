@@ -19,113 +19,113 @@ const ProfileEditPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-cream-50">
+    <div className="min-h-screen bg-cream">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-6 lg:px-12 pt-24 pb-16">
-        <div className="mb-8">
+        <div className="mb-6">
           <button
             onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-gray-900 mb-4 cursor-pointer"
+            className="flex items-center text-warm-gray hover:text-deep mb-4 cursor-pointer text-sm"
           >
             <i className="ri-arrow-left-line mr-2"></i>
             Back
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Edit Profile Picture</h1>
-          <p className="text-gray-600">Choose how you'd like to update your profile picture</p>
+          <h1 className="font-serif text-2xl font-semibold text-deep mb-2">Edit Profile Picture</h1>
+          <p className="text-warm-gray text-sm">Choose how you'd like to update your profile picture</p>
         </div>
 
-        <div className="bg-white rounded-xl p-8">
+        <div className="bg-white rounded-xl p-6 border border-blush/50">
           {/* Current Profile */}
-          <div className="flex items-center space-x-6 mb-8 pb-8 border-b border-gray-200">
-            <div className="w-24 h-24 rounded-full overflow-hidden ring-4 ring-taupe-200">
-              <img 
+          <div className="flex items-center space-x-5 mb-6 pb-6 border-b border-blush/30">
+            <div className="w-20 h-20 rounded-full overflow-hidden ring-4 ring-primary/20">
+              <img
                 src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=current-avatar&orientation=squarish"
                 alt="Current profile"
                 className="w-full h-full object-cover"
               />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 mb-1">Current Profile Picture</h3>
-              <p className="text-sm text-gray-600">Choose a new method below to update</p>
+              <h3 className="font-medium text-deep text-sm mb-1">Current Profile Picture</h3>
+              <p className="text-xs text-warm-gray">Choose a new method below to update</p>
             </div>
           </div>
 
           {/* Upload Methods */}
-          <div className="space-y-4 mb-8">
-            <h3 className="font-semibold text-gray-900 mb-4">Choose Upload Method</h3>
-            
+          <div className="space-y-3 mb-6">
+            <h3 className="font-medium text-deep text-sm mb-3">Choose Upload Method</h3>
+
             <button
               onClick={() => setUploadMethod('computer')}
-              className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'computer' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
+              className={`w-full flex items-center justify-between p-4 border rounded-xl transition-all cursor-pointer ${
+                uploadMethod === 'computer' ? 'border-primary bg-primary/5' : 'border-blush hover:border-primary/50'
               }`}
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-taupe-100 text-taupe rounded-lg mr-4">
-                  <i className="ri-computer-line text-2xl"></i>
+                <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-lg mr-4">
+                  <i className="ri-computer-line text-xl"></i>
                 </div>
                 <div className="text-left">
-                  <p className="font-medium text-gray-900">Upload from Computer</p>
-                  <p className="text-sm text-gray-600">Choose a file from your device</p>
+                  <p className="font-medium text-deep text-sm">Upload from Computer</p>
+                  <p className="text-xs text-warm-gray">Choose a file from your device</p>
                 </div>
               </div>
               {uploadMethod === 'computer' && (
-                <i className="ri-check-line text-2xl text-taupe"></i>
+                <i className="ri-check-line text-xl text-primary"></i>
               )}
             </button>
 
             <button
               onClick={() => setUploadMethod('drive')}
-              className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'drive' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
+              className={`w-full flex items-center justify-between p-4 border rounded-xl transition-all cursor-pointer ${
+                uploadMethod === 'drive' ? 'border-primary bg-primary/5' : 'border-blush hover:border-primary/50'
               }`}
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-primary-100 text-primary-600 rounded-lg mr-4">
-                  <i className="ri-google-line text-2xl"></i>
+                <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-lg mr-4">
+                  <i className="ri-google-line text-xl"></i>
                 </div>
                 <div className="text-left">
-                  <p className="font-medium text-gray-900">Upload from Google Drive</p>
-                  <p className="text-sm text-gray-600">Select from your cloud storage</p>
+                  <p className="font-medium text-deep text-sm">Upload from Google Drive</p>
+                  <p className="text-xs text-warm-gray">Select from your cloud storage</p>
                 </div>
               </div>
               {uploadMethod === 'drive' && (
-                <i className="ri-check-line text-2xl text-taupe"></i>
+                <i className="ri-check-line text-xl text-primary"></i>
               )}
             </button>
 
             <button
               onClick={() => setUploadMethod('provided')}
-              className={`w-full flex items-center justify-between p-4 border-2 rounded-lg transition-all cursor-pointer ${
-                uploadMethod === 'provided' ? 'border-taupe bg-taupe-50' : 'border-gray-200 hover:border-taupe-300'
+              className={`w-full flex items-center justify-between p-4 border rounded-xl transition-all cursor-pointer ${
+                uploadMethod === 'provided' ? 'border-primary bg-primary/5' : 'border-blush hover:border-primary/50'
               }`}
             >
               <div className="flex items-center">
-                <div className="w-12 h-12 flex items-center justify-center bg-purple-100 text-purple-600 rounded-lg mr-4">
-                  <i className="ri-gallery-line text-2xl"></i>
+                <div className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary rounded-lg mr-4">
+                  <i className="ri-gallery-line text-xl"></i>
                 </div>
                 <div className="text-left">
-                  <p className="font-medium text-gray-900">Choose Provided Avatar</p>
-                  <p className="text-sm text-gray-600">Select from our collection</p>
+                  <p className="font-medium text-deep text-sm">Choose Provided Avatar</p>
+                  <p className="text-xs text-warm-gray">Select from our collection</p>
                 </div>
               </div>
               {uploadMethod === 'provided' && (
-                <i className="ri-check-line text-2xl text-taupe"></i>
+                <i className="ri-check-line text-xl text-primary"></i>
               )}
             </button>
           </div>
 
           {/* Upload Area */}
           {uploadMethod === 'computer' && (
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center">
-              <i className="ri-upload-cloud-line text-5xl text-gray-400 mb-4"></i>
-              <p className="text-gray-900 font-medium mb-2">Drop your image here or click to browse</p>
-              <p className="text-sm text-gray-600 mb-4">PNG, JPG up to 10MB</p>
+            <div className="border-2 border-dashed border-blush rounded-xl p-10 text-center">
+              <i className="ri-upload-cloud-line text-4xl text-warm-gray/40 mb-3"></i>
+              <p className="text-deep font-medium text-sm mb-2">Drop your image here or click to browse</p>
+              <p className="text-xs text-warm-gray mb-4">PNG, JPG up to 10MB</p>
               <input type="file" accept="image/*" className="hidden" id="file-upload" />
               <label
                 htmlFor="file-upload"
-                className="inline-block px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap"
+                className="inline-block px-5 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-dark transition-colors cursor-pointer whitespace-nowrap"
               >
                 Choose File
               </label>
@@ -133,11 +133,11 @@ const ProfileEditPage = () => {
           )}
 
           {uploadMethod === 'drive' && (
-            <div className="border-2 border-gray-200 rounded-lg p-12 text-center">
-              <i className="ri-google-line text-5xl text-primary-600 mb-4"></i>
-              <p className="text-gray-900 font-medium mb-2">Connect to Google Drive</p>
-              <p className="text-sm text-gray-600 mb-4">Access your photos from the cloud</p>
-              <button className="px-6 py-3 bg-primary-600 text-white rounded-lg font-medium hover:bg-dark transition-colors cursor-pointer whitespace-nowrap">
+            <div className="border border-blush rounded-xl p-10 text-center">
+              <i className="ri-google-line text-4xl text-primary mb-3"></i>
+              <p className="text-deep font-medium text-sm mb-2">Connect to Google Drive</p>
+              <p className="text-xs text-warm-gray mb-4">Access your photos from the cloud</p>
+              <button className="px-5 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-dark transition-colors cursor-pointer whitespace-nowrap">
                 Connect Google Drive
               </button>
             </div>
@@ -145,14 +145,14 @@ const ProfileEditPage = () => {
 
           {uploadMethod === 'provided' && (
             <div>
-              <h4 className="font-medium text-gray-900 mb-4">Select an Avatar</h4>
-              <div className="grid grid-cols-4 gap-4">
+              <h4 className="font-medium text-deep text-sm mb-4">Select an Avatar</h4>
+              <div className="grid grid-cols-4 gap-3">
                 {providedAvatars.map((avatar, idx) => (
                   <button
                     key={idx}
-                    className="aspect-square rounded-lg overflow-hidden border-2 border-gray-200 hover:border-taupe transition-all cursor-pointer"
+                    className="aspect-square rounded-xl overflow-hidden border-2 border-blush hover:border-primary transition-all cursor-pointer"
                   >
-                    <img 
+                    <img
                       src={avatar}
                       alt={`Avatar ${idx + 1}`}
                       className="w-full h-full object-cover"
@@ -165,14 +165,14 @@ const ProfileEditPage = () => {
 
           {/* Action Buttons */}
           {uploadMethod && (
-            <div className="flex items-center justify-end space-x-4 mt-8 pt-8 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 mt-6 pt-6 border-t border-blush/30">
               <button
                 onClick={() => navigate(-1)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors cursor-pointer whitespace-nowrap"
+                className="px-5 py-2.5 border border-blush text-warm-gray rounded-lg font-medium text-sm hover:bg-cream transition-colors cursor-pointer whitespace-nowrap"
               >
                 Cancel
               </button>
-              <button className="px-6 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors cursor-pointer whitespace-nowrap">
+              <button className="px-5 py-2.5 bg-primary text-white rounded-lg font-medium text-sm hover:bg-dark transition-colors cursor-pointer whitespace-nowrap">
                 Save Profile Picture
               </button>
             </div>

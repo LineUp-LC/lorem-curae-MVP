@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import ProductCatalog from './components/ProductCatalog';
-import ProductComparison from './components/ProductComparison';
+import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
 import Navbar from '../../components/feature/Navbar';
 import Footer from '../../components/feature/Footer';
 import { sessionState, getEffectiveConcerns } from '../../lib/utils/sessionState';
@@ -51,48 +51,6 @@ const DiscoverPage = () => {
     
     if (effectiveConcerns.length > 0) {
       setUserConcerns(effectiveConcerns);
-    } else {
-      const surveyData = localStorage.getItem('skinSurveyData');
-      if (surveyData) {
-        try {
-          const parsed = JSON.parse(surveyData);
-          if (parsed.concerns && Array.isArray(parsed.concerns)) {
-            setUserConcerns(parsed.concerns);
-            sessionState.setTempConcerns(parsed.concerns);
-            return;
-          }
-        } catch (e) {
-          console.error('Failed to parse skinSurveyData:', e);
-        }
-      }
-      
-      const userProfile = localStorage.getItem('userProfile');
-      if (userProfile) {
-        try {
-          const parsed = JSON.parse(userProfile);
-          if (parsed.concerns && Array.isArray(parsed.concerns)) {
-            setUserConcerns(parsed.concerns);
-            sessionState.setTempConcerns(parsed.concerns);
-            return;
-          }
-        } catch (e) {
-          console.error('Failed to parse userProfile:', e);
-        }
-      }
-      
-      const storedConcerns = localStorage.getItem('userConcerns');
-      if (storedConcerns) {
-        try {
-          const parsed = JSON.parse(storedConcerns);
-          const concernStrings = parsed.map((c: any) => 
-            typeof c === 'string' ? c : (c.name || c.id || c)
-          );
-          setUserConcerns(concernStrings);
-          sessionState.setTempConcerns(concernStrings);
-        } catch (e) {
-          console.error('Failed to parse userConcerns:', e);
-        }
-      }
     }
 
     const unsubscribe = sessionState.subscribe(() => {
@@ -135,11 +93,12 @@ const DiscoverPage = () => {
       </main>
 
       {showComparison && selectedProducts.length >= 2 && (
-        <ProductComparison
-          products={selectedProducts}
-          userConcerns={normalizedConcerns}
+        <ComparisonPickerModal
+          isOpen={showComparison}
           onClose={handleCloseComparison}
-          onRemoveProduct={handleRemoveProduct}
+          preSelectedProducts={selectedProducts}
+          userConcerns={normalizedConcerns}
+          showSelectionView={false}
         />
       )}
 
