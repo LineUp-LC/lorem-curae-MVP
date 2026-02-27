@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
-import { getEffectiveSkinType, getEffectiveConcerns } from '../../lib/utils/sessionState';
+import Dropdown from '../../components/ui/Dropdown';
+import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveComplexion, getEffectiveSensitivity, getEffectiveLifestyle } from '../../lib/utils/sessionState';
+import { calculateSimilarityWeight, getTierBadgeInfo, type MatchTier } from '../../lib/utils/reviewSimilarity';
+import { matchesConcern } from '../../lib/utils/matching';
 
-interface Review {
+interface RetailerReview {
   id: number;
   userName: string;
   userAvatar: string;
@@ -32,6 +33,8 @@ interface Review {
   age: number;
   routineLength: string;
   similarityScore?: number;
+  matchTier?: MatchTier;
+  matchDetails?: string[];
 }
 
 const ReviewsPage = () => {
@@ -40,30 +43,126 @@ const ReviewsPage = () => {
   const retailerFilter = searchParams.get('retailer');
   const userSkinTypeParam = searchParams.get('skinType');
   const userConcernsParam = searchParams.get('concerns')?.split(',') || [];
-  
+
+  const ratingParam = searchParams.get('rating');
   const [sortBy, setSortBy] = useState<string>('relevance');
-  const [filterRating, setFilterRating] = useState<string>('all');
+  const [filterRating, setFilterRating] = useState<string>(ratingParam || 'all');
   const [filterRetailer, setFilterRetailer] = useState<string>(retailerFilter || 'all');
   const [filterVerified, setFilterVerified] = useState<boolean>(false);
-  const [filterSkinType, setFilterSkinType] = useState<string>(userSkinTypeParam || 'all');
-  const [showOnlySimilar, setShowOnlySimilar] = useState<boolean>(!!userSkinTypeParam);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
+  const [animatingReview, setAnimatingReview] = useState<number | null>(null);
+  const [reportedReviews, setReportedReviews] = useState<Set<number>>(new Set());
+  const [showReportConfirm, setShowReportConfirm] = useState<number | null>(null);
+  const [showReportModal, setShowReportModal] = useState<number | null>(null);
+  const [reportReason, setReportReason] = useState<string>('');
+  const [reportDetails, setReportDetails] = useState<string>('');
+  const [matchPopupReview, setMatchPopupReview] = useState<RetailerReview | null>(null);
+  const [shareToast, setShareToast] = useState<string | null>(null);
 
-  const effectiveSkinType = getEffectiveSkinType() || userSkinTypeParam || 'combination';
-  const effectiveConcerns = getEffectiveConcerns().length > 0 
-    ? getEffectiveConcerns() 
-    : (userConcernsParam.length > 0 ? userConcernsParam : ['Acne & Breakouts', 'Hyperpigmentation']);
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (matchPopupReview) setMatchPopupReview(null);
+        else if (showReportModal) { setShowReportModal(null); setReportReason(''); setReportDetails(''); }
+      }
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [matchPopupReview, showReportModal]);
 
-  const [userSkinProfile] = useState({
+  const handleHelpfulClick = (reviewId: number) => {
+    if (helpfulReviews.has(reviewId)) {
+      setHelpfulReviews(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(reviewId);
+        return newSet;
+      });
+    } else {
+      setAnimatingReview(reviewId);
+      setHelpfulReviews(prev => new Set(prev).add(reviewId));
+      setTimeout(() => setAnimatingReview(null), 300);
+    }
+  };
+
+  const handleReportReview = (reviewId: number) => {
+    setShowReportModal(reviewId);
+    setShowReportConfirm(null);
+  };
+
+  const handleSubmitReport = () => {
+    if (showReportModal && reportReason) {
+      setReportedReviews(prev => new Set(prev).add(showReportModal));
+      setShowReportModal(null);
+      setReportReason('');
+      setReportDetails('');
+    }
+  };
+
+  const handleShareReview = async (review: RetailerReview) => {
+    const shareUrl = `${window.location.origin}/retailer-reviews?id=${productId || ''}&review=${review.id}`;
+    const shareData = {
+      title: `${review.userName}'s review of ${review.retailerName}`,
+      text: review.title,
+      url: shareUrl,
+    };
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        if ((err as DOMException).name !== 'AbortError') {
+          await copyToClipboard(shareUrl);
+        }
+      }
+    } else {
+      await copyToClipboard(shareUrl);
+    }
+  };
+
+  const copyToClipboard = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setShareToast('Link copied to clipboard');
+    } catch {
+      setShareToast('Unable to copy link');
+    }
+    setTimeout(() => setShareToast(null), 2500);
+  };
+
+  // Get user skin profile from sessionState (unified source of truth)
+  const rawSkinType = getEffectiveSkinType() || userSkinTypeParam || '';
+  const rawConcerns = getEffectiveConcerns().length > 0
+    ? getEffectiveConcerns()
+    : (userConcernsParam.length > 0 ? userConcernsParam : []);
+
+  // hasSurveyData reflects whether REAL profile data exists (no hardcoded fallbacks)
+  const hasSurveyData = !!(rawSkinType || rawConcerns.length > 0);
+
+  // Use fallbacks only when we have SOME real data but a specific field is missing
+  const effectiveSkinType = rawSkinType || (hasSurveyData ? 'combination' : 'combination');
+  const effectiveConcerns = rawConcerns.length > 0 ? rawConcerns : (hasSurveyData ? ['General Skincare'] : []);
+
+  // Extended profile via unified getters (rehydrated from Supabase when localStorage is empty)
+  const surveyComplexion = getEffectiveComplexion();
+  const surveySensitivity = getEffectiveSensitivity();
+  const surveyLifestyle = getEffectiveLifestyle();
+
+  const userSkinProfile = {
     skinType: effectiveSkinType,
     primaryConcerns: effectiveConcerns,
+    complexion: surveyComplexion,
+    sensitivity: surveySensitivity,
+    lifestyle: surveyLifestyle,
     age: 28,
     routineLength: '3-6 months'
-  });
+  };
 
-  const allReviews: Review[] = [
+  // Demo reviews - these represent illustrative examples, not real user reviews
+  const allReviews: RetailerReview[] = [
     {
-      id: 1, userName: 'Sarah Mitchell',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20woman%20headshot&width=60&height=60&seq=service-reviewer-001&orientation=squarish',
+      id: 1, userName: 'Verified Reviewer',
+      userAvatar: '',
       rating: 5, title: 'Outstanding customer service and fast delivery',
       content: 'Ordered from the Official Brand Store and was impressed by their responsiveness. Had a question about my order and received a helpful reply within 2 hours. Product arrived beautifully packaged in eco-friendly materials.',
       date: '2024-01-20', verified: true, helpful: 34, retailerName: 'Official Brand Store',
@@ -72,8 +171,8 @@ const ReviewsPage = () => {
       skinType: 'combination', skinConcerns: ['Acne & Breakouts', 'Hyperpigmentation'], age: 29, routineLength: '3-6 months'
     },
     {
-      id: 2, userName: 'Michael Chen',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20headshot&width=60&height=60&seq=service-reviewer-002&orientation=squarish',
+      id: 2, userName: 'Verified Reviewer',
+      userAvatar: '',
       rating: 4, title: 'Great experience with Beauty Haven',
       content: 'First time ordering from Beauty Haven and the process was seamless. Their website is well-organized and easy to navigate.',
       date: '2024-01-18', verified: true, helpful: 28, retailerName: 'Beauty Haven',
@@ -82,8 +181,8 @@ const ReviewsPage = () => {
       skinType: 'oily', skinConcerns: ['Large Pores', 'Excess Oil'], age: 31, routineLength: '1-3 months'
     },
     {
-      id: 3, userName: 'Jennifer Lopez',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20woman%20portrait&width=60&height=60&seq=service-reviewer-003&orientation=squarish',
+      id: 3, userName: 'Community Member',
+      userAvatar: '',
       rating: 5, title: 'Exceptional service from Glow Market',
       content: "Glow Market exceeded my expectations! Their price match policy saved me $3, and they processed it quickly without hassle.",
       date: '2024-01-15', verified: false, helpful: 42, retailerName: 'Glow Market',
@@ -92,8 +191,8 @@ const ReviewsPage = () => {
       skinType: 'combination', skinConcerns: ['Acne & Breakouts', 'Dryness & Dehydration'], age: 27, routineLength: '3-6 months'
     },
     {
-      id: 4, userName: 'David Rodriguez',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20portrait&width=60&height=60&seq=service-reviewer-004&orientation=squarish',
+      id: 4, userName: 'Verified Reviewer',
+      userAvatar: '',
       rating: 4, title: 'Solid experience with Skin Essentials',
       content: 'Skin Essentials provided expert advice through their chat feature, which helped me choose the right variant for my combination skin.',
       date: '2024-01-12', verified: true, helpful: 25, retailerName: 'Skin Essentials',
@@ -102,8 +201,8 @@ const ReviewsPage = () => {
       skinType: 'combination', skinConcerns: ['Hyperpigmentation', 'Uneven Skin Tone'], age: 30, routineLength: '6+ months'
     },
     {
-      id: 5, userName: 'Amanda Foster',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20woman%20portrait&width=60&height=60&seq=service-reviewer-005&orientation=squarish',
+      id: 5, userName: 'Verified Reviewer',
+      userAvatar: '',
       rating: 3, title: 'Mixed experience with Pure Beauty Co',
       content: "Pure Beauty Co's commitment to eco-friendly packaging is commendable. However, the website was slow during checkout.",
       date: '2024-01-10', verified: true, helpful: 19, retailerName: 'Pure Beauty Co',
@@ -112,8 +211,8 @@ const ReviewsPage = () => {
       skinType: 'sensitive', skinConcerns: ['Sensitivity', 'Redness'], age: 33, routineLength: '6+ months'
     },
     {
-      id: 6, userName: 'Kevin Park',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20man%20portrait&width=60&height=60&seq=service-reviewer-006&orientation=squarish',
+      id: 6, userName: 'Verified Reviewer',
+      userAvatar: '',
       rating: 5, title: 'Flawless online shopping experience',
       content: "Official Brand Store's website is the gold standard - fast loading, intuitive navigation, and excellent mobile optimization.",
       date: '2024-01-08', verified: true, helpful: 38, retailerName: 'Official Brand Store',
@@ -123,32 +222,40 @@ const ReviewsPage = () => {
     }
   ];
 
-  const calculateSimilarityScore = (review: Review): number => {
-    let score = 0;
-    if (review.skinType === userSkinProfile.skinType) score += 50;
-    const concernMatches = review.skinConcerns.filter(concern => userSkinProfile.primaryConcerns.includes(concern)).length;
-    score += concernMatches * 20;
-    const ageDiff = Math.abs(review.age - userSkinProfile.age);
-    if (ageDiff <= 5) score += 15;
-    else if (ageDiff <= 10) score += 10;
-    if (review.routineLength === userSkinProfile.routineLength) score += 10;
-    return score;
-  };
+  // Score all reviews using shared Similarity Weight utility (12.15)
+  const scoredReviews = allReviews.map(review => {
+    const { score, matchTier, matchDetails } = calculateSimilarityWeight(
+      { skinType: review.skinType, skinConcerns: review.skinConcerns, age: review.age },
+      { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: surveyComplexion, sensitivity: surveySensitivity, lifestyle: surveyLifestyle, age: userSkinProfile.age }
+    );
+    return { ...review, similarityScore: score, matchTier, matchDetails };
+  });
 
-  let filteredReviews = allReviews.filter(review => {
+  // Filter: only show reviews with similarity ≥15 when profile data exists
+  let filteredReviews = scoredReviews.filter(review => {
+    // Apply user-selected filters first
     if (filterRating !== 'all' && review.rating !== parseInt(filterRating)) return false;
     if (filterRetailer !== 'all' && review.retailerName !== filterRetailer) return false;
     if (filterVerified && !review.verified) return false;
-    if (filterSkinType !== 'all' && review.skinType !== filterSkinType) return false;
-    if (showOnlySimilar) return calculateSimilarityScore(review) > 20;
+    // Keyword search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        review.title.toLowerCase().includes(q) ||
+        review.content.toLowerCase().includes(q) ||
+        review.retailerName.toLowerCase().includes(q) ||
+        review.userName.toLowerCase().includes(q);
+      if (!matchesSearch) return false;
+    }
+    // Strict personalization: only show reviews with score ≥15
+    if (hasSurveyData) return (review.similarityScore || 0) >= 15;
     return true;
   });
 
-  filteredReviews = filteredReviews.map(review => ({ ...review, similarityScore: calculateSimilarityScore(review) }));
-
   const sortedReviews = [...filteredReviews].sort((a, b) => {
     switch (sortBy) {
-      case 'relevance': return userSkinTypeParam ? (b.similarityScore || 0) - (a.similarityScore || 0) : b.helpful - a.helpful;
+      case 'relevance':
+        return (b.similarityScore || 0) - (a.similarityScore || 0);
       case 'newest': return new Date(b.date).getTime() - new Date(a.date).getTime();
       case 'oldest': return new Date(a.date).getTime() - new Date(b.date).getTime();
       case 'highest': return b.rating - a.rating;
@@ -159,7 +266,6 @@ const ReviewsPage = () => {
   });
 
   const retailers = Array.from(new Set(allReviews.map(r => r.retailerName)));
-  const skinTypes = Array.from(new Set(allReviews.map(r => r.skinType)));
   const averageRating = allReviews.reduce((acc, review) => acc + review.rating, 0) / allReviews.length;
 
   const renderStars = (rating: number) => {
@@ -180,53 +286,49 @@ const ReviewsPage = () => {
     </div>
   );
 
-  const getSimilarityBadge = (score: number) => {
-    if (score >= 70) return { label: 'Very Similar to You', color: 'bg-sage/20 text-sage', icon: 'ri-user-heart-line' };
-    if (score >= 50) return { label: 'Similar Profile', color: 'bg-blue-100 text-blue-800', icon: 'ri-user-line' };
-    if (score >= 30) return { label: 'Somewhat Similar', color: 'bg-amber-100 text-amber-800', icon: 'ri-user-2-line' };
-    return null;
-  };
-
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       <main className="pt-24 pb-16 px-6 lg:px-12">
         <div className="max-w-7xl mx-auto">
           <div className="mb-8">
             <div className="flex items-center space-x-2 text-sm text-warm-gray mb-4">
-              <Link to="/" className="hover:text-primary cursor-pointer">Home</Link>
+              <Link to="/" className="hover:text-primary focus:text-primary focus:outline-none cursor-pointer transition-colors duration-fast">Home</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <Link to="/discover" className="hover:text-primary cursor-pointer">Products</Link>
+              <Link to="/discover" className="hover:text-primary focus:text-primary focus:outline-none cursor-pointer transition-colors duration-fast">Products</Link>
               <i className="ri-arrow-right-s-line"></i>
-              <span className="text-primary">Retailer Reviews</span>
+              <span className="text-primary font-medium">Retailer Reviews</span>
             </div>
             <h1 className="text-4xl lg:text-5xl font-serif text-deep mb-4">Retailer Reviews &amp; Service Ratings</h1>
             <p className="text-xl text-warm-gray max-w-3xl">Real customer experiences with online beauty retailers. Read about service quality, shipping reliability, website experience, and overall satisfaction.</p>
           </div>
 
-          {userSkinTypeParam && (
+          {hasSurveyData && (
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg border-l-4 border-primary">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start space-x-4">
-                  <div className="w-12 h-12 rounded-full bg-light/30 flex items-center justify-center flex-shrink-0">
-                    <i className="ri-user-heart-line text-primary text-xl"></i>
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold text-deep mb-2">Personalized for Your Skin Profile</h3>
-                    <p className="text-warm-gray text-sm mb-3">Reviews prioritized for: <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong></p>
-                    <div className="flex items-center space-x-4">
-                      <label className="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" checked={showOnlySimilar} onChange={(e) => setShowOnlySimilar(e.target.checked)} className="w-4 h-4 text-primary border-blush rounded focus:ring-primary/50" />
-                        <span className="text-sm text-warm-gray">Only show reviews from similar skin profiles</span>
-                      </label>
-                      <span className="text-xs text-primary bg-light/20 px-2 py-1 rounded-full">{sortedReviews.filter(r => (r.similarityScore || 0) > 20).length} matching reviews</span>
-                    </div>
-                  </div>
+              <div>
+                <h3 className="text-xl font-semibold text-deep mb-2">Showing reviews from similar individuals</h3>
+                <p className="text-warm-gray text-sm mb-3">Prioritized for <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong>{userSkinProfile.complexion ? <> and <strong>{userSkinProfile.complexion}</strong> complexion</> : ''} that have purchased from these retailers.</p>
+                <div className="flex flex-wrap gap-2">
+                  <span className="text-xs text-primary bg-light/20 px-2 py-1 rounded-full">{sortedReviews.length} matching reviews found</span>
+                  {sortedReviews.filter(r => r.matchTier === 'full').length > 0 && (
+                    <span className="text-xs text-primary-700 bg-light/30 px-2 py-1 rounded-full border border-primary-300">{sortedReviews.filter(r => r.matchTier === 'full').length} full match</span>
+                  )}
                 </div>
-                <Link to="/my-skin" className="text-primary hover:text-dark text-sm font-medium cursor-pointer flex items-center space-x-1">
-                  <i className="ri-settings-3-line"></i>
-                  <span>Update Profile</span>
-                </Link>
+              </div>
+            </div>
+          )}
+
+          {!hasSurveyData && (
+            <div className="bg-cream-100 rounded-2xl p-6 mb-8 border border-blush">
+              <div className="flex items-start space-x-4">
+                <div className="w-12 h-12 rounded-full bg-light/30 flex items-center justify-center flex-shrink-0"><i className="ri-questionnaire-line text-primary text-xl"></i></div>
+                <div>
+                  <h3 className="text-lg font-semibold text-deep mb-1">Get personalized reviews</h3>
+                  <p className="text-warm-gray text-sm mb-3">Take the skin survey to see retailer reviews from individuals with skin similar to yours.</p>
+                  <Link to="/skin-survey" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-dark transition-colors cursor-pointer">
+                    <i className="ri-arrow-right-line"></i>
+                    <span>Take Skin Survey</span>
+                  </Link>
+                </div>
               </div>
             </div>
           )}
@@ -235,8 +337,8 @@ const ReviewsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-deep mb-1">{averageRating.toFixed(1)}</div>
-                <div className="flex items-center justify-center space-x-1 mb-2">{renderStars(Math.round(averageRating))}</div>
-                <p className="text-sm text-warm-gray">Overall Rating</p>
+                <p className="text-sm text-warm-gray mb-2">Overall Rating</p>
+                <div className="flex items-center justify-center space-x-1">{renderStars(Math.round(averageRating))}</div>
               </div>
               <div className="text-center">
                 <div className="text-3xl font-bold text-deep mb-1">{allReviews.length}</div>
@@ -254,86 +356,118 @@ const ReviewsPage = () => {
           </div>
 
           <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-warm-gray mb-2">Sort By</label>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
-                  {userSkinTypeParam && <option value="relevance">Most Relevant to You</option>}
-                  <option value="newest">Newest First</option>
-                  <option value="oldest">Oldest First</option>
-                  <option value="highest">Highest Rated</option>
-                  <option value="lowest">Lowest Rated</option>
-                  <option value="helpful">Most Helpful</option>
-                </select>
+                <Dropdown
+                  id="sort-by"
+                  value={sortBy}
+                  onChange={setSortBy}
+                  options={[
+                    ...(hasSurveyData ? [{ value: 'relevance', label: 'Most Relevant to You' }] : []),
+                    { value: 'newest', label: 'Newest First' },
+                    { value: 'oldest', label: 'Oldest First' },
+                    { value: 'highest', label: 'Highest Rated' },
+                    { value: 'lowest', label: 'Lowest Rated' },
+                    { value: 'helpful', label: 'Most Helpful' },
+                  ]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-warm-gray mb-2">Rating</label>
-                <select value={filterRating} onChange={(e) => setFilterRating(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
-                  <option value="all">All Ratings</option>
-                  <option value="5">5 Stars</option>
-                  <option value="4">4 Stars</option>
-                  <option value="3">3 Stars</option>
-                  <option value="2">2 Stars</option>
-                  <option value="1">1 Star</option>
-                </select>
+                <Dropdown
+                  id="filter-rating"
+                  value={filterRating}
+                  onChange={setFilterRating}
+                  options={[
+                    { value: 'all', label: 'All Ratings' },
+                    { value: '5', label: '5 Stars' },
+                    { value: '4', label: '4 Stars' },
+                    { value: '3', label: '3 Stars' },
+                    { value: '2', label: '2 Stars' },
+                    { value: '1', label: '1 Star' },
+                  ]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-warm-gray mb-2">Retailer</label>
-                <select value={filterRetailer} onChange={(e) => setFilterRetailer(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
-                  <option value="all">All Retailers</option>
-                  {retailers.map((retailer) => (<option key={retailer} value={retailer}>{retailer}</option>))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-warm-gray mb-2">Skin Type</label>
-                <select value={filterSkinType} onChange={(e) => setFilterSkinType(e.target.value)} className="w-full px-4 py-2 rounded-lg border border-blush focus:border-primary focus:outline-none text-sm cursor-pointer">
-                  <option value="all">All Skin Types</option>
-                  {skinTypes.map((skinType) => (<option key={skinType} value={skinType}>{skinType}</option>))}
-                </select>
+                <Dropdown
+                  id="filter-retailer"
+                  value={filterRetailer}
+                  onChange={setFilterRetailer}
+                  options={[
+                    { value: 'all', label: 'All Retailers' },
+                    ...retailers.map((retailer) => ({ value: retailer, label: retailer })),
+                  ]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-semibold text-warm-gray mb-2">Purchase Status</label>
-                <label className="flex items-center space-x-2 cursor-pointer">
-                  <input type="checkbox" checked={filterVerified} onChange={(e) => setFilterVerified(e.target.checked)} className="w-4 h-4 text-primary border-blush rounded focus:ring-primary/50" />
-                  <span className="text-sm text-warm-gray">Verified purchases only</span>
-                </label>
+                <button
+                  onClick={() => setFilterVerified(!filterVerified)}
+                  className="flex items-center space-x-2 cursor-pointer group rounded-sm focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+                >
+                  <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${filterVerified ? 'bg-primary border-primary' : 'border-blush group-hover:border-primary/50'}`}>
+                    {filterVerified && <i className="ri-check-line text-white text-xs"></i>}
+                  </div>
+                  <span className="text-sm text-warm-gray">Verified only</span>
+                </button>
               </div>
-              <div className="flex items-end">
-                <div className="text-sm text-warm-gray">Showing {sortedReviews.length} of {allReviews.length} reviews</div>
+              <div className="flex items-end"><div className="text-sm text-warm-gray">Showing {sortedReviews.length} of {allReviews.length} reviews{hasSurveyData && sortedReviews.length < allReviews.length ? ' (matched to your profile)' : ''}</div></div>
+            </div>
+            {/* Keyword Search */}
+            <div className="mt-4 pt-4 border-t border-blush">
+              <div className="relative max-w-md">
+                <i className="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-warm-gray/60"></i>
+                <input
+                  type="text"
+                  placeholder="Search reviews by keyword..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  autoComplete="off"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-full border border-blush focus:border-primary focus:outline-none text-sm transition-colors"
+                />
               </div>
             </div>
           </div>
 
           <div className="space-y-6">
             {sortedReviews.map((review) => {
-              const similarityBadge = getSimilarityBadge(review.similarityScore || 0);
+              const tierBadge = getTierBadgeInfo(review.matchTier || 'none', review.similarityScore || 0);
               return (
                 <div key={review.id} className="bg-white rounded-2xl p-6 shadow-lg">
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
                       <div className="flex items-start space-x-4 mb-4">
-                        <div className="w-16 h-16 rounded-full overflow-hidden bg-blush/30 flex-shrink-0">
-                          <img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" />
+                        <div className="w-16 h-16 rounded-full overflow-hidden bg-blush/30 flex-shrink-0 flex items-center justify-center">
+                          {review.userAvatar ? (
+                            <img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" />
+                          ) : (
+                            <i className="ri-user-line text-2xl text-warm-gray/50"></i>
+                          )}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-3 mb-2">
+                          <div className="flex items-center space-x-2 mb-1">
                             <h3 className="text-lg font-semibold text-deep">{review.userName}</h3>
-                            {review.verified && (<span className="flex items-center space-x-1 px-3 py-1 bg-sage/20 text-sage text-xs font-semibold rounded-full"><i className="ri-shield-check-fill"></i><span>Verified Purchase</span></span>)}
-                            {similarityBadge && (<span className={`flex items-center space-x-1 px-3 py-1 ${similarityBadge.color} text-xs font-semibold rounded-full`}><i className={similarityBadge.icon}></i><span>{similarityBadge.label}</span></span>)}
+                            {review.verified && (<span className="flex items-center space-x-1 px-2 py-0.5 bg-taupe-100 text-taupe-800 text-xs font-medium rounded-full"><i className="ri-shield-check-fill"></i><span>Verified</span></span>)}
+                            {hasSurveyData && tierBadge && (<button onClick={() => setMatchPopupReview(review)} className={`flex items-center space-x-1 px-3 py-1 ${tierBadge.color} text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer`}><i className={tierBadge.icon}></i><span>{tierBadge.label}</span></button>)}
                           </div>
-                          <div className="flex items-center space-x-4 mb-2">
-                            <div className="flex items-center space-x-1">{renderStars(review.rating)}</div>
-                            <span className="text-sm text-warm-gray/80">{new Date(review.date).toLocaleDateString()}</span>
+                          <div className="flex items-center space-x-3 mb-1">
+                            <div className="flex items-center space-x-0.5">{renderStars(review.rating)}</div>
+                            <span className="text-xs text-warm-gray/80">{new Date(review.date).toLocaleDateString()}</span>
                           </div>
                           <div className="flex items-center space-x-2 mb-2">
                             <span className="text-sm font-medium text-primary">{review.retailerName}</span>
                             <span className="text-sm text-warm-gray/80">• Order: {review.purchaseDetails.orderValue}</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <span className="text-xs text-warm-gray/80">{review.skinType} skin • Age {review.age}</span>
+                            <span className={`text-xs ${hasSurveyData && review.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase() ? 'text-primary-700 font-medium' : 'text-warm-gray/80'}`}>
+                              {review.skinType} skin
+                            </span>
+                            <span className="text-xs text-warm-gray/80">• Age {review.age}</span>
                             <div className="flex flex-wrap gap-1">
                               {review.skinConcerns.slice(0, 2).map((concern, idx) => (
-                                <span key={idx} className={`px-2 py-1 text-xs rounded-full ${userSkinProfile.primaryConcerns.includes(concern) ? 'bg-primary/10 text-primary font-medium' : 'bg-blush/50 text-warm-gray'}`}>{concern}</span>
+                                <span key={idx} className={`px-2 py-1 text-xs rounded-full ${hasSurveyData && matchesConcern(concern, userSkinProfile.primaryConcerns) ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
                               ))}
                             </div>
                           </div>
@@ -347,8 +481,34 @@ const ReviewsPage = () => {
                       </div>
                       <div className="flex items-center justify-between pt-4 border-t border-blush">
                         <div className="flex items-center space-x-4">
-                          <button className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-thumb-up-line"></i><span className="text-sm">Helpful ({review.helpful})</span></button>
-                          <button className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-flag-line"></i><span className="text-sm">Report</span></button>
+                          <button
+                            onClick={() => handleHelpfulClick(review.id)}
+                            className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                              helpfulReviews.has(review.id)
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-warm-gray hover:bg-gray-100'
+                            } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                            style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                          >
+                            <i className={helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'}></i>
+                            <span className="text-sm">Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
+                          </button>
+                          <button onClick={() => handleShareReview(review)} aria-label="Share review" className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-share-line"></i><span className="text-sm">Share</span></button>
+                          {reportedReviews.has(review.id) ? (
+                            <span className="text-xs text-warm-gray/60 flex items-center gap-1">
+                              <i className="ri-flag-fill text-xs"></i>
+                              Reported
+                            </span>
+                          ) : showReportConfirm === review.id ? (
+                            <div className="flex items-center gap-1.5">
+                              <i className="ri-flag-line text-xs text-warm-gray/60"></i>
+                              <span className="text-xs text-warm-gray">Report this review?</span>
+                              <button onClick={() => handleReportReview(review.id)} className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer">Yes</button>
+                              <button onClick={() => setShowReportConfirm(null)} className="text-xs text-warm-gray hover:text-deep cursor-pointer">No</button>
+                            </div>
+                          ) : (
+                            <button onClick={() => setShowReportConfirm(review.id)} className="flex items-center space-x-2 text-warm-gray hover:text-primary cursor-pointer"><i className="ri-flag-line"></i><span className="text-sm">Report</span></button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -369,18 +529,173 @@ const ReviewsPage = () => {
           </div>
 
           {sortedReviews.length === 0 && (
-            <div className="text-center py-12">
-              <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-blush/30 rounded-full">
-                <i className="ri-search-line text-3xl text-warm-gray/60"></i>
+            <div className="text-center py-16">
+              <div className="w-24 h-24 mx-auto mb-6 flex items-center justify-center bg-light/20 rounded-full border border-primary-300">
+                <i className="ri-user-heart-line text-3xl text-primary-700"></i>
               </div>
-              <h3 className="text-xl font-semibold text-deep mb-2">No reviews found</h3>
-              <p className="text-warm-gray mb-6">Try adjusting your filters to see more results.</p>
-              <button onClick={() => { setSortBy('newest'); setFilterRating('all'); setFilterRetailer('all'); setFilterSkinType('all'); setFilterVerified(false); setShowOnlySimilar(false); }} className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all cursor-pointer">Clear All Filters</button>
+              {hasSurveyData ? (
+                <>
+                  <h3 className="text-xl font-semibold text-deep mb-2">No reviews match your skin profile yet</h3>
+                  <p className="text-warm-gray mb-6 max-w-md mx-auto">We couldn't find retailer reviews from individuals with a similar skin profile. Try adjusting your filters or explore other retailers.</p>
+                </>
+              ) : (
+                <>
+                  <h3 className="text-xl font-semibold text-deep mb-2">No reviews found</h3>
+                  <p className="text-warm-gray mb-6">Try adjusting your filters to see more results.</p>
+                </>
+              )}
+              <div className="flex items-center justify-center gap-3">
+                <button onClick={() => { setSortBy('newest'); setFilterRating('all'); setFilterRetailer('all'); setFilterVerified(false); setSearchQuery(''); }} className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all cursor-pointer">Clear All Filters</button>
+                <Link to="/discover" className="px-6 py-3 border border-primary text-primary rounded-full font-semibold hover:bg-light/20 transition-all">Explore Products</Link>
+              </div>
             </div>
           )}
         </div>
       </main>
-      <Footer />
+
+      {/* Report Review Modal */}
+      {showReportModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="text-xl font-bold text-deep">Report Review</h3>
+              <button
+                onClick={() => { setShowReportModal(null); setReportReason(''); setReportDetails(''); }}
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <i className="ri-close-line text-2xl"></i>
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Reason for reporting</label>
+                <Dropdown
+                  id="report-reason"
+                  value={reportReason}
+                  onChange={setReportReason}
+                  placeholder="Select a reason..."
+                  options={[
+                    { value: 'spam', label: 'Spam or fake review' },
+                    { value: 'inappropriate', label: 'Inappropriate content' },
+                    { value: 'misleading', label: 'Misleading information' },
+                    { value: 'harassment', label: 'Harassment or bullying' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-deep mb-2">Additional details (optional)</label>
+                <textarea
+                  value={reportDetails}
+                  onChange={(e) => setReportDetails(e.target.value)}
+                  placeholder="Provide more context..."
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-lg border border-blush bg-white text-deep focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                />
+              </div>
+            </div>
+            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={() => { setShowReportModal(null); setReportReason(''); setReportDetails(''); }}
+                className="px-4 py-2 text-warm-gray hover:text-deep transition-colors cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReport}
+                disabled={!reportReason}
+                className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+                  reportReason
+                    ? 'bg-red-500 hover:bg-red-600 text-white'
+                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                }`}
+              >
+                Submit Report
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Match Breakdown Popup */}
+      {matchPopupReview && (() => {
+        const r = matchPopupReview;
+        const popupBadge = getTierBadgeInfo(r.matchTier || 'none', r.similarityScore || 0);
+        const skinTypeMatch = r.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase();
+        let concernCount = 0;
+        r.skinConcerns.forEach(rc => { if (matchesConcern(rc, userSkinProfile.primaryConcerns)) concernCount++; });
+        const ageMatch = Math.abs(r.age - userSkinProfile.age) <= 5;
+
+        const rows = [
+          { name: 'Skin Type', points: '+40', matched: skinTypeMatch, earned: skinTypeMatch ? 40 : 0, theirs: r.skinType, yours: userSkinProfile.skinType },
+          { name: 'Concerns', points: '+15/ea', matched: concernCount > 0, earned: concernCount * 15, theirs: r.skinConcerns.slice(0, 2).join(', '), yours: userSkinProfile.primaryConcerns.slice(0, 2).join(', '), note: `${concernCount} matched` },
+          { name: 'Complexion', points: '+10', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.complexion || '—' },
+          { name: 'Sensitivity', points: '+10', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.sensitivity || '—' },
+          { name: 'Lifestyle', points: '+5', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
+          { name: 'Age Range', points: '+5', matched: ageMatch, earned: ageMatch ? 5 : 0, theirs: `Age ${r.age}`, yours: `Age ${userSkinProfile.age}`, note: '±5 years' },
+        ];
+
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-deep">Match Breakdown</h3>
+                  <p className="text-sm text-warm-gray mt-1">{r.userName}'s profile vs yours</p>
+                </div>
+                <button
+                  onClick={() => setMatchPopupReview(null)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-primary"
+                >
+                  <i className="ri-close-line text-2xl"></i>
+                </button>
+              </div>
+              <div className="p-6">
+                {popupBadge && (
+                  <div className="flex justify-center mb-6">
+                    <span className={`flex items-center space-x-1.5 px-4 py-2 ${popupBadge.color} text-sm font-semibold rounded-full`}>
+                      <i className={popupBadge.icon}></i>
+                      <span>{popupBadge.label}</span>
+                    </span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {rows.map((row, idx) => (
+                    <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${row.matched ? 'bg-light/20 border border-primary-200' : 'bg-gray-50'}`}>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.matched ? 'bg-primary/20 text-primary-700' : 'bg-gray-200 text-gray-400'}`}>
+                          <i className={row.matched ? 'ri-check-line text-sm' : 'ri-close-line text-sm'}></i>
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${row.matched ? 'text-deep' : 'text-warm-gray'}`}>{row.name}</p>
+                          <p className="text-[11px] text-warm-gray/70">
+                            {row.theirs} vs {row.yours}{row.note ? ` · ${row.note}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold ${row.matched ? 'text-primary-700' : 'text-gray-400'}`}>
+                        +{row.earned}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-deep">Total Score</span>
+                  <span className="text-lg font-bold text-primary">{Math.min(r.similarityScore || 0, 100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Share Toast */}
+      {shareToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 px-5 py-3 bg-deep text-white text-sm font-medium rounded-full shadow-lg flex items-center space-x-2">
+          <i className="ri-check-line"></i>
+          <span>{shareToast}</span>
+        </div>
+      )}
     </div>
   );
 };

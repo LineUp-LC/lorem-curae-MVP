@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
-import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
+import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveComplexion, getEffectiveLifestyle } from '../../../lib/utils/sessionState';
+import { calculateSimilarityWeight, getTierBadgeInfo, isComplexionMatch } from '../../../lib/utils/reviewSimilarity';
+import { matchesConcern } from '../../../lib/utils/matching';
+import Dropdown from '../../../components/ui/Dropdown';
 
 interface Review {
   id: number;
@@ -14,8 +17,14 @@ interface Review {
   helpful: number;
   skinType: string;
   skinConcerns: string[];
+  complexion?: string;
+  lifestyle?: string[];
   age: number;
   routineLength: string;
+  // usageDurationWeeks replaces the submission date display.
+  // Duration of product use is more meaningful than submission date
+  // when evaluating product performance and results credibility.
+  usageDurationWeeks: number;
 }
 
 interface UserProfileData {
@@ -40,22 +49,29 @@ interface ProductReviewsProps {
 
 const ProductReviews = ({ productId }: ProductReviewsProps) => {
   // Get user skin profile from sessionState (unified source of truth)
-  const skinType = getEffectiveSkinType() || 'combination';
-  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['Acne & Breakouts', 'Hyperpigmentation'];
-  
-  const [userSkinProfile] = useState({
+  const rawSkinType = getEffectiveSkinType() || '';
+  const rawConcerns = getEffectiveConcerns();
+  const hasSurveyData = !!(rawSkinType || rawConcerns.length > 0);
+  const skinType = rawSkinType || 'combination';
+  const concerns = rawConcerns;
+
+  const complexion = getEffectiveComplexion() || '';
+  const lifestyle = getEffectiveLifestyle();
+
+  const userSkinProfile = {
     skinType,
     primaryConcerns: concerns,
+    complexion,
+    lifestyle,
     age: 28,
     routineLength: '3-6 months'
-  });
+  };
 
-  const [showPersonalized, setShowPersonalized] = useState(true);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [filterSkinType, setFilterSkinType] = useState<string>('all');
   const [filterConcern, setFilterConcern] = useState<string>('all');
   const [filterRating, setFilterRating] = useState<number>(0);
   const [selectedReviewer, setSelectedReviewer] = useState<Review | null>(null);
+  const [matchPopupReview, setMatchPopupReview] = useState<Review | null>(null);
   const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
   const [animatingReview, setAnimatingReview] = useState<number | null>(null);
   const [reportedReviews, setReportedReviews] = useState<Set<number>>(new Set());
@@ -63,6 +79,19 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   const [showReportModal, setShowReportModal] = useState<number | null>(null);
   const [reportReason, setReportReason] = useState<string>('');
   const [reportDetails, setReportDetails] = useState<string>('');
+
+  // Escape key to close modals
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (matchPopupReview) setMatchPopupReview(null);
+        else if (showReportModal) { setShowReportModal(null); setReportReason(''); setReportDetails(''); }
+        else if (showProfileModal) setShowProfileModal(false);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [matchPopupReview, showReportModal, showProfileModal]);
 
   const handleHelpfulClick = (reviewId: number) => {
     if (helpfulReviews.has(reviewId)) {
@@ -125,15 +154,18 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       userName: 'Sarah M.',
       userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&q=80',
       rating: 5,
-      title: 'Amazing results for combination skin!',
-      content: 'I\'ve been using this serum for 3 months now and the difference is incredible. My T-zone is no longer oily by midday, and my cheeks feel hydrated. The texture is lightweight and absorbs quickly without any sticky residue. Perfect for my combination skin type!',
+      title: 'Clear results for combination skin',
+      content: 'I\'ve been using this serum for 3 months now and the difference has been significant. My T-zone is no longer oily by midday, and my cheeks feel hydrated. The texture is lightweight and absorbs quickly without any sticky residue. Perfect for my combination skin type!',
       date: '2024-01-15',
       verified: true,
       helpful: 24,
       skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Dryness & Dehydration'],
+      skinConcerns: ['Acne Prone', 'Lack of Hydration'],
+      complexion: 'Type III',
+      lifestyle: ['Active', 'Screen-heavy'],
       age: 29,
-      routineLength: '3-6 months'
+      routineLength: '3-6 months',
+      usageDurationWeeks: 14
     },
     {
       id: 2,
@@ -146,9 +178,12 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       verified: true,
       helpful: 18,
       skinType: 'sensitive',
-      skinConcerns: ['Sensitivity', 'Redness'],
+      skinConcerns: ['Damaged Skin Barrier', 'Rosacea'],
+      complexion: 'Type II',
+      lifestyle: ['Low-stress', 'Indoor'],
       age: 25,
-      routineLength: '6+ months'
+      routineLength: '6+ months',
+      usageDurationWeeks: 28
     },
     {
       id: 3,
@@ -161,9 +196,12 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       verified: false,
       helpful: 31,
       skinType: 'oily',
-      skinConcerns: ['Large Pores', 'Excess Oil'],
+      skinConcerns: ['Enlarged Pores', 'Congested skin'],
+      complexion: 'Type IV',
+      lifestyle: ['Active', 'Outdoor'],
       age: 32,
-      routineLength: '1-3 months'
+      routineLength: '1-3 months',
+      usageDurationWeeks: 6
     },
     {
       id: 4,
@@ -171,14 +209,17 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&h=60&fit=crop&q=80',
       rating: 5,
       title: 'Perfect match for combination acne-prone skin',
-      content: 'This serum has been a game-changer for my combination skin with persistent breakouts. It controls oil in my T-zone while keeping my cheeks moisturized. The acne-fighting ingredients work without over-drying. Highly recommend for similar skin types!',
+      content: 'This serum has made a real difference for my combination skin with persistent breakouts. It controls oil in my T-zone while keeping my cheeks moisturized. The acne-fighting ingredients work without over-drying. Highly recommend for similar skin types!',
       date: '2024-01-20',
       verified: true,
       helpful: 35,
       skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Hyperpigmentation', 'Large Pores'],
+      skinConcerns: ['Acne Prone', 'Uneven Skin Tone', 'Enlarged Pores'],
+      complexion: 'Type III',
+      lifestyle: ['Active', 'Screen-heavy'],
       age: 26,
-      routineLength: '3-6 months'
+      routineLength: '3-6 months',
+      usageDurationWeeks: 16
     },
     {
       id: 5,
@@ -191,9 +232,12 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       verified: true,
       helpful: 22,
       skinType: 'combination',
-      skinConcerns: ['Hyperpigmentation', 'Acne Scars'],
+      skinConcerns: ['Uneven Skin Tone', 'Scarring'],
+      complexion: 'Type V',
+      lifestyle: ['Active'],
       age: 30,
-      routineLength: '3-6 months'
+      routineLength: '3-6 months',
+      usageDurationWeeks: 18
     },
     {
       id: 6,
@@ -206,61 +250,40 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       verified: true,
       helpful: 19,
       skinType: 'dry',
-      skinConcerns: ['Fine Lines & Wrinkles', 'Loss of Firmness'],
+      skinConcerns: ['Signs of Aging', 'Dullness'],
+      complexion: 'Type II',
+      lifestyle: ['Low-stress'],
       age: 45,
-      routineLength: '6+ months'
+      routineLength: '6+ months',
+      usageDurationWeeks: 32
     }
   ];
 
-  // Function to calculate similarity score based on user profile
-  const calculateSimilarityScore = (review: Review): number => {
-    let score = 0;
-    
-    // Skin type match (highest priority)
-    if (review.skinType === userSkinProfile.skinType) {
-      score += 50;
-    }
-    
-    // Concern overlap
-    const concernMatches = review.skinConcerns.filter(concern => 
-      userSkinProfile.primaryConcerns.includes(concern)
-    ).length;
-    score += concernMatches * 20;
-    
-    // Age similarity (within 10 years)
-    const ageDiff = Math.abs(review.age - userSkinProfile.age);
-    if (ageDiff <= 5) score += 15;
-    else if (ageDiff <= 10) score += 10;
-    
-    // Routine length similarity
-    if (review.routineLength === userSkinProfile.routineLength) {
-      score += 10;
-    }
-    
-    return score;
-  };
-
-  // Get personalized and general reviews
-  const personalizedReviews = allReviews
-    .map(review => ({
-      ...review,
-      similarityScore: calculateSimilarityScore(review)
-    }))
-    .filter(review => review.similarityScore > 20) // Only show relevant reviews
-    .sort((a, b) => b.similarityScore - a.similarityScore)
-    .slice(0, 3);
+  // Get personalized and general reviews using shared Similarity Weight utility (12.15)
+  const personalizedReviews = hasSurveyData
+    ? allReviews
+      .map(review => {
+        const result = calculateSimilarityWeight(
+          { skinType: review.skinType, skinConcerns: review.skinConcerns, complexion: review.complexion, lifestyle: review.lifestyle, age: review.age },
+          { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: userSkinProfile.complexion, sensitivity: '', lifestyle: userSkinProfile.lifestyle, age: userSkinProfile.age }
+        );
+        return { ...review, similarityScore: result.score, matchTier: result.matchTier };
+      })
+      .filter(review => review.similarityScore >= 15)
+      .sort((a, b) => b.similarityScore - a.similarityScore)
+      .slice(0, 3)
+    : [];
 
   // Apply user-selected filters
   const filteredReviews = useMemo(() => {
     return allReviews.filter((review) => {
-      const matchesSkinType = filterSkinType === 'all' || review.skinType === filterSkinType;
       const matchesConcern = filterConcern === 'all' || review.skinConcerns.includes(filterConcern);
       const matchesRating = review.rating >= filterRating;
-      return matchesSkinType && matchesConcern && matchesRating;
+      return matchesConcern && matchesRating;
     });
-  }, [allReviews, filterSkinType, filterConcern, filterRating]);
+  }, [allReviews, filterConcern, filterRating]);
 
-  const featuredReviews = showPersonalized && personalizedReviews.length > 0 && filterSkinType === 'all' && filterConcern === 'all' && filterRating === 0
+  const featuredReviews = personalizedReviews.length > 0 && filterConcern === 'all' && filterRating === 0
     ? personalizedReviews
     : filteredReviews.slice(0, 6);
 
@@ -285,14 +308,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     return stars;
   };
 
-  const getSimilarityBadge = (score: number) => {
-    if (score >= 70) return { label: 'Very Similar Profile', color: 'bg-taupe-100 text-taupe-800', icon: 'ri-user-heart-line' };
-    if (score >= 50) return { label: 'Similar Profile', color: 'bg-taupe-100 text-taupe-800', icon: 'ri-user-line' };
-    return { label: 'Related', color: 'bg-gray-100 text-gray-700', icon: 'ri-user-shared-line' };
-  };
-
   return (
-    <div id="reviews" className="py-16 bg-gradient-to-b from-[#F8F6F3] to-white">
+    <div id="reviews" className="py-16">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -312,35 +329,17 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         {/* Personalization Banner */}
         {personalizedReviews.length > 0 && (
           <div className="bg-taupe-50 rounded-2xl p-6 mb-8 border border-taupe-200">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-taupe-100 rounded-full flex items-center justify-center">
-                  <i className="ri-user-heart-line text-xl text-taupe"></i>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-deep-900 mb-1">
-                    Personalized for Your Skin
-                  </h3>
-                  <p className="text-gray-600 text-sm mb-3">
-                    Based on your skin profile: <strong>{userSkinProfile.skinType} skin</strong> with concerns about{' '}
-                    <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong>
-                  </p>
-                  <div className="flex items-center space-x-4">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={showPersonalized}
-                        onChange={(e) => setShowPersonalized(e.target.checked)}
-                        className="w-4 h-4 text-taupe border-gray-300 rounded focus:ring-taupe-500"
-                      />
-                      <span className="text-sm text-gray-700">Show reviews from similar skin profiles</span>
-                    </label>
-                    <span className="text-xs text-taupe bg-taupe-50 px-2 py-1 rounded-full">
-                      {personalizedReviews.length} matching reviews found
-                    </span>
-                  </div>
-                </div>
-              </div>
+            <div>
+              <h3 className="text-lg font-semibold text-deep-900 mb-1">
+                Personalized for Your Skin
+              </h3>
+              <p className="text-gray-600 text-sm mb-3">
+                Showing reviews from similar individuals with <strong>{userSkinProfile.skinType} skin</strong> concerned about{' '}
+                <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong> that are looking into buying this product
+              </p>
+              <span className="text-xs text-primary-700 bg-light/30 border border-primary-300 px-2.5 py-1 rounded-full font-medium">
+                {personalizedReviews.length} matching reviews found
+              </span>
             </div>
           </div>
         )}
@@ -364,11 +363,14 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
             {/* Rating Distribution */}
             <div className="lg:col-span-3">
               <div className="space-y-3">
-                {[5, 4, 3, 2, 1].map((rating) => {
-                  const count = Math.floor(Math.random() * 100) + 20;
+                {([{ star: 5, count: 98 }, { star: 4, count: 72 }, { star: 3, count: 41 }, { star: 2, count: 22 }, { star: 1, count: 14 }]).map(({ star: rating, count }) => {
                   const percentage = (count / totalReviews) * 100;
                   return (
-                    <div key={rating} className="flex items-center space-x-3">
+                    <Link
+                      key={rating}
+                      to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}&rating=${rating}`}
+                      className="flex items-center space-x-3 hover:bg-cream/50 rounded-lg px-2 py-0.5 -mx-2 transition-colors cursor-pointer"
+                    >
                       <span className="text-sm font-medium text-gray-700 w-8">
                         {rating}★
                       </span>
@@ -381,7 +383,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                       <span className="text-sm text-gray-500 w-12 text-right">
                         {count}
                       </span>
-                    </div>
+                    </Link>
                   );
                 })}
               </div>
@@ -395,117 +397,64 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
             <i className="ri-filter-3-line text-taupe"></i>
             <h3 className="text-lg font-semibold text-deep-900">Filter Reviews</h3>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Skin Type Filter */}
-            <div>
-              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
-                Skin Type
-              </label>
-              <select
-                value={filterSkinType}
-                onChange={(e) => setFilterSkinType(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
-              >
-                <option value="all">All Skin Types</option>
-                <option value="dry">Dry</option>
-                <option value="oily">Oily</option>
-                <option value="combination">Combination</option>
-                <option value="sensitive">Sensitive</option>
-                <option value="normal">Normal</option>
-              </select>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Concern Filter */}
             <div>
               <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
                 Skin Concern
               </label>
-              <select
+              <Dropdown
+                id="filter-concern"
                 value={filterConcern}
-                onChange={(e) => setFilterConcern(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
-              >
-                <option value="all">All Concerns</option>
-                <option value="Acne & Breakouts">Acne & Breakouts</option>
-                <option value="Hyperpigmentation">Hyperpigmentation</option>
-                <option value="Dryness & Dehydration">Dryness & Dehydration</option>
-                <option value="Fine Lines & Wrinkles">Fine Lines & Wrinkles</option>
-                <option value="Sensitivity">Sensitivity</option>
-                <option value="Large Pores">Large Pores</option>
-                <option value="Redness">Redness</option>
-              </select>
+                onChange={setFilterConcern}
+                options={[
+                  { value: 'all', label: 'All Concerns' },
+                  ...userSkinProfile.primaryConcerns.map((concern) => ({ value: concern, label: concern })),
+                ]}
+              />
             </div>
             {/* Rating Filter */}
             <div>
               <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
                 Minimum Rating
               </label>
-              <select
-                value={filterRating}
-                onChange={(e) => setFilterRating(Number(e.target.value))}
-                className="w-full px-4 py-2.5 rounded-lg border border-blush bg-white text-deep text-sm focus:outline-none focus:ring-2 focus:ring-taupe-300 cursor-pointer"
-              >
-                <option value={0}>All Ratings</option>
-                <option value={5}>5 Stars Only</option>
-                <option value={4}>4+ Stars</option>
-                <option value={3}>3+ Stars</option>
-              </select>
+              <Dropdown
+                id="filter-rating"
+                value={String(filterRating)}
+                onChange={(value) => setFilterRating(Number(value))}
+                options={[
+                  { value: '0', label: 'All Ratings' },
+                  { value: '5', label: '5 Stars Only' },
+                  { value: '4', label: '4+ Stars' },
+                  { value: '3', label: '3+ Stars' },
+                  { value: '2', label: '2+ Stars' },
+                  { value: '1', label: '1+ Stars' },
+                ]}
+              />
             </div>
           </div>
-          {/* Quick filter buttons based on user's skin survey */}
-          <div className="mt-4 pt-4 border-t border-blush/50">
-            <p className="text-xs text-warm-gray mb-2">Quick filters based on your profile:</p>
-            <div className="flex flex-wrap gap-2">
+          {/* Clear filters */}
+          {(filterConcern !== 'all' || filterRating > 0) && (
+            <div className="mt-4 pt-4 border-t border-blush/50">
               <button
                 onClick={() => {
-                  setFilterSkinType(userSkinProfile.skinType);
                   setFilterConcern('all');
+                  setFilterRating(0);
                 }}
-                className={`px-3 py-1.5 text-xs rounded-full transition-colors cursor-pointer ${
-                  filterSkinType === userSkinProfile.skinType && filterConcern === 'all'
-                    ? 'bg-taupe text-white'
-                    : 'bg-taupe-100 text-taupe-700 hover:bg-taupe-200'
-                }`}
+                className="px-3 py-1.5 text-xs rounded-full bg-gray-100 text-warm-gray hover:bg-gray-200 transition-colors cursor-pointer flex items-center gap-1"
               >
-                My Skin Type ({userSkinProfile.skinType})
+                <i className="ri-close-line"></i>
+                Clear filters
               </button>
-              {userSkinProfile.primaryConcerns.slice(0, 2).map((concern) => (
-                <button
-                  key={concern}
-                  onClick={() => {
-                    setFilterConcern(concern);
-                    setFilterSkinType('all');
-                  }}
-                  className={`px-3 py-1.5 text-xs rounded-full transition-colors cursor-pointer ${
-                    filterConcern === concern
-                      ? 'bg-taupe text-white'
-                      : 'bg-taupe-100 text-taupe-700 hover:bg-taupe-200'
-                  }`}
-                >
-                  {concern}
-                </button>
-              ))}
-              {(filterSkinType !== 'all' || filterConcern !== 'all' || filterRating > 0) && (
-                <button
-                  onClick={() => {
-                    setFilterSkinType('all');
-                    setFilterConcern('all');
-                    setFilterRating(0);
-                  }}
-                  className="px-3 py-1.5 text-xs rounded-full bg-gray-100 text-warm-gray hover:bg-gray-200 transition-colors cursor-pointer flex items-center gap-1"
-                >
-                  <i className="ri-close-line"></i>
-                  Clear filters
-                </button>
-              )}
             </div>
-          </div>
+          )}
         </div>
 
         {/* Featured Reviews */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {featuredReviews.map((review) => {
-            const similarityBadge = showPersonalized && 'similarityScore' in review 
-              ? getSimilarityBadge(review.similarityScore) 
+            const similarityBadge = 'matchTier' in review
+              ? getTierBadgeInfo(review.matchTier, review.similarityScore)
               : null;
             
             return (
@@ -523,52 +472,65 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                     />
                   </button>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <button
-                        onClick={() => handleReviewerClick(review)}
-                        className="font-semibold text-gray-900 truncate hover:text-taupe cursor-pointer transition-colors"
-                      >
-                        {review.userName}
-                      </button>
+                    <button
+                      onClick={() => handleReviewerClick(review)}
+                      className="font-semibold text-gray-900 truncate hover:text-taupe cursor-pointer transition-colors mb-1"
+                    >
+                      {review.userName}
+                    </button>
+                    <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 mb-1">
                       {review.verified && (
-                        <span className="flex items-center space-x-1 px-2 py-1 bg-taupe-100 text-taupe-800 text-xs font-medium rounded-full flex-shrink-0">
+                        <span className="flex items-center space-x-1 px-2 py-0.5 bg-taupe-100 text-taupe-800 text-[10px] font-medium rounded-full flex-shrink-0">
                           <i className="ri-shield-check-fill"></i>
                           <span>Verified</span>
                         </span>
+                      )}
+                      {similarityBadge && (
+                        <button
+                          onClick={() => setMatchPopupReview(review)}
+                          className={`inline-flex items-center space-x-0.5 px-1.5 py-0.5 ${similarityBadge.color} text-[10px] font-medium rounded-full flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer`}
+                        >
+                          <i className={similarityBadge.icon}></i>
+                          <span>{similarityBadge.label}</span>
+                        </button>
                       )}
                     </div>
                     <div className="flex items-center space-x-1 mb-1">
                       {renderStars(review.rating)}
                     </div>
+                    {/* Duration of use shown instead of submission date —
+                        product usage duration is more meaningful for evaluating
+                        product performance and results credibility. */}
                     <p className="text-xs text-gray-500 mb-2">
-                      {review.skinType} skin • Age {review.age} • {new Date(review.date).toLocaleDateString()}
+                      {hasSurveyData && review.skinType === userSkinProfile.skinType ? (
+                        <span className="text-primary-700 font-medium">{review.skinType} skin</span>
+                      ) : (
+                        <span>{review.skinType} skin</span>
+                      )} • Age {review.age} • Used for {review.usageDurationWeeks} weeks
                     </p>
                     
-                    {/* Similarity Badge */}
-                    {similarityBadge && (
-                      <div className={`inline-flex items-center space-x-1 px-2 py-1 ${similarityBadge.color} text-xs font-medium rounded-full`}>
-                        <i className={similarityBadge.icon}></i>
-                        <span>{similarityBadge.label}</span>
-                      </div>
-                    )}
                   </div>
                 </div>
 
                 {/* Skin Concerns */}
                 <div className="mb-3">
                   <div className="flex flex-wrap gap-1">
-                    {review.skinConcerns.map((concern, idx) => (
-                      <span
-                        key={idx}
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          userSkinProfile.primaryConcerns.includes(concern)
-                            ? 'bg-taupe-100 text-taupe-800 font-medium'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {concern}
-                      </span>
-                    ))}
+                    {review.skinConcerns.map((concern, idx) => {
+                      const isConcernMatch = hasSurveyData && matchesConcern(concern, userSkinProfile.primaryConcerns);
+                      return (
+                        <span
+                          key={idx}
+                          className={`px-2 py-1 text-xs rounded-full ${
+                            isConcernMatch
+                              ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
+                              : 'bg-gray-100 text-gray-600'
+                          }`}
+                        >
+                          {isConcernMatch && <i className="ri-check-line mr-0.5"></i>}
+                          {concern}
+                        </span>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -581,27 +543,36 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 </p>
 
                 {/* Review Footer */}
-                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-                  <button
-                    onClick={() => handleHelpfulClick(review.id)}
-                    className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
-                      helpfulReviews.has(review.id)
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-gray-600 hover:bg-gray-100'
-                    } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
-                    style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
-                  >
-                    <i className={`${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
-                    <span className="text-sm">Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
-                  </button>
-                  <div className="flex items-center gap-3">
+                <div className="pt-4 border-t border-gray-100 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => handleHelpfulClick(review.id)}
+                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                        helpfulReviews.has(review.id)
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-gray-600 hover:bg-gray-100'
+                      } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
+                      style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
+                    >
+                      <i className={`${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
+                      <span className="text-sm">Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
+                    </button>
+                    <Link
+                      to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
+                      className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
+                    >
+                      Read full review
+                    </Link>
+                  </div>
+                  <div className="pl-3">
                     {reportedReviews.has(review.id) ? (
                       <span className="text-xs text-warm-gray/60 flex items-center gap-1">
-                        <i className="ri-flag-fill"></i>
+                        <i className="ri-flag-fill text-xs"></i>
                         Reported
                       </span>
                     ) : showReportConfirm === review.id ? (
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1.5">
+                        <i className="ri-flag-line text-xs text-warm-gray/60"></i>
                         <span className="text-xs text-warm-gray">Report this review?</span>
                         <button
                           onClick={() => handleReportReview(review.id)}
@@ -619,18 +590,13 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                     ) : (
                       <button
                         onClick={() => setShowReportConfirm(review.id)}
-                        className="text-warm-gray/60 hover:text-warm-gray text-sm cursor-pointer flex items-center gap-1"
+                        className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer flex items-center gap-1"
                         title="Report review"
                       >
-                        <i className="ri-flag-line"></i>
+                        <i className="ri-flag-line text-xs"></i>
+                        <span>Report</span>
                       </button>
                     )}
-                    <Link
-                      to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-                      className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
-                    >
-                      Read full review
-                    </Link>
                   </div>
                 </div>
               </div>
@@ -669,7 +635,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
               </div>
               <button
                 onClick={() => setShowProfileModal(false)}
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
               >
                 <i className="ri-close-line text-2xl"></i>
               </button>
@@ -800,7 +767,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   setReportReason('');
                   setReportDetails('');
                 }}
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer"
+                aria-label="Close"
+                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
               >
                 <i className="ri-close-line text-2xl"></i>
               </button>
@@ -808,18 +776,19 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
             <div className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-deep mb-2">Reason for reporting</label>
-                <select
+                <Dropdown
+                  id="report-reason"
                   value={reportReason}
-                  onChange={(e) => setReportReason(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-blush bg-white text-deep focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
-                >
-                  <option value="">Select a reason...</option>
-                  <option value="spam">Spam or fake review</option>
-                  <option value="inappropriate">Inappropriate content</option>
-                  <option value="misleading">Misleading information</option>
-                  <option value="harassment">Harassment or bullying</option>
-                  <option value="other">Other</option>
-                </select>
+                  onChange={setReportReason}
+                  placeholder="Select a reason..."
+                  options={[
+                    { value: 'spam', label: 'Spam or fake review' },
+                    { value: 'inappropriate', label: 'Inappropriate content' },
+                    { value: 'misleading', label: 'Misleading information' },
+                    { value: 'harassment', label: 'Harassment or bullying' },
+                    { value: 'other', label: 'Other' },
+                  ]}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-deep mb-2">Additional details (optional)</label>
@@ -858,6 +827,87 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
           </div>
         </div>
       )}
+
+      {/* Match Breakdown Popup */}
+      {matchPopupReview && (() => {
+        const r = matchPopupReview;
+        const result = calculateSimilarityWeight(
+          { skinType: r.skinType, skinConcerns: r.skinConcerns, complexion: r.complexion, lifestyle: r.lifestyle, age: r.age },
+          { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: userSkinProfile.complexion, sensitivity: '', lifestyle: userSkinProfile.lifestyle, age: userSkinProfile.age }
+        );
+        const popupBadge = getTierBadgeInfo(result.matchTier, result.score);
+        const skinTypeMatch = r.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase();
+        let concernCount = 0;
+        r.skinConcerns.forEach(rc => {
+          if (matchesConcern(rc, userSkinProfile.primaryConcerns)) concernCount++;
+        });
+        const complexionResult = isComplexionMatch(r.complexion || '', userSkinProfile.complexion);
+        const complexionMatch = complexionResult !== 'none';
+        const lifestyleMatch = !!(r.lifestyle && userSkinProfile.lifestyle.length > 0 && r.lifestyle.some(l => userSkinProfile.lifestyle.includes(l)));
+        const ageMatch = Math.abs(r.age - userSkinProfile.age) <= 5;
+
+        const rows = [
+          { name: 'Complexion', points: '+10', matched: complexionMatch, earned: complexionMatch ? 10 : 0, theirs: r.complexion || '—', yours: userSkinProfile.complexion || '—', note: complexionMatch ? (complexionResult === 'exact' ? 'exact' : '±1 tier') : undefined },
+          { name: 'Skin Type', points: '+40', matched: skinTypeMatch, earned: skinTypeMatch ? 40 : 0, theirs: r.skinType, yours: userSkinProfile.skinType },
+          { name: 'Concerns', points: '+15/ea', matched: concernCount > 0, earned: concernCount * 15, theirs: r.skinConcerns.slice(0, 2).join(', '), yours: userSkinProfile.primaryConcerns.slice(0, 2).join(', '), note: `${concernCount} matched` },
+          { name: 'Age Range', points: '+5', matched: ageMatch, earned: ageMatch ? 5 : 0, theirs: `Age ${r.age}`, yours: `Age ${userSkinProfile.age}`, note: '±5 years' },
+          { name: 'Lifestyle', points: '+5', matched: lifestyleMatch, earned: lifestyleMatch ? 5 : 0, theirs: r.lifestyle?.slice(0, 1).join('') || '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
+        ];
+
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-bold text-deep">Match Breakdown</h3>
+                  <p className="text-sm text-warm-gray mt-1">{r.userName}'s profile vs yours</p>
+                </div>
+                <button
+                  onClick={() => setMatchPopupReview(null)}
+                  aria-label="Close"
+                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
+                >
+                  <i className="ri-close-line text-2xl"></i>
+                </button>
+              </div>
+              <div className="p-6">
+                {popupBadge && (
+                  <div className="flex justify-center mb-6">
+                    <span className={`flex items-center space-x-1.5 px-4 py-2 ${popupBadge.color} text-sm font-semibold rounded-full`}>
+                      <i className={popupBadge.icon}></i>
+                      <span>{popupBadge.label}</span>
+                    </span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {rows.map((row, idx) => (
+                    <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${row.matched ? 'bg-light/20 border border-primary-200' : 'bg-gray-50'}`}>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.matched ? 'bg-primary/20 text-primary-700' : 'bg-gray-200 text-gray-400'}`}>
+                          <i className={row.matched ? 'ri-check-line text-sm' : 'ri-close-line text-sm'}></i>
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${row.matched ? 'text-deep' : 'text-warm-gray'}`}>{row.name}</p>
+                          <p className="text-[11px] text-warm-gray/70">
+                            {row.theirs} vs {row.yours}{row.note ? ` · ${row.note}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold ${row.matched ? 'text-primary-700' : 'text-gray-400'}`}>
+                        +{row.earned}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-deep">Total Score</span>
+                  <span className="text-lg font-bold text-primary">{Math.min(result.score, 100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };
