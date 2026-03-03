@@ -1,5 +1,3 @@
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import HeroSection from './components/HeroSection';
 import WhyWeExistSection from './components/WhyWeExistSection';
 import WhyThisMattersSection from './components/WhyThisMattersSection';
@@ -33,7 +31,6 @@ const HomePage = () => {
           color: #2D2A26;
         }
       `}</style>
-      <Navbar />
       <main>
         <HeroSection />
         <WhyWeExistSection />
@@ -45,7 +42,6 @@ const HomePage = () => {
         <MarketplaceSection />
         <QuizCTA />
       </main>
-      <Footer />
     </div>
   );
 };

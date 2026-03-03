@@ -1,49 +1,36 @@
 /**
- * Product Metadata Validation Utilities
+ * Product metadata normalization utilities.
  *
- * Enforces common-sense rules before metadata is rendered:
- * - Skin Types: "all" absorbs specific types (no contradictions)
- * - Skin Type matching: "All Skin Types" always matches the user
+ * Provides skin-type normalization and matching used across
+ * product catalog, comparison, and ingredient surfaces.
  */
 
 /**
- * Normalize a product's skinTypes array (Ruleset A).
- *
- * 1. If the array contains 'all' → return ['All Skin Types']
- * 2. Otherwise return deduplicated, capitalized types
- * 3. Empty/undefined → return []
+ * Normalize an array of skin-type strings.
+ * Lowercases, trims whitespace, and filters out empty values.
  */
-export function normalizeSkinTypes(types: string[] | undefined): string[] {
-  if (!types || types.length === 0) return [];
-
-  const hasAll = types.some((t) => t.toLowerCase() === 'all');
-  if (hasAll) return ['All Skin Types'];
-
-  // Deduplicate (case-insensitive) and capitalize first letter
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const t of types) {
-    const key = t.toLowerCase();
-    if (!seen.has(key)) {
-      seen.add(key);
-      result.push(t);
-    }
-  }
-  return result;
+export function normalizeSkinTypes(skinTypes: string[]): string[] {
+  if (!skinTypes) return [];
+  return skinTypes
+    .map((st) => st.trim().toLowerCase())
+    .filter((st) => st.length > 0);
 }
 
 /**
- * Check if a single (already-normalized) skin type matches the user's type.
+ * Check whether a single product skin-type token matches the user's skin type.
  *
- * - 'All Skin Types' or 'all' → always matches
- * - Otherwise case-insensitive comparison
+ * Returns `true` when:
+ * - the product token is "all" (suits every skin type), OR
+ * - the token equals the user's skin type (case-insensitive).
+ *
+ * Returns `false` when `userSkinType` is undefined or empty.
  */
 export function isSkinTypeMatch(
   type: string,
   userSkinType: string | undefined,
 ): boolean {
   if (!userSkinType) return false;
-  const lower = type.toLowerCase();
-  if (lower === 'all skin types' || lower === 'all') return true;
-  return lower === userSkinType.toLowerCase();
+  const normalizedType = type.trim().toLowerCase();
+  const normalizedUser = userSkinType.trim().toLowerCase();
+  return normalizedType === 'all' || normalizedType === normalizedUser;
 }

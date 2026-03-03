@@ -53,11 +53,11 @@ const IngredientIntelligence = () => {
               Ingredient Intelligence
             </h2>
             <h3 className="text-xl text-slate-600 mb-6 leading-relaxed font-semibold">
-              Know what you're putting on your skin—in words you actually understand.
+              Know what you're putting on your skin, in words you actually understand.
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              Access our comprehensive ingredient library with benefits, concerns, and research—
-              all written for real people, not chemists. Learn which ingredients work for 
+              Access our comprehensive ingredient library with benefits, concerns, and research,
+              all written for real people, not chemists. Learn which ingredients work for
               <strong> your skin type</strong> and which to avoid.
             </p>
 

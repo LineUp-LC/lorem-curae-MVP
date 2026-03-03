@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const AccessibilityPage = () => {
   useEffect(() => {
@@ -14,7 +12,6 @@ const AccessibilityPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-12">
@@ -158,7 +155,6 @@ const AccessibilityPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

@@ -1,6 +1,4 @@
 import { useSearchParams, Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const IngredientPatchTestPage = () => {
   const [searchParams] = useSearchParams();
@@ -77,7 +75,6 @@ const IngredientPatchTestPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Breadcrumb */}
@@ -249,7 +246,6 @@ const IngredientPatchTestPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

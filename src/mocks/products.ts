@@ -23,6 +23,7 @@ export const productData: Product[] = [
       { name: 'Glycerin', concentration: 5, concentrationUnit: '%' },
     ],
     preferences: { vegan: true, crueltyFree: true, fragranceFree: true, alcoholFree: true },
+
   },
   {
     id: 2,
@@ -34,7 +35,7 @@ export const productData: Product[] = [
     reviewCount: 2156,
     image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=400&h=500&fit=crop&q=80',
     description: 'Powerful antioxidant serum that brightens, evens tone, and protects against environmental damage.',
-    skinTypes: ['all', 'dry', 'oily', 'combination', 'normal'],
+    skinTypes: ['all'],
     concerns: ['brightening', 'dark spots', 'dullness'],
     keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'],
     inStock: true,
@@ -46,6 +47,7 @@ export const productData: Product[] = [
       { name: 'Vitamin E', concentration: 1, concentrationUnit: '%' },
     ],
     preferences: { crueltyFree: true, plantBased: true, glutenFree: true },
+
   },
   {
     id: 3,
@@ -69,6 +71,7 @@ export const productData: Product[] = [
       { name: 'Squalane', concentration: 10, concentrationUnit: '%' },
     ],
     preferences: { vegan: true, fragranceFree: true, siliconeFree: true },
+
   },
   {
     id: 4,
@@ -92,6 +95,7 @@ export const productData: Product[] = [
       { name: 'Zinc PCA', concentration: 1, concentrationUnit: '%' },
     ],
     preferences: { crueltyFree: true, alcoholFree: true },
+
   },
   {
     id: 5,
@@ -103,7 +107,7 @@ export const productData: Product[] = [
     reviewCount: 2341,
     image: 'https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=400&h=500&fit=crop&q=80',
     description: 'Lightweight mineral sunscreen with broad-spectrum protection. No white cast, reef-safe formula.',
-    skinTypes: ['all', 'dry', 'oily', 'combination', 'normal', 'sensitive'],
+    skinTypes: ['all'],
     concerns: ['sun protection', 'anti-aging'],
     keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'],
     inStock: true,
@@ -115,6 +119,7 @@ export const productData: Product[] = [
       { name: 'Vitamin E', isKeyActive: false },
     ],
     preferences: { vegan: true, crueltyFree: true, chemicalFree: true },
+
   },
   {
     id: 6,
@@ -138,6 +143,7 @@ export const productData: Product[] = [
       { name: 'Hyaluronic Acid', concentration: 2, concentrationUnit: '%' },
     ],
     preferences: { crueltyFree: true, fragranceFree: true, glutenFree: true },
+
   },
   {
     id: 7,
@@ -161,6 +167,7 @@ export const productData: Product[] = [
       { name: 'Aloe Vera', isKeyActive: false },
     ],
     preferences: { vegan: true, plantBased: true, alcoholFree: true, siliconeFree: true },
+
   },
   {
     id: 8,
@@ -184,6 +191,7 @@ export const productData: Product[] = [
       { name: 'Hyaluronic Acid', concentration: 1, concentrationUnit: '%' },
     ],
     preferences: { vegan: true, crueltyFree: true, fragranceFree: true },
+
   },
   {
     id: 9,
@@ -207,6 +215,7 @@ export const productData: Product[] = [
       { name: 'Panthenol', concentration: 5, concentrationUnit: '%' },
     ],
     preferences: { vegan: true, fragranceFree: true, alcoholFree: true, plantBased: true },
+
   },
   {
     id: 10,
@@ -230,6 +239,7 @@ export const productData: Product[] = [
       { name: 'Witch Hazel', isKeyActive: false },
     ],
     preferences: { crueltyFree: true, siliconeFree: true },
+
   },
   {
     id: 11,
@@ -241,7 +251,7 @@ export const productData: Product[] = [
     reviewCount: 1456,
     image: 'https://images.unsplash.com/photo-1612817288484-6f916006741a?w=400&h=500&fit=crop&q=80',
     description: 'Advanced eye cream that targets fine lines, dark circles, and puffiness with powerful peptides.',
-    skinTypes: ['all', 'dry', 'normal', 'combination'],
+    skinTypes: ['all'],
     concerns: ['anti-aging', 'dark circles', 'fine lines'],
     keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'],
     inStock: true,
@@ -253,6 +263,7 @@ export const productData: Product[] = [
       { name: 'Hyaluronic Acid', concentration: 1, concentrationUnit: '%' },
     ],
     preferences: { crueltyFree: true, fragranceFree: true },
+
   },
   {
     id: 12,
@@ -276,5 +287,6 @@ export const productData: Product[] = [
       { name: 'Green Tea Extract', isKeyActive: false },
     ],
     preferences: { vegan: true, plantBased: true, glutenFree: true, alcoholFree: true },
+
   },
 ];

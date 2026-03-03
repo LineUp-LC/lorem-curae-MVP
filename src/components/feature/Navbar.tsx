@@ -8,6 +8,7 @@ import { Link, useLocation } from 'react-router-dom';
 import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
+import { useAuth } from '../../lib/auth/AuthContext';
 
 /**
  * Navbar Component - MOBILE OPTIMIZED
@@ -30,8 +31,8 @@ const navLinks = [
   { name: 'Skin Survey', path: '/skin-survey' },
   { name: 'Discover', path: '/discover' },
   { name: 'Ingredients', path: '/ingredients' },
-  { name: 'Marketplace', path: '/marketplace' },
-  { name: 'Nutrire', path: '/community' },
+  { name: 'Marketplace', path: '/marketplace', comingSoon: true },
+  { name: 'Nutrire', path: '/community', comingSoon: true },
   { name: 'About', path: '/about' },
 ];
 
@@ -41,6 +42,7 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isNavHovered, setIsNavHovered] = useState(false);
   const cartCount = useCartCount();
+  const { profile } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const location = useLocation();
 
@@ -278,6 +280,28 @@ const Navbar = () => {
           }
         }
 
+        /* Coming Soon label - desktop */
+        .lc-coming-soon-label {
+          display: block;
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.5625rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          color: #C4704D;
+          text-align: center;
+          line-height: 1;
+          margin-top: 2px;
+        }
+
+        /* Coming Soon label - mobile */
+        .lc-coming-soon-mobile {
+          font-family: var(--lc-font-sans, 'DM Sans', sans-serif);
+          font-size: 0.6875rem;
+          font-weight: 600;
+          color: #C4704D;
+          margin-left: 0.5rem;
+        }
+
         /* Ensure desktop nav visibility at lg breakpoint */
         @media (min-width: 1024px) {
           .lc-mobile-btn { display: none !important; }
@@ -334,6 +358,9 @@ const Navbar = () => {
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {link.name}
+                  {link.comingSoon && (
+                    <span className="lc-coming-soon-label">Coming Soon</span>
+                  )}
                 </Link>
               );
             })}
@@ -367,21 +394,24 @@ const Navbar = () => {
             <div className="relative ml-2">
               <button
                 onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-                className="lc-nav-icon-btn overflow-hidden ring-2 ring-[#E8A888]/50 hover:ring-[#C4704D] bg-gradient-to-br from-[#FDF8F5] to-[#E8D4CC]"
+                className="lc-nav-icon-btn ring-2 ring-[#E8A888]/50 hover:ring-[#C4704D] overflow-hidden"
+                style={{
+                  ...(!((profile?.preferences as any)?.avatar_url) && {
+                    background: 'linear-gradient(to bottom right, #FDF8F5, #E8D4CC)',
+                  }),
+                }}
                 aria-label="Profile menu"
                 aria-expanded={showProfileDropdown}
               >
-                {/* Person outline icon as base layer */}
-                <i className="ri-user-line absolute inset-0 flex items-center justify-center text-[#C4704D] text-xl"></i>
-                {/* Avatar image overlays the icon when loaded */}
-                <img
-                  src="https://readdy.ai/api/search-image?query=professional%20portrait%20of%20confident%20young%20woman%20with%20clear%20glowing%20skin%20natural%20makeup%20soft%20lighting%20studio%20photography%20beauty%20portrait%20minimalist%20clean%20background&width=200&height=200&seq=navbar-avatar&orientation=squarish"
-                  alt=""
-                  width={44}
-                  height={44}
-                  className="w-full h-full object-cover relative z-10"
-                  loading="eager"
-                />
+                {(profile?.preferences as any)?.avatar_url ? (
+                  <img
+                    src={(profile?.preferences as any).avatar_url}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <i className="ri-user-line text-[#C4704D] text-xl"></i>
+                )}
               </button>
               <ProfileDropdown
                 isOpen={showProfileDropdown}
@@ -409,6 +439,9 @@ const Navbar = () => {
                   aria-current={isActive ? 'page' : undefined}
                 >
                   {link.name}
+                  {link.comingSoon && (
+                    <span className="lc-coming-soon-mobile">Coming Soon</span>
+                  )}
                 </Link>
               );
             })}

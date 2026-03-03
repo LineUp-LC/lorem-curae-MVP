@@ -1,18 +1,22 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
-import html2canvas from 'html2canvas';
-import { routineCompletionState, getRoutineBuilderCompletionRate } from '../../lib/utils/routineCompletionState';
+import { hydrateRoutines, deleteRoutineFromSupabase, saveRoutineToSupabase, getLocalRoutines, saveLocalRoutines, SavedRoutine } from '../../lib/utils/routineState';
+import NotesSection from '../routines/components/NotesSection';
+import { useAuth } from '../../lib/auth/AuthContext';
+import { logRoutineUsage } from '../../lib/utils/routineAnalytics';
+import VersionHistoryModal from '../routines/components/VersionHistoryModal';
+import TimelineTab from '../routines/components/TimelineTab';
+import RoutineListTutorial from './components/RoutineListTutorial';
 
 interface Routine {
   id: string;
   name: string;
-  createdAt: Date;
-  lastModified: Date;
+  createdAt: string;
+  updatedAt: string;
   stepCount: number;
   completionRate: number;
   thumbnail?: string;
+  timeOfDay?: 'morning' | 'evening' | 'both';
 }
 
 // Education flow content
@@ -20,116 +24,80 @@ const educationSteps = [
   {
     title: "Understanding AM Routines",
     icon: "ri-sun-line",
-    content: "Your morning routine focuses on protection and hydration. Start with a gentle cleanser to remove overnight oil buildup, followed by serums that target your specific concerns.",
+    content: "Your morning routine is all about preparing your skin for the day ahead. It focuses on protection, hydration, and creating a smooth base before you're exposed to sunlight, pollution, and daily stressors.",
     tip: "The key is to end with SPF - this protects all the work you've done!"
   },
   {
     title: "Understanding PM Routines",
     icon: "ri-moon-line",
-    content: "Evening routines are about repair and treatment. Double cleansing removes makeup and sunscreen, then you apply active ingredients that work while you sleep.",
+    content: "Your evening routine is all about repair, renewal, and deeper treatment. Nighttime is when your skin shifts into recovery mode, making it the ideal time to use richer products and stronger actives.",
     tip: "Nighttime is when your skin does most of its repair work!"
   },
   {
     title: "The Importance of Order",
     icon: "ri-sort-asc",
-    content: "Products are applied from thinnest to thickest consistency. Water-based serums first, then oils, then creams. This ensures proper absorption.",
+    content: "Skincare products are applied from thinnest to thickest so each layer can absorb properly. Lighter, water-based formulas sink in quickly, while heavier creams and oils sit on top to seal everything in. Applying them out of order can block absorption or reduce effectiveness.",
     tip: "Think of it like building layers - each one should be able to penetrate the previous layer."
-  },
-  {
-    title: "Why Order Matters",
-    icon: "ri-lightbulb-line",
-    content: "Applying products in the wrong order can reduce their effectiveness. Heavy creams before serums create a barrier that prevents absorption.",
-    tip: "Wait 30-60 seconds between steps for optimal absorption."
-  }
-];
-
-const mockRoutines: Routine[] = [
-  {
-    id: '1',
-    name: 'Morning Glow Routine',
-    createdAt: new Date('2024-01-01'),
-    lastModified: new Date('2024-01-20'),
-    stepCount: 6,
-    completionRate: 100,
-    thumbnail: 'https://readdy.ai/api/search-image?query=minimalist%20skincare%20products%20arranged%20in%20morning%20routine%20order%20on%20white%20marble%20surface%20with%20natural%20sunlight%20soft%20shadows%20clean%20aesthetic%20product%20photography&width=400&height=300&seq=routine-thumb-1&orientation=landscape',
-  },
-  {
-    id: '2',
-    name: 'Evening Repair Routine',
-    createdAt: new Date('2024-01-05'),
-    lastModified: new Date('2024-01-18'),
-    stepCount: 7,
-    completionRate: 85,
-    thumbnail: 'https://readdy.ai/api/search-image?query=elegant%20nighttime%20skincare%20products%20with%20moon%20and%20stars%20aesthetic%20dark%20moody%20lighting%20luxury%20skincare%20photography%20clean%20minimal%20background&width=400&height=300&seq=routine-thumb-2&orientation=landscape',
-  },
-  {
-    id: '3',
-    name: 'Weekend Deep Treatment',
-    createdAt: new Date('2024-01-10'),
-    lastModified: new Date('2024-01-15'),
-    stepCount: 5,
-    completionRate: 60,
-    thumbnail: 'https://readdy.ai/api/search-image?query=spa-like%20skincare%20treatment%20products%20with%20face%20masks%20and%20serums%20on%20clean%20white%20surface%20with%20green%20plants%20relaxing%20aesthetic%20product%20photography&width=400&height=300&seq=routine-thumb-3&orientation=landscape',
   },
 ];
 
 export default function RoutinesListPage() {
+  const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [routines, setRoutines] = useState<Routine[]>(mockRoutines);
-  const [completedToday, setCompletedToday] = useState<Set<string>>(() => {
-    const completions = routineCompletionState.getCompletions();
-    return new Set(completions.map(c => c.routineId));
-  });
+  const [routines, setRoutines] = useState<Routine[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  const loadRoutines = async () => {
+    try {
+      const savedRoutines = await hydrateRoutines();
+      const mappedRoutines: Routine[] = savedRoutines.map(r => {
+        const stepsWithProducts = r.steps ? r.steps.filter(s => s.product).length : 0;
+        const totalSteps = r.steps ? r.steps.length : r.stepCount;
+        const completionRate = totalSteps > 0 ? Math.round((stepsWithProducts / totalSteps) * 100) : 0;
+        return {
+          id: r.id,
+          name: r.name,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          stepCount: r.stepCount,
+          completionRate,
+          thumbnail: r.thumbnail,
+          timeOfDay: r.timeOfDay,
+        };
+      });
+      setRoutines(mappedRoutines);
+    } catch (e) {
+      console.error('[RoutinesList] Failed to load routines:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Hydrate routines from Supabase/localStorage once auth is settled
   useEffect(() => {
-    return routineCompletionState.subscribe((completions) => {
-      setCompletedToday(new Set(completions.map(c => c.routineId)));
-    });
-  }, []);
-
-  // Update completion rates from actual RoutineBuilder data
-  useEffect(() => {
-    const updateCompletionRates = () => {
-      const morningRate = getRoutineBuilderCompletionRate('morning');
-      const eveningRate = getRoutineBuilderCompletionRate('evening');
-
-      setRoutines(prev => prev.map(routine => {
-        // Map routines to their corresponding time of day
-        if (routine.name.toLowerCase().includes('morning')) {
-          return { ...routine, completionRate: morningRate.percentage };
-        } else if (routine.name.toLowerCase().includes('evening')) {
-          return { ...routine, completionRate: eveningRate.percentage };
-        }
-        // For other routines, use combined average
-        const combined = Math.round((morningRate.percentage + eveningRate.percentage) / 2);
-        return { ...routine, completionRate: combined };
-      }));
-    };
-
-    updateCompletionRates();
-
-    // Listen for storage changes (when RoutineBuilder updates)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'routine_completion_tracker') {
-        updateCompletionRates();
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-
-    // Also poll periodically in case of same-tab updates
-    const interval = setInterval(updateCompletionRates, 2000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+    if (authLoading) return;
+    loadRoutines();
+  }, [authLoading]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
   const [shareRoutineId, setShareRoutineId] = useState<string | null>(null);
-  
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [kebabMenuId, setKebabMenuId] = useState<string | null>(null);
+  const [versionHistoryRoutineId, setVersionHistoryRoutineId] = useState<string | null>(null);
+  const [showListTutorial, setShowListTutorial] = useState(() => {
+    return !localStorage.getItem('routineListTutorialComplete');
+  });
+
+  // Close kebab menu on outside click
+  useEffect(() => {
+    if (!kebabMenuId) return;
+    const handleClick = () => setKebabMenuId(null);
+    document.addEventListener('click', handleClick);
+    return () => document.removeEventListener('click', handleClick);
+  }, [kebabMenuId]);
+
   // Routine builder education flow state
   const [showIntroPopup, setShowIntroPopup] = useState(false);
   const [showFamiliarityPopup, setShowFamiliarityPopup] = useState(false);
@@ -154,18 +122,60 @@ export default function RoutinesListPage() {
     setEditingName(routine.name);
   };
 
-  const handleSaveName = (id: string) => {
+  const handleSaveName = async (id: string) => {
+    // Update React state immediately (optimistic)
     setRoutines(prev =>
       prev.map(r =>
-        r.id === id ? { ...r, name: editingName, lastModified: new Date() } : r
+        r.id === id ? { ...r, name: editingName } : r
       )
     );
     setEditingId(null);
+
+    // Persist to localStorage + Supabase
+    const local = getLocalRoutines();
+    const routine = local.find(r => r.id === id);
+    if (routine) {
+      const updated: SavedRoutine = { ...routine, name: editingName, updatedAt: new Date().toISOString() };
+      const updatedLocal = local.map(r => r.id === id ? updated : r);
+      saveLocalRoutines(updatedLocal);
+      await saveRoutineToSupabase(updated);
+      if (user) logRoutineUsage(user.id, id, 'routine_updated');
+    }
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditingName('');
+  };
+
+  const handleDeleteRoutine = async (id: string) => {
+    setDeleting(true);
+    // Optimistic UI update
+    setRoutines(prev => prev.filter(r => r.id !== id));
+    setDeleteConfirmId(null);
+
+    const success = await deleteRoutineFromSupabase(id);
+    if (!success) {
+      // Revert on failure - reload routines
+      const reloaded = await hydrateRoutines();
+      setRoutines(reloaded.map(r => {
+        const stepsWithProducts = r.steps ? r.steps.filter(s => s.product).length : 0;
+        const totalSteps = r.steps ? r.steps.length : r.stepCount;
+        const completionRate = totalSteps > 0 ? Math.round((stepsWithProducts / totalSteps) * 100) : 0;
+        return {
+          id: r.id,
+          name: r.name,
+          createdAt: r.createdAt,
+          updatedAt: r.updatedAt,
+          stepCount: r.stepCount,
+          completionRate,
+          thumbnail: r.thumbnail,
+          timeOfDay: r.timeOfDay,
+        };
+      }));
+    }
+    setDeleting(false);
+    if (user) logRoutineUsage(user.id, id, 'routine_deleted');
   };
 
   const handleShareRoutine = async (routineId: string) => {
@@ -247,25 +257,41 @@ export default function RoutinesListPage() {
     navigate('/routines');
   };
 
+  const [notesRoutineId, setNotesRoutineId] = useState<string | null>(null);
+  const [notesModalTab, setNotesModalTab] = useState<'notes' | 'timeline'>('notes');
+
   const handleViewNotes = (id: string) => {
-    navigate(`/routines?id=${id}&tab=notes`);
+    setNotesRoutineId(id);
+    setNotesModalTab('notes');
+    if (user) logRoutineUsage(user.id, id, 'notes_opened');
   };
 
   const handleEditRoutine = (id: string) => {
-    navigate(`/routines?id=${id}&tab=routine`);
+    navigate(`/routines?id=${id}`);
+  };
+
+  const getStepLabel = (id: string, stepCount: number, timeOfDay?: string) => {
+    if (timeOfDay === 'both') {
+      const saved = getLocalRoutines().find(r => r.id === id);
+      if (saved?.steps) {
+        const am = saved.steps.filter(s => s.timeOfDay === 'morning').length;
+        const pm = saved.steps.filter(s => s.timeOfDay === 'evening').length;
+        if (am > 0 && pm > 0) return `${am} AM \u00B7 ${pm} PM steps`;
+      }
+    }
+    return `${stepCount} steps`;
   };
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24 pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
           {/* CHANGED: mb-12 -> mb-8 sm:mb-12 */}
-          <div className="text-center mb-8 sm:mb-12">
+          <div className="text-center mb-6 sm:mb-8">
             {/* Updated: consistent with design system */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-serif text-deep mb-4">
+            <h1 className="text-3xl sm:text-4xl font-serif text-deep mb-2">
               My Skincare Routines
             </h1>
             {/* CHANGED: text-lg -> text-base sm:text-lg, added px-4 */}
@@ -274,22 +300,45 @@ export default function RoutinesListPage() {
             </p>
           </div>
 
+          {/* Loading State */}
+          {isLoading && (
+            <div className="flex items-center justify-center py-16">
+              <div className="text-center">
+                <i className="ri-loader-4-line text-4xl text-primary animate-spin mb-4 block"></i>
+                <p className="text-warm-gray">Loading your routines...</p>
+              </div>
+            </div>
+          )}
+
           {/* Routines Grid */}
           {/* CHANGED: grid md:grid-cols-2 lg:grid-cols-3 gap-6 -> grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {!isLoading && (
+          <>
+          {routines.length === 0 && (
+            <div className="text-center mb-6">
+              <h3 className="font-serif text-xl sm:text-2xl font-bold text-warm-gray/60 mb-1">
+                No Routines Yet
+              </h3>
+              <p className="text-sm text-warm-gray/80 max-w-md mx-auto">
+                Start building your first skincare routine with our guided template
+              </p>
+            </div>
+          )}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             {/* Create New Routine Card */}
             {/* CHANGED: rounded-2xl -> rounded-xl sm:rounded-2xl, p-8 -> p-6 sm:p-8, min-h-[400px] -> min-h-[300px] sm:min-h-[400px] */}
             <div
+              data-tutorial="build-routine"
               onClick={handleCreateRoutine}
-              className="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-dashed border-blush hover:border-primary p-6 sm:p-8 flex flex-col items-center justify-center min-h-[300px] sm:min-h-[400px] cursor-pointer transition-all group"
+              className="bg-white rounded-xl sm:rounded-2xl shadow-sm border-2 border-dashed border-blush hover:border-primary p-5 sm:p-6 flex flex-col items-center justify-center min-h-[200px] sm:min-h-[240px] cursor-pointer transition-all group"
             >
               {/* CHANGED: w-20 h-20 -> w-16 h-16 sm:w-20 sm:h-20, mb-4 -> mb-3 sm:mb-4 */}
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center mb-3 sm:mb-4 transition-colors">
-                {/* CHANGED: text-4xl -> text-3xl sm:text-4xl */}
-                <i className="ri-add-line text-3xl sm:text-4xl text-deep"></i>
+              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary/10 group-hover:bg-primary/20 flex items-center justify-center mb-2 sm:mb-3 transition-colors">
+                <i className="ri-add-line text-2xl sm:text-3xl text-deep"></i>
               </div>
               {/* CHANGED: text-2xl -> text-xl sm:text-2xl, added text-center */}
-              <h3 className="font-serif text-xl sm:text-2xl font-bold text-deep mb-2 text-center">
+              <h3 className="font-serif text-lg sm:text-xl font-bold text-deep mb-1 text-center">
                 Build Your Routine
               </h3>
               <p className="text-warm-gray text-center text-sm">
@@ -306,56 +355,81 @@ export default function RoutinesListPage() {
               >
                 {/* Thumbnail */}
                 {/* CHANGED: h-48 -> h-40 sm:h-48 */}
-                <div className="relative h-40 sm:h-48 overflow-hidden bg-cream">
-                  <img
-                    src={routine.thumbnail}
-                    alt={routine.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                  <div className="absolute top-3 right-3 flex gap-2">
+                <div className="relative h-28 sm:h-36 overflow-hidden bg-cream">
+                  {routine.thumbnail ? (
+                    <img
+                      src={routine.thumbnail}
+                      alt={routine.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/10 to-light/30">
+                      <i className={`text-3xl text-primary/40 ${
+                        routine.timeOfDay === 'morning' ? 'ri-sun-line' :
+                        routine.timeOfDay === 'evening' ? 'ri-moon-line' :
+                        'ri-calendar-line'
+                      }`}></i>
+                    </div>
+                  )}
+                  {/* 3-dot Kebab Menu */}
+                  <div className="absolute top-3 right-3">
                     <button
-                      onClick={() => handleShareRoutine(routine.id)}
-                      /* CHANGED: w-10 h-10 -> w-9 h-9 sm:w-10 sm:h-10 */
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setKebabMenuId(kebabMenuId === routine.id ? null : routine.id);
+                      }}
                       className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/90 hover:bg-white flex items-center justify-center shadow-sm transition-colors cursor-pointer"
-                      title="Share Routine"
+                      title="More options"
                     >
-                      {shareRoutineId === routine.id ? (
-                        <i className="ri-loader-4-line text-deep animate-spin"></i>
-                      ) : (
-                        <i className="ri-share-line text-deep"></i>
-                      )}
+                      <i className="ri-more-2-fill text-deep"></i>
                     </button>
-                  </div>
 
-                  {/* Mark as Done Button */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      routineCompletionState.toggleCompletion(routine.id);
-                    }}
-                    className={`absolute top-3 left-3 px-3 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                      completedToday.has(routine.id)
-                        ? 'bg-sage text-white'
-                        : 'bg-white/90 hover:bg-white text-deep'
-                    }`}
-                    title={completedToday.has(routine.id) ? 'Completed today - click to undo' : 'Mark as done for today'}
-                  >
-                    <i className={`${completedToday.has(routine.id) ? 'ri-check-line' : 'ri-checkbox-blank-circle-line'} mr-1`}></i>
-                    {completedToday.has(routine.id) ? 'Done' : 'Mark Done'}
-                  </button>
+                    {kebabMenuId === routine.id && (
+                      <div className="absolute top-full right-0 mt-1.5 bg-white rounded-xl shadow-lg border border-blush overflow-hidden min-w-[160px] z-10">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShareRoutine(routine.id);
+                            setKebabMenuId(null);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-deep hover:bg-cream/60 transition-colors flex items-center gap-2.5 cursor-pointer"
+                        >
+                          <i className="ri-share-line"></i>
+                          Share Routine
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDeleteConfirmId(routine.id);
+                            setKebabMenuId(null);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-sm text-red-500 hover:bg-red-50/60 transition-colors flex items-center gap-2.5 cursor-pointer"
+                        >
+                          <i className="ri-delete-bin-line"></i>
+                          Delete Routine
+                        </button>
+                      </div>
+                    )}
+                  </div>
 
                   {/* Completion Badge */}
                   <div className="absolute bottom-3 left-3">
-                    {/* CHANGED: px-3 -> px-2 sm:px-3 */}
-                    <div className="px-2 sm:px-3 py-1 bg-white/90 rounded-full text-xs font-medium text-deep">
-                      {routine.completionRate}% Complete
-                    </div>
+                    {routine.completionRate === 100 ? (
+                      <div className="px-2 sm:px-3 py-1 bg-sage/90 rounded-full text-xs font-medium text-white flex items-center gap-1">
+                        <i className="ri-check-line"></i>
+                        Completed
+                      </div>
+                    ) : (
+                      <div className="px-2 sm:px-3 py-1 bg-white/90 rounded-full text-xs font-medium text-deep">
+                        {routine.completionRate}% Complete
+                      </div>
+                    )}
                   </div>
                 </div>
 
                 {/* Content */}
                 {/* CHANGED: p-6 -> p-4 sm:p-6 */}
-                <div className="p-4 sm:p-6">
+                <div className="p-3 sm:p-4">
                   {/* Editable Name */}
                   {editingId === routine.id ? (
                     <div className="mb-4">
@@ -364,7 +438,7 @@ export default function RoutinesListPage() {
                         value={editingName}
                         onChange={(e) => setEditingName(e.target.value)}
                         /* CHANGED: text-xl -> text-lg sm:text-xl */
-                        className="w-full px-3 py-2 border border-primary rounded-lg font-serif text-lg sm:text-xl font-bold text-deep focus:outline-none focus:ring-2 focus:ring-primary/20"
+                        className="w-full px-3 py-1.5 border border-primary rounded-lg font-serif text-base sm:text-lg font-bold text-deep focus:outline-none focus:ring-2 focus:ring-primary/20"
                         autoFocus
                       />
                       <div className="flex gap-2 mt-2">
@@ -388,7 +462,7 @@ export default function RoutinesListPage() {
                     /* CHANGED: mb-4 -> mb-3 sm:mb-4 */
                     <div className="flex items-center gap-2 mb-3 sm:mb-4">
                       {/* CHANGED: text-2xl -> text-xl sm:text-2xl, added line-clamp-1 */}
-                      <h3 className="font-serif text-xl sm:text-2xl font-bold text-deep flex-1 line-clamp-1">
+                      <h3 className="font-serif text-base sm:text-lg font-bold text-deep flex-1 line-clamp-1">
                         {routine.name}
                       </h3>
                       {/* ADDED: flex-shrink-0 to prevent button from shrinking */}
@@ -404,65 +478,56 @@ export default function RoutinesListPage() {
 
                   {/* Stats */}
                   {/* CHANGED: gap-4 mb-4 text-sm -> gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm */}
-                  <div className="flex items-center gap-3 sm:gap-4 mb-3 sm:mb-4 text-xs sm:text-sm text-warm-gray">
+                  <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-3 text-xs text-warm-gray">
                     <div className="flex items-center gap-1">
                       <i className="ri-list-check text-deep"></i>
-                      <span>{routine.stepCount} steps</span>
+                      <span>{getStepLabel(routine.id, routine.stepCount, routine.timeOfDay)}</span>
                     </div>
                   </div>
 
                   {/* Progress Bar */}
                   {/* CHANGED: mb-4 -> mb-3 sm:mb-4 */}
-                  <div className="mb-3 sm:mb-4">
+                  <div className="mb-2 sm:mb-3">
                     <div className="h-2 bg-blush rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-primary transition-all duration-300"
+                        className={`h-full transition-all duration-300 ${
+                          routine.completionRate === 100 ? 'bg-sage' : 'bg-primary'
+                        }`}
                         style={{ width: `${routine.completionRate}%` }}
                       ></div>
                     </div>
                   </div>
 
-                  {/* Action Button: Edit Routine */}
-                  <div>
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
                     <button
                       onClick={() => handleEditRoutine(routine.id)}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-sm font-medium whitespace-nowrap cursor-pointer"
+                      className="flex-1 px-3 sm:px-4 py-2 bg-primary text-white rounded-lg hover:bg-dark transition-colors text-xs sm:text-sm font-medium whitespace-nowrap cursor-pointer"
                     >
                       <i className="ri-pencil-line mr-1 sm:mr-2"></i>
                       Edit
+                    </button>
+                    <button
+                      onClick={() => handleViewNotes(routine.id)}
+                      className="flex-1 px-3 sm:px-4 py-2 bg-sage/10 text-sage-700 border border-sage/30 rounded-lg hover:bg-sage/20 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap cursor-pointer"
+                      title="Notes & Progress"
+                    >
+                      <i className="ri-file-text-line mr-1 sm:mr-2"></i>
+                      Notes
+                    </button>
+                    <button
+                      onClick={() => setVersionHistoryRoutineId(routine.id)}
+                      className="px-3 sm:px-4 py-2 bg-warm-gray/10 text-warm-gray border border-warm-gray/20 rounded-lg hover:bg-warm-gray/20 transition-colors text-xs sm:text-sm font-medium whitespace-nowrap cursor-pointer"
+                      title="Version History"
+                    >
+                      <i className="ri-history-line"></i>
                     </button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
-
-          {/* Empty State */}
-          {routines.length === 0 && (
-            /* CHANGED: py-16 -> py-12 sm:py-16 */
-            <div className="text-center py-12 sm:py-16">
-              {/* CHANGED: w-24 h-24 mb-6 -> w-20 h-20 sm:w-24 sm:h-24 mb-4 sm:mb-6 */}
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-cream flex items-center justify-center mx-auto mb-4 sm:mb-6">
-                {/* CHANGED: text-5xl -> text-4xl sm:text-5xl */}
-                <i className="ri-file-list-3-line text-warm-gray/60 text-4xl sm:text-5xl"></i>
-              </div>
-              {/* CHANGED: text-3xl mb-3 -> text-2xl sm:text-3xl mb-2 sm:mb-3 */}
-              <h3 className="font-serif text-2xl sm:text-3xl font-bold text-warm-gray/60 mb-2 sm:mb-3">
-                No Routines Yet
-              </h3>
-              {/* CHANGED: mb-8 -> mb-6 sm:mb-8, added text-sm sm:text-base and px-4 */}
-              <p className="text-sm sm:text-base text-warm-gray/80 mb-6 sm:mb-8 max-w-md mx-auto px-4">
-                Start building your first skincare routine with our guided template
-              </p>
-              {/* CHANGED: px-8 py-4 -> px-6 sm:px-8 py-3 sm:py-4 */}
-              <button
-                onClick={handleCreateRoutine}
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-primary text-white rounded-lg hover:bg-dark transition-colors font-medium whitespace-nowrap cursor-pointer"
-              >
-                <i className="ri-add-line mr-2"></i>
-                Create Your First Routine
-              </button>
-            </div>
+          </>
           )}
         </div>
       </main>
@@ -479,7 +544,7 @@ export default function RoutinesListPage() {
                 Let's Build Your Perfect Routine
               </h3>
               <p className="text-warm-gray">
-                Our Routine Builder helps you create a personalized skincare regimen with expert-guided steps, product recommendations, and ingredient conflict detection.
+                Our Routine Builder helps you create a personalized skincare regimen with guided steps, product recommendations, and ingredient conflict detection.
               </p>
             </div>
 
@@ -664,7 +729,131 @@ export default function RoutinesListPage() {
         </div>
       )}
 
-      <Footer />
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmId && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6">
+            <div className="text-center mb-5">
+              <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-delete-bin-line text-red-500 text-2xl"></i>
+              </div>
+              <h3 className="font-serif text-lg font-semibold text-deep mb-2">Delete Routine</h3>
+              <p className="text-sm text-warm-gray">
+                Are you sure you want to delete this routine? This action cannot be undone.
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirmId(null)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2.5 border border-blush text-warm-gray rounded-lg text-sm font-medium hover:bg-cream transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => handleDeleteRoutine(deleteConfirmId)}
+                disabled={deleting}
+                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
+              >
+                {deleting ? (
+                  <><i className="ri-loader-4-line animate-spin mr-2"></i>Deleting...</>
+                ) : (
+                  'Delete'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Version History Modal */}
+      {versionHistoryRoutineId && (
+        <VersionHistoryModal
+          isOpen={true}
+          onClose={() => setVersionHistoryRoutineId(null)}
+          onRevert={loadRoutines}
+          routineId={versionHistoryRoutineId}
+          routineName={routines.find(r => r.id === versionHistoryRoutineId)?.name || 'Routine'}
+        />
+      )}
+
+      {/* Notes & Progress Modal */}
+      {notesRoutineId && (
+        <div
+          className="fixed inset-0 bg-deep/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={(e) => e.target === e.currentTarget && setNotesRoutineId(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Routine Notes & Progress"
+        >
+          <div className="bg-cream rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="flex items-center justify-between p-5 border-b border-blush bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-sage/10 flex items-center justify-center">
+                  <i className="ri-file-text-line text-sage text-lg"></i>
+                </div>
+                <div>
+                  <h2 className="font-serif text-lg font-bold text-deep">
+                    Notes & Progress
+                  </h2>
+                  <p className="text-xs text-warm-gray">
+                    Track observations and assess your skin's progress
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setNotesRoutineId(null)}
+                className="w-9 h-9 rounded-full bg-cream hover:bg-blush flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close notes panel"
+              >
+                <i className="ri-close-line text-xl text-warm-gray"></i>
+              </button>
+            </div>
+
+            {/* Tab bar */}
+            <div className="flex border-b border-blush bg-white px-5">
+              <button
+                onClick={() => setNotesModalTab('notes')}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
+                  notesModalTab === 'notes'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-warm-gray hover:text-deep'
+                }`}
+              >
+                <i className="ri-file-text-line mr-1.5"></i>
+                Notes
+              </button>
+              <button
+                onClick={() => setNotesModalTab('timeline')}
+                className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors cursor-pointer ${
+                  notesModalTab === 'timeline'
+                    ? 'border-primary text-primary'
+                    : 'border-transparent text-warm-gray hover:text-deep'
+                }`}
+              >
+                <i className="ri-timeline-view mr-1.5"></i>
+                Timeline
+              </button>
+            </div>
+
+            {/* Content - scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 bg-cream">
+              {notesModalTab === 'notes' ? (
+                <NotesSection autoOpenAssessment={false} />
+              ) : (
+                <TimelineTab routineId={notesRoutineId ?? undefined} />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* First-Time Tutorial */}
+      {showListTutorial && (
+        <RoutineListTutorial onComplete={() => setShowListTutorial(false)} />
+      )}
+
     </div>
   );
 }

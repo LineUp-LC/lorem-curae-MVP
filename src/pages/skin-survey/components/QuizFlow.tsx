@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 
 interface SurveyData {
@@ -101,8 +101,66 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   const [allergenSuggestions, setAllergenSuggestions] = useState<string[]>([]);
   const [showOtherConcern, setShowOtherConcern] = useState(false);
   const [otherConcernInput, setOtherConcernInput] = useState('');
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [pendingPath, setPendingPath] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const totalSteps = 15; // Updated total steps to include routine preferences
+
+  // Warn on browser tab close / refresh when survey is in progress
+  const isInProgress = currentStep > 1 && currentStep <= totalSteps;
+  useEffect(() => {
+    if (!isInProgress) return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isInProgress]);
+
+  // Intercept in-app link clicks during survey (capturing phase fires before React Router)
+  useEffect(() => {
+    if (!isInProgress) return;
+    const handleClick = (e: MouseEvent) => {
+      const anchor = (e.target as HTMLElement).closest('a[href]');
+      if (!anchor) return;
+      const href = anchor.getAttribute('href');
+      if (!href || href.startsWith('http') || href.startsWith('#') || href.startsWith('mailto:')) return;
+      e.preventDefault();
+      e.stopPropagation();
+      setPendingPath(href);
+      setShowExitModal(true);
+    };
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, [isInProgress]);
+
+  // Intercept browser back/forward button
+  useEffect(() => {
+    if (!isInProgress) return;
+    window.history.pushState(null, '', window.location.href);
+    const handlePopState = () => {
+      window.history.pushState(null, '', window.location.href);
+      setPendingPath(null);
+      setShowExitModal(true);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, [isInProgress]);
+
+  const handleExitSurvey = () => {
+    clearCurrentStep();
+    clearSurveyData();
+    localStorage.removeItem('skinSurveyData');
+    setShowExitModal(false);
+    navigate(pendingPath || '/');
+    setPendingPath(null);
+  };
+
+  const handleContinueSurvey = () => {
+    setShowExitModal(false);
+    setPendingPath(null);
+  };
 
   const allergensList = [
     'Fragrance', 'Parabens', 'Sulfates', 'Alcohol', 'Silicones', 'Essential oils',
@@ -546,19 +604,45 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Select your preferences</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Chemicals', 'Vegan', 'Plant-Based', 'Fragrance-free', 'Gluten-Free',
-                'Alcohol-Free', 'Silicone-free', 'Cruelty-Free'
-              ].map((preference) => (
+                { label: 'Cruelty-Free', tip: 'No animal testing at any stage of production' },
+                { label: 'Vegan', tip: 'Contains no animal-derived ingredients whatsoever' },
+                { label: 'Fragrance-Free', tip: 'Free from added synthetic or natural fragrances that can irritate sensitive skin' },
+                { label: 'Organic', tip: 'Made with organically farmed ingredients, free from synthetic pesticides' },
+                { label: 'Dermatologist Tested', tip: 'Clinically evaluated by dermatologists for safety and efficacy' },
+                { label: 'Hypoallergenic', tip: 'Formulated to minimize the risk of allergic reactions' },
+                { label: 'Paraben-Free', tip: 'Free from paraben preservatives, which some prefer to avoid' },
+                { label: 'Sulfate-Free', tip: 'No harsh sulfate cleansing agents that can strip natural oils' },
+                { label: 'Plant-Based', tip: 'Primarily derived from botanical and plant sources' },
+                { label: 'Gluten-Free', tip: 'Free from gluten-containing ingredients, important for those with sensitivities' },
+                { label: 'Alcohol-Free', tip: 'No drying alcohols that can dehydrate or irritate the skin' },
+                { label: 'Silicone-Free', tip: 'Free from silicones, which some find can clog pores or cause buildup' },
+                { label: 'Budget conscious', tip: 'Helps us surface effective options at lower price points' },
+                { label: 'Premium products preferred', tip: 'Indicates interest in high-performance and luxury formulations' },
+                { label: 'Prefer multi-use products', tip: 'Products that serve multiple purposes, like a moisturizer with SPF' },
+                { label: 'Prefer travel-friendly sizes', tip: 'Indicates a preference for portable or mini-sized products' },
+                { label: 'K-Beauty', tip: 'Korean skincare philosophy focusing on gentle, layered hydration and barrier care' },
+                { label: 'Prefer natural/clean ingredients', tip: 'Preference for products without synthetic fragrances, parabens, or harsh chemicals' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={preference}
-                  onClick={() => handleMultiSelect('preferences', preference)}
-                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.preferences.includes(preference)
+                  key={label}
+                  onClick={() => handleMultiSelect('preferences', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.preferences.includes(label)
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {preference}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -572,18 +656,36 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Tell us about your daily environment</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Active lifestyle', 'Indoor work environment', 'Frequent travel', 'High stress levels'
-              ].map((factor) => (
+                { label: 'Active lifestyle', tip: 'Regular exercise affects sweat production, pore activity, and product wear' },
+                { label: 'Indoor work environment', tip: 'Dry air and artificial lighting can reduce skin hydration over time' },
+                { label: 'Frequent travel', tip: 'Changing climates, cabin pressure, and water quality shift your skin\'s needs' },
+                { label: 'High stress levels', tip: 'Stress triggers cortisol which can lead to breakouts and sensitivity' },
+                { label: 'Outdoor work environment', tip: 'Regular sun and wind exposure increases the need for UV protection and barrier repair' },
+                { label: 'Frequently wears makeup', tip: 'Daily makeup influences product selection for compatibility and skin recovery' },
+                { label: 'Screen time heavy', tip: 'Blue light from screens may contribute to hyperpigmentation and premature aging' },
+                { label: 'Sun exposure daily', tip: 'Consistent UV exposure requires stronger photoprotection and antioxidant support' },
+                { label: 'Wears glasses or headsets regularly', tip: 'Pressure and friction from frames or headsets can cause congestion in contact areas' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={factor}
-                  onClick={() => handleMultiSelect('lifestyle', factor)}
-                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.lifestyle.includes(factor)
+                  key={label}
+                  onClick={() => handleMultiSelect('lifestyle', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.lifestyle.includes(label)
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {factor}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -593,23 +695,33 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 10:
         return (
           <div>
-            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Routine & Product Preferences</h2>
-            <p className="text-warm-gray text-sm mb-6">Tell us about your skincare habits and preferences</p>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Routine Preferences</h2>
+            <p className="text-warm-gray text-sm mb-6">Tell us about your skincare routine habits</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Limited time for routine', 'Detailed routine preferred',
-                'Budget conscious', 'Premium products preferred'
-              ].map((preference) => (
+                { label: 'Limited time for routine', tip: 'Helps us suggest quick, efficient routines that fit a busy schedule' },
+                { label: 'Detailed routine preferred', tip: 'Indicates you enjoy a thorough, multi-step skincare ritual' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={preference}
-                  onClick={() => handleMultiSelect('routine', preference)}
-                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.routine.includes(preference)
+                  key={label}
+                  onClick={() => handleMultiSelect('routine', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.routine.includes(label)
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {preference}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -653,21 +765,31 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Stress can trigger various skin conditions and affect healing</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Low - Generally calm',
-                'Moderate - Occasional stress',
-                'High - Frequently stressed',
-                'Very High - Chronic stress'
-              ].map((option) => (
+                { label: 'Low - Generally calm', tip: 'Lower cortisol levels support balanced oil production and skin barrier health' },
+                { label: 'Moderate - Occasional stress', tip: 'Periodic stress can cause temporary flare-ups like breakouts or dullness' },
+                { label: 'High - Frequently stressed', tip: 'Elevated cortisol can increase oil production, trigger breakouts, and slow healing' },
+                { label: 'Very High - Chronic stress', tip: 'Prolonged stress can weaken the skin barrier, worsen inflammation, and accelerate aging' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={option}
-                  onClick={() => handleSingleSelect('stressLevel', option)}
-                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.stressLevel === option
+                  key={label}
+                  onClick={() => handleSingleSelect('stressLevel', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.stressLevel === label
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {option}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -681,23 +803,33 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Nutrition plays a key role in skin health</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                'Balanced - Variety of whole foods',
-                'Plant-based/Vegetarian',
-                'High protein focus',
-                'Processed/Fast food heavy',
-                'Limited/Restricted diet',
-                'Variable/Inconsistent'
-              ].map((option) => (
+                { label: 'Balanced - Variety of whole foods', tip: 'Rich in antioxidants, vitamins, and healthy fats that support skin repair and glow' },
+                { label: 'Plant-based/Vegetarian', tip: 'High in anti-inflammatory compounds, though may need supplementation for B12 and zinc' },
+                { label: 'High protein focus', tip: 'Supports collagen production, but dairy-heavy diets may trigger breakouts for some' },
+                { label: 'Processed/Fast food heavy', tip: 'High glycemic foods and excess sodium can contribute to inflammation and breakouts' },
+                { label: 'Limited/Restricted diet', tip: 'May affect nutrient availability for skin health depending on what is restricted' },
+                { label: 'Variable/Inconsistent', tip: 'Inconsistent nutrition can lead to fluctuations in skin clarity and hydration' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={option}
-                  onClick={() => handleSingleSelect('dietPattern', option)}
-                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.dietPattern === option
+                  key={label}
+                  onClick={() => handleSingleSelect('dietPattern', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.dietPattern === label
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {option}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -784,7 +916,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
 
   if (currentStep > totalSteps) {
     return (
-      <main className="max-w-2xl mx-auto px-6 lg:px-12 py-24">
+      <main className="max-w-2xl mx-auto px-6 lg:px-12 py-24 min-h-[calc(100vh-6rem)] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-full flex items-center justify-center">
             <i className="ri-check-line text-2xl text-primary"></i>
@@ -796,7 +928,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           <Link
             to="/my-skin"
             onClick={handleViewResults}
-            className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap"
+            className="inline-flex items-center space-x-2 bg-deep hover:bg-deep/90 text-white px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap"
           >
             <span>View Your Skin Profile</span>
             <i className="ri-arrow-right-line"></i>
@@ -813,13 +945,13 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
         <div className="flex items-center justify-between mb-4">
           <span className="text-sm text-warm-gray">Step {currentStep} of {totalSteps}</span>
           <span className="text-sm text-warm-gray">
-            {Math.round((currentStep / totalSteps) * 100)}% Complete
+            {Math.round(((currentStep - 1) / totalSteps) * 100)}% Complete
           </span>
         </div>
         <div className="w-full bg-blush rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+            style={{ width: `${((currentStep - 1) / totalSteps) * 100}%` }}
           />
         </div>
       </div>
@@ -857,6 +989,42 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           <i className="ri-arrow-right-line"></i>
         </button>
       </div>
+
+      {/* Exit Intercept Modal */}
+      {showExitModal && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          onClick={handleContinueSurvey}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 text-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="w-14 h-14 mx-auto mb-5 bg-primary/10 rounded-full flex items-center justify-center">
+              <i className="ri-error-warning-line text-2xl text-primary"></i>
+            </div>
+            <h2 className="font-serif text-xl font-semibold text-deep mb-3">Leave the survey?</h2>
+            <p className="text-warm-gray text-sm mb-8">
+              Your progress will be reset if you exit now.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <button
+                onClick={handleContinueSurvey}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-primary hover:bg-dark text-white px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+              >
+                Continue Survey
+              </button>
+              <button
+                onClick={handleExitSurvey}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-blush hover:border-primary text-warm-gray hover:text-deep px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer"
+              >
+                Exit Survey
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };

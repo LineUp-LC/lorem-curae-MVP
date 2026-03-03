@@ -5,6 +5,7 @@ import {
   getEffectiveSkinType,
   getEffectiveConcerns,
 } from '../../../lib/utils/sessionState';
+import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
 
 interface ProductOverviewProps {
   productId: number;
@@ -18,6 +19,7 @@ const ProductOverview = ({
   isInComparison,
 }: ProductOverviewProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
+  const { env } = useEnvironmentContext();
 
   const product = productData.find((p) => p.id === productId);
 
@@ -30,9 +32,6 @@ const ProductOverview = ({
       getEffectiveConcerns().length > 0
         ? getEffectiveConcerns()
         : ['hydration', 'texture'],
-    location: 'New York, NY',
-    climate: 'Humid Continental',
-    uvIndex: 'Moderate (5-6)',
   };
 
   return (
@@ -108,17 +107,59 @@ const ProductOverview = ({
           </ul>
         </div>
 
-        <div className="mt-6 p-4 bg-blue-50 rounded-md">
-          <h3 className="font-semibold">Your Environment</h3>
-          <p className="text-sm text-gray-700">
-            Location: {userProfile.location}
-          </p>
-          <p className="text-sm text-gray-700">
-            Climate: {userProfile.climate}
-          </p>
-          <p className="text-sm text-gray-700">
-            UV Index: {userProfile.uvIndex}
-          </p>
+        {/* Environment Fit */}
+        <div className="mt-4">
+          <h3 className="font-semibold">Environment Fit</h3>
+          {env && env.source !== 'mock' ? (
+            <>
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {env.location?.city && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
+                    <i className="ri-map-pin-line"></i>
+                    {[env.location.city, env.location.region].filter(Boolean).join(', ')}
+                  </span>
+                )}
+                {env.climate && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
+                    <i className="ri-cloud-line"></i>
+                    {env.climate.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  </span>
+                )}
+                {env.uvBand && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
+                    <i className="ri-sun-line"></i>
+                    UV {env.uvBand.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}{env.uvIndex != null ? ` (${env.uvIndex})` : ''}
+                  </span>
+                )}
+                {env.season && (
+                  <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
+                    <i className="ri-leaf-line"></i>
+                    {env.season.charAt(0).toUpperCase() + env.season.slice(1)}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-warm-gray italic mt-2">
+                {env.source === 'live'
+                  ? 'Personalized for your local conditions'
+                  : 'Partially personalized based on your saved location'}
+              </p>
+            </>
+          ) : (
+            <div className="flex items-center gap-2 flex-wrap mt-2">
+              <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-cream text-warm-gray border border-transparent">
+                <i className="ri-map-pin-line"></i>
+                No location set
+              </span>
+              <span className="text-xs text-warm-gray italic">Add your location for personalized environmental insights</span>
+              <Link
+                to="/settings?tab=location"
+                className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
+              >
+                <i className="ri-settings-3-line"></i>
+                Update in Settings
+              </Link>
+            </div>
+          )}
         </div>
 
         <div className="mt-6 flex gap-3">

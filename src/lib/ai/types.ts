@@ -41,8 +41,8 @@ export interface ProductReference {
 export interface UserInteractionHistory {
   /** Products the user has viewed */
   viewedProducts: ProductReference[];
-  /** Products the user has favorited/saved */
-  favoritedProducts: ProductReference[];
+  /** Products the user has saved */
+  savedProducts: ProductReference[];
   /** Products the user has purchased (if available) */
   purchasedProducts: ProductReference[];
   /** Categories the user frequently browses */
@@ -94,10 +94,10 @@ export interface AIChatRequest {
   message: string;
   conversationHistory?: ConversationMessage[];
   settings?: AIChatSettings;
-  /** Client-side user context (favorites, recently viewed, etc.) */
+  /** Client-side user context (saved products, recently viewed, etc.) */
   clientContext?: {
     viewedProducts?: ProductReference[];
-    favoritedProducts?: ProductReference[];
+    savedProducts?: ProductReference[];
     frequentCategories?: string[];
     recentSearches?: string[];
   };

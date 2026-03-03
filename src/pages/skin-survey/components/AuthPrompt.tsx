@@ -1,6 +1,4 @@
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 /**
  * AuthPrompt Component
@@ -14,7 +12,6 @@ import Footer from '../../../components/feature/Footer';
 const AuthPrompt = () => {
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
         <div className="bg-white rounded-xl p-6 lg:p-8 shadow-sm border border-blush/50 max-w-md mx-auto">
@@ -23,7 +20,7 @@ const AuthPrompt = () => {
               How would you like to continue?
             </h2>
             <p className="text-warm-gray text-sm">
-              Save your results permanently or try as a guest first.
+              Create an account to access all features, or try as a guest first.
             </p>
           </div>
 
@@ -66,23 +63,18 @@ const AuthPrompt = () => {
               </li>
               <li className="flex items-center gap-2">
                 <i className="ri-check-line text-sage"></i>
-                <span>Progress tracking & adjustments</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <i className="ri-check-line text-sage"></i>
                 <span>Curated product recommendations</span>
               </li>
             </ul>
 
             <p className="mt-4 text-xs text-warm-gray/80 flex items-center gap-1.5">
               <i className="ri-information-line text-sage"></i>
-              <span>Guest results sync when you sign up.</span>
+              <span>Guest results are stored locally in your browser.</span>
             </p>
           </div>
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 interface Treatment {
   id: string;
@@ -118,7 +116,6 @@ export default function BookingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-white">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -419,7 +416,6 @@ export default function BookingPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

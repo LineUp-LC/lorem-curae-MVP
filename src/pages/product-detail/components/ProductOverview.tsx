@@ -1,10 +1,14 @@
-import { useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
+import { getEffectiveConcerns } from '../../../lib/utils/sessionState';
+import { matchesIngredient } from '../../../lib/utils/matching';
 
-export default function ProductOverview() {
-  const [searchParams] = useSearchParams();
-  const productId = parseInt(searchParams.get('id') || '1');
+interface ProductOverviewProps {
+  productId: number;
+}
+
+export default function ProductOverview({ productId }: ProductOverviewProps) {
   const productFromData = productData.find(p => p.id === productId);
+  const userConcerns = getEffectiveConcerns();
 
   // Calculate price per mL
   const sizeInMl = productFromData?.size?.unit === 'ml' ? productFromData.size.value :
@@ -32,11 +36,19 @@ export default function ProductOverview() {
       <div>
         <h3 className="text-sm font-semibold text-deep mb-3">Key Ingredients</h3>
         <div className="flex flex-wrap gap-2">
-          {productFromData.keyIngredients.map((ing) => (
-            <span key={ing} className="px-3 py-1.5 bg-cream text-warm-gray text-sm rounded-full">
-              {ing}
-            </span>
-          ))}
+          {productFromData.keyIngredients.map((ing) => {
+            const isMatch = matchesIngredient(ing, userConcerns);
+            return (
+              <span key={ing} className={`px-3 py-1.5 text-sm rounded-full border ${
+                isMatch
+                  ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                  : 'bg-cream text-warm-gray border-transparent'
+              }`}>
+                {isMatch && <i className="ri-check-line mr-1"></i>}
+                {ing}
+              </span>
+            );
+          })}
         </div>
       </div>
 

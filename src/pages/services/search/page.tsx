@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 interface Business {
   id: string;
@@ -167,7 +165,6 @@ export default function ServicesSearchPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -488,7 +485,6 @@ export default function ServicesSearchPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

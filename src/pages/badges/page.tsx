@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { useAuth } from '../../lib/auth/AuthContext';
 
 const BadgesPage = () => {
-  const [activeTab, setActiveTab] = useState<'unlocked' | 'locked'>('unlocked');
+  // Default to 'locked' tab since no badges are earned yet
+  const [activeTab, setActiveTab] = useState<'unlocked' | 'locked'>('locked');
   const [searchParams] = useSearchParams();
   const selectedBadgeId = searchParams.get('selected');
+  const { user: authUser } = useAuth();
+
+  // Determine if viewing another user's badges
+  const viewingUserId = searchParams.get('user');
+  const viewingUserName = searchParams.get('name');
+  const isOwnBadges = !viewingUserId || viewingUserId === authUser?.id;
 
   useEffect(() => {
     if (selectedBadgeId) {
@@ -19,18 +25,18 @@ const BadgesPage = () => {
     }
   }, [selectedBadgeId]);
 
-  const unlockedBadges = [
-    { id: 1, name: 'Early Adopter', description: 'Joined Lorem Curae in its first month', icon: 'ri-rocket-line', unlockedDate: 'January 15, 2025', rarity: 'Legendary' },
-    { id: 2, name: 'Routine Master', description: 'Created 5 complete skincare routines', icon: 'ri-calendar-check-line', unlockedDate: 'January 20, 2025', rarity: 'Epic' },
-    { id: 3, name: 'Community Helper', description: 'Helped 10 community members with advice', icon: 'ri-heart-line', unlockedDate: 'January 22, 2025', rarity: 'Rare' },
-    { id: 4, name: 'Ingredient Expert', description: 'Learned about 50+ skincare ingredients', icon: 'ri-flask-fill', unlockedDate: 'January 25, 2025', rarity: 'Epic' },
-    { id: 5, name: 'Consistent Tracker', description: 'Logged skincare routine for 30 days straight', icon: 'ri-calendar-check-fill', unlockedDate: 'February 1, 2025', rarity: 'Rare' },
-    { id: 6, name: 'Product Reviewer', description: 'Wrote 10 detailed product reviews', icon: 'ri-edit-fill', unlockedDate: 'February 3, 2025', rarity: 'Common' }
-  ];
+  // No badges earned yet - badge system coming soon
+  const unlockedBadges: Array<{ id: number; name: string; description: string; icon: string; unlockedDate: string; rarity: string }> = [];
 
+  // All available badges to earn
   const lockedBadges = [
+    { id: 1, name: 'Early Adopter', description: 'Joined Lorem Curae in its first month', icon: 'ri-rocket-line', requirement: 'Join during launch period', rarity: 'Legendary' },
+    { id: 2, name: 'Routine Master', description: 'Created 5 complete skincare routines', icon: 'ri-calendar-check-line', requirement: 'Create 5 routines', rarity: 'Epic' },
+    { id: 3, name: 'Community Helper', description: 'Helped 10 community members with advice', icon: 'ri-heart-line', requirement: 'Help 10 community members', rarity: 'Rare' },
+    { id: 4, name: 'Ingredient Expert', description: 'Learned about 50+ skincare ingredients', icon: 'ri-flask-fill', requirement: 'View 50 ingredient profiles', rarity: 'Epic' },
+    { id: 5, name: 'Consistent Tracker', description: 'Logged skincare routine for 30 days straight', icon: 'ri-calendar-check-fill', requirement: 'Log routine for 30 consecutive days', rarity: 'Rare' },
+    { id: 6, name: 'Product Reviewer', description: 'Wrote 10 detailed product reviews', icon: 'ri-edit-fill', requirement: 'Write 10 product reviews', rarity: 'Common' },
     { id: 7, name: 'Skin Transformation', description: 'Document a complete skin transformation journey', icon: 'ri-magic-fill', requirement: 'Upload before/after photos spanning 90 days', rarity: 'Legendary' },
-    { id: 8, name: 'Mentor', description: 'Guide 25 new members through their first routine', icon: 'ri-user-heart-line', requirement: 'Help 25 new members create their first routine', rarity: 'Epic' },
     { id: 9, name: 'Science Enthusiast', description: 'Read and understand 100 ingredient profiles', icon: 'ri-microscope-line', requirement: 'View 100 different ingredient detail pages', rarity: 'Rare' },
     { id: 10, name: 'Year One', description: 'Be a member for one full year', icon: 'ri-cake-2-line', requirement: 'Maintain active membership for 365 days', rarity: 'Epic' }
   ];
@@ -46,13 +52,16 @@ const BadgesPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
-      <Navbar />
       
       <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">Your Achievements</h1>
-          <p className="text-sm text-warm-gray">Track your skincare journey milestones</p>
+          <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-2">
+            {isOwnBadges ? 'Your Achievements' : `${viewingUserName}'s Badges`}
+          </h1>
+          <p className="text-sm text-warm-gray">
+            {isOwnBadges ? 'Track your skincare journey milestones' : `See what ${viewingUserName} has earned`}
+          </p>
         </div>
 
         {/* Stats */}
@@ -68,14 +77,14 @@ const BadgesPage = () => {
             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(122, 139, 122, 0.1)' }}>
               <i className="ri-trophy-line text-3xl" style={{ color: '#7A8B7A' }}></i>
             </div>
-            <p className="text-3xl font-bold mb-1" style={{ color: '#2D2A26' }}>2</p>
-            <p className="text-sm" style={{ color: '#6B635A' }}>Legendary Badges</p>
+            <p className="text-3xl font-bold mb-1" style={{ color: '#2D2A26' }}>{lockedBadges.length}</p>
+            <p className="text-sm" style={{ color: '#6B635A' }}>Available to Earn</p>
           </div>
           <div className="bg-white rounded-xl p-6 text-center" style={{ border: '1px solid rgba(232, 212, 204, 0.3)' }}>
             <div className="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style={{ backgroundColor: 'rgba(232, 168, 136, 0.15)' }}>
               <i className="ri-fire-line text-3xl" style={{ color: '#C4704D' }}></i>
             </div>
-            <p className="text-3xl font-bold mb-1" style={{ color: '#2D2A26' }}>15</p>
+            <p className="text-3xl font-bold mb-1" style={{ color: '#2D2A26' }}>—</p>
             <p className="text-sm" style={{ color: '#6B635A' }}>Day Streak</p>
           </div>
         </div>
@@ -177,7 +186,6 @@ const BadgesPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

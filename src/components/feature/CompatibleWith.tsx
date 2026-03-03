@@ -3,6 +3,7 @@ import { productData } from '../../mocks/products';
 import { getEffectiveConcerns, getEffectiveSkinType, getEffectivePreferences } from '../../lib/utils/sessionState';
 import { matchesConcern, matchesIngredient } from '../../lib/utils/matching';
 import { findCompatibleProducts } from '../../lib/utils/productSimilarity';
+import { getLocalRoutines } from '../../lib/utils/routineState';
 
 interface CompatibleWithProps {
   productId: number;
@@ -28,6 +29,14 @@ const CompatibleWith = ({ productId }: CompatibleWithProps) => {
 
   if (!currentProduct) return null;
 
+  // Collect product IDs from the user's saved routines
+  const routines = getLocalRoutines();
+  const routineProductIds = new Set(
+    routines.flatMap(r => r.steps)
+      .filter(step => step.product?.id)
+      .map(step => String(step.product!.id))
+  );
+
   const compatibleProducts = findCompatibleProducts(
     currentProduct,
     userConcerns,
@@ -35,6 +44,15 @@ const CompatibleWith = ({ productId }: CompatibleWithProps) => {
   );
 
   if (compatibleProducts.length === 0) return null;
+
+  // Sort routine products first, preserve existing order within each group
+  const sortedProducts = routineProductIds.size > 0
+    ? [...compatibleProducts].sort((a, b) => {
+        const aInRoutine = routineProductIds.has(String(a.id)) ? 0 : 1;
+        const bInRoutine = routineProductIds.has(String(b.id)) ? 0 : 1;
+        return aInRoutine - bInRoutine;
+      })
+    : compatibleProducts;
 
   const getProductUrl = (id: number) => `/product-detail?id=${id}`;
 
@@ -63,13 +81,13 @@ const CompatibleWith = ({ productId }: CompatibleWithProps) => {
         <div className="mb-8">
           <h2 className="text-3xl font-serif text-deep-900 mb-3">Compatible With</h2>
           <p className="text-gray-600">
-            See which products pair safely with this one
+            See which products pair safely with this one in your routine
           </p>
         </div>
 
         {/* Product Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {compatibleProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <div
               key={product.id}
               className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all border-2 border-gray-100 group"
@@ -106,6 +124,16 @@ const CompatibleWith = ({ productId }: CompatibleWithProps) => {
                       : 'Use With Care'}
                   </span>
                 </div>
+
+                {/* In Routine Badge */}
+                {routineProductIds.has(String(product.id)) && (
+                  <div className="absolute top-4 right-4">
+                    <span className="px-2.5 py-1 text-xs font-semibold bg-white/90 text-primary-700 rounded-full flex items-center gap-1 shadow-sm border border-primary-300">
+                      <i className="ri-loop-left-line"></i>
+                      In Your Routine
+                    </span>
+                  </div>
+                )}
 
                 {/* Category Label */}
                 <div className="absolute bottom-4 left-4">

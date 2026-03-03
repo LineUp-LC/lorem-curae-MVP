@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useRecentlyViewed, type RecentlyViewedProduct } from '../../lib/utils/recentlyViewedState';
+import { buildSearchIndex, getCategoryFilter, matchesFirstLetter, type SearchResult } from '../../lib/utils/searchIndex';
 
 /**
  * SearchOverlay Component
- * 
+ *
  * Color Scheme (Lorem Curae):
  * - Primary: #C4704D (coral)
  * - Light: #E8A888 (light coral)
@@ -14,130 +16,67 @@ import { useNavigate } from 'react-router-dom';
  * - Warm Gray: #6B635A (body text)
  */
 
-interface SearchResult {
-  id: number;
-  title: string;
-  category: 'Product' | 'Service' | 'Ingredient' | 'Business' | 'Page';
-  description: string;
-  image?: string;
-  link: string;
-}
-
 interface SearchOverlayProps {
   isOpen: boolean;
   onClose: () => void;
-  onProductClick?: (productId: number) => void;
 }
 
-const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) => {
+const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>('All');
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [recentlyViewedFilter, setRecentlyViewedFilter] = useState<string | null>(null);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const resultRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  const categories = ['All', 'Products', 'Services', 'Ingredients', 'Businesses', 'Pages'];
+  // Recently viewed products
+  const { items: recentlyViewedItems } = useRecentlyViewed();
 
-  const allResults: SearchResult[] = [
-    {
-      id: 1,
-      title: 'Vitamin C Serum',
-      category: 'Product',
-      description: 'Brightening serum with 15% L-Ascorbic Acid',
-      image: 'https://readdy.ai/api/search-image?query=luxury%20vitamin%20c%20serum%20bottle%20with%20dropper%20on%20clean%20white%20background%20minimalist%20product%20photography%20bright%20lighting&width=80&height=80&seq=1&orientation=squarish',
-      link: '/product-detail?id=1'
-    },
-    {
-      id: 2,
-      title: 'Hydrating Facial',
-      category: 'Service',
-      description: 'Deep hydration treatment for dry skin',
-      image: 'https://readdy.ai/api/search-image?query=spa%20facial%20treatment%20room%20with%20soft%20lighting%20and%20skincare%20products%20professional%20aesthetic%20clean%20environment&width=80&height=80&seq=2&orientation=squarish',
-      link: '/services/1'
-    },
-    {
-      id: 3,
-      title: 'Niacinamide',
-      category: 'Ingredient',
-      description: 'Vitamin B3 for pore refinement and brightening',
-      image: 'https://readdy.ai/api/search-image?query=niacinamide%20molecule%20scientific%20illustration%20on%20white%20background%20clean%20minimal%20design%20chemistry%20aesthetic&width=80&height=80&seq=3&orientation=squarish',
-      link: '/ingredient-patch-test?ingredient=niacinamide'
-    },
-    {
-      id: 4,
-      title: 'Retinol Night Cream',
-      category: 'Product',
-      description: 'Anti-aging cream with 0.5% retinol',
-      image: 'https://readdy.ai/api/search-image?query=luxury%20night%20cream%20jar%20elegant%20packaging%20on%20white%20background%20premium%20skincare%20product%20photography%20soft%20lighting&width=80&height=80&seq=4&orientation=squarish',
-      link: '/product-detail?id=2'
-    },
-    {
-      id: 5,
-      title: 'Glow Spa & Wellness',
-      category: 'Business',
-      description: 'Premium skincare clinic specializing in facials',
-      image: 'https://readdy.ai/api/search-image?query=modern%20spa%20reception%20area%20with%20plants%20and%20natural%20light%20clean%20aesthetic%20professional%20wellness%20center%20interior&width=80&height=80&seq=5&orientation=squarish',
-      link: '/services/1'
-    },
-    {
-      id: 6,
-      title: 'Hyaluronic Acid',
-      category: 'Ingredient',
-      description: 'Powerful humectant for intense hydration',
-      image: 'https://readdy.ai/api/search-image?query=hyaluronic%20acid%20molecule%20water%20droplets%20scientific%20illustration%20clean%20white%20background%20chemistry%20aesthetic&width=80&height=80&seq=6&orientation=squarish',
-      link: '/ingredient-patch-test?ingredient=hyaluronic-acid'
-    },
-    {
-      id: 7,
-      title: 'Chemical Peel Treatment',
-      category: 'Service',
-      description: 'Professional exfoliation for skin renewal',
-      image: 'https://readdy.ai/api/search-image?query=professional%20skincare%20treatment%20room%20with%20equipment%20clean%20aesthetic%20spa%20environment%20soft%20lighting&width=80&height=80&seq=7&orientation=squarish',
-      link: '/services/2'
-    },
-    {
-      id: 8,
-      title: 'Gentle Cleanser',
-      category: 'Product',
-      description: 'pH-balanced cleanser for sensitive skin',
-      image: 'https://readdy.ai/api/search-image?query=gentle%20facial%20cleanser%20bottle%20on%20white%20background%20minimalist%20product%20photography%20clean%20aesthetic%20soft%20lighting&width=80&height=80&seq=8&orientation=squarish',
-      link: '/product-detail?id=3'
-    },
-    {
-      id: 9,
-      title: 'Skin Quiz',
-      category: 'Page',
-      description: 'Discover your perfect skincare routine',
-      link: '/discover'
-    },
-    {
-      id: 10,
-      title: 'Ingredient Library',
-      category: 'Page',
-      description: 'Explore skincare ingredients and their benefits',
-      link: '/ingredients'
-    },
-    {
-      id: 11,
-      title: 'Pure Botanicals',
-      category: 'Business',
-      description: 'Natural and organic skincare storefront',
-      image: 'https://readdy.ai/api/search-image?query=natural%20botanical%20skincare%20products%20display%20with%20plants%20clean%20aesthetic%20organic%20beauty%20store%20interior&width=80&height=80&seq=11&orientation=squarish',
-      link: '/storefront/1'
-    },
-    {
-      id: 12,
-      title: 'Salicylic Acid',
-      category: 'Ingredient',
-      description: 'BHA for acne treatment and pore cleansing',
-      image: 'https://readdy.ai/api/search-image?query=salicylic%20acid%20molecule%20scientific%20illustration%20on%20white%20background%20clean%20minimal%20chemistry%20aesthetic&width=80&height=80&seq=12&orientation=squarish',
-      link: '/ingredient-patch-test?ingredient=salicylic-acid'
+  const categories = ['All', 'Products', 'Ingredients', 'Pages'];
+
+  // Build search index dynamically from product + ingredient + page data
+  const searchIndex = useMemo(() => buildSearchIndex(), []);
+
+  // Derive recently viewed filter options from actual data
+  const recentlyViewedFilters = useMemo(() => {
+    const categorySet = new Set<string>();
+    for (const item of recentlyViewedItems) {
+      if (item.category) categorySet.add(item.category.toLowerCase());
     }
-  ];
+    const categoryLabels: Record<string, string> = {
+      cleanser: 'Cleanser',
+      toner: 'Toner',
+      serum: 'Serum',
+      essence: 'Essence',
+      moisturizer: 'Moisturizer',
+      sunscreen: 'SPF',
+      treatment: 'Treatment',
+      'eye-care': 'Eye',
+      'lip-care': 'Lip',
+      mask: 'Mask',
+      exfoliator: 'Exfoliator',
+      oil: 'Oil',
+      mist: 'Mist',
+      tool: 'Tools',
+    };
+    return Array.from(categorySet)
+      .sort()
+      .map(value => ({
+        value,
+        label: categoryLabels[value] || value.charAt(0).toUpperCase() + value.slice(1),
+      }));
+  }, [recentlyViewedItems]);
 
+  // Focus input when open, reset state when closed
   useEffect(() => {
     if (isOpen && inputRef.current) {
       inputRef.current.focus();
+    } else if (!isOpen) {
+      setRecentlyViewedFilter(null);
+      setActiveIndex(-1);
     }
   }, [isOpen]);
 
@@ -151,30 +90,66 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
     return () => document.removeEventListener('keydown', handleEscape);
   }, [isOpen, onClose]);
 
+  // Focus trap — keep Tab within the modal
+  useEffect(() => {
+    if (!isOpen || !modalRef.current) return;
+
+    const handleFocusTrap = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return;
+      const modal = modalRef.current;
+      if (!modal) return;
+
+      const focusable = modal.querySelectorAll<HTMLElement>(
+        'button, [href], input, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleFocusTrap);
+    return () => document.removeEventListener('keydown', handleFocusTrap);
+  }, [isOpen]);
+
+  // Filter search results
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setResults([]);
+      setActiveIndex(-1);
       return;
     }
 
-    const filtered = allResults.filter(result => {
-      const matchesQuery = result.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          result.description.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesCategory = activeCategory === 'All' || 
-                             result.category === activeCategory.slice(0, -1) ||
-                             (activeCategory === 'Businesses' && result.category === 'Business');
+    const categoryFilter = getCategoryFilter(activeCategory);
+    const query = searchQuery.toLowerCase();
+
+    const filtered = searchIndex.filter(result => {
+      if (!matchesFirstLetter(query, result.title)) return false;
+      const matchesQuery =
+        result.title.toLowerCase().includes(query) ||
+        result.description.toLowerCase().includes(query);
+      const matchesCategory = categoryFilter === null || result.category === categoryFilter;
       return matchesQuery && matchesCategory;
     });
 
     setResults(filtered);
-  }, [searchQuery, activeCategory]);
+    setActiveIndex(-1);
+  }, [searchQuery, activeCategory, searchIndex]);
 
   const handleResultClick = (result: SearchResult) => {
-    if (result.category === 'Product' && onProductClick) {
-      onProductClick(result.id);
-    } else {
-      navigate(result.link);
-    }
+    navigate(result.link);
     onClose();
     setSearchQuery('');
   };
@@ -185,12 +160,49 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
     setSearchQuery('');
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && results.length > 0) {
-      handleResultClick(results[0]);
-      onClose();
-    }
+  const handleRecentlyViewedClick = (product: RecentlyViewedProduct) => {
+    navigate(`/product-detail?id=${product.id}`);
+    onClose();
+    setSearchQuery('');
   };
+
+  // Filter recently viewed items by category
+  const filteredRecentlyViewed = recentlyViewedFilter
+    ? recentlyViewedItems.filter(item =>
+        item.category?.toLowerCase() === recentlyViewedFilter.toLowerCase()
+      )
+    : recentlyViewedItems;
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (results.length === 0) return;
+
+    switch (e.key) {
+      case 'ArrowDown': {
+        e.preventDefault();
+        setActiveIndex(prev => {
+          const next = prev < results.length - 1 ? prev + 1 : 0;
+          resultRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+          return next;
+        });
+        break;
+      }
+      case 'ArrowUp': {
+        e.preventDefault();
+        setActiveIndex(prev => {
+          const next = prev > 0 ? prev - 1 : results.length - 1;
+          resultRefs.current[next]?.scrollIntoView({ block: 'nearest' });
+          return next;
+        });
+        break;
+      }
+      case 'Enter': {
+        e.preventDefault();
+        const index = activeIndex >= 0 ? activeIndex : 0;
+        handleResultClick(results[index]);
+        break;
+      }
+    }
+  }, [results, activeIndex]);
 
   if (!isOpen) return null;
 
@@ -199,12 +211,8 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
     switch (category) {
       case 'Product':
         return 'bg-[#C4704D]/10 text-[#C4704D]';
-      case 'Service':
-        return 'bg-[#7A8B7A]/10 text-[#7A8B7A]';
       case 'Ingredient':
         return 'bg-[#E8A888]/20 text-[#8B4D35]';
-      case 'Business':
-        return 'bg-[#E8D4CC] text-[#6B635A]';
       default:
         return 'bg-[#FDF8F5] text-[#6B635A]';
     }
@@ -221,10 +229,14 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
           opacity: 0.6;
         }
       `}</style>
-      <div className="lc-search min-h-screen px-3 sm:px-4 pt-16 sm:pt-20 pb-6 sm:pb-10">
-        <div 
-          className="max-w-3xl mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden motion-safe:animate-enter-up will-change-transform border border-[#E8D4CC]/30"
+      <div className="lc-search flex items-start justify-center min-h-screen px-3 sm:px-4 pt-24 pb-6 sm:pb-10">
+        <div
+          ref={modalRef}
+          className="max-w-2xl w-full mx-auto bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden motion-safe:animate-enter-up will-change-transform border border-[#E8D4CC]/30"
           onClick={(e) => e.stopPropagation()}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Search"
         >
           {/* Search Input */}
           <div className="p-4 sm:p-6 border-b border-[#E8D4CC]/30 bg-gradient-to-b from-[#FDF8F5] to-white">
@@ -238,8 +250,12 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search products, services..."
-                className="lc-search-input flex-1 text-base sm:text-lg outline-none text-[#2D2A26] bg-transparent min-w-0"
+                placeholder="Search products, ingredients, and more..."
+                className="lc-search-input flex-1 text-sm sm:text-base outline-none text-[#2D2A26] bg-transparent min-w-0"
+                role="combobox"
+                aria-expanded={results.length > 0}
+                aria-activedescendant={activeIndex >= 0 ? `search-result-${activeIndex}` : undefined}
+                aria-controls="search-results-list"
               />
               <button
                 onClick={onClose}
@@ -251,16 +267,17 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
             </div>
 
             {/* Category Filters */}
-            <div className="flex items-center space-x-2 mt-3 sm:mt-4 overflow-x-auto pb-2 -mx-4 sm:-mx-6 px-4 sm:px-6 scrollbar-hide">
+            <div className="flex items-center space-x-1.5 mt-5 sm:mt-6 overflow-x-auto pb-2 -mx-4 sm:-mx-6 px-5 sm:px-7 scrollbar-hide">
               {categories.map((category) => (
                 <button
                   key={category}
                   onClick={() => setActiveCategory(category)}
-                  className={`px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-medium transition-all cursor-pointer whitespace-nowrap ${
+                  className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[10px] sm:text-xs font-medium transition-all cursor-pointer whitespace-nowrap ${
                     activeCategory === category
                       ? 'bg-[#C4704D] text-white'
                       : 'bg-[#FDF8F5] text-[#6B635A] hover:bg-[#E8D4CC]/50'
                   }`}
+                  aria-pressed={activeCategory === category}
                 >
                   {category}
                 </button>
@@ -269,14 +286,11 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
           </div>
 
           {/* Search Results */}
-          <div className="max-h-[50vh] sm:max-h-[500px] overflow-y-auto">
+          <div className="max-h-[40vh] sm:max-h-[360px] overflow-y-auto" id="search-results-list" role="listbox">
             {searchQuery.trim() === '' ? (
-              <div className="p-8 sm:p-12 text-center">
-                <div className="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center mx-auto mb-4 rounded-full bg-[#C4704D]/10">
-                  <i className="ri-search-2-line text-3xl sm:text-4xl text-[#C4704D]/60"></i>
-                </div>
-                <h3 className="text-base sm:text-lg font-semibold text-[#2D2A26] mb-2" style={{ fontFamily: 'var(--lc-font-serif)' }}>Start Searching</h3>
-                <p className="text-sm sm:text-base text-[#6B635A]">Find products, services, ingredients, and more</p>
+              <div className="p-6 sm:p-10 flex flex-col items-center justify-center">
+                <h3 className="text-sm sm:text-base font-semibold text-[#2D2A26] mb-1" style={{ fontFamily: 'var(--lc-font-serif)' }}>Start Searching</h3>
+                <p className="text-xs sm:text-sm text-[#6B635A]">Find products, ingredients, and more</p>
               </div>
             ) : results.length === 0 ? (
               <div className="p-8 sm:p-12 text-center">
@@ -290,9 +304,17 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
               <div className="divide-y divide-[#E8D4CC]/30">
                 {results.map((result, index) => (
                   <div
-                    key={result.id}
+                    key={`${result.category}-${result.id}`}
+                    ref={el => { resultRefs.current[index] = el; }}
+                    id={`search-result-${index}`}
+                    role="option"
+                    aria-selected={index === activeIndex}
                     onClick={() => handleResultClick(result)}
-                    className="p-3 sm:p-4 hover:bg-[#FDF8F5] transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill"
+                    className={`p-3 sm:p-4 transition-colors duration-fast cursor-pointer motion-safe:animate-enter-right motion-stagger-fill ${
+                      index === activeIndex
+                        ? 'bg-[#FDF8F5] outline outline-2 outline-[#C4704D]/30'
+                        : 'hover:bg-[#FDF8F5]'
+                    }`}
                     style={{ animationDelay: `${Math.min(index * 50, 200)}ms` }}
                   >
                     <div className="flex items-center space-x-3 sm:space-x-4">
@@ -309,9 +331,7 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
                           <i className={`text-xl sm:text-2xl text-[#C4704D] ${
                             result.category === 'Page' ? 'ri-file-text-line' :
                             result.category === 'Product' ? 'ri-shopping-bag-line' :
-                            result.category === 'Service' ? 'ri-service-line' :
-                            result.category === 'Ingredient' ? 'ri-flask-line' :
-                            'ri-store-line'
+                            'ri-flask-line'
                           }`}></i>
                         </div>
                       )}
@@ -332,42 +352,97 @@ const SearchOverlay = ({ isOpen, onClose, onProductClick }: SearchOverlayProps) 
             )}
           </div>
 
-          {/* Quick Links */}
-          {searchQuery.trim() === '' && (
-            <div className="p-4 sm:p-6 bg-[#FDF8F5] border-t border-[#E8D4CC]/30">
-              <h4 className="text-xs sm:text-sm font-semibold text-[#6B635A] mb-2 sm:mb-3 uppercase tracking-wider">Quick Links</h4>
-              <div className="grid grid-cols-2 gap-2">
-                <button
-                  onClick={() => handleQuickLinkClick('/discover')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
-                >
-                  <i className="ri-compass-line text-[#C4704D]"></i>
-                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Discover</span>
-                </button>
-                <button
-                  onClick={() => handleQuickLinkClick('/ingredients')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
-                >
-                  <i className="ri-flask-line text-[#C4704D]"></i>
-                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Ingredients</span>
-                </button>
-                <button
-                  onClick={() => handleQuickLinkClick('/services')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
-                >
-                  <i className="ri-service-line text-[#C4704D]"></i>
-                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Services</span>
-                </button>
-                <button
-                  onClick={() => handleQuickLinkClick('/marketplace')}
-                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-white rounded-lg hover:bg-[#C4704D]/5 hover:border-[#C4704D]/20 border border-transparent transition-colors cursor-pointer text-left"
-                >
-                  <i className="ri-store-line text-[#C4704D]"></i>
-                  <span className="text-xs sm:text-sm font-medium text-[#2D2A26]">Marketplace</span>
-                </button>
+          {/* Bottom Section: Recently Viewed */}
+          {recentlyViewedItems.length > 0 && (
+            <div className="border-t border-[#E8D4CC]/30 bg-[#FDF8F5]/50">
+              {/* Header with filters */}
+              <div className="px-4 sm:px-6 pt-3 pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <i className="ri-history-line text-sm text-[#C4704D]"></i>
+                    <p className="text-xs font-semibold text-[#2D2A26]">
+                      Recently Viewed
+                    </p>
+                  </div>
+                  {/* Condensed filter chips with scroll indicator */}
+                  {recentlyViewedFilters.length > 0 && (
+                    <div className="relative flex-1 min-w-0">
+                      <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pr-6">
+                        <button
+                          onClick={() => setRecentlyViewedFilter(null)}
+                          className={`px-2 py-0.5 rounded text-[10px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                            recentlyViewedFilter === null
+                              ? 'bg-[#C4704D] text-white'
+                              : 'text-[#6B635A] hover:bg-[#E8D4CC]/50'
+                          }`}
+                        >
+                          All
+                        </button>
+                        {recentlyViewedFilters.map((filter) => (
+                          <button
+                            key={filter.value}
+                            onClick={() => setRecentlyViewedFilter(
+                              recentlyViewedFilter === filter.value ? null : filter.value
+                            )}
+                            className={`px-2 py-0.5 rounded text-[10px] font-medium transition-all cursor-pointer whitespace-nowrap ${
+                              recentlyViewedFilter === filter.value
+                                ? 'bg-[#C4704D] text-white'
+                                : 'text-[#6B635A] hover:bg-[#E8D4CC]/50'
+                            }`}
+                          >
+                            {filter.label}
+                          </button>
+                        ))}
+                      </div>
+                      {/* Scroll indicator */}
+                      <div className="absolute right-0 top-0 bottom-0 flex items-center pointer-events-none">
+                        <div className="w-6 h-full bg-gradient-to-l from-[#FDF8F5] to-transparent"></div>
+                        <i className="ri-arrow-right-s-line text-[#C4704D] text-sm -ml-4"></i>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Horizontal scrollable product list */}
+              <div className="flex items-stretch gap-3 overflow-x-auto pb-4 px-4 sm:px-6 scrollbar-hide">
+                {filteredRecentlyViewed.length > 0 ? (
+                  filteredRecentlyViewed.slice(0, 10).map((product) => (
+                    <div
+                      key={product.id}
+                      onClick={() => handleRecentlyViewedClick(product)}
+                      className="flex-shrink-0 w-28 bg-white rounded-lg p-2 border border-[#E8D4CC]/50 hover:border-[#C4704D]/50 hover:shadow-md transition-all cursor-pointer group"
+                    >
+                      <div className="w-full h-20 rounded-md overflow-hidden bg-[#FDF8F5] mb-2">
+                        {product.image ? (
+                          <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <i className="ri-shopping-bag-line text-xl text-[#C4704D]/30"></i>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-[10px] font-semibold text-[#C4704D] uppercase tracking-wide truncate">
+                        {product.brand}
+                      </p>
+                      <h5 className="text-xs font-medium text-[#2D2A26] truncate leading-tight">
+                        {product.name}
+                      </h5>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-[#6B635A] py-2">
+                    No products in this category
+                  </p>
+                )}
               </div>
             </div>
           )}
+
         </div>
       </div>
     </div>

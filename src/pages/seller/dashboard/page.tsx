@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 export default function SellerDashboardPage() {
   const [stats] = useState({
@@ -51,7 +49,6 @@ export default function SellerDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
@@ -273,7 +270,6 @@ export default function SellerDashboardPage() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

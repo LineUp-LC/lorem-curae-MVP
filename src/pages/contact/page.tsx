@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { Link } from 'react-router-dom';
+import Dropdown from '../../components/ui/Dropdown';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -41,7 +41,6 @@ const ContactPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -129,22 +128,20 @@ const ContactPage = () => {
                   <label htmlFor="category" className="block text-sm font-medium mb-2" style={{ color: '#2D2A26' }}>
                     Category *
                   </label>
-                  <select
+                  <Dropdown
                     id="category"
                     name="category"
                     value={formData.category}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-4 py-3 rounded-lg transition-all"
-                    style={{ border: '1px solid #E8D4CC', outline: 'none', color: formData.category ? '#2D2A26' : '#9A938A' }}
-                  >
-                    <option value="">Select a category</option>
-                    <option value="general">General Inquiry</option>
-                    <option value="product">Product Questions</option>
-                    <option value="technical">Technical Support</option>
-                    <option value="feedback">Feedback</option>
-                    <option value="partnership">Partnership</option>
-                  </select>
+                    onChange={(value) => handleChange({ target: { name: 'category', value } } as any)}
+                    placeholder="Select a category"
+                    options={[
+                      { value: 'general', label: 'General Inquiry' },
+                      { value: 'product', label: 'Product Questions' },
+                      { value: 'technical', label: 'Technical Support' },
+                      { value: 'feedback', label: 'Feedback' },
+                      { value: 'partnership', label: 'Partnership' },
+                    ]}
+                  />
                 </div>
 
                 <div>
@@ -248,18 +245,18 @@ const ContactPage = () => {
               <div className="bg-white rounded-lg shadow-sm p-8" style={{ border: '1px solid rgba(232, 212, 204, 0.5)' }}>
                 <h2 className="text-2xl font-semibold mb-6" style={{ color: '#2D2A26' }}>Quick Answers</h2>
                 <div className="space-y-4">
-                  <a href="/faq" className="block p-4 rounded-lg transition-all cursor-pointer" style={{ backgroundColor: '#FDF8F5' }}>
+                  <Link to="/faq" className="block p-4 rounded-lg transition-all cursor-pointer" style={{ backgroundColor: '#FDF8F5' }}>
                     <div className="flex items-center justify-between">
                       <span className="font-medium" style={{ color: '#2D2A26' }}>View our FAQ</span>
                       <i className="ri-arrow-right-line" style={{ color: '#C4704D' }}></i>
                     </div>
-                  </a>
-                  <a href="/community" className="block p-4 rounded-lg transition-all cursor-pointer" style={{ backgroundColor: '#FDF8F5' }}>
+                  </Link>
+                  <Link to="/community" className="block p-4 rounded-lg transition-all cursor-pointer" style={{ backgroundColor: '#FDF8F5' }}>
                     <div className="flex items-center justify-between">
                       <span className="font-medium" style={{ color: '#2D2A26' }}>Join our Community</span>
                       <i className="ri-arrow-right-line" style={{ color: '#C4704D' }}></i>
                     </div>
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -267,7 +264,6 @@ const ContactPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

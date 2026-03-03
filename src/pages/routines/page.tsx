@@ -1,21 +1,20 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import RoutineBuilder from './components/RoutineBuilder';
-import NotesSection from './components/NotesSection';
 import { sessionState } from '../../lib/utils/sessionState';
 import RoutineTutorial from './components/RoutineTutorial';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
+import { saveRoutineToSupabase, getLocalRoutines, saveLocalRoutines, hydrateRoutines, SavedRoutine } from '../../lib/utils/routineState';
+import { useAuth } from '../../lib/auth/AuthContext';
+import { logRoutineUsage } from '../../lib/utils/routineAnalytics';
+import { createVersionSnapshot } from '../../lib/utils/routineVersioning';
 
 export default function RoutinesPage() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
   // Persisted state for continuity between sessions
-  const [activeTab, setActiveTab] = useLocalStorageState<'routine' | 'notes'>(
-    'routine_active_tab',
-    'routine'
-  );
   const [routineSteps, setRoutineSteps] = useLocalStorageState<any[]>(
     'routine_builder_steps',
     []
@@ -30,19 +29,12 @@ export default function RoutinesPage() {
   const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);
   const [savedProducts, setSavedProducts] = useState<any[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
-  const [pendingFromAiChat, setPendingFromAiChat] = useState(false);
 
   // Check if tutorial should show on first visit
   useEffect(() => {
     const tutorialComplete = localStorage.getItem('routineBuilderTutorialComplete');
-    const fromAiChat = searchParams.get('fromAiChat') === 'true';
-
     if (!tutorialComplete) {
       setShowTutorial(true);
-      // If coming from AI chat, remember to navigate to notes after tutorial
-      if (fromAiChat) {
-        setPendingFromAiChat(true);
-      }
     }
   }, [searchParams]);
 
@@ -51,21 +43,17 @@ export default function RoutinesPage() {
 
     // Load routine name from URL params or localStorage
     const routineId = searchParams.get('id');
-    const tabParam = searchParams.get('tab');
-
-    // Set active tab based on URL param
-    if (tabParam === 'notes') {
-      setActiveTab('notes');
-    } else if (tabParam === 'routine') {
-      setActiveTab('routine');
-    }
 
     if (routineId) {
-      const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
-      const routine = savedRoutines.find((r: any) => r.id === routineId);
-      if (routine) {
-        setRoutineName(routine.name);
-      }
+      hydrateRoutines().then((savedRoutines) => {
+        const routine = savedRoutines.find((r) => r.id === routineId);
+        if (routine) {
+          setRoutineName(routine.name);
+          if (routine.steps && routine.steps.length > 0) {
+            setRoutineSteps(routine.steps);
+          }
+        }
+      });
     }
 
     // Load saved products
@@ -78,11 +66,11 @@ export default function RoutinesPage() {
     // Save to localStorage
     const routineId = searchParams.get('id');
     if (routineId) {
-      const savedRoutines = JSON.parse(localStorage.getItem('routines') || '[]');
-      const updatedRoutines = savedRoutines.map((r: any) => 
+      const savedRoutines = getLocalRoutines();
+      const updatedRoutines = savedRoutines.map((r) =>
         r.id === routineId ? { ...r, name: routineName } : r
       );
-      localStorage.setItem('routines', JSON.stringify(updatedRoutines));
+      saveLocalRoutines(updatedRoutines);
     }
     sessionState.trackInteraction('click', 'save-routine-name', { name: routineName });
   };
@@ -116,21 +104,71 @@ export default function RoutinesPage() {
     sessionState.trackInteraction('click', 'reorder-routine-steps');
   };
 
-  const handleSaveRoutine = () => {
-    sessionState.completeAction('save-routine');
-    sessionState.trackInteraction('click', 'save-routine', { stepCount: routineSteps.length });
-  };
+  const handleSaveRoutine = async (data: { morningSteps: any[], eveningSteps: any[] }) => {
+    const { morningSteps, eveningSteps } = data;
+    const allSteps = [...morningSteps, ...eveningSteps];
+    if (allSteps.length === 0) return;
 
-  const handleAIAssistantQuery = (query: string) => {
-    sessionState.trackInteraction('input', 'routine-ai-query', { query });
+    const now = new Date().toISOString();
+    const hasMorning = morningSteps.length > 0;
+    const hasEvening = eveningSteps.length > 0;
+    const timeOfDay: 'morning' | 'evening' | 'both' =
+      hasMorning && hasEvening ? 'both' : hasMorning ? 'morning' : 'evening';
+
+    // Reuse existing ID when editing, otherwise generate one new UUID
+    const existingId = searchParams.get('id');
+    const routineId = existingId || crypto.randomUUID();
+
+    const routine: SavedRoutine = {
+      id: routineId,
+      name: routineName,
+      description: `Skincare routine`,
+      timeOfDay,
+      steps: allSteps.map((step, index) => ({
+        id: step.id,
+        stepNumber: index + 1,
+        title: step.title,
+        description: step.description,
+        timeOfDay: step.timeOfDay,
+        product: step.product,
+        recommended: step.recommended || false,
+      })),
+      stepCount: allSteps.length,
+      createdAt: existingId
+        ? (getLocalRoutines().find(r => r.id === existingId)?.createdAt || now)
+        : now,
+      updatedAt: now,
+    };
+
+    const saved = await saveRoutineToSupabase(routine);
+    if (saved) {
+      await createVersionSnapshot(routine.id, routine);
+    }
+
+    sessionState.completeAction('save-routine');
+    sessionState.trackInteraction('click', 'save-routine', {
+      morningSteps: morningSteps.length,
+      eveningSteps: eveningSteps.length,
+    });
+    if (user) logRoutineUsage(user.id, routine.id, existingId ? 'routine_updated' : 'routine_created');
   };
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back to Routines */}
+          <div className="flex justify-start mb-4">
+            <button
+              onClick={() => navigate('/routines-list')}
+              className="flex items-center gap-2 text-warm-gray hover:text-deep transition-colors cursor-pointer text-sm"
+            >
+              <i className="ri-arrow-left-line"></i>
+              Back to Routines
+            </button>
+          </div>
+
           {/* Header - Shows routine name only */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3">
@@ -171,54 +209,15 @@ export default function RoutinesPage() {
             </button>
           </div>
 
-          {/* Tab Navigation */}
-          <div className="flex flex-col items-center mb-8">
-            <div className="inline-flex bg-white rounded-full p-1 shadow-sm mb-2">
-              <button
-                onClick={() => setActiveTab('routine')}
-                title="Build and customize your skincare routine steps"
-                className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                  activeTab === 'routine'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-600 hover:text-deep'
-                }`}
-              >
-                <i className="ri-layout-grid-line mr-2 hidden sm:inline"></i>
-                Routine Builder
-              </button>
-              <button
-                onClick={() => setActiveTab('notes')}
-                title="Track daily observations and skin progress"
-                className={`px-6 sm:px-8 py-3 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
-                  activeTab === 'notes'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-600 hover:text-deep'
-                }`}
-              >
-                <i className="ri-file-text-line mr-2 hidden sm:inline"></i>
-                Routine Notes
-              </button>
-            </div>
-            <p className="text-xs text-warm-gray/70">
-              {activeTab === 'routine'
-                ? 'Add products and customize your daily routine steps'
-                : 'Track and receive insights on your skin\'s progress'}
-            </p>
-          </div>
-
           {/* Content */}
-          {activeTab === 'routine' ? (
-            <RoutineBuilder
-              steps={routineSteps}
-              onAddStep={handleAddStep}
-              onRemoveStep={handleRemoveStep}
-              onReorderSteps={handleReorderSteps}
-              onSave={handleSaveRoutine}
-              onBrowseClick={() => setShowBrowsePopup(true)}
-            />
-          ) : (
-            <NotesSection autoOpenAssessment={searchParams.get('openAssessment') === 'true'} />
-          )}
+          <RoutineBuilder
+            steps={routineSteps}
+            onAddStep={handleAddStep}
+            onRemoveStep={handleRemoveStep}
+            onReorderSteps={handleReorderSteps}
+            onSave={handleSaveRoutine}
+            onBrowseClick={() => setShowBrowsePopup(true)}
+          />
         </div>
       </main>
 
@@ -242,8 +241,8 @@ export default function RoutinesPage() {
             </div>
 
             <div className="space-y-3">
-              <a
-                href="/marketplace"
+              <Link
+                to="/marketplace"
                 className="w-full px-6 py-4 bg-primary text-white rounded-xl hover:bg-dark transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center">
@@ -254,10 +253,10 @@ export default function RoutinesPage() {
                   <p className="text-sm text-cream-100">Shop curated products and services</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
-              </a>
+              </Link>
 
-              <a
-                href="/discover"
+              <Link
+                to="/discover"
                 className="w-full px-6 py-4 bg-white border-2 border-primary text-primary rounded-xl hover:bg-cream transition-colors text-left flex items-center gap-4 cursor-pointer"
               >
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -268,7 +267,7 @@ export default function RoutinesPage() {
                   <p className="text-sm text-warm-gray">Explore personalized recommendations</p>
                 </div>
                 <i className="ri-arrow-right-line text-xl ml-auto"></i>
-              </a>
+              </Link>
             </div>
           </div>
         </div>
@@ -293,9 +292,9 @@ export default function RoutinesPage() {
                 <div className="text-center py-8">
                   <i className="ri-bookmark-line text-4xl text-warm-gray/40 mb-3"></i>
                   <p className="text-warm-gray">No saved products yet</p>
-                  <a href="/discover" className="text-taupe hover:underline text-sm mt-2 inline-block">
+                  <Link to="/discover" className="text-taupe hover:underline text-sm mt-2 inline-block">
                     Browse products to save
-                  </a>
+                  </Link>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -312,13 +311,13 @@ export default function RoutinesPage() {
                         <p className="text-sm text-taupe">{product.priceRange}</p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <a
-                          href={`/product-detail?id=${product.id}`}
+                        <Link
+                          to={`/product-detail?id=${product.id}`}
                           className="p-2 text-deep hover:bg-deep/10 rounded-lg transition-colors cursor-pointer"
                           title="View Details"
                         >
                           <i className="ri-eye-line"></i>
-                        </a>
+                        </Link>
                         <button
                           onClick={() => handleRemoveSavedProduct(product.id)}
                           className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors cursor-pointer"
@@ -340,23 +339,9 @@ export default function RoutinesPage() {
       {showTutorial && (
         <RoutineTutorial onComplete={() => {
           setShowTutorial(false);
-          // If user came from AI chat, navigate to notes tab after tutorial
-          if (pendingFromAiChat) {
-            setPendingFromAiChat(false);
-            setActiveTab('notes');
-            // Small delay to allow tab switch animation
-            setTimeout(() => {
-              const openAssessment = searchParams.get('openAssessment') === 'true';
-              if (openAssessment) {
-                // Trigger assessment opening via custom event
-                window.dispatchEvent(new CustomEvent('openProgressAssessment'));
-              }
-            }, 300);
-          }
         }} />
       )}
 
-      <Footer />
     </div>
   );
 }

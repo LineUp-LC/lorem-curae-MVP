@@ -4,6 +4,12 @@ export interface UserLocation {
   city: string;
   state: string;
   zip: string;
+  region?: string;
+  country?: string;
+  lat?: number;
+  lon?: number;
+  timezone?: string;
+  hemisphere?: 'northern' | 'southern';
 }
 
 const STORAGE_KEY = 'user_location';
@@ -68,11 +74,14 @@ export function useUserLocation() {
     ? [location.city, location.state].filter(Boolean).join(', ')
     : '';
 
+  const hasCoordinates = !!location && typeof location.lat === 'number' && typeof location.lon === 'number';
+
   return {
     location,
     setLocation,
     clearLocation,
     displayString,
     hasLocation: !!location && !!(location.city || location.state || location.zip),
+    hasCoordinates,
   };
 }

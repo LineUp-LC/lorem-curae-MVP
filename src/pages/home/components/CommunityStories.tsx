@@ -8,42 +8,41 @@ import { Link } from 'react-router-dom';
  * - Edit 3: Changed "Products Analyzed" to "Marketplace Brands" and "50,000+" to "100+"
  */
 
+// Representative stories - illustrative of typical user experiences
 const testimonials = [
   {
     id: 1,
-    quote: "I spent years bouncing between influencer recommendations and overwhelming product walls. Lorem Curae was the first place that actually understood my skin—not just sold to it.",
-    name: "Sarah M.",
+    quote: "I spent years bouncing between influencer recommendations and overwhelming product walls. Lorem Curae was the first place that actually understood my skin, not just sold to it.",
+    name: "Community Member",
     skin: "Combination Skin",
     journey: "8 months",
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80',
-    result: 'Found her perfect routine',
+    avatar: '',
+    result: 'Found a personalized routine',
   },
   {
     id: 2,
-    quote: "My dermatologist was surprised at how well I understood my routine. I told her I finally had tools that explained the 'why' behind every product.",
-    name: "Keisha L.",
+    quote: "My dermatologist was surprised at how well I understood my routine. I finally had tools that explained the 'why' behind every product.",
+    name: "Community Member",
     skin: "Sensitive Skin",
     journey: "1 year",
-    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=150&q=80',
-    result: 'Reduced irritation by 80%',
+    avatar: '',
+    result: 'Better understanding of skincare',
   },
   {
     id: 3,
     quote: "As someone with rosacea, I was terrified of trying new products. The ingredient transparency and AI guidance gave me confidence I never had before.",
-    name: "Emma T.",
+    name: "Community Member",
     skin: "Rosacea-prone",
     journey: "6 months",
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80',
-    result: 'Calmed flare-ups significantly',
+    avatar: '',
+    result: 'Gained confidence in product choices',
   },
 ];
 
-// EDIT 3: Changed "Products Analyzed" to "Marketplace Brands" and "50,000+" to "100+"
+// Platform highlights - actual counts will be displayed once available
 const stats = [
-  { value: '10,000+', label: 'Community Members' },
-  { value: '100+', label: 'Marketplace Brands' },
-  { value: '1,200+', label: 'Ingredients Decoded' },
-  { value: '4.9', label: 'Average Rating' },
+  { value: 'Coming Soon', label: 'Marketplace' },
+  { value: '10+', label: 'Ingredients Simplified' },
 ];
 
 const CommunityStories = () => {
@@ -71,7 +70,7 @@ const CommunityStories = () => {
           </h2>
           
           <p className="text-lg max-w-2xl mx-auto" style={{ color: '#6B635A' }}>
-            These aren't influencers. They're real people who were frustrated with skincare—until they found tools that actually worked.
+            These aren't influencers. They're real people who were frustrated with skincare, until they found tools that actually worked.
           </p>
         </div>
 
@@ -95,12 +94,12 @@ const CommunityStories = () => {
             </blockquote>
             
             <div className="flex items-center justify-center gap-4 mb-6">
-              <img 
-                src={testimonials[activeTestimonial].avatar} 
-                alt={testimonials[activeTestimonial].name}
-                className="w-16 h-16 rounded-full object-cover"
-                style={{ border: '2px solid rgba(122, 139, 122, 0.2)' }}
-              />
+              <div
+                className="w-16 h-16 rounded-full flex items-center justify-center"
+                style={{ border: '2px solid rgba(122, 139, 122, 0.2)', backgroundColor: 'rgba(122, 139, 122, 0.1)' }}
+              >
+                <i className="ri-user-line text-2xl" style={{ color: '#7A8B7A' }}></i>
+              </div>
               <div className="text-left">
                 <p className="font-semibold text-lg" style={{ color: '#2D2A26' }}>{testimonials[activeTestimonial].name}</p>
                 <p style={{ color: '#6B635A' }}>{testimonials[activeTestimonial].skin} • {testimonials[activeTestimonial].journey}</p>
@@ -139,20 +138,20 @@ const CommunityStories = () => {
               onClick={() => setActiveTestimonial(index)}
               className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all cursor-pointer"
               style={{
-                border: index === activeTestimonial 
-                  ? '1px solid rgba(196, 112, 77, 0.4)' 
+                border: index === activeTestimonial
+                  ? '1px solid rgba(196, 112, 77, 0.4)'
                   : '1px solid rgba(232, 212, 204, 0.3)',
                 boxShadow: index === activeTestimonial ? '0 0 0 3px rgba(196, 112, 77, 0.1)' : undefined,
               }}
             >
               {/* Author */}
               <div className="flex items-center gap-3 mb-4">
-                <img 
-                  src={story.avatar} 
-                  alt={story.name}
-                  className="w-12 h-12 rounded-full object-cover"
-                  style={{ border: '2px solid rgba(122, 139, 122, 0.2)' }}
-                />
+                <div
+                  className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+                  style={{ border: '2px solid rgba(122, 139, 122, 0.2)', backgroundColor: 'rgba(122, 139, 122, 0.1)' }}
+                >
+                  <i className="ri-user-line text-xl" style={{ color: '#7A8B7A' }}></i>
+                </div>
                 <div>
                   <p className="font-semibold" style={{ color: '#2D2A26' }}>{story.name}</p>
                   <p className="text-sm" style={{ color: '#6B635A' }}>{story.skin}</p>

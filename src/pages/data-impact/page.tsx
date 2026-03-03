@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { supabase, UserProfile, DataImpactContribution } from '../../lib/supabase';
 
 export default function DataImpactPage() {
@@ -114,7 +112,6 @@ export default function DataImpactPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -183,10 +180,10 @@ export default function DataImpactPage() {
                   <div className="w-10 h-10 bg-taupe-100 rounded-lg flex items-center justify-center">
                     <i className="ri-database-2-line text-taupe text-xl"></i>
                   </div>
-                  <h3 className="font-semibold text-gray-900">Total Users</h3>
+                  <h3 className="font-semibold text-gray-900">Contributors</h3>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">47,892</p>
-                <p className="text-sm text-gray-600">Contributing to change</p>
+                <p className="text-3xl font-bold text-gray-900 mb-1">—</p>
+                <p className="text-sm text-gray-600">Stats coming soon</p>
               </div>
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
@@ -196,8 +193,8 @@ export default function DataImpactPage() {
                   </div>
                   <h3 className="font-semibold text-gray-900">Data Points</h3>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">2.4M</p>
-                <p className="text-sm text-gray-600">Anonymized insights</p>
+                <p className="text-3xl font-bold text-gray-900 mb-1">—</p>
+                <p className="text-sm text-gray-600">Stats coming soon</p>
               </div>
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
@@ -207,8 +204,8 @@ export default function DataImpactPage() {
                   </div>
                   <h3 className="font-semibold text-gray-900">Campaigns</h3>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">23</p>
-                <p className="text-sm text-gray-600">Successful advocacy</p>
+                <p className="text-3xl font-bold text-gray-900 mb-1">—</p>
+                <p className="text-sm text-gray-600">Stats coming soon</p>
               </div>
 
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
@@ -229,7 +226,14 @@ export default function DataImpactPage() {
             <div className="lg:col-span-2 space-y-6">
               {/* Recent Impact Stories */}
               <div className="bg-gray-50 rounded-xl shadow-sm p-6 border border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Impact Stories</h2>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-gray-900">How Data Impact Works</h2>
+                  <span className="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-xs font-medium">Illustrative Examples</span>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">
+                  These examples demonstrate the types of impact your anonymized data could enable.
+                  Actual campaigns and results will be displayed here as they become available.
+                </p>
                 <div className="space-y-6">
                   <div className="flex gap-4 pb-6 border-b border-gray-200 last:border-0 last:pb-0">
                     <div className="w-12 h-12 bg-taupe-100 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -492,7 +496,6 @@ export default function DataImpactPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

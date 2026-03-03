@@ -137,7 +137,7 @@ export default function WhyWeExistSection() {
           </span>
           <span className="lc-text-emphasis">That was never fair.</span>{' '}
           The industry sells you products, routines, and "holy grails" without ever
-          helping you understand your skin. Lorem Curae exists to change that —
+          helping you understand your skin. Lorem Curae exists to change that,
           with tools built around <em>clarity</em>, not confusion.
         </motion.p>
       </motion.div>

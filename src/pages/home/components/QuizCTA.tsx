@@ -140,14 +140,14 @@ export default function QuizCTA() {
           className="lc-cta-title"
           variants={contentVariants}
         >
-          Your skin story matters — this is where it begins.
+          Your skin story matters. This is where it begins.
         </motion.h2>
 
         <motion.p
           className="lc-cta-text"
           variants={contentVariants}
         >
-          Start with us — you're not navigating this alone anymore.
+          Start with us. You're not navigating this alone anymore.
         </motion.p>
         
         {/* CTA matches Hero for consistency */}

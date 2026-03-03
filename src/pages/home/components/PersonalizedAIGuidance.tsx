@@ -35,7 +35,7 @@ export default function PersonalizedAIGuidance() {
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
               Get instant, accurate answers to your skincare questions. Ask about product compatibility, 
-              routine order, ingredient concerns—all personalized to <strong>your unique skin profile</strong>.
+              routine order, ingredient concerns, all personalized to <strong>your unique skin profile</strong>.
             </p>
 
             {/* Trust Layer */}
@@ -48,7 +48,7 @@ export default function PersonalizedAIGuidance() {
                 </li>
                 <li className="flex items-start gap-2">
                   <i className="ri-check-line text-purple-600 mt-0.5"></i>
-                  <span>No sponsored recommendations—ever</span>
+                  <span>No sponsored recommendations, ever</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <i className="ri-check-line text-purple-600 mt-0.5"></i>

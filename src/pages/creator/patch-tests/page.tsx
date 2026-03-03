@@ -1,5 +1,7 @@
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { fadeInUp, transitions } from '@/lib/motion/motionVariants';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 // Types
 interface PatchTest {
@@ -16,11 +18,6 @@ interface PatchTest {
 
 type StatusFilter = 'all' | 'draft' | 'active' | 'completed' | 'archived';
 
-// Mock creator data
-const creator = {
-  display_name: 'Dr. Skin Example',
-  email: 'creator@example.com',
-};
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -618,6 +615,13 @@ export default function CreatorPatchTestsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
+  const { user, profile } = useAuth();
+
+  // Derive creator display data from real auth
+  const creator = {
+    display_name: profile?.full_name || user?.email?.split('@')[0] || 'Creator',
+    email: user?.email || '',
+  };
 
   // Fetch patch tests
   const fetchPatchTests = useCallback(async () => {

@@ -133,7 +133,7 @@ const MealPlanner = () => {
       'Breakfast': 'ri-sun-line',
       'Lunch': 'ri-restaurant-line',
       'Dinner': 'ri-moon-line',
-      'Snack': 'ri-apple-line'
+      'Snack': 'ri-leaf-line'
     };
     return icons[type] || 'ri-restaurant-line';
   };

@@ -213,9 +213,9 @@ const tools = [
         <path d="M21 21l-4.35-4.35" />
       </svg>
     ),
-    title: 'Smart Product Finder',
+    title: 'Discovery',
     // EDIT 3: Added retailer/faulty products pain point
-    pain: "The pain: Endless scrolling through products that weren't made for your skin—and finding retailers that sell faulty products, never knowing if the product actually works.",
+    pain: "The pain: Endless scrolling through products that weren't made for your skin, encountering unreliable retailers, and never knowing if a product actually suits you.",
     // EDIT 4: Combined products AND retailers search into one cohesive sentence
     description: 'Search for products and reputable retailers the way you actually think about skincare—by concern, ingredient, price, or skin type.',
     // EDIT 5: Replaced outcome with trusted retailers text
@@ -230,9 +230,9 @@ const tools = [
     ),
     // EDIT 6: Renamed to "Curae AI"
     title: 'Curae AI',
-    pain: 'The pain: Conflicting advice from the internet, influencers, and even derms.',
+    pain: 'The pain: Conflicting advice from the internet, influencers, and even dermatologists.',
     // EDIT 6: Added interaction-based answers
-    description: 'Ask anything and get answers grounded in peer-reviewed research, not sponsored content—and answers based on your interactions and overall journey within the site.',
+    description: 'Ask anything and get answers grounded in peer-reviewed research, not sponsored content. Responses are informed by your interactions and overall journey within the site.',
     outcome: 'Trusted answers, tailored to you',
     link: '/ai-chat',
   },
@@ -250,7 +250,7 @@ const tools = [
     // EDIT 7: Changed "any two" to "up to three"
     description: 'Compare up to three products side-by-side: ingredients, concentration, price-per-ml, and compatibility.',
     outcome: 'Spend smarter, not more',
-    link: '/discover',
+    link: '/discover?highlight=compare',
   },
   {
     icon: (
@@ -260,7 +260,7 @@ const tools = [
     ),
     title: 'Ingredient Library',
     pain: "The pain: Reading ingredient lists like they're written in another language.",
-    description: "Every ingredient decoded: what it does, who it's for, what to pair it with (and what to avoid).",
+    description: "Every ingredient explained: what it does, who it's for, what to pair it with, and what to avoid.",
     outcome: "Finally understand what you're putting on your face",
     link: '/ingredients',
   },
@@ -272,9 +272,9 @@ const tools = [
     ),
     title: 'Routine Tracking',
     // EDIT 8: Added guidance pain point
-    pain: "The pain: Forgetting what you used when, never knowing what's working, and not having someone to guide you throughout your process.",
+    pain: "The pain: Forgetting what you used, when you used it, and never actually knowing what's working.",
     // EDIT 9: Added personalization and assessment text
-    description: 'Build AM/PM routines with smart conflict detection. Track your progress over time—further enhancing your personalization so Curae can assess the progress you\'ve tracked for a selected time period.',
+    description: 'Build AM/PM routines with smart conflict detection. Track your progress over time — further enhancing your personalization and allowing Curae to assess your progress over a selected time period.',
     outcome: 'Build consistency, see results',
     link: '/routines',
   },
@@ -286,10 +286,10 @@ const tools = [
       </svg>
     ),
     title: 'Progress Assessment and Feedback',
-    pain: "The pain: Trying new routines without any way to measure if they're actually working—or knowing when it's time to adjust.",
+    pain: "The pain: Trying new routines without any way to measure if they're actually working, or knowing when it's time to adjust.",
     description: "Curae analyzes your tracked routines and skin progress over time, providing personalized feedback and actionable insights. See what's working, what needs adjustment, and receive tailored recommendations based on your real results.",
     outcome: 'Data-driven insights that evolve with your skin',
-    link: '/my-skin',
+    link: '/routines-list',
   },
 ];
 
@@ -1028,7 +1028,7 @@ export default function ConnectedSystemSection() {
             className="lc-section-description"
             variants={fadeInUpSoft}
           >
-            Everything you do on Lorem Curae <em>strengthens the next step</em>. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress help Curae <em>learn with you</em>. It's not a set of tools — it's <em>a guided journey built around your skin</em> — <em>a system designed to grow with you</em>.
+            Everything you do on Lorem Curae <em>strengthens the next step</em>. Your skin survey unlocks tailored recommendations. Your ingredient understanding shapes smarter comparisons. Your routines and progress tracking help Curae <em>learn with you</em>. It's not a set of tools. It's <em>a guided journey built around your skin</em>, <em>a system designed to grow with you</em>.
           </motion.p>
 
           {/* Journey cycle - top step, circle loop (steps 2-5), bottom step */}

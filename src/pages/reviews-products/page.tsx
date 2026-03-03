@@ -4,32 +4,17 @@ import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveComplexion, get
 import { matchesConcern } from '../../lib/utils/matching';
 import { calculateSimilarityWeight, getTierBadgeInfo, isComplexionMatch, type MatchTier } from '../../lib/utils/reviewSimilarity';
 import Dropdown from '../../components/ui/Dropdown';
+import { type MockReview, enrichedProductReviews } from '../../mocks/reviews';
 
-interface ProductReview {
-  id: number;
-  userName: string;
-  userAvatar: string;
-  rating: number;
-  title: string;
-  content: string;
-  date: string;
-  verified: boolean;
-  helpful: number;
+interface ProductReview extends MockReview {
   productName: string;
   productImage: string;
-  skinType: string;
-  skinConcerns: string[];
-  age: number;
-  routineLength: string;
-  complexion?: string;
-  sensitivity?: string;
-  lifestyle?: string[];
-  beforeAfterPhotos?: string[];
   pros: string[];
   cons: string[];
   wouldRecommend: boolean;
   usageDuration: string;
   finalVerdict?: string;
+  beforeAfterPhotos?: string[];
   similarityScore?: number;
   matchTier?: MatchTier;
   matchDetails?: string[];
@@ -139,7 +124,7 @@ const ProductReviewsPage = () => {
   const hasSurveyData = !!(rawSkinType || rawConcerns.length > 0);
 
   // Use fallbacks only when we have SOME real data but a specific field is missing
-  const effectiveSkinType = rawSkinType || (hasSurveyData ? 'combination' : 'combination');
+  const effectiveSkinType = rawSkinType || '';
   const effectiveConcerns = rawConcerns.length > 0 ? rawConcerns : (hasSurveyData ? ['General Skincare'] : []);
 
   // Extended profile via unified getters (rehydrated from Supabase when localStorage is empty)
@@ -153,139 +138,12 @@ const ProductReviewsPage = () => {
     complexion: surveyComplexion,
     sensitivity: surveySensitivity,
     lifestyle: surveyLifestyle,
-    age: 28,
+    age: 0,
     routineLength: '3-6 months'
   };
 
-  // Demo reviews - these represent illustrative examples, not real user reviews
-  const allReviews: ProductReview[] = [
-    {
-      id: 1,
-      userName: 'Sarah M.',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&q=80',
-      rating: 5,
-      title: 'A significant improvement for my combination skin',
-      content: "After 3 months of consistent use, this serum has completely transformed my skin. My T-zone used to be an oil slick by noon, but now it stays balanced all day. The acne on my chin has cleared up significantly, and my hyperpigmentation from old breakouts is fading. The texture is lightweight and layers perfectly under moisturizer. I apply 3-4 drops morning and night, and one bottle lasts about 6 weeks. Worth every penny!",
-      date: '2024-01-20',
-      verified: true,
-      helpful: 45,
-      productName: 'Advanced Niacinamide Serum',
-      productImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=80&h=80&fit=crop&q=80',
-      skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Hyperpigmentation', 'Large Pores'],
-      complexion: 'Type III - Medium',
-      sensitivity: 'moderate',
-      lifestyle: ['Active lifestyle', 'Screen time heavy'],
-      age: 29,
-      routineLength: '3-6 months',
-      beforeAfterPhotos: ['https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=400&h=300&fit=crop&q=80'],
-      pros: ['Reduced oiliness', 'Cleared acne', 'Faded dark spots', 'Lightweight texture'],
-      cons: ['Takes 6-8 weeks to see full results', 'Slight tingling first week'],
-      wouldRecommend: true,
-      usageDuration: '3 months',
-      finalVerdict: 'If you have combination skin with breakout concerns, this serum is worth the patience — real results after consistent use.'
-    },
-    {
-      id: 2,
-      userName: 'Jessica R.',
-      userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&q=80',
-      rating: 4,
-      title: 'Great for sensitive skin, gentle yet effective',
-      content: "As someone with reactive sensitive skin, I was nervous to try this. Started with every other night and gradually increased to nightly use. No irritation whatsoever! My redness has decreased noticeably, and my skin feels more resilient. The formula is very gentle - no burning or stinging that I usually get with active ingredients. My skin looks calmer and more even-toned after 2 months of use.",
-      date: '2024-01-18',
-      verified: true,
-      helpful: 32,
-      productName: 'Advanced Niacinamide Serum',
-      productImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=80&h=80&fit=crop&q=80',
-      skinType: 'sensitive',
-      skinConcerns: ['Sensitivity', 'Redness', 'Uneven Skin Tone'],
-      complexion: 'Type II - Fair',
-      sensitivity: 'high',
-      lifestyle: ['Indoor work environment', 'High stress levels'],
-      age: 25,
-      routineLength: '6+ months',
-      pros: ['Very gentle formula', 'Reduced redness', 'No irritation', 'Calming effect'],
-      cons: ['Results take time', 'Wish it came in larger size'],
-      wouldRecommend: true,
-      usageDuration: '2 months',
-      finalVerdict: 'A gentle option for anyone with reactive skin who needs effective ingredients without the irritation.'
-    },
-    {
-      id: 3,
-      userName: 'Michael K.',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&q=80',
-      rating: 5,
-      title: 'Finally found my holy grail for oily skin',
-      content: "This serum has been effective for controlling oil production without over-drying. I have very oily skin with enlarged pores, and this has been a lifesaver. Within 4 weeks, my pores looked visibly smaller, and the oil control lasts all day. I use it twice daily after cleansing. The niacinamide concentration is perfect - strong enough to be effective but not irritating. My skin texture has improved dramatically.",
-      date: '2024-01-15',
-      verified: false,
-      helpful: 38,
-      productName: 'Advanced Niacinamide Serum',
-      productImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=80&h=80&fit=crop&q=80',
-      skinType: 'oily',
-      skinConcerns: ['Large Pores', 'Excess Oil', 'Uneven Texture'],
-      complexion: 'Type IV - Olive',
-      sensitivity: 'low',
-      lifestyle: ['Active lifestyle', 'Outdoor work environment'],
-      age: 32,
-      routineLength: '1-3 months',
-      pros: ['Excellent oil control', 'Minimized pores', 'Improved texture', 'Long-lasting effects'],
-      cons: ['Bottle could be bigger', 'Dropper sometimes gets sticky'],
-      wouldRecommend: true,
-      usageDuration: '4 months',
-      finalVerdict: 'For oily skin that needs pore control without dryness, this delivers — my texture has never been smoother.'
-    },
-    {
-      id: 4,
-      userName: 'Emma L.',
-      userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&h=60&fit=crop&q=80',
-      rating: 4,
-      title: 'Effective for hyperpigmentation and aging concerns',
-      content: "At 42, I was looking for something to address both pigmentation and fine lines. This serum has definitely helped with both! My melasma patches have lightened considerably over 3 months, and I've noticed my skin looks more plump and smooth. The formula plays well with my other anti-aging products. I use it in my morning routine under vitamin C serum and sunscreen.",
-      date: '2024-01-12',
-      verified: true,
-      helpful: 28,
-      productName: 'Advanced Niacinamide Serum',
-      productImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=80&h=80&fit=crop&q=80',
-      skinType: 'dry',
-      skinConcerns: ['Hyperpigmentation', 'Fine Lines & Wrinkles', 'Dryness & Dehydration'],
-      complexion: 'Type III - Medium',
-      sensitivity: 'moderate',
-      lifestyle: ['Frequently wears makeup', 'Sun exposure daily'],
-      age: 42,
-      routineLength: '6+ months',
-      pros: ['Faded dark spots', 'Improved skin texture', 'Works with other products', 'Anti-aging benefits'],
-      cons: ['Takes patience to see results', 'Price point is high'],
-      wouldRecommend: true,
-      usageDuration: '3 months',
-      finalVerdict: 'At 42, finding something that addresses both pigmentation and fine lines is rare — this serum does both with consistent use.'
-    },
-    {
-      id: 5,
-      userName: 'David C.',
-      userAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&q=80',
-      rating: 3,
-      title: 'Good product but not miraculous for me',
-      content: "I had high expectations based on other reviews, but the results have been more subtle for me. I do see some improvement in my skin texture and my breakouts are less frequent, but it hasn't been the dramatic transformation I hoped for. My combination skin still gets oily in the T-zone, though maybe less than before. It's a decent product, just not the miracle cure I expected.",
-      date: '2024-01-10',
-      verified: true,
-      helpful: 22,
-      productName: 'Advanced Niacinamide Serum',
-      productImage: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=80&h=80&fit=crop&q=80',
-      skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Large Pores'],
-      complexion: 'Type V - Brown',
-      sensitivity: 'low',
-      lifestyle: ['Active lifestyle', 'Screen time heavy', 'High stress levels'],
-      age: 24,
-      routineLength: '1-3 months',
-      pros: ['Gentle on skin', 'Some texture improvement', 'Good ingredients'],
-      cons: ['Results slower than expected', 'T-zone still oily', 'Expensive for subtle results'],
-      wouldRecommend: false,
-      usageDuration: '6 weeks',
-      finalVerdict: 'Decent product, but if you expect dramatic results for combination skin, temper your expectations — improvements were subtle for me.'
-    }
-  ];
+  // Canonical review data from shared source
+  const allReviews = enrichedProductReviews as ProductReview[];
 
   // Score all reviews using shared Similarity Weight utility (12.15)
   const scoredReviews = allReviews.map(review => {
@@ -361,7 +219,7 @@ const ProductReviewsPage = () => {
             <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg border-l-4 border-primary">
               <div>
                 <h3 className="text-xl font-semibold text-deep mb-2">Showing reviews from similar individuals</h3>
-                <p className="text-warm-gray text-sm mb-3">Prioritized for <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong>{userSkinProfile.complexion ? <> and <strong>{userSkinProfile.complexion}</strong> complexion</> : ''} that are looking into buying this product.</p>
+                <p className="text-warm-gray text-sm mb-3">Prioritized for <strong>{userSkinProfile.skinType} skin</strong> with concerns about <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong>{userSkinProfile.complexion ? <> and <strong>{userSkinProfile.complexion}</strong> complexion</> : ''} that bought this product.</p>
                 <div className="flex flex-wrap gap-2">
                   <span className="text-xs text-primary bg-light/20 px-2 py-1 rounded-full">{sortedReviews.length} matching reviews found</span>
                   {sortedReviews.filter(r => r.matchTier === 'full').length > 0 && (
@@ -490,15 +348,16 @@ const ProductReviewsPage = () => {
           <div className="space-y-6">
             {sortedReviews.map((review) => {
               const tierBadge = getTierBadgeInfo(review.matchTier || 'none', review.similarityScore || 0);
+              const isFullMatch = review.matchTier === 'full';
               return (
-                <div key={review.id} className="bg-white rounded-2xl p-5 shadow-lg">
+                <div key={review.id} className={`rounded-2xl p-5 shadow-lg ${isFullMatch ? 'bg-light/30 border border-primary-300' : 'bg-white'}`}>
                   <div className="flex items-start space-x-3 mb-3">
                     <div className="w-12 h-12 rounded-full overflow-hidden bg-blush/30 flex-shrink-0 flex items-center justify-center">{review.userAvatar ? (<img src={review.userAvatar} alt={review.userName} className="w-full h-full object-cover" />) : (<i className="ri-user-line text-xl text-warm-gray/50"></i>)}</div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center space-x-2 mb-1">
                         <h3 className="text-base font-semibold text-deep">{review.userName}</h3>
                         {review.verified && (<span className="flex items-center space-x-1 px-2 py-0.5 bg-taupe-100 text-taupe-800 text-xs font-medium rounded-full"><i className="ri-shield-check-fill"></i><span>Verified</span></span>)}
-                        {hasSurveyData && tierBadge && (<button onClick={() => setMatchPopupReview(review)} className={`flex items-center space-x-1 px-3 py-1 ${tierBadge.color} text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer`}><i className={tierBadge.icon}></i><span>{tierBadge.label}</span></button>)}
+                        {tierBadge && (<button onClick={() => setMatchPopupReview(review)} className={`flex items-center space-x-1 px-3 py-1 ${tierBadge.color} text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer`}><i className={tierBadge.icon}></i><span>{tierBadge.label}</span></button>)}
                       </div>
                       <div className="flex items-center space-x-3 mb-1">
                         <div className="flex items-center space-x-0.5">{renderStars(review.rating)}</div>
@@ -506,16 +365,16 @@ const ProductReviewsPage = () => {
                         <span className="text-xs text-warm-gray/80">• Used for {review.usageDuration}</span>
                       </div>
                       <div className="flex items-center space-x-2">
-                        <span className={`text-xs ${hasSurveyData && review.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase() ? 'text-primary-700 font-medium' : 'text-warm-gray/80'}`}>
+                        <span className={`text-xs ${review.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase() ? 'text-primary-700 font-medium' : 'text-warm-gray/80'}`}>
                           {review.skinType} skin
                         </span>
                         <span className="text-xs text-warm-gray/80">• Age {review.age}</span>
-                        {hasSurveyData && review.complexion && isComplexionMatch(review.complexion, userSkinProfile.complexion) !== 'none' && (
+                        {review.complexion && isComplexionMatch(review.complexion, userSkinProfile.complexion) !== 'none' && (
                           <span className={`text-xs ${isComplexionMatch(review.complexion, userSkinProfile.complexion) === 'exact' ? 'text-primary-700 font-medium' : 'text-primary-700/70'}`}>{review.complexion}</span>
                         )}
                         <div className="flex flex-wrap gap-1">
                           {review.skinConcerns.slice(0, 2).map((concern, idx) => (
-                            <span key={idx} className={`px-2 py-1 text-xs rounded-full ${hasSurveyData && matchesConcern(concern, userSkinProfile.primaryConcerns) ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
+                            <span key={idx} className={`px-2 py-1 text-xs rounded-full ${matchesConcern(concern, userSkinProfile.primaryConcerns) ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
                           ))}
                         </div>
                       </div>
@@ -753,12 +612,12 @@ const ProductReviewsPage = () => {
         const ageMatch = Math.abs(r.age - userSkinProfile.age) <= 5;
 
         const rows = [
+          { name: 'Complexion', points: '+10', matched: complexionMatch, earned: complexionMatch ? 10 : 0, theirs: r.complexion || '—', yours: userSkinProfile.complexion || '—', note: complexionMatch ? (complexionResult === 'exact' ? 'exact' : '±1 tier') : undefined },
           { name: 'Skin Type', points: '+40', matched: skinTypeMatch, earned: skinTypeMatch ? 40 : 0, theirs: r.skinType, yours: userSkinProfile.skinType },
           { name: 'Concerns', points: '+15/ea', matched: concernCount > 0, earned: concernCount * 15, theirs: r.skinConcerns.slice(0, 2).join(', '), yours: userSkinProfile.primaryConcerns.slice(0, 2).join(', '), note: `${concernCount} matched` },
-          { name: 'Complexion', points: '+10', matched: complexionMatch, earned: complexionMatch ? 10 : 0, theirs: r.complexion || '—', yours: userSkinProfile.complexion || '—', note: complexionMatch ? (complexionResult === 'exact' ? 'exact' : '±1 tier') : undefined },
           { name: 'Sensitivity', points: '+10', matched: sensitivityMatch, earned: sensitivityMatch ? 10 : 0, theirs: r.sensitivity || '—', yours: userSkinProfile.sensitivity || '—' },
-          { name: 'Lifestyle', points: '+5', matched: lifestyleMatch, earned: lifestyleMatch ? 5 : 0, theirs: r.lifestyle?.slice(0, 1).join('') || '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
           { name: 'Age Range', points: '+5', matched: ageMatch, earned: ageMatch ? 5 : 0, theirs: `Age ${r.age}`, yours: `Age ${userSkinProfile.age}`, note: '±5 years' },
+          { name: 'Lifestyle', points: '+5', matched: lifestyleMatch, earned: lifestyleMatch ? 5 : 0, theirs: r.lifestyle?.slice(0, 1).join('') || '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
         ];
 
         return (

@@ -140,7 +140,7 @@ const ReviewsPage = () => {
   const hasSurveyData = !!(rawSkinType || rawConcerns.length > 0);
 
   // Use fallbacks only when we have SOME real data but a specific field is missing
-  const effectiveSkinType = rawSkinType || (hasSurveyData ? 'combination' : 'combination');
+  const effectiveSkinType = rawSkinType || '';
   const effectiveConcerns = rawConcerns.length > 0 ? rawConcerns : (hasSurveyData ? ['General Skincare'] : []);
 
   // Extended profile via unified getters (rehydrated from Supabase when localStorage is empty)
@@ -154,7 +154,7 @@ const ReviewsPage = () => {
     complexion: surveyComplexion,
     sensitivity: surveySensitivity,
     lifestyle: surveyLifestyle,
-    age: 28,
+    age: 0,
     routineLength: '3-6 months'
   };
 
@@ -434,8 +434,9 @@ const ReviewsPage = () => {
           <div className="space-y-6">
             {sortedReviews.map((review) => {
               const tierBadge = getTierBadgeInfo(review.matchTier || 'none', review.similarityScore || 0);
+              const isFullMatch = review.matchTier === 'full';
               return (
-                <div key={review.id} className="bg-white rounded-2xl p-6 shadow-lg">
+                <div key={review.id} className={`rounded-2xl p-6 shadow-lg ${isFullMatch ? 'bg-light/30 border border-primary-300' : 'bg-white'}`}>
                   <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
                       <div className="flex items-start space-x-4 mb-4">
@@ -450,7 +451,7 @@ const ReviewsPage = () => {
                           <div className="flex items-center space-x-2 mb-1">
                             <h3 className="text-lg font-semibold text-deep">{review.userName}</h3>
                             {review.verified && (<span className="flex items-center space-x-1 px-2 py-0.5 bg-taupe-100 text-taupe-800 text-xs font-medium rounded-full"><i className="ri-shield-check-fill"></i><span>Verified</span></span>)}
-                            {hasSurveyData && tierBadge && (<button onClick={() => setMatchPopupReview(review)} className={`flex items-center space-x-1 px-3 py-1 ${tierBadge.color} text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer`}><i className={tierBadge.icon}></i><span>{tierBadge.label}</span></button>)}
+                            {tierBadge && (<button onClick={() => setMatchPopupReview(review)} className={`flex items-center space-x-1 px-3 py-1 ${tierBadge.color} text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer`}><i className={tierBadge.icon}></i><span>{tierBadge.label}</span></button>)}
                           </div>
                           <div className="flex items-center space-x-3 mb-1">
                             <div className="flex items-center space-x-0.5">{renderStars(review.rating)}</div>
@@ -461,13 +462,13 @@ const ReviewsPage = () => {
                             <span className="text-sm text-warm-gray/80">• Order: {review.purchaseDetails.orderValue}</span>
                           </div>
                           <div className="flex items-center space-x-2">
-                            <span className={`text-xs ${hasSurveyData && review.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase() ? 'text-primary-700 font-medium' : 'text-warm-gray/80'}`}>
+                            <span className={`text-xs ${review.skinType.toLowerCase() === userSkinProfile.skinType.toLowerCase() ? 'text-primary-700 font-medium' : 'text-warm-gray/80'}`}>
                               {review.skinType} skin
                             </span>
                             <span className="text-xs text-warm-gray/80">• Age {review.age}</span>
                             <div className="flex flex-wrap gap-1">
                               {review.skinConcerns.slice(0, 2).map((concern, idx) => (
-                                <span key={idx} className={`px-2 py-1 text-xs rounded-full ${hasSurveyData && matchesConcern(concern, userSkinProfile.primaryConcerns) ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
+                                <span key={idx} className={`px-2 py-1 text-xs rounded-full ${matchesConcern(concern, userSkinProfile.primaryConcerns) ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium' : 'bg-gray-100 text-gray-600'}`}>{concern}</span>
                               ))}
                             </div>
                           </div>
@@ -627,12 +628,12 @@ const ReviewsPage = () => {
         const ageMatch = Math.abs(r.age - userSkinProfile.age) <= 5;
 
         const rows = [
+          { name: 'Complexion', points: '+10', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.complexion || '—' },
           { name: 'Skin Type', points: '+40', matched: skinTypeMatch, earned: skinTypeMatch ? 40 : 0, theirs: r.skinType, yours: userSkinProfile.skinType },
           { name: 'Concerns', points: '+15/ea', matched: concernCount > 0, earned: concernCount * 15, theirs: r.skinConcerns.slice(0, 2).join(', '), yours: userSkinProfile.primaryConcerns.slice(0, 2).join(', '), note: `${concernCount} matched` },
-          { name: 'Complexion', points: '+10', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.complexion || '—' },
           { name: 'Sensitivity', points: '+10', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.sensitivity || '—' },
-          { name: 'Lifestyle', points: '+5', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
           { name: 'Age Range', points: '+5', matched: ageMatch, earned: ageMatch ? 5 : 0, theirs: `Age ${r.age}`, yours: `Age ${userSkinProfile.age}`, note: '±5 years' },
+          { name: 'Lifestyle', points: '+5', matched: false, earned: 0, theirs: '—', yours: userSkinProfile.lifestyle.slice(0, 1).join('') || '—' },
         ];
 
         return (

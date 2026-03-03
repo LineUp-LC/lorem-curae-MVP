@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase-browser';
 import { cartState } from '../../lib/utils/cartState';
+import { useDocumentTitle } from '../../lib/utils/useDocumentTitle';
 
 export default function StorefrontProductDetailsPage() {
   const [searchParams] = useSearchParams();
@@ -17,6 +16,8 @@ export default function StorefrontProductDetailsPage() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [purchasing, setPurchasing] = useState(false);
+
+  useDocumentTitle(product ? `${product.name} by ${storefront?.business_name}` : null);
 
   useEffect(() => {
     if (productId) {
@@ -123,14 +124,12 @@ export default function StorefrontProductDetailsPage() {
   if (!product) {
     return (
       <div className="min-h-screen bg-cream-50">
-        <Navbar />
         <div className="max-w-7xl mx-auto px-6 lg:px-12 py-24 text-center">
           <h1 className="text-3xl font-bold text-gray-900 mb-4">Product Not Found</h1>
           <Link to="/marketplace" className="text-taupe hover:text-taupe-700 cursor-pointer">
             Return to Marketplace
           </Link>
         </div>
-        <Footer />
       </div>
     );
   }
@@ -139,7 +138,6 @@ export default function StorefrontProductDetailsPage() {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -345,7 +343,6 @@ export default function StorefrontProductDetailsPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

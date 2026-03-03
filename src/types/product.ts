@@ -26,11 +26,13 @@ export interface ActiveIngredient {
  */
 export type ProductSource = 'marketplace' | 'discovery';
 
+import type { ProductCategory } from '../lib/utils/categoryRegistry';
+
 export interface Product {
   id: number;
   name: string;
   brand: string;
-  category: string;
+  category: ProductCategory;
   price: number;
   rating: number;
   reviewCount: number;
@@ -46,6 +48,12 @@ export interface Product {
   size?: ProductSize;
   /** Active ingredients with concentration data */
   activeIngredients?: ActiveIngredient[];
+  /** When this product is typically used in a routine */
+  timeOfDay?: ('am' | 'pm')[];
+  /** Product texture (optional — inferred if absent) */
+  texture?: 'gel' | 'cream' | 'lotion' | 'balm' | 'oil' | 'liquid' | 'foam' | 'paste' | 'emulsion' | 'mist' | 'serum';
+  /** Formulation type (optional — future enrichment) */
+  formulation?: 'water-based' | 'oil-based' | 'silicone-based' | 'anhydrous' | 'emulsion';
   preferences?: {
     vegan?: boolean;
     crueltyFree?: boolean;

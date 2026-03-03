@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 const MarketplaceSuccessPage = () => {
   const [searchParams] = useSearchParams();
@@ -30,7 +28,6 @@ const MarketplaceSuccessPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-2xl mx-auto px-6 text-center">
@@ -118,7 +115,6 @@ const MarketplaceSuccessPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

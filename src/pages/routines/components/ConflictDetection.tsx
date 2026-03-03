@@ -1,5 +1,11 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import type { CompatibilityResult } from '../../../lib/ai/ingredientIntelligence';
+
+export interface LiveConflict {
+  pair: [string, string];
+  result: CompatibilityResult;
+}
 
 interface Conflict {
   id: string;
@@ -8,55 +14,27 @@ interface Conflict {
   issue: string;
   explanation: string;
   recommendation: string;
-  alternativeProducts?: {
-    id: string;
-    name: string;
-    brand: string;
-    image: string;
-    reason: string;
-  }[];
 }
 
-const detectedConflicts: Conflict[] = [
-  {
-    id: '1',
-    severity: 'high',
-    products: ['Vitamin C Brightening Serum', 'Night Treatment (Retinol)'],
-    issue: 'Vitamin C + Retinol Conflict',
-    explanation: 'Using Vitamin C and Retinol together can cause skin irritation, redness, and reduce the effectiveness of both ingredients. Vitamin C works best at a lower pH (3-4), while Retinol is more stable at a higher pH (5.5-6). When combined, they can destabilize each other and increase sensitivity.',
-    recommendation: 'Use Vitamin C in your morning routine and Retinol in your evening routine. This separation allows each ingredient to work at its optimal pH level and prevents irritation.',
-    alternativeProducts: [
-      {
-        id: 'alt-1',
-        name: 'Niacinamide Brightening Serum',
-        brand: 'Radiant Skin Co.',
-        image: 'https://readdy.ai/api/search-image?query=elegant%20white%20dropper%20bottle%20niacinamide%20serum%20on%20marble%20surface%20with%20soft%20lighting%20minimalist%20skincare%20product%20photography%20clean%20background&width=300&height=300&seq=conflict-alt-1&orientation=squarish',
-        reason: 'Niacinamide is gentler and works well with Retinol. It provides similar brightening benefits without pH conflicts, reduces inflammation, and strengthens your skin barrier.',
-      },
-    ],
-  },
-  {
-    id: '2',
-    severity: 'medium',
-    products: ['Gentle Hydrating Cleanser', 'Vitamin C Brightening Serum'],
-    issue: 'pH Imbalance Warning',
-    explanation: 'Your cleanser has a pH of 6.5, which is great for maintaining skin barrier health. However, Vitamin C serums work best at a pH of 3-4. Using a higher pH cleanser immediately before Vitamin C can reduce its absorption and effectiveness by up to 50%.',
-    recommendation: 'After cleansing, use a pH-balancing toner (pH 4-5) to prepare your skin for Vitamin C absorption. Wait 1-2 minutes after toning before applying your Vitamin C serum for optimal results.',
-    alternativeProducts: [
-      {
-        id: 'alt-2',
-        name: 'pH Balancing Toner',
-        brand: 'Pure Balance',
-        image: 'https://readdy.ai/api/search-image?query=minimalist%20clear%20glass%20bottle%20ph%20balancing%20toner%20on%20white%20surface%20with%20green%20botanical%20elements%20soft%20natural%20lighting%20clean%20product%20photography&width=300&height=300&seq=conflict-alt-2&orientation=squarish',
-        reason: 'This toner adjusts your skin\'s pH to 4.5, creating the perfect environment for Vitamin C absorption. It contains gentle AHAs that enhance serum penetration without irritation.',
-      },
-    ],
-  },
-];
+function mapLiveConflicts(live: LiveConflict[]): Conflict[] {
+  return live.map((c, i) => ({
+    id: `live-${i}`,
+    severity: c.result.level === 'avoid' ? 'high' : c.result.level === 'caution' ? 'medium' : 'low',
+    products: [c.pair[0], c.pair[1]],
+    issue: `${c.pair[0]} + ${c.pair[1]} conflict`,
+    explanation: c.result.reason,
+    recommendation: c.result.resolution || 'Consider using these products at different times of day.',
+  }));
+}
 
-export default function ConflictDetection() {
+interface ConflictDetectionProps {
+  liveConflicts?: LiveConflict[];
+}
+
+export default function ConflictDetection({ liveConflicts = [] }: ConflictDetectionProps) {
   const navigate = useNavigate();
   const [expandedConflict, setExpandedConflict] = useState<string | null>(null);
+  const detectedConflicts = mapLiveConflicts(liveConflicts);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -227,41 +205,16 @@ export default function ConflictDetection() {
                   </p>
                 </div>
 
-                {/* Alternative Products */}
-                {conflict.alternativeProducts && conflict.alternativeProducts.length > 0 && (
-                  <div>
-                    <h4 className="font-medium text-deep mb-4 flex items-center gap-2">
-                      <i className="ri-star-line"></i>
-                      Better Alternatives for Your Routine
+                {/* Resolution suggestion */}
+                {conflict.recommendation && (
+                  <div className="p-4 bg-sage/10 rounded-lg border border-sage/20">
+                    <h4 className="font-medium text-deep mb-2 flex items-center gap-2">
+                      <i className="ri-swap-line text-sage"></i>
+                      How to Resolve
                     </h4>
-                    {/* Horizontal scrollable container for mobile */}
-                    <div className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory pb-2 -mx-2 px-2 md:grid md:grid-cols-1 md:overflow-visible md:mx-0 md:px-0">
-                      {conflict.alternativeProducts.map((product) => (
-                        <div
-                          key={product.id}
-                          className="bg-white rounded-lg p-4 border border-blush hover:border-primary transition-colors duration-fast flex-shrink-0 w-[85vw] max-w-sm snap-start md:w-full md:max-w-none"
-                        >
-                          <div className="flex items-start gap-4">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs text-warm-gray mb-1">{product.brand}</p>
-                              <h5 className="font-medium text-deep mb-2">{product.name}</h5>
-                              <div className="mb-3 p-3 bg-sage-50 rounded-lg border border-sage-200">
-                                <p className="text-sm text-warm-gray-700">
-                                  <strong className="text-sage-700">Why this works better:</strong> {product.reason}
-                                </p>
-                              </div>
-                              <button
-                                onClick={() => navigate(`/product-detail?id=${product.id}`)}
-                                className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-dark focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 transition-colors duration-fast text-sm font-medium whitespace-nowrap cursor-pointer"
-                                aria-label={`View details for ${product.name}`}
-                              >
-                                View Product Details
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <p className="text-warm-gray-700 text-sm leading-relaxed">
+                      {conflict.recommendation}
+                    </p>
                   </div>
                 )}
               </div>

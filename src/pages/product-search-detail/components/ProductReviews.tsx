@@ -1,22 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
+import { getReviewsForProduct, type MockReview } from '../../../mocks/reviews';
+import { matchesConcern } from '../../../lib/utils/matching';
 
-interface Review {
-  id: number;
-  userName: string;
-  userAvatar: string;
-  rating: number;
-  title: string;
-  content: string;
-  date: string;
-  verified: boolean;
-  helpful: number;
-  skinType: string;
-  skinConcerns: string[];
-  age: number;
-  routineLength: string;
-}
+type Review = MockReview;
 
 interface ProductReviewsProps {
   productId: number;
@@ -25,7 +13,7 @@ interface ProductReviewsProps {
 const ProductReviews = ({ productId }: ProductReviewsProps) => {
   // Get user skin profile from sessionState (unified source of truth)
   const skinType = getEffectiveSkinType() || 'combination';
-  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['Acne & Breakouts', 'Hyperpigmentation'];
+  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['Acne Prone', 'Uneven Skin Tone'];
   
   const [userSkinProfile] = useState({
     skinType,
@@ -36,99 +24,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
   const [showPersonalized, setShowPersonalized] = useState(true);
 
-  // All reviews data with expanded skin profile information
-  const allReviews: Review[] = [
-    {
-      id: 1,
-      userName: 'Sarah M.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20woman%20headshot%2C%20friendly%20smile%2C%20natural%20lighting%2C%20skincare%20enthusiast%2C%20clean%20background%2C%20modern%20portrait%20photography&width=60&height=60&seq=reviewer-001&orientation=squarish',
-      rating: 5,
-      title: 'Amazing results for combination skin!',
-      content: 'I\'ve been using this serum for 3 months now and the difference is incredible. My T-zone is no longer oily by midday, and my cheeks feel hydrated. The texture is lightweight and absorbs quickly without any sticky residue. Perfect for my combination skin type!',
-      date: '2024-01-15',
-      verified: true,
-      helpful: 24,
-      skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Dryness & Dehydration'],
-      age: 29,
-      routineLength: '3-6 months'
-    },
-    {
-      id: 2,
-      userName: 'Jessica R.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20woman%20portrait%2C%20natural%20beauty%2C%20confident%20smile%2C%20skincare%20routine%2C%20professional%20headshot%2C%20clean%20aesthetic&width=60&height=60&seq=reviewer-002&orientation=squarish',
-      rating: 4,
-      title: 'Great for sensitive skin',
-      content: 'As someone with very sensitive skin, I was hesitant to try this. But it\'s been gentle and effective. No irritation at all, and I\'ve noticed my redness has decreased significantly. Takes time to see results but worth the patience.',
-      date: '2024-01-10',
-      verified: true,
-      helpful: 18,
-      skinType: 'sensitive',
-      skinConcerns: ['Sensitivity', 'Redness'],
-      age: 25,
-      routineLength: '6+ months'
-    },
-    {
-      id: 3,
-      userName: 'Michael K.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20headshot%2C%20friendly%20expression%2C%20natural%20lighting%2C%20skincare%20enthusiast%2C%20clean%20background%2C%20modern%20portrait&width=60&height=60&seq=reviewer-003&orientation=squarish',
-      rating: 5,
-      title: 'Finally found my holy grail serum',
-      content: 'After trying countless serums, this one actually delivers. The niacinamide really helps with my enlarged pores, and the hyaluronic acid keeps my skin plump all day. Great for oily skin that needs hydration without heaviness.',
-      date: '2024-01-08',
-      verified: false,
-      helpful: 31,
-      skinType: 'oily',
-      skinConcerns: ['Large Pores', 'Excess Oil'],
-      age: 32,
-      routineLength: '1-3 months'
-    },
-    {
-      id: 4,
-      userName: 'Emma L.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Young%20professional%20woman%2C%20natural%20skincare%20enthusiast%2C%20gentle%20smile%2C%20clean%20portrait%20photography%2C%20modern%20headshot&width=60&height=60&seq=reviewer-004&orientation=squarish',
-      rating: 5,
-      title: 'Perfect match for combination acne-prone skin',
-      content: 'This serum has been a game-changer for my combination skin with persistent breakouts. It controls oil in my T-zone while keeping my cheeks moisturized. The acne-fighting ingredients work without over-drying. Highly recommend for similar skin types!',
-      date: '2024-01-20',
-      verified: true,
-      helpful: 35,
-      skinType: 'combination',
-      skinConcerns: ['Acne & Breakouts', 'Hyperpigmentation', 'Large Pores'],
-      age: 26,
-      routineLength: '3-6 months'
-    },
-    {
-      id: 5,
-      userName: 'David C.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Professional%20man%20portrait%2C%20confident%20expression%2C%20skincare%20routine%20advocate%2C%20clean%20background%2C%20modern%20headshot&width=60&height=60&seq=reviewer-005&orientation=squarish',
-      rating: 4,
-      title: 'Effective for dark spots and uneven tone',
-      content: 'Been dealing with hyperpigmentation from old acne scars. This serum has noticeably faded the dark spots over 4 months of consistent use. The vitamin C and niacinamide combo works well. Patience is key with pigmentation issues.',
-      date: '2024-01-12',
-      verified: true,
-      helpful: 22,
-      skinType: 'combination',
-      skinConcerns: ['Hyperpigmentation', 'Acne Scars'],
-      age: 30,
-      routineLength: '3-6 months'
-    },
-    {
-      id: 6,
-      userName: 'Lisa K.',
-      userAvatar: 'https://readdy.ai/api/search-image?query=Mature%20woman%20portrait%2C%20elegant%20appearance%2C%20skincare%20expert%2C%20professional%20headshot%2C%20natural%20lighting&width=60&height=60&seq=reviewer-006&orientation=squarish',
-      rating: 4,
-      title: 'Good anti-aging benefits',
-      content: 'At 45, I\'m always looking for products that help with fine lines and firmness. This serum has improved my skin texture and reduced some fine lines around my eyes. Takes consistent use to see results.',
-      date: '2024-01-05',
-      verified: true,
-      helpful: 19,
-      skinType: 'dry',
-      skinConcerns: ['Fine Lines & Wrinkles', 'Loss of Firmness'],
-      age: 45,
-      routineLength: '6+ months'
-    }
-  ];
+  // Canonical review data from shared source
+  const allReviews: Review[] = getReviewsForProduct(productId);
 
   // Function to calculate similarity score based on user profile
   const calculateSimilarityScore = (review: Review): number => {
@@ -139,9 +36,9 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       score += 50;
     }
     
-    // Concern overlap
-    const concernMatches = review.skinConcerns.filter(concern => 
-      userSkinProfile.primaryConcerns.includes(concern)
+    // Concern overlap (fuzzy matching via shared utility)
+    const concernMatches = review.skinConcerns.filter(concern =>
+      matchesConcern(concern, userSkinProfile.primaryConcerns)
     ).length;
     score += concernMatches * 20;
     
@@ -363,7 +260,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                       <span
                         key={idx}
                         className={`px-2 py-1 text-xs rounded-full ${
-                          userSkinProfile.primaryConcerns.includes(concern)
+                          matchesConcern(concern, userSkinProfile.primaryConcerns)
                             ? 'bg-taupe-100 text-taupe-800 font-medium'
                             : 'bg-gray-100 text-gray-600'
                         }`}

@@ -1,11 +1,19 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
-import { productMatchesUserConcerns } from '../../../lib/utils/matching';
+import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
+import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
+import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
 import type { Product } from '../../../types/product';
-import { useFavorites } from '../../../lib/utils/favoritesState';
+import { useSavedProducts } from '../../../lib/utils/favoritesState';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import Dropdown from '../../../components/ui/Dropdown';
+import SafetyBadge from '../../../components/feature/SafetyBadge';
+import { assessProductSafety, getUserProfile } from '../../../lib/utils/productSafety';
+import { classifyTimeOfDay } from '../../../lib/utils/classifyTimeOfDay';
+import { PRODUCT_CATEGORIES } from '../../../lib/utils/categoryRegistry';
+import AIInsightBlock from '../../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
 
 /**
  * ProductCatalog Component
@@ -16,25 +24,6 @@ import Dropdown from '../../../components/ui/Dropdown';
  * - Safe area support for comparison bar
  */
 
-// Static data moved outside component to prevent recreation on each render
-const categories = [
-  { value: 'all', label: 'All Products', icon: 'ri-grid-line' },
-  { value: 'cleanser', label: 'Cleansers', icon: 'ri-drop-line' },
-  { value: 'toner', label: 'Toners', icon: 'ri-contrast-drop-line' },
-  { value: 'serum', label: 'Serums', icon: 'ri-flask-line' },
-  { value: 'essence', label: 'Essences', icon: 'ri-water-flash-line' },
-  { value: 'moisturizer', label: 'Moisturizers', icon: 'ri-contrast-drop-2-line' },
-  { value: 'sunscreen', label: 'Sunscreen', icon: 'ri-sun-line' },
-  { value: 'treatment', label: 'Treatments', icon: 'ri-heart-pulse-line' },
-  { value: 'eye-care', label: 'Eye Care', icon: 'ri-eye-line' },
-  { value: 'lip-care', label: 'Lip Care', icon: 'ri-chat-smile-3-line' },
-  { value: 'mask', label: 'Masks', icon: 'ri-user-smile-line' },
-  { value: 'exfoliator', label: 'Exfoliators', icon: 'ri-refresh-line' },
-  { value: 'oil', label: 'Face Oils', icon: 'ri-drop-fill' },
-  { value: 'mist', label: 'Mists & Sprays', icon: 'ri-cloud-line' },
-  { value: 'tool', label: 'Tools & Devices', icon: 'ri-tools-line' },
-];
-
 const skinTypes = [
   { value: 'all', label: 'All Skin Types' },
   { value: 'dry', label: 'Dry' },
@@ -43,6 +32,17 @@ const skinTypes = [
   { value: 'normal', label: 'Normal' },
   { value: 'sensitive', label: 'Sensitive' },
 ];
+
+const preferenceLabels: Record<string, string> = {
+  vegan: 'Vegan',
+  crueltyFree: 'Cruelty-Free',
+  fragranceFree: 'Fragrance-Free',
+  glutenFree: 'Gluten-Free',
+  alcoholFree: 'Alcohol-Free',
+  siliconeFree: 'Silicone-Free',
+  plantBased: 'Plant-Based',
+  chemicalFree: 'Chemical-Free',
+};
 
 interface ProductCatalogProps {
   userConcerns: string[];
@@ -68,21 +68,21 @@ export default function ProductCatalog({
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Favorites for reactive updates
-  const { isFavorite, toggleFavorite } = useFavorites();
+  // Saved products for reactive updates
+  const { isSaved, toggleSaved } = useSavedProducts();
 
   // Persisted filter and sort preferences
   const [selectedCategory, setSelectedCategory] = useLocalStorageState<string>(
     'discover_filter_category',
     'all'
   );
-  const [selectedSkinType, setSelectedSkinType] = useLocalStorageState<string>(
-    'discover_filter_skin_type',
-    'all'
-  );
   const [sortBy, setSortBy] = useLocalStorageState<string>(
     'discover_sort_by',
     'rating'
+  );
+  const [selectedSkinType, setSelectedSkinType] = useLocalStorageState<string>(
+    'discover_filter_skin_type',
+    'all'
   );
 
   // Migrate old 'popular' sort value to 'rating'
@@ -96,9 +96,10 @@ export default function ProductCatalog({
     'all'
   );
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
 
-  // Favorite notification state
-  const [favoriteNotification, setFavoriteNotification] = useState<{ show: boolean; productName: string; isAdding: boolean }>({ show: false, productName: '', isAdding: true });
+  // Save notification state
+  const [saveNotification, setSaveNotification] = useState<{ show: boolean; productName: string; isAdding: boolean }>({ show: false, productName: '', isAdding: true });
 
   // Safe fallback for compareList to prevent undefined errors
   const safeCompareList = compareList ?? [];
@@ -113,6 +114,27 @@ export default function ProductCatalog({
   );
   const [isScrolled, setIsScrolled] = useState(false);
   const compareBarRef = useRef<HTMLDivElement>(null);
+
+  // Compare highlight state (triggered from homepage "Product Comparison" card)
+  const [showCompareHighlight, setShowCompareHighlight] = useState(false);
+  const firstProductRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (searchParams.get('highlight') === 'compare') {
+      setShowCompareHighlight(true);
+      // Clean up URL param
+      const newParams = new URLSearchParams(searchParams);
+      newParams.delete('highlight');
+      window.history.replaceState({}, '', `${window.location.pathname}${newParams.toString() ? '?' + newParams.toString() : ''}`);
+      // Scroll to first product after a brief delay
+      setTimeout(() => {
+        firstProductRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+      // Auto-dismiss after 5 seconds
+      const timer = setTimeout(() => setShowCompareHighlight(false), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   // Safe fallback for userConcerns
   const safeUserConcerns = userConcerns ?? [];
@@ -136,12 +158,16 @@ export default function ProductCatalog({
 
   const products = productData;
 
+  // Determine the active skin type filter:
+  // If user completed survey, auto-filter by their profile skin type;
+  // otherwise use the dropdown selection.
+  const effectiveSkinType = getEffectiveSkinType();
+  const activeSkinTypeFilter = effectiveSkinType || selectedSkinType;
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
       const matchesCategory =
         selectedCategory === 'all' || product.category === selectedCategory;
-      const matchesSkinType =
-        selectedSkinType === 'all' || product.skinTypes.includes(selectedSkinType);
       const matchesSearch =
         searchQuery === '' ||
         product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -149,10 +175,19 @@ export default function ProductCatalog({
         product.keyIngredients.some((ing) =>
           ing.toLowerCase().includes(searchQuery.toLowerCase())
         );
+      const matchesSkinType =
+        activeSkinTypeFilter === 'all' ||
+        normalizeSkinTypes(product.skinTypes).some(
+          (st) => isSkinTypeMatch(st, activeSkinTypeFilter)
+        );
+      const productTimeOfDay = product.timeOfDay ?? classifyTimeOfDay(product);
+      const matchesTimeOfDay =
+        timeOfDay === 'all' ||
+        productTimeOfDay.includes(timeOfDay as 'am' | 'pm');
 
-      return matchesCategory && matchesSkinType && matchesSearch;
+      return matchesCategory && matchesSearch && matchesSkinType && matchesTimeOfDay;
     });
-  }, [products, selectedCategory, selectedSkinType, searchQuery]);
+  }, [products, selectedCategory, searchQuery, activeSkinTypeFilter, timeOfDay]);
 
   // Concern matching using the matching utility with synonym support
   const matchedProducts = useMemo(() => {
@@ -169,7 +204,7 @@ export default function ProductCatalog({
     );
   }, [filteredProducts, matchedProducts]);
 
-  // Final sorting (price, rating, favorites)
+  // Final sorting (price, rating, saved)
   const sortProducts = (productList: Product[]) => {
     return [...productList].sort((a, b) => {
       switch (sortBy) {
@@ -178,10 +213,10 @@ export default function ProductCatalog({
         case 'price-high':
           return b.price - a.price;
         case 'favorites':
-          // Favorites first, then by rating
-          const aFav = isFavorite(a.id) ? 1 : 0;
-          const bFav = isFavorite(b.id) ? 1 : 0;
-          if (bFav !== aFav) return bFav - aFav;
+          // Saved first, then by rating
+          const aSaved = isSaved(a.id) ? 1 : 0;
+          const bSaved = isSaved(b.id) ? 1 : 0;
+          if (bSaved !== aSaved) return bSaved - aSaved;
           return b.rating - a.rating;
         case 'rating':
         default:
@@ -199,6 +234,20 @@ export default function ProductCatalog({
     () => sortProducts(otherProducts),
     [otherProducts, sortBy]
   );
+
+  // AI search insight — only active when the user has typed a search query
+  const searchAIContext = useMemo(() => {
+    if (!searchQuery.trim()) return null;
+    const allResults = [...sortedMatchedProducts, ...sortedOtherProducts];
+    if (allResults.length === 0) return null;
+    return buildAIContext('search', {
+      page: {
+        mode: 'search',
+        query: searchQuery,
+        results: allResults.slice(0, 10),
+      },
+    });
+  }, [searchQuery, sortedMatchedProducts, sortedOtherProducts]);
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -246,8 +295,12 @@ export default function ProductCatalog({
     setCompareList([]);
   };
 
+  const handleCompareAll = () => {
+    onOpenComparison();
+  };
+
   // Render a single product card
-  const renderProductCard = (product: Product) => {
+  const renderProductCard = (product: Product, highlightCompare = false) => {
     const isRecommended = isProductRecommended(product);
     const isSelected = isInCompareList(product.id);
 
@@ -272,12 +325,12 @@ export default function ProductCatalog({
 
         {/* Action Buttons - Horizontal Layout */}
         <div className="absolute top-3 right-3 flex flex-row items-center gap-2 z-10">
-          {/* Favorite Button */}
+          {/* Save Button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
-              const wasAlreadyFavorite = isFavorite(product.id);
-              toggleFavorite({
+              const wasAlreadySaved = isSaved(product.id);
+              toggleSaved({
                 id: product.id,
                 name: product.name,
                 brand: product.brand,
@@ -286,45 +339,57 @@ export default function ProductCatalog({
                 category: product.category,
                 skinTypes: product.skinTypes,
               });
-              setFavoriteNotification({ show: true, productName: product.name, isAdding: !wasAlreadyFavorite });
-              setTimeout(() => setFavoriteNotification({ show: false, productName: '', isAdding: true }), 3000);
+              setSaveNotification({ show: true, productName: product.name, isAdding: !wasAlreadySaved });
+              setTimeout(() => setSaveNotification({ show: false, productName: '', isAdding: true }), 3000);
             }}
             className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-              isFavorite(product.id)
+              isSaved(product.id)
                 ? 'bg-primary text-white'
                 : 'bg-white text-warm-gray hover:bg-light/30 hover:text-primary'
             }`}
-            title={isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'}
-            aria-label={isFavorite(product.id) ? `Remove ${product.name} from favorites` : `Add ${product.name} to favorites`}
-            aria-pressed={isFavorite(product.id)}
+            title={isSaved(product.id) ? 'Remove from saved' : 'Save product'}
+            aria-label={isSaved(product.id) ? `Remove ${product.name} from saved` : `Save ${product.name}`}
+            aria-pressed={isSaved(product.id)}
           >
-            <i className={`${isFavorite(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
+            <i className={`${isSaved(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
           </button>
 
           {/* Comparison Button */}
           {(() => {
             const isMaxReached = safeCompareList.length >= 3 && !isSelected;
             return (
-              <button
-                onClick={(e) => !isMaxReached && handleAddToCompare(product, e)}
-                disabled={isMaxReached}
-                className={`w-10 h-10 flex items-center justify-center rounded-full transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                  isSelected
-                    ? 'bg-primary text-white cursor-pointer'
-                    : isMaxReached
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-white text-warm-gray hover:bg-light/30 cursor-pointer'
-                }`}
-                title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
-                aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
-                aria-pressed={isSelected}
-              >
-                {isSelected ? (
-                  <i className="ri-check-line text-xl"></i>
-                ) : (
-                  <i className="ri-scales-line text-xl"></i>
+              <div className="relative">
+                <button
+                  onClick={(e) => !isMaxReached && handleAddToCompare(product, e)}
+                  disabled={isMaxReached}
+                  className={`w-10 h-10 flex items-center justify-center rounded-full transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
+                    highlightCompare
+                      ? 'ring-4 ring-primary/50 animate-pulse '
+                      : ''
+                  }${
+                    isSelected
+                      ? 'bg-primary text-white cursor-pointer'
+                      : isMaxReached
+                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      : 'bg-white text-warm-gray hover:bg-light/30 cursor-pointer'
+                  }`}
+                  title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
+                  aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
+                  aria-pressed={isSelected}
+                >
+                  {isSelected ? (
+                    <i className="ri-check-line text-xl"></i>
+                  ) : (
+                    <i className="ri-scales-line text-xl"></i>
+                  )}
+                </button>
+                {highlightCompare && (
+                  <div className="absolute top-full right-0 mt-2 whitespace-nowrap bg-deep text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-20">
+                    Tap to compare products
+                    <div className="absolute -top-1 right-4 w-2 h-2 bg-deep rotate-45"></div>
+                  </div>
                 )}
-              </button>
+              </div>
             );
           })()}
         </div>
@@ -347,6 +412,13 @@ export default function ProductCatalog({
               </span>
             </div>
           )}
+
+          {/* Category Label */}
+          <div className="absolute bottom-4 left-4">
+            <span className="px-2.5 py-1 text-xs font-medium bg-white/90 text-deep-900 rounded-full capitalize shadow-sm">
+              {product.category}
+            </span>
+          </div>
         </div>
 
         {/* Product Info */}
@@ -365,15 +437,15 @@ export default function ProductCatalog({
             <span className="text-sm text-warm-gray/80">({product.reviewCount})</span>
           </div>
 
-          <p className="text-sm text-warm-gray mb-4 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-warm-gray mb-3 line-clamp-1">{product.description}</p>
 
           {/* Concerns - with highlighting for matching concerns */}
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-warm-gray mb-2">Addresses:</p>
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-warm-gray mb-1.5">Addresses:</p>
             <div className="flex flex-wrap gap-1">
               {product.concerns.slice(0, 3).map((concern, idx) => {
                 const isMatchingConcern = productMatchesUserConcerns([concern], safeUserConcerns);
-                
+
                 return (
                   <span
                     key={idx}
@@ -390,6 +462,97 @@ export default function ProductCatalog({
               })}
             </div>
           </div>
+
+          {/* Key Ingredients */}
+          {product.keyIngredients && product.keyIngredients.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-warm-gray mb-1.5">Key Ingredients:</p>
+              <div className="flex flex-wrap gap-1">
+                {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
+                  const isMatch = matchesIngredient(ingredient, safeUserConcerns);
+                  return (
+                    <span
+                      key={idx}
+                      className={`px-2 py-1 text-xs rounded-full border ${
+                        isMatch
+                          ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                          : 'bg-cream text-warm-gray border-blush'
+                      }`}
+                    >
+                      {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                      {ingredient}
+                    </span>
+                  );
+                })}
+              </div>
+
+              {/* Safety Warning */}
+              {(() => {
+                const safety = assessProductSafety(product.keyIngredients || [], getUserProfile());
+                return safety.level !== 'safe' ? <SafetyBadge result={safety} compact /> : null;
+              })()}
+            </div>
+          )}
+
+          {/* Preferences */}
+          {product.preferences && Object.values(product.preferences).some(v => v === true) && (
+            <div className="mb-3">
+              <p className="text-xs font-semibold text-warm-gray mb-1.5">Preferences:</p>
+              <div className="flex flex-wrap gap-1">
+                {(() => {
+                  const userPrefs = getEffectivePreferences();
+                  return Object.entries(product.preferences)
+                    .filter(([_, value]) => value === true)
+                    .slice(0, 3)
+                    .map(([key]) => {
+                      const isPrefMatch = userPrefs[key] === true;
+                      return (
+                        <span
+                          key={key}
+                          className={`px-2 py-1 text-xs rounded-full border ${
+                            isPrefMatch
+                              ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                              : 'bg-cream text-warm-gray border-blush'
+                          }`}
+                        >
+                          {isPrefMatch && <i className="ri-check-line mr-0.5"></i>}
+                          {preferenceLabels[key] || key}
+                        </span>
+                      );
+                    });
+                })()}
+              </div>
+            </div>
+          )}
+
+          {/* Skin Types */}
+          {(() => {
+            const normalized = normalizeSkinTypes(product.skinTypes);
+            const userSkinType = getEffectiveSkinType();
+            return normalized.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-warm-gray mb-1.5">Skin Types:</p>
+                <div className="flex flex-wrap gap-1">
+                  {normalized.slice(0, 3).map((type, idx) => {
+                    const isMatch = isSkinTypeMatch(type, userSkinType);
+                    return (
+                      <span
+                        key={idx}
+                        className={`px-2 py-1 text-xs rounded-full capitalize border ${
+                          isMatch
+                            ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                            : 'bg-cream text-warm-gray border-blush'
+                        }`}
+                      >
+                        {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                        {type}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="flex items-center justify-between pt-4 border-t border-blush">
             <div>
@@ -439,58 +602,115 @@ export default function ProductCatalog({
         </div>
       </div>
 
+      {/* Category Toggle + Dropdown */}
+      <div className="relative mb-4 sm:mb-6">
+        <button
+          onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-blush hover:border-primary/30 transition-colors cursor-pointer shadow-sm"
+        >
+          <i className="ri-grid-line text-base text-primary"></i>
+          <span className="text-sm font-semibold text-deep">Categories</span>
+          <i className={`ri-arrow-${isCategoriesOpen ? 'up' : 'down'}-s-line text-lg text-warm-gray`}></i>
+        </button>
+
+        {/* Dropdown panel — overlays content */}
+        {isCategoriesOpen && (
+          <>
+            {/* Backdrop to close on outside click */}
+            <div
+              className="fixed inset-0 z-30"
+              onClick={() => setIsCategoriesOpen(false)}
+            />
+
+            {/* Mobile: wrapped pills */}
+            <div className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-4 w-full sm:w-auto lg:hidden">
+              <div className="flex flex-wrap gap-2 xs:gap-3">
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <button
+                    key={category.value}
+                    onClick={() => {
+                      setSelectedCategory(category.value);
+                      onFilterChange('category', category.value);
+                      setIsCategoriesOpen(false);
+                    }}
+                    aria-pressed={selectedCategory === category.value}
+                    className={`flex items-center space-x-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
+                      selectedCategory === category.value
+                        ? 'bg-primary text-white shadow-md'
+                        : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
+                    }`}
+                  >
+                    <i className={`${category.icon} text-base`}></i>
+                    <span>{category.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Desktop: vertical list */}
+            <div className="hidden lg:block absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-3 w-56">
+              <div className="space-y-1">
+                {PRODUCT_CATEGORIES.map((category) => (
+                  <button
+                    key={category.value}
+                    onClick={() => {
+                      setSelectedCategory(category.value);
+                      onFilterChange('category', category.value);
+                      setIsCategoriesOpen(false);
+                    }}
+                    aria-pressed={selectedCategory === category.value}
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                      selectedCategory === category.value
+                        ? 'bg-primary text-white'
+                        : 'text-warm-gray hover:bg-cream hover:text-deep'
+                    }`}
+                  >
+                    <i className={`${category.icon} text-base`}></i>
+                    <span>{category.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
       {/* Filters */}
       <div className="mb-6 sm:mb-8">
-        {/* Category Filter */}
-        <div className="mb-4 sm:mb-6">
-          <h3 className="text-sm font-semibold text-warm-gray mb-3">Categories</h3>
-          {/* FIXED: Horizontal scroll on mobile with proper spacing */}
-          <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 xs:gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
-            {categories.map((category) => (
-              <button
-                key={category.value}
-                onClick={() => {
-                  setSelectedCategory(category.value);
-                  onFilterChange('category', category.value);
-                }}
-                className={`flex items-center space-x-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer flex-shrink-0 ${
-                  selectedCategory === category.value
-                    ? 'bg-primary text-white shadow-md'
-                    : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
-                }`}
-              >
-                <i className={`${category.icon} text-base`}></i>
-                <span>{category.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Skin Type, Time of Day & Sort */}
+        {/* Time of Day & Sort */}
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
 
-          {/* Skin Type + Time of Day */}
+          {/* Skin Type + Time of Day + Compare */}
           <div className="flex flex-col xs:flex-row items-start xs:items-end gap-3 xs:gap-4 w-full sm:w-auto">
 
-            {/* Skin Type */}
+            {/* Skin Type — dropdown if no survey, label if survey completed */}
             <div className="w-full xs:w-auto">
               <label
-                htmlFor="filter-skin-type"
                 className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
               >
                 Skin Type
               </label>
-              <Dropdown
-                id="filter-skin-type"
-                name="skinType"
-                value={selectedSkinType}
-                onChange={(value) => {
-                  setSelectedSkinType(value)
-                  onFilterChange('skinType', value)
-                }}
-                options={skinTypes}
-                className="min-w-[150px]"
-              />
+              {effectiveSkinType ? (
+                <div
+                  className="flex items-center gap-2 px-4 py-2.5 bg-light/30 border border-primary-300 rounded-full text-sm font-medium text-primary-700 min-w-[150px]"
+                  title="Based on your skin survey"
+                >
+                  <i className="ri-check-line text-base"></i>
+                  Filtered for {effectiveSkinType}
+                </div>
+              ) : (
+                <Dropdown
+                  id="filter-skin-type"
+                  name="skinType"
+                  value={selectedSkinType}
+                  onChange={(value) => {
+                    setSelectedSkinType(value);
+                    onFilterChange('skinType', value);
+                  }}
+                  options={skinTypes}
+                  className="min-w-[150px]"
+                />
+              )}
             </div>
 
             {/* Time of Day */}
@@ -517,6 +737,21 @@ export default function ProductCatalog({
                 className="min-w-[150px]"
               />
             </div>
+
+            {/* Compare CTA */}
+            <div className="w-full xs:w-auto flex flex-col items-center -mt-8">
+              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5">
+                Compare
+              </label>
+              <button
+                onClick={handleCompareAll}
+                title="Compare Products"
+                aria-label="Compare Products"
+                className="w-[42px] h-[42px] flex items-center justify-center rounded-full bg-white border border-blush text-warm-gray hover:border-primary/50 hover:bg-cream/30 hover:text-primary transition-all cursor-pointer"
+              >
+                <i className="ri-scales-line text-xl"></i>
+              </button>
+            </div>
           </div>
 
           {/* Sort + Reset */}
@@ -541,24 +776,25 @@ export default function ProductCatalog({
                   { value: 'rating', label: 'Highest Rated' },
                   { value: 'price-low', label: 'Price: Low to High' },
                   { value: 'price-high', label: 'Price: High to Low' },
-                  { value: 'favorites', label: 'Favorites First' },
+                  { value: 'favorites', label: 'Saved First' },
                 ]}
                 className="min-w-[170px]"
               />
             </div>
 
             {/* Reset Filters */}
-            {(selectedCategory !== 'all' || selectedSkinType !== 'all' || timeOfDay !== 'all' || sortBy !== 'popular') && (
+            {(selectedCategory !== 'all' || timeOfDay !== 'all' || sortBy !== 'rating' || searchQuery !== '' || (!effectiveSkinType && selectedSkinType !== 'all')) && (
               <button
                 onClick={() => {
                   setSelectedCategory('all');
-                  setSelectedSkinType('all');
                   setTimeOfDay('all');
-                  setSortBy('popular');
+                  setSortBy('rating');
+                  setSearchQuery('');
+                  if (!effectiveSkinType) setSelectedSkinType('all');
                   onFilterChange('category', 'all');
-                  onFilterChange('skinType', 'all');
                   onFilterChange('timeOfDay', 'all');
-                  onFilterChange('sortBy', 'popular');
+                  onFilterChange('sortBy', 'rating');
+                  onFilterChange('skinType', 'all');
                 }}
                 className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium text-warm-gray hover:text-deep transition-colors cursor-pointer whitespace-nowrap"
                 title="Reset all filters to defaults"
@@ -587,6 +823,13 @@ export default function ProductCatalog({
         </p>
       </div>
 
+      {/* AI Search Insight */}
+      {searchAIContext && (
+        <div className="mb-6">
+          <AIInsightBlock context={searchAIContext} compact />
+        </div>
+      )}
+
       {/* Recommended for You Section */}
       {sortedMatchedProducts.length > 0 && (
         <section className="mb-8 sm:mb-10">
@@ -598,7 +841,11 @@ export default function ProductCatalog({
           </div>
           {/* FIXED: Responsive grid gaps - smaller on xs screens */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-6">
-            {sortedMatchedProducts.map((product) => renderProductCard(product))}
+            {sortedMatchedProducts.map((product, idx) => (
+              <div key={product.id} ref={idx === 0 ? firstProductRef : undefined}>
+                {renderProductCard(product, idx === 0 && showCompareHighlight)}
+              </div>
+            ))}
           </div>
         </section>
       )}
@@ -616,7 +863,11 @@ export default function ProductCatalog({
         className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 xs:gap-4 sm:gap-6"
         data-product-shop
       >
-        {sortedOtherProducts.map((product) => renderProductCard(product))}
+        {sortedOtherProducts.map((product, idx) => (
+          <div key={product.id} ref={sortedMatchedProducts.length === 0 && idx === 0 ? firstProductRef : undefined}>
+            {renderProductCard(product, sortedMatchedProducts.length === 0 && idx === 0 && showCompareHighlight)}
+          </div>
+        ))}
       </div>
 
       {/* No Results */}
@@ -630,8 +881,10 @@ export default function ProductCatalog({
           <button
             onClick={() => {
               setSelectedCategory('all');
-              setSelectedSkinType('all');
               setSearchQuery('');
+              setTimeOfDay('all');
+              setSortBy('rating');
+              if (!effectiveSkinType) setSelectedSkinType('all');
             }}
             className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all whitespace-nowrap cursor-pointer"
           >
@@ -776,13 +1029,13 @@ export default function ProductCatalog({
         </div>
       )}
 
-      {/* Favorite Notification Popup */}
-      {favoriteNotification.show && (
+      {/* Save Notification Popup */}
+      {saveNotification.show && (
         <div className="fixed top-24 right-6 z-50 bg-primary text-white px-6 py-4 rounded-xl shadow-lg flex items-center gap-3 motion-safe:animate-fade-in">
-          <i className={`${favoriteNotification.isAdding ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
+          <i className={`${saveNotification.isAdding ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
           <div>
-            <p className="font-medium">{favoriteNotification.isAdding ? 'Added to Favorites' : 'Removed from Favorites'}</p>
-            <p className="text-sm text-white/80">{favoriteNotification.productName}</p>
+            <p className="font-medium">{saveNotification.isAdding ? 'Product Saved' : 'Product Removed'}</p>
+            <p className="text-sm text-white/80">{saveNotification.productName}</p>
           </div>
         </div>
       )}

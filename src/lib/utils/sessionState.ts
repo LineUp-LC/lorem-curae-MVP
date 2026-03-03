@@ -430,6 +430,104 @@ export function getEffectiveConcerns(): string[] {
   return [];
 }
 
+// Label → key mapping for product preferences
+const preferenceLabelToKey: Record<string, string> = {
+  'vegan': 'vegan',
+  'cruelty-free': 'crueltyFree',
+  'fragrance-free': 'fragranceFree',
+  'gluten-free': 'glutenFree',
+  'alcohol-free': 'alcoholFree',
+  'silicone-free': 'siliconeFree',
+  'plant-based': 'plantBased',
+  'chemical-free': 'chemicalFree',
+};
+
+export function getEffectivePreferences(): Record<string, boolean> {
+  const prefs: Record<string, boolean> = {};
+
+  // Priority 1: authenticated user profile
+  const user = sessionState.getUser();
+  const profilePrefs = user?.preferences?.productPreferences as string[] | undefined;
+  if (profilePrefs && profilePrefs.length > 0) {
+    profilePrefs.forEach(label => {
+      const key = preferenceLabelToKey[label.toLowerCase()];
+      if (key) prefs[key] = true;
+    });
+    return prefs;
+  }
+
+  // Priority 2: localStorage skinSurveyData
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      const surveyPrefs = parsed.preferences as string[] | undefined;
+      if (surveyPrefs && surveyPrefs.length > 0) {
+        surveyPrefs.forEach(label => {
+          const key = preferenceLabelToKey[label.toLowerCase()];
+          if (key) prefs[key] = true;
+        });
+        return prefs;
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData preferences:', e);
+  }
+
+  return prefs;
+}
+
+// ========================================
+// Extended profile getters
+// Priority: user profile > skinSurveyData > default
+// ========================================
+
+export function getEffectiveComplexion(): string {
+  const user = sessionState.getUser();
+  if (user?.preferences?.fitzpatrickType) {
+    return user.preferences.fitzpatrickType;
+  }
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      return parsed.complexion || '';
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData complexion:', e);
+  }
+  return '';
+}
+
+export function getEffectiveSensitivity(): string {
+  // Sensitivity is derived from skin type + concerns
+  const skinType = getEffectiveSkinType();
+  if (skinType?.toLowerCase() === 'sensitive') return 'high';
+
+  const concerns = getEffectiveConcerns();
+  const moderateIndicators = ['Damaged Skin Barrier', 'Rosacea', 'Looking for gentle products'];
+  if (concerns.some(c => moderateIndicators.includes(c))) return 'moderate';
+
+  return 'low';
+}
+
+export function getEffectiveLifestyle(): string[] {
+  const user = sessionState.getUser();
+  if (user?.lifestyle?.factors && Array.isArray(user.lifestyle.factors) && user.lifestyle.factors.length > 0) {
+    return user.lifestyle.factors;
+  }
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      return parsed.lifestyle || [];
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData lifestyle:', e);
+  }
+  return [];
+}
+
 // React hook for using session state
 export function useSessionState() {
   const [state, setState] = React.useState(sessionState.getState());

@@ -1,5 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { fadeInUp, transitions } from '@/lib/motion/motionVariants';
+import { useAuth } from '@/lib/auth/AuthContext';
 
 // Types
 interface Product {
@@ -16,11 +18,6 @@ interface Product {
 
 type StatusFilter = 'all' | 'draft' | 'pending_review' | 'published' | 'archived';
 
-// Mock creator data (will be replaced with real auth later)
-const creator = {
-  display_name: 'Dr. Skin Example',
-  email: 'creator@example.com',
-};
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -522,6 +519,13 @@ export default function CreatorProductsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<StatusFilter>('all');
+  const { user, profile } = useAuth();
+
+  // Derive creator display data from real auth
+  const creator = {
+    display_name: profile?.full_name || user?.email?.split('@')[0] || 'Creator',
+    email: user?.email || '',
+  };
 
   // Fetch products
   const fetchProducts = useCallback(async () => {

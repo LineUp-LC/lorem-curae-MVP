@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 import { cartState } from '../../../lib/utils/cartState';
-import { useFavorites } from '../../../lib/utils/favoritesState';
+import { useSavedProducts } from '../../../lib/utils/favoritesState';
 import ComparisonPickerModal from '../../../components/feature/ComparisonPickerModal';
 
 interface MarketplaceProduct {
@@ -78,8 +76,8 @@ export default function MarketplaceProductDetailPage() {
   const [showComparisonPicker, setShowComparisonPicker] = useState(false);
   const [userConcerns, setUserConcerns] = useState<string[]>([]);
 
-  // Favorites state
-  const { isFavorite, toggleFavorite } = useFavorites();
+  // Saved products state
+  const { isSaved, toggleSaved } = useSavedProducts();
 
   useEffect(() => {
     // Load user skin profile for preference highlighting
@@ -148,7 +146,6 @@ export default function MarketplaceProductDetailPage() {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -219,7 +216,7 @@ export default function MarketplaceProductDetailPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => toggleFavorite({
+                      onClick={() => toggleSaved({
                         id: product.id,
                         name: product.name,
                         brand: product.brand,
@@ -227,13 +224,13 @@ export default function MarketplaceProductDetailPage() {
                         priceRange: `$${product.price.toFixed(2)}`,
                       })}
                       className={`w-12 h-12 flex items-center justify-center rounded-full transition-all cursor-pointer ${
-                        isFavorite(product.id)
+                        isSaved(product.id)
                           ? 'bg-primary text-white'
                           : 'bg-cream-100 text-gray-500 hover:bg-cream-200'
                       }`}
-                      title={isFavorite(product.id) ? 'Remove from favorites' : 'Add to favorites'}
+                      title={isSaved(product.id) ? 'Remove from saved' : 'Save product'}
                     >
-                      <i className={`${isFavorite(product.id) ? 'ri-heart-fill' : 'ri-heart-line'} text-xl`}></i>
+                      <i className={`${isSaved(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
                     </button>
                     <button
                       onClick={() => setShowComparisonPicker(true)}
@@ -250,7 +247,7 @@ export default function MarketplaceProductDetailPage() {
 
               {/* Preference Tags (Task 9) */}
               <div className="mb-6">
-                <h3 className="text-sm font-semibold text-gray-700 mb-3">Product Preferences</h3>
+                <h3 className="text-sm font-semibold text-gray-700 mb-3">Preferences</h3>
                 <div className="flex flex-wrap gap-2">
                   {Object.entries(product.preferences).map(([key, value]) => {
                     if (!value) return null;
@@ -384,7 +381,6 @@ export default function MarketplaceProductDetailPage() {
         userConcerns={userConcerns}
       />
 
-      <Footer />
     </div>
   );
 }

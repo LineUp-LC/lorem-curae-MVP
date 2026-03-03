@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { useNavigate, Link } from 'react-router-dom';
 import { sessionState } from '../../lib/utils/sessionState';
+import { useAuth } from '../../lib/auth/AuthContext';
+import { updateUserProfile } from '../../lib/supabase';
+import Dropdown from '../../components/ui/Dropdown';
 
 interface SkinConcern {
   id: string;
@@ -44,6 +45,7 @@ interface ExtendedSkinProfile {
 
 export default function MySkinPage() {
   const navigate = useNavigate();
+  const { profile } = useAuth();
   const [skinProfile, setSkinProfile] = useState({
     skinType: '',
     concerns: [] as string[],
@@ -82,6 +84,7 @@ export default function MySkinPage() {
   });
   const [showPreferencesEdit, setShowPreferencesEdit] = useState(false);
   const [editingPreferences, setEditingPreferences] = useState<string[]>([]);
+  const [hasSurveyData, setHasSurveyData] = useState<boolean | null>(null);
 
   // Lifestyle options for the check-in
   const lifestyleOptions: Record<string, { emoji: string; options: string[] }> = {
@@ -102,13 +105,25 @@ export default function MySkinPage() {
     environmentalExposure: 'Your environment?',
   };
 
-  const handleSaveLifestyle = () => {
+  const handleSaveLifestyle = async () => {
     setLifestyleFactors(editingLifestyle);
     // Save to localStorage
     const existingData = JSON.parse(localStorage.getItem('skinSurveyData') || '{}');
     existingData.lifestyle = editingLifestyle;
     localStorage.setItem('skinSurveyData', JSON.stringify(existingData));
     setShowLifestyleCheckin(false);
+
+    // Sync to Supabase for authenticated users
+    if (profile?.id) {
+      const existingPrefs = (profile.preferences as Record<string, any>) || {};
+      const existingSurvey = existingPrefs.surveyAnswers || {};
+      await updateUserProfile(profile.id, {
+        preferences: {
+          ...existingPrefs,
+          surveyAnswers: { ...existingSurvey, ...editingLifestyle },
+        },
+      });
+    }
   };
 
   // Product preference options
@@ -117,12 +132,10 @@ export default function MySkinPage() {
     { id: 'vegan', label: 'Vegan', icon: 'ri-leaf-line' },
     { id: 'fragrance-free', label: 'Fragrance-Free', icon: 'ri-drop-line' },
     { id: 'organic', label: 'Organic', icon: 'ri-plant-line' },
-    { id: 'clean-beauty', label: 'Clean Beauty', icon: 'ri-sparkling-line' },
     { id: 'dermatologist-tested', label: 'Dermatologist Tested', icon: 'ri-stethoscope-line' },
     { id: 'hypoallergenic', label: 'Hypoallergenic', icon: 'ri-shield-check-line' },
     { id: 'paraben-free', label: 'Paraben-Free', icon: 'ri-prohibited-line' },
     { id: 'sulfate-free', label: 'Sulfate-Free', icon: 'ri-water-flash-line' },
-    { id: 'sustainable', label: 'Sustainable Packaging', icon: 'ri-recycle-line' },
     { id: 'budget-friendly', label: 'Budget-Friendly', icon: 'ri-money-dollar-circle-line' },
     { id: 'luxury', label: 'Luxury/Premium', icon: 'ri-vip-diamond-line' },
   ];
@@ -135,7 +148,7 @@ export default function MySkinPage() {
     );
   };
 
-  const handleSavePreferences = () => {
+  const handleSavePreferences = async () => {
     // Convert to UserPreference format
     const newPreferences: UserPreference[] = editingPreferences.map((pref, index) => ({
       id: `pref-${index}`,
@@ -154,6 +167,18 @@ export default function MySkinPage() {
     sessionState.updatePreferences({ goals: editingPreferences });
 
     setShowPreferencesEdit(false);
+
+    // Sync to Supabase for authenticated users
+    if (profile?.id) {
+      const existingPrefs = (profile.preferences as Record<string, any>) || {};
+      const existingSurvey = existingPrefs.surveyAnswers || {};
+      await updateUserProfile(profile.id, {
+        preferences: {
+          ...existingPrefs,
+          surveyAnswers: { ...existingSurvey, preferences: editingPreferences },
+        },
+      });
+    }
   };
 
   const openPreferencesEdit = () => {
@@ -166,18 +191,43 @@ export default function MySkinPage() {
   useEffect(() => {
     sessionState.navigateTo('/my-skin');
     loadSurveyData();
-  }, []);
+  }, [profile]);
 
   const loadSurveyData = () => {
     try {
-      const savedSurvey = localStorage.getItem('skinSurveyData');
-      if (savedSurvey) {
-        const surveyData = JSON.parse(savedSurvey);
-        
-        // Map survey data to skin profile
-        const primarySkinType = surveyData.skinType?.[0] || 'Normal';
+      // Priority: Supabase profile > localStorage
+      let surveyData = null;
+
+      // Check for authenticated user with server data
+      if (profile?.preferences?.surveyAnswers) {
+        console.log('[DataSync] Loading survey data from Supabase profile');
+        surveyData = profile.preferences.surveyAnswers;
+      } else {
+        // Fallback to localStorage for guests
+        const savedSurvey = localStorage.getItem('skinSurveyData');
+        if (savedSurvey) {
+          console.log('[DataSync] Loading survey data from localStorage');
+          surveyData = JSON.parse(savedSurvey);
+        }
+      }
+
+      // Check if survey has meaningful data (at least skin type or concerns)
+      const hasValidSurveyData = surveyData && (
+        (surveyData.skinTypes && surveyData.skinTypes.length > 0) ||
+        (surveyData.skinType && surveyData.skinType.length > 0) ||
+        (surveyData.concerns && surveyData.concerns.length > 0) ||
+        profile?.skin_type
+      );
+
+      if (hasValidSurveyData) {
+        setHasSurveyData(true);
+
+        // Map survey data to skin profile (handle both skinType and skinTypes)
+        const primarySkinType = surveyData.skinTypes?.[0] || surveyData.skinType?.[0] || profile?.skin_type || 'Normal';
         const mappedConcerns = mapSurveyConcernsToConcerns(surveyData.concerns || []);
-        const mappedAllergens = (surveyData.allergens || []).map((allergen: string, index: number) => ({
+        // Get allergens from profile preferences or survey data
+        const allergenList = profile?.preferences?.allergens || surveyData.allergens || [];
+        const mappedAllergens = allergenList.map((allergen: string, index: number) => ({
           id: `allergen-${index}`,
           name: allergen,
           category: 'User Added'
@@ -211,10 +261,10 @@ export default function MySkinPage() {
           });
         }
 
-        // Extended profile data
+        // Extended profile data (also check profile.preferences for fitzpatrickType)
         setExtendedProfile({
           sexAtBirth: surveyData.sexAtBirth || '',
-          complexion: surveyData.complexion || '',
+          complexion: profile?.preferences?.fitzpatrickType || surveyData.complexion || '',
           acneType: surveyData.acneType || [],
           scarringType: surveyData.scarringType || [],
           environmentalExposure: Array.isArray(surveyData.environmentalExposure)
@@ -229,12 +279,12 @@ export default function MySkinPage() {
           sensitivities: surveyData.allergens || [],
         });
       } else {
-        // Load default mock data if no survey data
-        loadDefaultData();
+        // No valid survey data - show empty state
+        setHasSurveyData(false);
       }
     } catch (error) {
       console.error('Error loading survey data:', error);
-      loadDefaultData();
+      setHasSurveyData(false);
     }
   };
 
@@ -428,26 +478,6 @@ export default function MySkinPage() {
     return prefs;
   };
 
-  const basicProducts = [
-    {
-      id: '1',
-      name: 'Gentle Cleanser',
-      description: 'pH-balanced, non-stripping formula for daily cleansing',
-      icon: 'ri-bubble-chart-line',
-    },
-    {
-      id: '2',
-      name: 'Hydrating Moisturizer',
-      description: 'Locks in moisture and strengthens skin barrier',
-      icon: 'ri-drop-line',
-    },
-    {
-      id: '3',
-      name: 'Broad Spectrum SPF 30+',
-      description: 'Daily sun protection against UVA/UVB rays',
-      icon: 'ri-sun-line',
-    },
-  ];
 
   const handlePrioritize = (concern: SkinConcern, destination: 'products' | 'services') => {
     try {
@@ -577,10 +607,83 @@ export default function MySkinPage() {
     }));
   };
 
+  // Loading state
+  if (hasSurveyData === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-cream to-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-12 h-12 border-3 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-warm-gray text-sm">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state - no survey completed
+  if (hasSurveyData === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-cream to-white">
+        <main className="pt-24 pb-16">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center py-16">
+              {/* Icon */}
+              <div className="w-20 h-20 mx-auto mb-6 bg-primary/10 rounded-full flex items-center justify-center">
+                <i className="ri-user-heart-line text-4xl text-primary"></i>
+              </div>
+
+              {/* Title */}
+              <h1 className="font-serif text-3xl md:text-4xl font-bold text-deep mb-4">
+                Your Skin Profile
+              </h1>
+
+              {/* Description */}
+              <p className="text-warm-gray text-base mb-8 max-w-md mx-auto">
+                Complete your skin survey to unlock personalized recommendations,
+                track your concerns, and build a routine tailored to your unique skin.
+              </p>
+
+              {/* CTA */}
+              <button
+                onClick={() => navigate('/skin-survey')}
+                className="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-dark transition-colors cursor-pointer"
+              >
+                Start Survey
+              </button>
+
+              {/* Benefits */}
+              <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-6 text-left">
+                <div className="p-4 bg-white rounded-xl border border-blush">
+                  <div className="w-10 h-10 mb-3 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <i className="ri-focus-3-line text-xl text-primary"></i>
+                  </div>
+                  <h3 className="font-semibold text-deep text-sm mb-1">Identify Concerns</h3>
+                  <p className="text-xs text-warm-gray">Understand your skin's unique needs and challenges.</p>
+                </div>
+                <div className="p-4 bg-white rounded-xl border border-blush">
+                  <div className="w-10 h-10 mb-3 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <i className="ri-flask-line text-xl text-primary"></i>
+                  </div>
+                  <h3 className="font-semibold text-deep text-sm mb-1">Ingredient Matches</h3>
+                  <p className="text-xs text-warm-gray">Get recommended ingredients for your concerns.</p>
+                </div>
+                <div className="p-4 bg-white rounded-xl border border-blush">
+                  <div className="w-10 h-10 mb-3 bg-primary/10 rounded-lg flex items-center justify-center">
+                    <i className="ri-calendar-check-line text-xl text-primary"></i>
+                  </div>
+                  <h3 className="font-semibold text-deep text-sm mb-1">Build Routines</h3>
+                  <p className="text-xs text-warm-gray">AI-powered routines that evolve with your skin.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-white">
-      <Navbar />
-      
+
       <main className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header */}
@@ -616,7 +719,7 @@ export default function MySkinPage() {
                   </div>
                   <div className="text-left">
                     <h2 className="font-serif text-lg font-bold text-deep">Skin Basics</h2>
-                    <p className="text-xs text-warm-gray">Type, sensitivities & conditions</p>
+                    <p className="text-xs text-warm-gray">Type, allergens & conditions</p>
                   </div>
                 </div>
                 <i className={`ri-arrow-${expandedCategories.skinBasics ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
@@ -646,13 +749,6 @@ export default function MySkinPage() {
                         </div>
                       </div>
                     )}
-
-                    {/* Sensitivities Count */}
-                    <div className="p-3 bg-cream rounded-lg border border-blush">
-                      <p className="text-xs text-warm-gray mb-1">Sensitivities</p>
-                      <p className="text-sm font-semibold text-deep">{skinProfile.sensitivities.length || 0} tracked</p>
-                      <p className="text-xs text-deep/60 leading-relaxed mt-1">Ingredients or factors your skin reacts to, like fragrance or certain actives.</p>
-                    </div>
 
                     {/* Allergies */}
                     <div className="p-3 bg-primary-50/50 rounded-lg border border-blush">
@@ -720,16 +816,18 @@ export default function MySkinPage() {
                           onChange={(e) => setNewAllergen({ ...newAllergen, name: e.target.value })}
                           className="flex-1 px-3 py-2 text-sm border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20"
                         />
-                        <select
+                        <Dropdown
+                          id="allergen-category"
                           value={newAllergen.category}
-                          onChange={(e) => setNewAllergen({ ...newAllergen, category: e.target.value })}
-                          className="px-3 py-2 text-sm border border-blush rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-                        >
-                          <option value="Synthetic">Synthetic</option>
-                          <option value="Natural">Natural</option>
-                          <option value="Chemical">Chemical</option>
-                          <option value="Preservative">Preservative</option>
-                        </select>
+                          onChange={(value) => setNewAllergen({ ...newAllergen, category: value })}
+                          options={[
+                            { value: 'Synthetic', label: 'Synthetic' },
+                            { value: 'Natural', label: 'Natural' },
+                            { value: 'Chemical', label: 'Chemical' },
+                            { value: 'Preservative', label: 'Preservative' },
+                          ]}
+                          className="min-w-[140px]"
+                        />
                       </div>
                       <div className="flex gap-2">
                         <button onClick={handleAddAllergen} className="px-3 py-1.5 bg-primary text-white text-sm rounded-lg hover:bg-dark cursor-pointer">Add</button>
@@ -782,9 +880,13 @@ export default function MySkinPage() {
                                 ? concern.recommendedIngredients
                                 : concern.recommendedIngredients.slice(0, 3)
                               ).map((ing, idx) => (
-                                <span key={idx} className="px-2 py-0.5 bg-white text-deep text-xs rounded-full border border-primary/20">
+                                <Link
+                                  key={idx}
+                                  to={`/ingredients?id=${ing.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`}
+                                  className="px-2 py-0.5 bg-white text-deep text-xs rounded-full border border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-colors cursor-pointer"
+                                >
                                   {ing}
-                                </span>
+                                </Link>
                               ))}
                               {concern.recommendedIngredients.length > 3 && (
                                 <button
@@ -846,7 +948,9 @@ export default function MySkinPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <span
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
                       setEditingLifestyle({
@@ -859,74 +963,57 @@ export default function MySkinPage() {
                       });
                       setShowLifestyleCheckin(true);
                     }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); (e.target as HTMLElement).click(); } }}
                     className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer"
                   >
                     <i className="ri-edit-line mr-1"></i>Update
-                  </button>
+                  </span>
                   <i className={`ri-arrow-${expandedCategories.lifestyle ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
                 </div>
               </button>
 
               {expandedCategories.lifestyle && (
                 <div className="px-5 pb-5 border-t border-warm-gray/10">
-                  <div className="pt-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+                  <div className="pt-4 flex flex-wrap gap-x-6 gap-y-3">
                     {lifestyleFactors?.sleepPattern && (
-                      <div className="p-3 bg-primary-50/50 rounded-lg border border-blush">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-moon-line text-primary text-sm"></i>
-                          <p className="text-xs text-primary font-medium">Sleep</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.sleepPattern}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Sleep</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.sleepPattern.replace(/\s*hours?\s*/i, 'h')}</p>
                       </div>
                     )}
 
                     {lifestyleFactors?.stressLevel && (
-                      <div className="p-3 bg-cream/50 rounded-lg border border-blush">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-mental-health-line text-primary text-sm"></i>
-                          <p className="text-xs text-primary font-medium">Stress</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.stressLevel}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Stress</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.stressLevel.split(' - ')[0]}</p>
                       </div>
                     )}
 
                     {lifestyleFactors?.dietPattern && (
-                      <div className="p-3 bg-sage-50/50 rounded-lg border border-sage-200">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-restaurant-line text-sage text-sm"></i>
-                          <p className="text-xs text-sage font-medium">Diet</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.dietPattern}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Diet</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.dietPattern.split('/')[0]}</p>
                       </div>
                     )}
 
                     {lifestyleFactors?.waterIntake && (
-                      <div className="p-3 bg-sage-50/50 rounded-lg border border-sage-200">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-drop-line text-sage text-sm"></i>
-                          <p className="text-xs text-sage font-medium">Hydration</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.waterIntake}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Hydration</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.waterIntake.replace('glasses', 'glasses/day')}</p>
                       </div>
                     )}
 
                     {lifestyleFactors?.exerciseFrequency && (
-                      <div className="p-3 bg-primary-50/50 rounded-lg border border-blush">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-run-line text-primary text-sm"></i>
-                          <p className="text-xs text-primary font-medium">Exercise</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.exerciseFrequency}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Exercise</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.exerciseFrequency.replace('times per week', '×/week')}</p>
                       </div>
                     )}
 
                     {lifestyleFactors?.environmentalExposure && (
-                      <div className="p-3 bg-warm-gray-50/50 rounded-lg border border-warm-gray-200">
-                        <div className="flex items-center gap-2 mb-1">
-                          <i className="ri-cloud-line text-warm-gray text-sm"></i>
-                          <p className="text-xs text-warm-gray font-medium">Environment</p>
-                        </div>
-                        <p className="text-sm font-semibold text-deep truncate">{lifestyleFactors.environmentalExposure}</p>
+                      <div>
+                        <p className="text-[10px] font-medium uppercase tracking-wider text-warm-gray/60 mb-0.5">Environment</p>
+                        <p className="text-sm font-semibold text-deep">{lifestyleFactors.environmentalExposure}</p>
                       </div>
                     )}
                   </div>
@@ -964,7 +1051,7 @@ export default function MySkinPage() {
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <i className="ri-settings-3-line text-primary text-lg"></i>
+                    <i className="ri-shopping-bag-line text-primary text-lg"></i>
                   </div>
                   <div className="text-left">
                     <h2 className="font-serif text-lg font-bold text-deep">Product Preferences</h2>
@@ -972,15 +1059,18 @@ export default function MySkinPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
+                  <span
+                    role="button"
+                    tabIndex={0}
                     onClick={(e) => {
                       e.stopPropagation();
                       openPreferencesEdit();
                     }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); (e.target as HTMLElement).click(); } }}
                     className="px-3 py-1.5 bg-primary/10 text-primary rounded-lg text-xs font-medium hover:bg-primary/20 transition-colors cursor-pointer"
                   >
                     <i className="ri-edit-line mr-1"></i>Update
-                  </button>
+                  </span>
                   <i className={`ri-arrow-${expandedCategories.preferences ? 'up' : 'down'}-s-line text-warm-gray text-xl`}></i>
                 </div>
               </button>
@@ -989,30 +1079,17 @@ export default function MySkinPage() {
                 <div className="px-5 pb-5 border-t border-warm-gray/10">
                   <div className="pt-4">
                     {preferences.length > 0 ? (
-                      <div className="grid grid-cols-2 gap-3">
+                      <div className="flex flex-wrap gap-2">
                         {preferences.map((pref) => (
-                          <div key={pref.id} className="p-3 bg-primary-50/50 rounded-lg border border-blush">
-                            <p className="text-xs text-primary mb-1">{pref.category}</p>
-                            <p className="text-sm font-semibold text-deep">{pref.value}</p>
-                          </div>
+                          <span key={pref.id} className="px-3 py-1.5 bg-cream/50 rounded-full border border-blush text-sm text-deep font-medium">
+                            {pref.value}
+                          </span>
                         ))}
                       </div>
                     ) : (
                       <p className="text-sm text-warm-gray text-center py-4">No preferences set. Retake quiz to add.</p>
                     )}
 
-                    {/* Essential Products */}
-                    <div className="mt-4 pt-4 border-t border-warm-gray/10">
-                      <p className="text-xs font-medium text-warm-gray mb-3">Recommended essentials:</p>
-                      <div className="grid grid-cols-3 gap-2">
-                        {basicProducts.map((product) => (
-                          <div key={product.id} className="p-2 bg-cream/50 rounded-lg text-center">
-                            <i className={`${product.icon} text-lg text-primary mb-1`}></i>
-                            <p className="text-xs font-medium text-deep">{product.name}</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
@@ -1144,43 +1221,32 @@ export default function MySkinPage() {
       {/* Lifestyle Check-in Modal */}
       {showLifestyleCheckin && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-cream rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-cream rounded-2xl shadow-2xl max-w-xl w-full max-h-[90vh] overflow-y-auto">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-sage text-white p-6 rounded-t-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-blush">
+              <h3 className="font-serif text-lg font-bold text-deep">Lifestyle Check-in</h3>
               <button
                 onClick={() => setShowLifestyleCheckin(false)}
-                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-warm-gray/10 transition-colors cursor-pointer"
               >
-                <i className="ri-close-line text-2xl"></i>
+                <i className="ri-close-line text-xl text-warm-gray"></i>
               </button>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                  <i className="ri-heart-pulse-line text-2xl"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold">Lifestyle Check-in</h3>
-                  <p className="text-sm text-white/80">How are things going?</p>
-                </div>
-              </div>
             </div>
 
             {/* Content */}
-            <div className="p-6 space-y-6">
+            <div className="p-5 space-y-5">
               {Object.entries(lifestyleOptions).map(([key, { emoji, options }]) => (
-                <div key={key} className="space-y-3">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{emoji}</span>
-                    <h4 className="font-medium text-deep">{lifestyleLabels[key]}</h4>
-                  </div>
+                <div key={key}>
+                  <p className="text-xs font-medium text-warm-gray mb-2">{lifestyleLabels[key]}</p>
                   <div className="flex flex-wrap gap-2">
                     {options.map((option) => (
                       <button
                         key={option}
                         onClick={() => setEditingLifestyle(prev => ({ ...prev, [key]: option }))}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
+                        className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer ${
                           editingLifestyle[key as keyof typeof editingLifestyle] === option
-                            ? 'bg-sage text-white shadow-md scale-105'
-                            : 'bg-white text-warm-gray border border-blush hover:border-sage hover:text-sage'
+                            ? 'bg-primary text-white'
+                            : 'bg-white text-deep border border-blush hover:border-primary/40'
                         }`}
                       >
                         {option}
@@ -1192,20 +1258,19 @@ export default function MySkinPage() {
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-cream border-t border-blush p-4 rounded-b-2xl">
-              <div className="flex gap-3">
+            <div className="flex items-center justify-end p-5 border-t border-blush">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setShowLifestyleCheckin(false)}
-                  className="flex-1 px-6 py-3 bg-white text-warm-gray border border-blush rounded-xl font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-sm text-warm-gray hover:text-deep transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSaveLifestyle}
-                  className="flex-1 px-6 py-3 bg-sage text-white rounded-xl font-medium hover:bg-sage/90 transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="px-5 py-2 bg-primary text-white rounded-full text-sm font-medium hover:bg-dark transition-colors cursor-pointer"
                 >
-                  <i className="ri-check-line"></i>
-                  Save Changes
+                  Save
                 </button>
               </div>
             </div>
@@ -1216,57 +1281,35 @@ export default function MySkinPage() {
       {/* Product Preferences Edit Modal */}
       {showPreferencesEdit && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-cream rounded-2xl shadow-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+          <div className="bg-cream rounded-2xl shadow-2xl max-w-xl w-full">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-primary text-white p-6 rounded-t-2xl">
+            <div className="flex items-center justify-between p-5 border-b border-blush">
+              <h3 className="font-serif text-lg font-bold text-deep">Product Preferences</h3>
               <button
                 onClick={() => setShowPreferencesEdit(false)}
-                className="absolute top-4 right-4 text-white/80 hover:text-white transition-colors cursor-pointer"
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-warm-gray/10 transition-colors cursor-pointer"
               >
-                <i className="ri-close-line text-2xl"></i>
+                <i className="ri-close-line text-xl text-warm-gray"></i>
               </button>
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-                  <i className="ri-settings-3-line text-2xl"></i>
-                </div>
-                <div>
-                  <h3 className="text-xl font-serif font-bold">Product Preferences</h3>
-                  <p className="text-sm text-white/80">Select what matters to you</p>
-                </div>
-              </div>
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              <p className="text-sm text-warm-gray mb-4">
-                Choose the product qualities that are important to you. We'll use these to personalize your recommendations.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
+            <div className="p-5">
+              <div className="flex flex-wrap gap-2">
                 {preferenceOptions.map((option) => {
                   const isSelected = editingPreferences.includes(option.label);
                   return (
                     <button
                       key={option.id}
                       onClick={() => handleTogglePreference(option.label)}
-                      className={`p-4 rounded-xl text-left transition-all cursor-pointer flex items-start gap-3 ${
+                      className={`px-3.5 py-2 rounded-full text-sm font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
                         isSelected
-                          ? 'bg-primary text-white shadow-md ring-2 ring-primary ring-offset-2'
-                          : 'bg-white text-deep border border-blush hover:border-primary/30 hover:shadow-sm'
+                          ? 'bg-primary text-white'
+                          : 'bg-white text-deep border border-blush hover:border-primary/40'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        isSelected ? 'bg-white/20' : 'bg-primary/10'
-                      }`}>
-                        <i className={`${option.icon} text-lg ${isSelected ? 'text-white' : 'text-primary'}`}></i>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`font-medium text-sm ${isSelected ? 'text-white' : 'text-deep'}`}>
-                          {option.label}
-                        </p>
-                      </div>
-                      {isSelected && (
-                        <i className="ri-check-line text-lg text-white flex-shrink-0"></i>
-                      )}
+                      {isSelected && <i className="ri-check-line text-sm"></i>}
+                      {option.label}
                     </button>
                   );
                 })}
@@ -1274,33 +1317,32 @@ export default function MySkinPage() {
             </div>
 
             {/* Footer */}
-            <div className="sticky bottom-0 bg-cream border-t border-blush p-4 rounded-b-2xl">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm text-warm-gray">
-                  {editingPreferences.length} preference{editingPreferences.length !== 1 ? 's' : ''} selected
+            <div className="flex items-center justify-between p-5 border-t border-blush">
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-warm-gray">
+                  {editingPreferences.length} selected
                 </span>
                 {editingPreferences.length > 0 && (
                   <button
                     onClick={() => setEditingPreferences([])}
                     className="text-xs text-primary hover:underline cursor-pointer"
                   >
-                    Clear all
+                    Clear
                   </button>
                 )}
               </div>
-              <div className="flex gap-3">
+              <div className="flex gap-2">
                 <button
                   onClick={() => setShowPreferencesEdit(false)}
-                  className="flex-1 px-6 py-3 bg-white text-warm-gray border border-blush rounded-xl font-medium hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="px-4 py-2 text-sm text-warm-gray hover:text-deep transition-colors cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSavePreferences}
-                  className="flex-1 px-6 py-3 bg-primary text-white rounded-xl font-medium hover:bg-dark transition-colors cursor-pointer flex items-center justify-center gap-2"
+                  className="px-5 py-2 bg-primary text-white rounded-full text-sm font-medium hover:bg-dark transition-colors cursor-pointer"
                 >
-                  <i className="ri-check-line"></i>
-                  Save Preferences
+                  Save
                 </button>
               </div>
             </div>
@@ -1308,7 +1350,6 @@ export default function MySkinPage() {
         </div>
       )}
 
-      <Footer />
     </div>
   );
 }

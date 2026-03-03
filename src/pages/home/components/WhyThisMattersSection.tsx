@@ -50,7 +50,7 @@ const painPoints = [
   {
     icon: 'ri-tools-line',
     title: 'Missing tools',
-    description: "You've been doing your best — you just haven't had the right guidance yet.",
+    description: "You've been doing your best. You just haven't had the right guidance yet.",
   },
 ];
 
@@ -156,7 +156,7 @@ export default function WhyThisMattersSection() {
         </motion.span>
 
         <motion.h2 className="lc-why-title" variants={itemVariants}>
-          Understanding your skin shouldn't feel impossible — but the industry made it that way.
+          Understanding your skin shouldn't feel impossible, but the industry made it that way.
         </motion.h2>
 
         <motion.div className="lc-pain-grid" variants={sectionVariants}>

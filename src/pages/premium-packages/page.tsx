@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const PremiumPackagesPage = () => {
   const [selectedSkinType, setSelectedSkinType] = useState('all');
@@ -157,7 +155,6 @@ const PremiumPackagesPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24">
         {/* Hero Section */}
@@ -406,7 +403,6 @@ const PremiumPackagesPage = () => {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 };

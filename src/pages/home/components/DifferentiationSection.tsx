@@ -58,13 +58,36 @@ const quoteVariants = {
 
 // EDIT 4: Enhanced Lorem Curae description with all requested elements
 const competitors = [
-  { name: "Sephora & Ulta", issue: "Inventory first, fit second. Product suggestions aren't personalized and don't adapt to your skin type, concerns, or progress, leaving you to guess what works for you.", isUs: false },
-  { name: 'Amazon', issue: 'Counterfeit risk. Zero personalization. Review manipulation.', isUs: false },
-  { name: 'Google', issue: 'SEO-gamed results. Sponsored content disguised as advice.', isUs: false },
-  { name: 'INCIdecoder', issue: 'Great for data, but no personalization or guidance.', isUs: false },
+  { name: "Sephora & Ulta", issue: '', bullets: [
+    'Inventory first, fit second',
+    "Product suggestions aren't personalized",
+    "Doesn't adapt to your skin type, concerns, or progress",
+    'Leaves you to guess what works for you',
+  ], isUs: false },
+  { name: 'Amazon', issue: '', bullets: [
+    'Counterfeit risk',
+    'Zero personalization',
+    'Review manipulation',
+  ], isUs: false },
+  { name: 'Google', issue: '', bullets: [
+    'SEO-gamed results',
+    'Sponsored content disguised as advice',
+  ], isUs: false },
+  { name: 'INCIdecoder', issue: '', bullets: [
+    'Great for data, but no personalization or guidance',
+  ], isUs: false },
   {
     name: 'Lorem Curae',
-    issue: 'Personalized recommendations, community-reviewed retailers, product and retailer comparison tools, verified marketplace products, science-backed guidance, and a supportive community with a personal AI skincare assistant that walks the journey with you.',
+    issue: '',
+    bullets: [
+      'Personalized recommendations',
+      'Community-reviewed retailers',
+      'Product and retailer comparison tools',
+      'Science-backed guidance',
+      'A supportive community',
+      'A personal AI skincare assistant that walks the journey with you',
+      'Verified marketplace products (coming soon)',
+    ],
     isUs: true
   },
 ];
@@ -255,7 +278,18 @@ export default function DifferentiationSection() {
                 </motion.span>
                 <div>
                   <strong>{competitor.name}:</strong>{' '}
-                  <span>{competitor.issue}</span>
+                  {competitor.bullets ? (
+                    <ul style={{ margin: '0.5rem 0 0', padding: '0 0 0 1rem', listStyle: 'none' }}>
+                      {competitor.bullets.map((bullet, i) => (
+                        <li key={i} style={{ marginBottom: '0.25rem', display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
+                          <span style={{ color: competitor.isUs ? '#E8A888' : 'rgba(255, 255, 255, 0.3)', fontSize: '0.7rem', flexShrink: 0 }}>●</span>
+                          <span style={{ color: 'rgba(255, 255, 255, 0.6)' }}>{bullet}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span>{competitor.issue}</span>
+                  )}
                 </div>
               </motion.li>
             ))}

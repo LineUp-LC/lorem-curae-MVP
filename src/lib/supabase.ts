@@ -36,9 +36,11 @@ export interface UserProfile {
   id: string;
   email: string;
   full_name: string | null;
+  avatar_url: string | null;
   subscription_tier: string | null;
   skin_type: string | null;
   concerns: string[];
+  survey_completed: boolean;
   preferences: Record<string, any>;
   lifestyle: Record<string, any>;
   created_at: string;
@@ -136,6 +138,14 @@ export async function createUserProfile(authUser: User): Promise<boolean> {
   const tempSkinType = getEffectiveSkinType();
   const tempConcerns = getEffectiveConcerns();
 
+  // Include guest location if available
+  const guestLocation = (() => {
+    try {
+      const saved = localStorage.getItem('user_location')
+      return saved ? JSON.parse(saved) : null
+    } catch { return null }
+  })()
+
   const { error } = await supabase.from('users_profiles').insert({
     id: userId,
     email: authUser.email,
@@ -144,8 +154,9 @@ export async function createUserProfile(authUser: User): Promise<boolean> {
 
     skin_type: tempSkinType || null,
     concerns: tempConcerns.length > 0 ? tempConcerns : [],
+    survey_completed: false,
 
-    preferences: {},
+    preferences: guestLocation ? { location: guestLocation } : {},
     lifestyle: {},
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),

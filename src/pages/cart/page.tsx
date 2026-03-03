@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { useCartItems } from '../../lib/utils/cartState';
 
 const CartPage = () => {
@@ -17,7 +15,6 @@ const CartPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
-      <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         <div className="mb-8">
@@ -119,7 +116,6 @@ const CartPage = () => {
         )}
       </main>
 
-      <Footer />
     </div>
   );
 };

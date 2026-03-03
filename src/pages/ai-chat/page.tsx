@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
+import Dropdown from '../../components/ui/Dropdown';
 import { sessionState } from '../../lib/utils/sessionState';
 import { adaptiveAI } from '../../lib/utils/adaptiveAI';
 import { Link } from 'react-router-dom';
@@ -722,7 +721,7 @@ const AIChatPage = () => {
   // User interaction history for personalized reasoning
   const [userInteractionHistory, setUserInteractionHistory] = useState<UserInteractionHistory>({
     viewedProducts: [],
-    favoritedProducts: [],
+    savedProducts: [],
     purchasedProducts: [],
     frequentCategories: [],
     frequentConcerns: [],
@@ -844,15 +843,15 @@ const AIChatPage = () => {
 
   // Personalize welcome message when user history loads (only if on initial message)
   useEffect(() => {
-    const hasHistory = userInteractionHistory.favoritedProducts.length > 0 ||
+    const hasHistory = userInteractionHistory.savedProducts.length > 0 ||
                        userInteractionHistory.viewedProducts.length > 0;
 
     // Only update if we're on the initial welcome message and have history
     if (hasHistory && messages.length === 1 && messages[0].id === 1 && messages[0].sender === 'ai') {
       let welcomeContent = 'Hello! I\'m Curae AI, your personalized skincare assistant.';
 
-      if (userInteractionHistory.favoritedProducts.length > 0) {
-        const recentSaved = userInteractionHistory.favoritedProducts[0];
+      if (userInteractionHistory.savedProducts.length > 0) {
+        const recentSaved = userInteractionHistory.savedProducts[0];
         welcomeContent += ` I noticed you've been exploring ${recentSaved.category}s — I can help you find more options that match your profile.`;
       } else if (userInteractionHistory.frequentCategories.length > 0) {
         welcomeContent += ` Based on your browsing, I can help you discover more ${userInteractionHistory.frequentCategories[0]}s or explore other categories.`;
@@ -901,12 +900,12 @@ const AIChatPage = () => {
   };
 
   const loadUserInteractionHistory = () => {
-    // Gather client context from localStorage (favorites, recently viewed, etc.)
+    // Gather client context from localStorage (saved products, recently viewed, etc.)
     const clientContext = getClientContext();
 
     setUserInteractionHistory({
       viewedProducts: clientContext.viewedProducts || [],
-      favoritedProducts: clientContext.favoritedProducts || [],
+      savedProducts: clientContext.savedProducts || [],
       purchasedProducts: [], // Will be fetched from DB if authenticated
       frequentCategories: clientContext.frequentCategories || [],
       frequentConcerns: userProfile.concerns || [],
@@ -915,7 +914,7 @@ const AIChatPage = () => {
 
     console.log('[AI Chat] User interaction history loaded:', {
       viewed: clientContext.viewedProducts?.length || 0,
-      favorited: clientContext.favoritedProducts?.length || 0,
+      saved: clientContext.savedProducts?.length || 0,
       categories: clientContext.frequentCategories?.length || 0,
     });
   };
@@ -1125,12 +1124,12 @@ const AIChatPage = () => {
     let welcomeContent = 'Hello! I\'m Curae AI, your personalized skincare assistant.';
 
     const history = userInteractionHistory;
-    const hasHistory = history.favoritedProducts.length > 0 || history.viewedProducts.length > 0;
+    const hasHistory = history.savedProducts.length > 0 || history.viewedProducts.length > 0;
 
     if (hasHistory) {
       // Personalize based on what we know about the user
-      if (history.favoritedProducts.length > 0) {
-        const recentSaved = history.favoritedProducts[0];
+      if (history.savedProducts.length > 0) {
+        const recentSaved = history.savedProducts[0];
         welcomeContent += ` I noticed you've been exploring ${recentSaved.category}s — I can help you find more options that match your profile.`;
       } else if (history.frequentCategories.length > 0) {
         welcomeContent += ` Based on your browsing, I can help you discover more ${history.frequentCategories[0]}s or explore other categories.`;
@@ -1177,7 +1176,7 @@ const AIChatPage = () => {
     if (category) {
       // Check if user has viewed/saved products in this category
       const viewedInCategory = history.viewedProducts.filter(p => p.category === category);
-      const savedInCategory = history.favoritedProducts.filter(p => p.category === category);
+      const savedInCategory = history.savedProducts.filter(p => p.category === category);
 
       if (savedInCategory.length > 0) {
         return ` and the ${category}s you've saved`;
@@ -1187,8 +1186,8 @@ const AIChatPage = () => {
     }
 
     // Check for general patterns
-    if (history.favoritedProducts.length > 0) {
-      const categories = [...new Set(history.favoritedProducts.map(p => p.category))];
+    if (history.savedProducts.length > 0) {
+      const categories = [...new Set(history.savedProducts.map(p => p.category))];
       if (categories.length === 1) {
         return ` and your interest in ${categories[0]}s`;
       }
@@ -1513,7 +1512,6 @@ const AIChatPage = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-white">
-      <Navbar />
       
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-[calc(100vh-200px)]">
@@ -1595,7 +1593,7 @@ const AIChatPage = () => {
                 <h2 className="text-lg font-semibold text-deep">Curae AI</h2>
               </div>
               <Link
-                to="/routines?tab=notes&openAssessment=true&fromAiChat=true"
+                to="/routines-list"
                 className="px-4 py-2 bg-cream text-warm-gray rounded-lg text-sm font-medium hover:bg-blush transition-colors"
               >
                 <i className="ri-line-chart-line mr-1"></i>
@@ -1836,44 +1834,47 @@ const AIChatPage = () => {
               {/* Tone */}
               <div>
                 <label className="block text-sm font-medium text-warm-gray mb-2">Response Tone</label>
-                <select
+                <Dropdown
+                  id="ai-tone"
                   value={aiSettings.tone}
-                  onChange={(e) => setAiSettings({ ...aiSettings, tone: e.target.value })}
-                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                >
-                  <option value="friendly">Friendly & Casual</option>
-                  <option value="professional">Professional & Formal</option>
-                  <option value="encouraging">Encouraging & Supportive</option>
-                  <option value="direct">Direct & Concise</option>
-                </select>
+                  onChange={(value) => setAiSettings({ ...aiSettings, tone: value })}
+                  options={[
+                    { value: 'friendly', label: 'Friendly & Casual' },
+                    { value: 'professional', label: 'Professional & Formal' },
+                    { value: 'encouraging', label: 'Encouraging & Supportive' },
+                    { value: 'direct', label: 'Direct & Concise' },
+                  ]}
+                />
               </div>
 
               {/* Detail Level */}
               <div>
                 <label className="block text-sm font-medium text-warm-gray mb-2">Detail Level</label>
-                <select
+                <Dropdown
+                  id="ai-detail-level"
                   value={aiSettings.detailLevel}
-                  onChange={(e) => setAiSettings({ ...aiSettings, detailLevel: e.target.value })}
-                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                >
-                  <option value="brief">Brief - Quick answers</option>
-                  <option value="balanced">Balanced - Standard detail</option>
-                  <option value="detailed">Detailed - In-depth explanations</option>
-                </select>
+                  onChange={(value) => setAiSettings({ ...aiSettings, detailLevel: value })}
+                  options={[
+                    { value: 'brief', label: 'Brief - Quick answers' },
+                    { value: 'balanced', label: 'Balanced - Standard detail' },
+                    { value: 'detailed', label: 'Detailed - In-depth explanations' },
+                  ]}
+                />
               </div>
 
               {/* Response Style */}
               <div>
                 <label className="block text-sm font-medium text-warm-gray mb-2">Response Style</label>
-                <select
+                <Dropdown
+                  id="ai-response-style"
                   value={aiSettings.responseStyle}
-                  onChange={(e) => setAiSettings({ ...aiSettings, responseStyle: e.target.value })}
-                  className="w-full px-4 py-3 border border-blush rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer"
-                >
-                  <option value="conversational">Conversational</option>
-                  <option value="structured">Structured (with bullet points)</option>
-                  <option value="educational">Educational (with explanations)</option>
-                </select>
+                  onChange={(value) => setAiSettings({ ...aiSettings, responseStyle: value })}
+                  options={[
+                    { value: 'conversational', label: 'Conversational' },
+                    { value: 'structured', label: 'Structured (with bullet points)' },
+                    { value: 'educational', label: 'Educational (with explanations)' },
+                  ]}
+                />
               </div>
 
               {/* Custom Instructions */}
@@ -1922,7 +1923,6 @@ const AIChatPage = () => {
         </div>
       )}
 
-      <Footer />
     </div>
   );
 };

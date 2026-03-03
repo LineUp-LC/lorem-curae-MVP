@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 import { supabase } from '../../../lib/supabase-browser';
 
 const StorefrontRegisterPage = () => {
@@ -167,7 +165,6 @@ const StorefrontRegisterPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="max-w-5xl mx-auto px-6 lg:px-12 py-24">
         <div className="mb-12">
@@ -684,7 +681,6 @@ const StorefrontRegisterPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

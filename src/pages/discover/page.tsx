@@ -1,8 +1,6 @@
 import { useEffect, useState } from 'react';
 import ProductCatalog from './components/ProductCatalog';
 import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { sessionState, getEffectiveConcerns } from '../../lib/utils/sessionState';
 import type { Product } from '../../types/product';
 import { normalizeUserConcern } from '../../lib/utils/matching';
@@ -46,6 +44,11 @@ const DiscoverPage = () => {
     }
   }, []);
 
+  // Persist comparison selections to localStorage
+  useEffect(() => {
+    localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
+  }, [selectedProducts]);
+
   useEffect(() => {
     const effectiveConcerns = getEffectiveConcerns();
     
@@ -77,7 +80,6 @@ const DiscoverPage = () => {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <ProductCatalog
@@ -92,17 +94,16 @@ const DiscoverPage = () => {
         />
       </main>
 
-      {showComparison && selectedProducts.length >= 2 && (
+      {showComparison && (
         <ComparisonPickerModal
           isOpen={showComparison}
           onClose={handleCloseComparison}
-          preSelectedProducts={selectedProducts}
+          preSelectedProducts={selectedProducts.length > 0 ? selectedProducts : undefined}
           userConcerns={normalizedConcerns}
-          showSelectionView={false}
+          showSelectionView={true}
         />
       )}
 
-      <Footer />
     </div>
   );
 };

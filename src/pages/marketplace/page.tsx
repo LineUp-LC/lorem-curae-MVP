@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { useState, useEffect, useMemo } from 'react';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
 import { supabase } from '../../lib/supabase-browser';
+import AIInsightBlock from '../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../lib/ai/surfaceContext';
 
 const MarketplacePage = () => {
   const [currentTier, setCurrentTier] = useState('free');
@@ -252,9 +252,42 @@ const MarketplacePage = () => {
 
   const discountBadge = getDiscountBadge();
 
+  const marketplaceAIContext = useMemo(() => {
+    if (loading || products.length === 0) return null;
+    // Map Supabase products to the Product shape expected by the context builder
+    const mappedProducts = products.slice(0, 8).map(p => ({
+      id: p.id,
+      name: p.name,
+      brand: p.marketplace_storefronts?.business_name || '',
+      price: p.price,
+      image: p.image_url || '',
+      category: p.category || 'skincare',
+      description: p.description || '',
+      keyIngredients: p.key_ingredients || [],
+      concerns: p.concerns || p.target_concerns || [],
+      skinTypes: p.skin_types || [],
+      rating: p.rating || 0,
+      reviewCount: p.review_count || 0,
+      inStock: p.in_stock ?? true,
+      preferences: p.preferences || {},
+    }));
+    // Map storefronts to lightweight retailer shape
+    const retailers = storefronts.map(s => ({
+      id: s.id,
+      name: s.name,
+      trustScore: s.rating ? s.rating * 20 : undefined,
+    }));
+    return buildAIContext('marketplace', {
+      page: {
+        mode: 'marketplace',
+        products: mappedProducts as any,
+        retailers,
+      },
+    });
+  }, [loading, products, storefronts]);
+
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24">
         {/* Hero Section - Clean style matching Ingredients page */}
@@ -287,6 +320,15 @@ const MarketplacePage = () => {
             </div>
           </div>
         </section>
+
+        {/* AI Marketplace Insight */}
+        {marketplaceAIContext && (
+          <section className="px-6 lg:px-12 pb-8">
+            <div className="max-w-7xl mx-auto">
+              <AIInsightBlock context={marketplaceAIContext} compact />
+            </div>
+          </section>
+        )}
 
         {/* Featured Products */}
         {products.length > 0 && (
@@ -653,7 +695,6 @@ const MarketplacePage = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

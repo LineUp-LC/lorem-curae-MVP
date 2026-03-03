@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase-browser';
 
 interface AffiliatePartner {
@@ -139,7 +137,6 @@ export default function AffiliateDashboardPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -470,7 +467,6 @@ export default function AffiliateDashboardPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

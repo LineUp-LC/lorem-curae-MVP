@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { matchesConcern, matchesIngredient } from '../../../lib/utils/matching';
+import ConcentrationRow from '../../../components/ui/ConcentrationRow';
+import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
+import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
 import {
   calculatePPML,
   formatPPML,
@@ -53,7 +56,7 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
   }, [show, buttonRef]);
 
   const tooltipContent = show && createPortal(
-    <div 
+    <div
       className="fixed px-3 py-2 bg-deep-800 text-white text-xs rounded-lg shadow-lg w-48 text-center whitespace-normal pointer-events-none"
       style={{
         top: position.top,
@@ -63,7 +66,7 @@ function Tooltip({ text, children }: { text: string; children: React.ReactNode }
       }}
     >
       {text}
-      <div 
+      <div
         className="absolute border-4 border-transparent border-t-deep-800"
         style={{
           top: '100%',
@@ -165,46 +168,20 @@ export default function ProductComparison({
     return stars;
   };
 
-  // Render concentration row for an ingredient
-  const renderConcentrationRow = (ingredient: ActiveIngredient, productId: number) => {
-    const isHighest = hasHighestConcentration(productId, ingredient.name, comparisonMetrics);
-    const concentrationText = formatConcentration(ingredient);
-    const hasKnownConcentration = typeof ingredient.concentration === 'number';
-
-    return (
-      <div
-        key={ingredient.name}
-        className={`flex items-center justify-between py-1 ${
-          isHighest && hasKnownConcentration ? 'text-sage-700 font-medium' : 'text-gray-600'
-        }`}
-      >
-        <span className="text-xs">{ingredient.name}</span>
-        <span className={`text-xs flex items-center gap-1 ${
-          !hasKnownConcentration ? 'text-gray-400 italic' : ''
-        }`}>
-          {concentrationText}
-          {isHighest && hasKnownConcentration && (
-            <i className="ri-trophy-line text-amber-500" title="Highest concentration"></i>
-          )}
-        </span>
-      </div>
-    );
-  };
-
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4 md:p-6 motion-safe:animate-fade-in"
       onClick={onClose}
     >
-      <div 
+      <div
         className="bg-white rounded-2xl sm:rounded-3xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col motion-safe:animate-scale-in"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 px-4 sm:px-6 md:px-8 py-4 sm:py-6 flex items-center justify-between rounded-t-2xl sm:rounded-t-3xl z-10 shadow-sm">
           <div className="flex items-center space-x-2 sm:space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-sage-100 rounded-full">
-              <i className="ri-scales-3-line text-xl sm:text-2xl text-sage-600"></i>
+            <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center bg-primary/10 rounded-full">
+              <i className="ri-scales-3-line text-xl sm:text-2xl text-primary"></i>
             </div>
             <div>
               <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-deep-900">Product Comparison</h2>
@@ -239,7 +216,7 @@ export default function ProductComparison({
                 product.reviewCount === highlights.mostReviews && safeProducts.length > 1;
               const hasLeastReviews =
                 product.reviewCount === highlights.leastReviews && safeProducts.length > 1;
-              
+
               // PPML calculations
               const ppml = calculatePPML(product);
               const ppmlFormatted = formatPPML(ppml);
@@ -282,6 +259,13 @@ export default function ProductComparison({
                     >
                       <i className="ri-close-line text-lg"></i>
                     </button>
+
+                    {/* Category Label */}
+                    <div className="absolute bottom-4 left-4">
+                      <span className="px-2.5 py-1 text-xs font-medium bg-white/90 text-deep-900 rounded-full capitalize shadow-sm">
+                        {product.category}
+                      </span>
+                    </div>
                   </div>
 
                   {/* Product Info */}
@@ -289,7 +273,7 @@ export default function ProductComparison({
                     {/* Brand & Name */}
                     <div>
                       {product.brand && (
-                        <p className="text-xs font-semibold text-sage-600 uppercase tracking-wide mb-1">
+                        <p className="text-xs font-semibold text-taupe uppercase tracking-wide mb-1">
                           {product.brand}
                         </p>
                       )}
@@ -298,91 +282,180 @@ export default function ProductComparison({
                       </h3>
                     </div>
 
-                    {/* Rating */}
-                    <div
-                      className={`p-2 sm:p-3 rounded-xl transition-all ${
-                        isHighestRating
-                          ? 'bg-sage-100 ring-2 ring-sage-500'
-                          : isLowestRating
-                            ? 'bg-orange-50 ring-2 ring-orange-400'
-                            : 'bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-gray-700">Rating</p>
-                        {isHighestRating && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
-                            Highest
-                          </span>
-                        )}
-                        {isLowestRating && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">
-                            Lowest
-                          </span>
+                    {/* Addresses (Concerns) */}
+                    <div className="bg-white p-2 sm:p-3 rounded-xl">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
+                      <div className="flex flex-wrap gap-1">
+                        {product.concerns.length > 0 ? (
+                          product.concerns.slice(0, 3).map((concern, idx) => {
+                            const isMatch = matchesConcern(concern, safeUserConcerns);
+
+                            return (
+                              <span
+                                key={idx}
+                                className={
+                                  isMatch
+                                    ? 'px-2 py-1 bg-light/30 text-primary-700 text-xs rounded-full capitalize font-medium border border-primary-300'
+                                    : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize'
+                                }
+                              >
+                                {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                {concern}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">Not specified</span>
                         )}
                       </div>
-                      {product.rating > 0 ? (
-                        <div className="flex items-center space-x-2">
-                          <div className="flex items-center space-x-0.5 sm:space-x-1 text-sm">
-                            {renderStars(product.rating)}
-                          </div>
-                          <span className="text-sm font-medium text-gray-700">
-                            {product.rating}
-                          </span>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-400 italic">{getMissingDataText('rating')}</p>
-                      )}
                     </div>
 
-                    {/* Review Count */}
-                    <div
-                      className={`p-2 sm:p-3 rounded-xl transition-all ${
-                        hasMostReviews
-                          ? 'bg-sage-100 ring-2 ring-sage-500'
-                          : hasLeastReviews
-                            ? 'bg-orange-50 ring-2 ring-orange-400'
-                            : 'bg-white'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-gray-700">Reviews</p>
-                        {hasMostReviews && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
-                            Most
-                          </span>
-                        )}
-                        {hasLeastReviews && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">
-                            Least
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-base sm:text-lg font-bold text-deep-900">
-                        {product.reviewCount > 0 ? product.reviewCount.toLocaleString() : getMissingDataText('rating')}
+                    {/* Key Ingredients */}
+                    <div className="bg-white p-2 sm:p-3 rounded-xl">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">
+                        Key Ingredients:
                       </p>
+                      <div className="flex flex-wrap gap-1">
+                        {product.keyIngredients.length > 0 ? (
+                          product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
+                            const isRecommended = matchesIngredient(ingredient, safeUserConcerns);
+
+                            return (
+                              <span
+                                key={idx}
+                                className={
+                                  isRecommended
+                                    ? 'px-2 py-1 bg-light/30 text-primary-700 text-xs rounded-full font-medium border border-primary-300'
+                                    : 'px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full'
+                                }
+                              >
+                                {isRecommended && <i className="ri-check-line mr-0.5"></i>}
+                                {ingredient}
+                              </span>
+                            );
+                          })
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">{getMissingDataText('ingredients')}</span>
+                        )}
+                      </div>
                     </div>
 
-                    {/* SECTION 2: Price & Value */}
+                    {/* Preferences */}
+                    {product.preferences && Object.values(product.preferences).some(v => v === true) && (
+                      <div className="bg-white p-2 sm:p-3 rounded-xl">
+                        <p className="text-xs font-semibold text-gray-700 mb-2">Preferences:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {(() => {
+                            const userPrefs = getEffectivePreferences();
+                            const prefLabels: Record<string, string> = {
+                              chemicalFree: 'Chemical-Free',
+                              vegan: 'Vegan',
+                              plantBased: 'Plant-Based',
+                              fragranceFree: 'Fragrance-Free',
+                              glutenFree: 'Gluten-Free',
+                              alcoholFree: 'Alcohol-Free',
+                              siliconeFree: 'Silicone-Free',
+                              crueltyFree: 'Cruelty-Free',
+                            };
+
+                            const productPrefs = product.preferences || {};
+
+                            // Only show preferences that the product has
+                            return Object.entries(productPrefs)
+                              .filter(([_, value]) => value === true)
+                              .map(([key]) => {
+                                const isMatching = userPrefs[key] === true;
+                                return (
+                                  <span
+                                    key={key}
+                                    className={
+                                      isMatching
+                                        ? 'px-2 py-1 bg-light/30 text-primary-700 text-xs rounded-full font-medium border border-primary-300'
+                                        : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full'
+                                    }
+                                  >
+                                    {isMatching && <i className="ri-check-line mr-0.5"></i>}
+                                    {prefLabels[key] || key}
+                                  </span>
+                                );
+                              });
+                          })()}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Skin Types */}
+                    {(() => {
+                      const normalized = normalizeSkinTypes(product.skinTypes);
+                      const userSkinType = getEffectiveSkinType();
+                      return normalized.length > 0 && (
+                        <div className="bg-white p-2 sm:p-3 rounded-xl">
+                          <p className="text-xs font-semibold text-gray-700 mb-2">Skin Types:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {normalized.map((type, idx) => {
+                              const isMatch = isSkinTypeMatch(type, userSkinType);
+                              return (
+                                <span
+                                  key={idx}
+                                  className={`px-2 py-1 text-xs rounded-full capitalize border ${
+                                    isMatch
+                                      ? 'bg-light/30 text-primary-700 font-medium border border-primary-300'
+                                      : 'bg-gray-100 text-gray-600 border-gray-200'
+                                  }`}
+                                >
+                                  {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                  {type}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* Active Concentrations */}
+                    {hasActiveIngredients(product) && (
+                      <div className="bg-white p-2 sm:p-3 rounded-xl">
+                        <div className="flex items-center mb-2">
+                          <p className="text-xs font-semibold text-gray-700">
+                            Active Concentrations
+                          </p>
+                          <Tooltip text="Higher concentration is not always better — depends on formulation and your skin's tolerance">
+                            <span></span>
+                          </Tooltip>
+                        </div>
+                        <div className="divide-y divide-gray-100">
+                          {product.activeIngredients!.slice(0, 4).map((ingredient) => (
+                            <ConcentrationRow
+                              key={ingredient.name}
+                              name={ingredient.name}
+                              concentration={formatConcentration(ingredient)}
+                              isHighest={hasHighestConcentration(product.id, ingredient.name, comparisonMetrics)}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Price */}
                     <div
                       className={`p-2 sm:p-3 rounded-xl transition-all ${
                         isLowestPrice
-                          ? 'bg-sage-100 ring-2 ring-sage-500'
+                          ? 'bg-light/30 ring-2 ring-primary-300'
                           : isHighestPrice
-                            ? 'bg-orange-50 ring-2 ring-orange-400'
+                            ? 'bg-orange-50 ring-2 ring-orange-300'
                             : 'bg-white'
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
                         <p className="text-xs font-semibold text-gray-700">Price</p>
                         {isLowestPrice && (
-                          <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold">
+                          <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold">
                             Best
                           </span>
                         )}
                         {isHighestPrice && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">
+                          <span className="px-2 py-0.5 bg-warm-gray text-white text-xs rounded-full font-semibold">
                             High
                           </span>
                         )}
@@ -403,14 +476,14 @@ export default function ProductComparison({
                       )}
                     </div>
 
-                    {/* Value Score (PPML) - Only show if we have valid data */}
+                    {/* Value Score (PPML) */}
                     {hasPPMLData(product) && (
                       <div
                         className={`p-2 sm:p-3 rounded-xl transition-all ${
                           productIsBestValue
-                            ? 'bg-sage-100 ring-2 ring-sage-500'
+                            ? 'bg-light/30 ring-2 ring-primary-300'
                             : productIsWorstValue
-                              ? 'bg-orange-50 ring-2 ring-orange-400'
+                              ? 'bg-orange-50 ring-2 ring-orange-300'
                               : 'bg-white'
                         }`}
                       >
@@ -422,13 +495,13 @@ export default function ProductComparison({
                             </Tooltip>
                           </div>
                           {productIsBestValue && (
-                            <span className="px-2 py-0.5 bg-sage-600 text-white text-xs rounded-full font-semibold flex items-center gap-1">
+                            <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold flex items-center gap-1">
                               <i className="ri-award-line"></i>
                               Best Value
                             </span>
                           )}
                           {productIsWorstValue && (
-                            <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">
+                            <span className="px-2 py-0.5 bg-warm-gray text-white text-xs rounded-full font-semibold">
                               Priciest
                             </span>
                           )}
@@ -448,139 +521,70 @@ export default function ProductComparison({
                       </div>
                     )}
 
-                    {/* SECTION 3: Active Ingredient Concentrations */}
-                    {hasActiveIngredients(product) && (
-                      <div className="bg-white p-2 sm:p-3 rounded-xl">
-                        <div className="flex items-center mb-2">
-                          <p className="text-xs font-semibold text-gray-700">
-                            Active Concentrations
-                          </p>
-                          <Tooltip text="Higher concentration is not always better — depends on formulation and your skin's tolerance">
-                            <span></span>
-                          </Tooltip>
-                        </div>
-                        <div className="divide-y divide-gray-100">
-                          {product.activeIngredients!.slice(0, 4).map((ingredient) => 
-                            renderConcentrationRow(ingredient, product.id)
-                          )}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* SECTION 4: Concerns (Addresses) */}
-                    <div className="bg-white p-2 sm:p-3 rounded-xl">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {product.concerns.length > 0 ? (
-                          product.concerns.slice(0, 3).map((concern, idx) => {
-                            const isMatch = matchesConcern(concern, safeUserConcerns);
-
-                            return (
-                              <span
-                                key={idx}
-                                className={
-                                  isMatch
-                                    ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full capitalize font-medium'
-                                    : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize'
-                                }
-                              >
-                                {concern}
-                              </span>
-                            );
-                          })
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">Not specified</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* SECTION 5: Key Ingredients */}
-                    <div className="bg-white p-2 sm:p-3 rounded-xl">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">
-                        Key Ingredients:
-                      </p>
-                      <div className="flex flex-wrap gap-1">
-                        {product.keyIngredients.length > 0 ? (
-                          product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
-                            const isRecommended = matchesIngredient(ingredient, safeUserConcerns);
-
-                            return (
-                              <span
-                                key={idx}
-                                className={
-                                  isRecommended
-                                    ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full font-medium'
-                                    : 'px-2 py-1 bg-cream-100 text-gray-700 text-xs rounded-full'
-                                }
-                              >
-                                {ingredient}
-                              </span>
-                            );
-                          })
-                        ) : (
-                          <span className="text-xs text-gray-400 italic">{getMissingDataText('ingredients')}</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Skin Types */}
-                    <div className="bg-white p-2 sm:p-3 rounded-xl">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">Skin Types:</p>
-                      <div className="flex flex-wrap gap-1">
-                        {product.skinTypes.map((type, idx) => (
-                          <span
-                            key={idx}
-                            className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize"
-                          >
-                            {type}
+                    {/* Rating */}
+                    <div
+                      className={`p-2 sm:p-3 rounded-xl transition-all ${
+                        isHighestRating
+                          ? 'bg-light/30 ring-2 ring-primary-300'
+                          : isLowestRating
+                            ? 'bg-orange-50 ring-2 ring-orange-300'
+                            : 'bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-semibold text-gray-700">Rating</p>
+                        {isHighestRating && (
+                          <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold">
+                            Highest
                           </span>
-                        ))}
+                        )}
+                        {isLowestRating && (
+                          <span className="px-2 py-0.5 bg-warm-gray text-white text-xs rounded-full font-semibold">
+                            Lowest
+                          </span>
+                        )}
                       </div>
+                      {product.rating > 0 ? (
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-0.5 sm:space-x-1 text-sm">
+                            {renderStars(product.rating)}
+                          </div>
+                          <span className="text-sm font-medium text-gray-700">
+                            {product.rating}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-400 italic">{getMissingDataText('rating')}</p>
+                      )}
                     </div>
 
-                    {/* SECTION 6: Preferences */}
-                    {product.preferences && Object.values(product.preferences).some(v => v === true) && (
-                      <div className="bg-white p-2 sm:p-3 rounded-xl">
-                        <p className="text-xs font-semibold text-gray-700 mb-2">Preferences:</p>
-                        <div className="flex flex-wrap gap-1">
-                          {(() => {
-                            const userPrefs = JSON.parse(localStorage.getItem('skinSurveyData') || '{}').preferences || {};
-                            const prefLabels: Record<string, string> = {
-                              chemicalFree: 'Chemical-Free',
-                              vegan: 'Vegan',
-                              plantBased: 'Plant-Based',
-                              fragranceFree: 'Fragrance-Free',
-                              glutenFree: 'Gluten-Free',
-                              alcoholFree: 'Alcohol-Free',
-                              siliconeFree: 'Silicone-Free',
-                              crueltyFree: 'Cruelty-Free',
-                            };
-                            
-                            const productPrefs = product.preferences || {};
-                            
-                            // Only show preferences that the product has
-                            return Object.entries(productPrefs)
-                              .filter(([_, value]) => value === true)
-                              .map(([key]) => {
-                                const isMatching = userPrefs[key] === true;
-                                return (
-                                  <span
-                                    key={key}
-                                    className={
-                                      isMatching
-                                        ? 'px-2 py-1 bg-sage-100 text-sage-700 text-xs rounded-full font-medium border border-sage-300'
-                                        : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full'
-                                    }
-                                  >
-                                    {isMatching && <i className="ri-check-line mr-0.5"></i>}
-                                    {prefLabels[key] || key}
-                                  </span>
-                                );
-                              });
-                          })()}
-                        </div>
+                    {/* Reviews */}
+                    <div
+                      className={`p-2 sm:p-3 rounded-xl transition-all ${
+                        hasMostReviews
+                          ? 'bg-light/30 ring-2 ring-primary-300'
+                          : hasLeastReviews
+                            ? 'bg-orange-50 ring-2 ring-orange-300'
+                            : 'bg-white'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-xs font-semibold text-gray-700">Reviews</p>
+                        {hasMostReviews && (
+                          <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold">
+                            Most
+                          </span>
+                        )}
+                        {hasLeastReviews && (
+                          <span className="px-2 py-0.5 bg-warm-gray text-white text-xs rounded-full font-semibold">
+                            Least
+                          </span>
+                        )}
                       </div>
-                    )}
+                      <p className="text-base sm:text-lg font-bold text-deep-900">
+                        {product.reviewCount > 0 ? product.reviewCount.toLocaleString() : getMissingDataText('rating')}
+                      </p>
+                    </div>
 
                     {/* CTA */}
                     <button
@@ -600,8 +604,8 @@ export default function ProductComparison({
             <h4 className="text-xs sm:text-sm font-semibold text-gray-700 mb-2 sm:mb-3">Legend:</h4>
             <div className="flex flex-wrap gap-3 sm:gap-4 mb-3">
               <div className="flex items-center space-x-2">
-                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-sage-600 rounded"></div>
-                <span className="text-xs sm:text-sm text-gray-700">Best Value / Matches Profile</span>
+                <div className="w-3 h-3 sm:w-4 sm:h-4 bg-primary rounded"></div>
+                <span className="text-xs sm:text-sm text-gray-700">Best Value / Highest Rated</span>
               </div>
               <div className="flex items-center space-x-2">
                 <div className="w-3 h-3 sm:w-4 sm:h-4 bg-orange-500 rounded"></div>

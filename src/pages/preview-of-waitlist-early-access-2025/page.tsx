@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const WaitlistLandingPage = () => {
   const [submitted, setSubmitted] = useState(false);
@@ -34,7 +32,6 @@ const WaitlistLandingPage = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
 
       {/* Hero Section */}
       <section className="pt-24 sm:pt-28 pb-20 px-6 bg-gradient-to-br from-sage-50 via-white to-cream-50">
@@ -465,7 +462,6 @@ const WaitlistLandingPage = () => {
         </div>
       </section>
 
-      <Footer />
     </div>
   );
 };

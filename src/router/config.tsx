@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
+import AppLayout from '../components/feature/AppLayout';
 
 // Lazy load components
 const AuthCallbackPage = lazy(() => import('../pages/auth/callback/page'));
@@ -18,8 +19,8 @@ const NutritionPage = lazy(() => import('../pages/nutrition/page'));
 const MySkinPage = lazy(() => import('../pages/my-skin/page'));
 const SettingsPage = lazy(() => import('../pages/settings/page'));
 const AccountPage = lazy(() => import('../pages/account/page'));
-const ProfileEditPage = lazy(() => import('../pages/profile/edit/page'));
 const ProfileCustomizePage = lazy(() => import('../pages/profile/customize/page'));
+const ProfileViewPage = lazy(() => import('../pages/profile/view/page'));
 const RetailerReviewsPage = lazy(() => import('../pages/retailer-reviews/page'));
 const ReviewsProductsPage = lazy(() => import('../pages/reviews-products/page'));
 const BadgesPage = lazy(() => import('../pages/badges/page'));
@@ -27,8 +28,10 @@ const SubscriptionPage = lazy(() => import('../pages/subscription/page'));
 const PremiumPackagesPage = lazy(() => import('../pages/premium-packages/page'));
 const LoginPage = lazy(() => import('../pages/auth/login/page'));
 const SignupPage = lazy(() => import('../pages/auth/signup/page'));
+const ForgotPasswordPage = lazy(() => import('../pages/auth/forgot-password/page'));
+const ResetPasswordPage = lazy(() => import('../pages/auth/reset-password/page'));
 const ProductDetailPage = lazy(() => import('../pages/product-detail/page'));
-const ProductSearchDetailPage = lazy(() => import('../pages/product-search-detail/page'));
+
 const ServicesPage = lazy(() => import('../pages/services/page'));
 const ServicesSearchPage = lazy(() => import('../pages/services/search/page'));
 const ServiceDetailPage = lazy(() => import('../pages/services/detail/page'));
@@ -71,282 +74,85 @@ const AccessibilityPage = lazy(() => import('../pages/accessibility/page'));
 const CommunityGuidelinesPage = lazy(() => import('../pages/community-guidelines/page'));
 
 const routes: RouteObject[] = [
-  {
-    path: '/',
-    element: <HomePage />,
-  },
-  {
-  path: '/auth/callback',
-  element: <AuthCallbackPage />,
-  },
-  {
-    path: '/discover',
-    element: <DiscoverPage />,
-  },
-  {
-    path: '/ingredients',
-    element: <IngredientsPage />,
-  },
-  {
-    path: '/routines',
-    element: <RoutinesPage />,
-  },
-  {
-    path: '/routines-list',
-    element: <RoutinesListPage />,
-  },
-  {
-    path: '/marketplace',
-    element: <MarketplacePage />,
-  },
-  {
-    path: '/marketplace/all',
-    element: <MarketplaceAllPage />,
-  },
-  {
-    path: '/marketplace/success',
-    element: <MarketplaceSuccessPage />,
-  },
-  {
-    path: '/marketplace/product',
-    element: <MarketplaceProductDetailPage />,
-  },
-  {
-    path: '/marketplace/product/:id',
-    element: <MarketplaceProductDetailPage />,
-  },
-  {
-    path: '/community',
-    element: <CommunityPage />,
-  },
-  {
-    path: '/community/create',
-    element: <CommunityCreatePage />,
-  },
-  {
-    path: '/nutrition',
-    element: <NutritionPage />,
-  },
-  {
-    path: '/my-skin',
-    element: <MySkinPage />,
-  },
-  {
-    path: '/settings',
-    element: <SettingsPage />,
-  },
-  {
-    path: '/account',
-    element: <AccountPage />,
-  },
-  {
-    path: '/profile/edit',
-    element: <ProfileEditPage />,
-  },
-  {
-    path: '/profile/customize',
-    element: <ProfileCustomizePage />,
-  },
-  {
-    path: '/retailer-reviews',
-    element: <RetailerReviewsPage />,
-  },
-  {
-    path: '/reviews-products',
-    element: <ReviewsProductsPage />,
-  },
-  {
-    path: '/badges',
-    element: <BadgesPage />,
-  },
-  {
-    path: '/subscription',
-    element: <SubscriptionPage />,
-  },
-  {
-    path: '/premium-packages',
-    element: <PremiumPackagesPage />,
-  },
-  {
-    path: '/auth/login',
-    element: <LoginPage />,
-  },
-  {
-    path: '/auth/signup',
-    element: <SignupPage />,
-  },
-  {
-    path: '/signup',
-    element: <SignupPage />,
-  },
-  {
-    path: '/product-detail',
-    element: <ProductDetailPage />,
-  },
-  {
-    path: '/product-detail/:id',
-    element: <ProductDetailPage />,
-  },
-  {
-    path: '/product-search-detail',
-    element: <ProductSearchDetailPage />,
-  },
-  {
-    path: '/product-search-detail/:id',
-    element: <ProductSearchDetailPage />,
-  },
-  {
-    path: '/services',
-    element: <ServicesPage />,
-  },
-  {
-    path: '/services/search',
-    element: <ServicesSearchPage />,
-  },
-  {
-    path: '/services/compare',
-    element: <ServicesComparePage />,
-  },
-  {
-    path: '/services/:id',
-    element: <ServiceDetailPage />,
-  },
-  {
-    path: '/services/:id/booking',
-    element: <ServicesBookingPage />,
-  },
-  {
-    path: '/services/booking-success',
-    element: <ServicesBookingSuccessPage />,
-  },
-  {
-    path: '/storefront/:id',
-    element: <StorefrontDetailPage />,
-  },
-  {
-    path: '/storefront-product-details',
-    element: <StorefrontProductDetailsPage />,
-  },
-  {
-    path: '/storefront/join',
-    element: <StorefrontJoinPage />,
-  },
-  {
-    path: '/storefront/register',
-    element: <StorefrontRegisterPage />,
-  },
-  {
-    path: '/seller/onboarding',
-    element: <SellerOnboardingPage />,
-  },
-  {
-    path: '/seller/dashboard',
-    element: <SellerDashboardPage />,
-  },
-  {
-    path: '/seller/application-status',
-    element: <SellerApplicationStatusPage />,
-  },
-  {
-    path: '/creator/onboarding',
-    element: <CreatorOnboardingPage />,
-  },
-  {
-    path: '/creator/dashboard',
-    element: <CreatorDashboardPage />,
-  },
-  {
-    path: '/creator/products',
-    element: <CreatorProductsPage />,
-  },
-  {
-    path: '/creator/patch-tests',
-    element: <CreatorPatchTestsPage />,
-  },
-  {
-    path: '/creator/patch-tests/create',
-    element: <CreatePatchTestPage />,
-  },
-  {
-    path: '/creator/audience',
-    element: <CreatorAudiencePage />,
-  },
-  {
-    path: '/affiliate-dashboard',
-    element: <AffiliateDashboardPage />,
-  },
-  {
-    path: '/affiliate-redirect/:id',
-    element: <AffiliateRedirectPage />,
-  },
-  {
-    path: '/data-impact',
-    element: <DataImpactPage />,
-  },
-  {
-    path: '/data-anonymization',
-    element: <DataAnonymizationPage />,
-  },
-  {
-    path: '/ingredient-patch-test',
-    element: <IngredientPatchTestPage />,
-  },
-  {
-    path: '/ai-chat',
-    element: <AIChatPage />,
-  },
-  {
-    path: '/about',
-    element: <AboutPage />,
-  },
-  {
-    path: '/preview-of-waitlist-early-access-2025',
-    element: <WaitlistLandingPage />,
-  },
-  {
-    path: '/preview-of-waitlist-early-access-2025-marketplace',
-    element: <MarketplaceWaitlistPage />,
-  },
-  {
-    path: '/skin-survey',
-    element: <SkinSurveyPage />,
-  },
-  {
-    path: '/skin-survey-account',
-    element: <SkinSurveyAccountPage />,
-  },
-  {
-    path: '/skin-survey/results',
-    element: <SurveyResultsPage />,
-  },
-  {
-    path: '/cart',
-    element: <CartPage />,
-  },
-  {
-    path: '/privacy',
-    element: <PrivacyPage />,
-  },
-  {
-    path: '/contact',
-    element: <ContactPage />,
-  },
-  {
-    path: '/faq',
-    element: <FAQPage />,
-  },
-  {
-    path: '/accessibility',
-    element: <AccessibilityPage />,
-  },
-  {
-    path: '/community-guidelines',
-    element: <CommunityGuidelinesPage />,
-  },
-  {
-    path: '*',
-    element: <NotFoundPage />,
-  },
+  // — No-layout routes (auth, creator dashboards, etc.) —
+  { path: '/auth/callback', element: <AuthCallbackPage /> },
+  { path: '/auth/login', element: <LoginPage /> },
+  { path: '/auth/signup', element: <SignupPage /> },
+  { path: '/signup', element: <SignupPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
+  { path: '/auth/reset-password', element: <ResetPasswordPage /> },
+  { path: '/creator/dashboard', element: <CreatorDashboardPage /> },
+  { path: '/creator/products', element: <CreatorProductsPage /> },
+  { path: '/creator/patch-tests', element: <CreatorPatchTestsPage /> },
+  { path: '/creator/patch-tests/create', element: <CreatePatchTestPage /> },
+  { path: '/creator/audience', element: <CreatorAudiencePage /> },
+  { path: '/affiliate-redirect/:id', element: <AffiliateRedirectPage /> },
+  { path: '/data-anonymization', element: <DataAnonymizationPage /> },
+
+  // — Layout routes (Navbar + Footer persist across navigation) —
+  {
+    element: <AppLayout />,
+    children: [
+      { path: '/', element: <HomePage /> },
+      { path: '/discover', element: <DiscoverPage /> },
+      { path: '/ingredients', element: <IngredientsPage /> },
+      { path: '/routines', element: <RoutinesPage /> },
+      { path: '/routines-list', element: <RoutinesListPage /> },
+      { path: '/marketplace', element: <MarketplacePage /> },
+      { path: '/marketplace/all', element: <MarketplaceAllPage /> },
+      { path: '/marketplace/success', element: <MarketplaceSuccessPage /> },
+      { path: '/marketplace/product', element: <MarketplaceProductDetailPage /> },
+      { path: '/marketplace/product/:id', element: <MarketplaceProductDetailPage /> },
+      { path: '/community', element: <CommunityPage /> },
+      { path: '/community/create', element: <CommunityCreatePage /> },
+      { path: '/nutrition', element: <NutritionPage /> },
+      { path: '/my-skin', element: <MySkinPage /> },
+      { path: '/settings', element: <SettingsPage /> },
+      { path: '/account', element: <AccountPage /> },
+      { path: '/profile/customize', element: <ProfileCustomizePage /> },
+      { path: '/profile/view/:userId', element: <ProfileViewPage /> },
+      { path: '/retailer-reviews', element: <RetailerReviewsPage /> },
+      { path: '/reviews-products', element: <ReviewsProductsPage /> },
+      { path: '/badges', element: <BadgesPage /> },
+      { path: '/subscription', element: <SubscriptionPage /> },
+      { path: '/premium-packages', element: <PremiumPackagesPage /> },
+      { path: '/product-detail', element: <ProductDetailPage /> },
+      { path: '/product-detail/:id', element: <ProductDetailPage /> },
+      { path: '/services', element: <ServicesPage /> },
+      { path: '/services/search', element: <ServicesSearchPage /> },
+      { path: '/services/compare', element: <ServicesComparePage /> },
+      { path: '/services/:id', element: <ServiceDetailPage /> },
+      { path: '/services/:id/booking', element: <ServicesBookingPage /> },
+      { path: '/services/booking-success', element: <ServicesBookingSuccessPage /> },
+      { path: '/storefront/:id', element: <StorefrontDetailPage /> },
+      { path: '/storefront-product-details', element: <StorefrontProductDetailsPage /> },
+      { path: '/storefront/join', element: <StorefrontJoinPage /> },
+      { path: '/storefront/register', element: <StorefrontRegisterPage /> },
+      { path: '/seller/onboarding', element: <SellerOnboardingPage /> },
+      { path: '/seller/dashboard', element: <SellerDashboardPage /> },
+      { path: '/seller/application-status', element: <SellerApplicationStatusPage /> },
+      { path: '/creator/onboarding', element: <CreatorOnboardingPage /> },
+      { path: '/affiliate-dashboard', element: <AffiliateDashboardPage /> },
+      { path: '/data-impact', element: <DataImpactPage /> },
+      { path: '/ingredient-patch-test', element: <IngredientPatchTestPage /> },
+      { path: '/ai-chat', element: <AIChatPage /> },
+      { path: '/about', element: <AboutPage /> },
+      { path: '/preview-of-waitlist-early-access-2025', element: <WaitlistLandingPage /> },
+      { path: '/preview-of-waitlist-early-access-2025-marketplace', element: <MarketplaceWaitlistPage /> },
+      { path: '/skin-survey', element: <SkinSurveyPage /> },
+      { path: '/skin-survey-account', element: <SkinSurveyAccountPage /> },
+      { path: '/skin-survey/results', element: <SurveyResultsPage /> },
+      { path: '/cart', element: <CartPage /> },
+      { path: '/privacy', element: <PrivacyPage /> },
+      { path: '/contact', element: <ContactPage /> },
+      { path: '/faq', element: <FAQPage /> },
+      { path: '/accessibility', element: <AccessibilityPage /> },
+      { path: '/community-guidelines', element: <CommunityGuidelinesPage /> },
+    ],
+  },
+
+  // — Catch-all —
+  { path: '*', element: <NotFoundPage /> },
 ];
 
 export default routes;

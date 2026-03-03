@@ -78,6 +78,14 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
   const [showMonthDropdown, setShowMonthDropdown] = useState(false);
   const [showDayDropdown, setShowDayDropdown] = useState(false);
 
+  // Additional filter states
+  const [concernFilter, setConcernFilter] = useState<string>('');
+  const [productFilter, setProductFilter] = useState<string>('');
+
+  // Delete confirmation state
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'entry' | 'month' | 'year'; id: string; label: string } | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // AI Assessment states
   const [showAssessmentModal, setShowAssessmentModal] = useState(false);
   const [selectedConcern, setSelectedConcern] = useState<string>('');
@@ -255,7 +263,7 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
       const { data, error } = await supabase
         .from('routine_notes')
         .select('*')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -359,6 +367,92 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
     } catch (error) {
       console.error('Error saving note:', error);
       alert('Failed to save note. Please try again.');
+    }
+  };
+
+  const handleDeleteNote = async (noteId: string) => {
+    setIsDeleting(true);
+    try {
+      // Skip deletion for example notes
+      if (noteId.startsWith('example-note')) {
+        setNotes(prev => prev.filter(n => n.id !== noteId));
+        setDeleteConfirm(null);
+        setIsDeleting(false);
+        return;
+      }
+
+      const { error } = await supabase
+        .from('routine_notes')
+        .delete()
+        .eq('id', noteId);
+
+      if (error) throw error;
+      setNotes(prev => prev.filter(n => n.id !== noteId));
+    } catch (error) {
+      console.error('Error deleting note:', error);
+    } finally {
+      setDeleteConfirm(null);
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteMonth = async (monthKey: string) => {
+    setIsDeleting(true);
+    try {
+      const [year, month] = monthKey.split('-');
+      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
+      const endDate = new Date(parseInt(year), parseInt(month), 0, 23, 59, 59);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase
+          .from('routine_notes')
+          .delete()
+          .eq('user_id', user.id)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString());
+
+        if (error) throw error;
+      }
+
+      setNotes(prev => prev.filter(n => {
+        const noteDate = new Date(n.created_at);
+        return !(noteDate.getFullYear().toString() === year && (noteDate.getMonth() + 1).toString() === month);
+      }));
+      setSelectedMonth(null);
+    } catch (error) {
+      console.error('Error deleting month:', error);
+    } finally {
+      setDeleteConfirm(null);
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteYear = async (year: string) => {
+    setIsDeleting(true);
+    try {
+      const startDate = new Date(parseInt(year), 0, 1);
+      const endDate = new Date(parseInt(year), 11, 31, 23, 59, 59);
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { error } = await supabase
+          .from('routine_notes')
+          .delete()
+          .eq('user_id', user.id)
+          .gte('created_at', startDate.toISOString())
+          .lte('created_at', endDate.toISOString());
+
+        if (error) throw error;
+      }
+
+      setNotes(prev => prev.filter(n => new Date(n.created_at).getFullYear().toString() !== year));
+      setDateFilter(null);
+    } catch (error) {
+      console.error('Error deleting year:', error);
+    } finally {
+      setDeleteConfirm(null);
+      setIsDeleting(false);
     }
   };
 
@@ -489,7 +583,7 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
     return grouped;
   };
 
-  // Filter notes by routine type, search, and day
+  // Filter notes by routine type, search, day, concern, and product
   const filterMonthNotes = (notes: Note[]): Note[] => {
     return notes.filter(note => {
       // Routine filter
@@ -507,6 +601,19 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
       if (dayFilter) {
         const noteDay = new Date(note.created_at).getDate().toString();
         if (noteDay !== dayFilter) return false;
+      }
+
+      // Skin concern filter
+      if (concernFilter) {
+        const condition = (note.skin_condition || '').toLowerCase();
+        const obs = (note.observations || '').toLowerCase();
+        if (!condition.includes(concernFilter.toLowerCase()) && !obs.includes(concernFilter.toLowerCase())) return false;
+      }
+
+      // Product used filter
+      if (productFilter) {
+        const products = note.products_used || [];
+        if (!products.some(p => p.toLowerCase().includes(productFilter.toLowerCase()))) return false;
       }
 
       return true;
@@ -575,8 +682,7 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
             </div>
             <div>
               <p className="text-sm text-warm-gray leading-relaxed">
-                <span className="font-medium text-deep">Your notes power smarter recommendations.</span>{' '}
-                The more you track, the better Curae will understand your skin's unique patterns and needs.
+                <span className="font-medium text-deep">Your notes power smarter recommendations and add insights.</span>
               </p>
             </div>
           </div>
@@ -686,6 +792,17 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
               >
                 Clear
               </button>
+              {/* Delete Year Button */}
+              {dateFilter?.year && (
+                <button
+                  onClick={() => setDeleteConfirm({ type: 'year', id: dateFilter.year!, label: dateFilter.year! })}
+                  className="px-4 py-2.5 bg-white text-red-400 rounded-xl hover:bg-red-50 transition-colors cursor-pointer whitespace-nowrap text-sm font-medium border border-red-200"
+                  title={`Delete all entries from ${dateFilter.year}`}
+                >
+                  <i className="ri-delete-bin-line mr-1"></i>
+                  Delete {dateFilter.year}
+                </button>
+              )}
             </div>
 
             {/* Active Filter Indicator */}
@@ -818,18 +935,29 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
                             <p className="text-sm text-warm-gray">{filteredMonthNotes.length} {filteredMonthNotes.length === 1 ? 'entry' : 'entries'}</p>
                           </div>
                         </div>
-                        <button
-                          onClick={() => {
-                            setSelectedMonth(null);
-                            setEntrySearch('');
-                            setDayFilter('');
-                            setRoutineFilter('both');
-                            setShowDayDropdown(false);
-                          }}
-                          className="w-10 h-10 rounded-full bg-white hover:bg-blush flex items-center justify-center transition-colors cursor-pointer shadow-sm"
-                        >
-                          <i className="ri-close-line text-xl text-warm-gray"></i>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setDeleteConfirm({ type: 'month', id: selectedMonth!, label: monthLabel })}
+                            className="w-10 h-10 rounded-full bg-white hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                            title="Delete all entries in this month"
+                          >
+                            <i className="ri-delete-bin-line text-lg text-red-400"></i>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedMonth(null);
+                              setEntrySearch('');
+                              setDayFilter('');
+                              setRoutineFilter('both');
+                              setConcernFilter('');
+                              setProductFilter('');
+                              setShowDayDropdown(false);
+                            }}
+                            className="w-10 h-10 rounded-full bg-white hover:bg-blush flex items-center justify-center transition-colors cursor-pointer shadow-sm"
+                          >
+                            <i className="ri-close-line text-xl text-warm-gray"></i>
+                          </button>
+                        </div>
                       </div>
 
                       {/* Search and Day Filter */}
@@ -929,6 +1057,34 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
                           Both
                         </button>
                       </div>
+
+                      {/* Concern & Product Filters */}
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {userConcerns.length > 0 && (
+                          <select
+                            value={concernFilter}
+                            onChange={(e) => setConcernFilter(e.target.value)}
+                            className="px-3 py-1.5 rounded-full text-xs font-medium border border-blush bg-white text-warm-gray cursor-pointer focus:outline-none focus:border-primary"
+                          >
+                            <option value="">All Concerns</option>
+                            {userConcerns.map((c) => (
+                              <option key={c.id} value={c.name}>{c.name}</option>
+                            ))}
+                          </select>
+                        )}
+                        <select
+                          value={productFilter}
+                          onChange={(e) => setProductFilter(e.target.value)}
+                          className="px-3 py-1.5 rounded-full text-xs font-medium border border-blush bg-white text-warm-gray cursor-pointer focus:outline-none focus:border-primary"
+                        >
+                          <option value="">All Products</option>
+                          {Array.from(new Set(
+                            monthNotes.flatMap(n => n.products_used || [])
+                          )).sort().map((product) => (
+                            <option key={product} value={product}>{product}</option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
                     {/* Entries Grid */}
@@ -937,16 +1093,18 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
                         <div className="text-center py-12">
                           <i className="ri-file-text-line text-4xl text-warm-gray/40 mb-3"></i>
                           <p className="text-warm-gray">
-                            {entrySearch || dayFilter || routineFilter !== 'both'
+                            {entrySearch || dayFilter || routineFilter !== 'both' || concernFilter || productFilter
                               ? 'No entries match your filters'
                               : 'No entries this month'}
                           </p>
-                          {(entrySearch || dayFilter || routineFilter !== 'both') && (
+                          {(entrySearch || dayFilter || routineFilter !== 'both' || concernFilter || productFilter) && (
                             <button
                               onClick={() => {
                                 setEntrySearch('');
                                 setDayFilter('');
                                 setRoutineFilter('both');
+                                setConcernFilter('');
+                                setProductFilter('');
                               }}
                               className="mt-2 text-primary text-sm hover:underline cursor-pointer"
                             >
@@ -966,8 +1124,20 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
                                   position: { x: rect.right + 12, y: rect.top }
                                 });
                               }}
-                              className="flex flex-col gap-2 p-4 bg-cream/30 border border-blush rounded-xl hover:border-primary/30 hover:shadow-md transition-all cursor-pointer"
+                              className="relative flex flex-col gap-2 p-4 bg-cream/30 border border-blush rounded-xl hover:border-primary/30 hover:shadow-md transition-all cursor-pointer group/note"
                             >
+                              {/* Delete entry button */}
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const label = new Date(note.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                                  setDeleteConfirm({ type: 'entry', id: note.id, label });
+                                }}
+                                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/80 hover:bg-red-50 flex items-center justify-center opacity-0 group-hover/note:opacity-100 transition-opacity cursor-pointer"
+                                title="Delete entry"
+                              >
+                                <i className="ri-delete-bin-line text-xs text-red-400 hover:text-red-500"></i>
+                              </button>
                               <div className="flex items-start gap-3">
                                 {note.photo_url ? (
                                   <img
@@ -1599,6 +1769,61 @@ export default function NotesSection({ autoOpenAssessment }: NotesSectionProps) 
                 className="flex-1 py-2.5 bg-primary text-white rounded-lg hover:bg-dark transition-colors cursor-pointer text-sm font-medium"
               >
                 Save Note
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirm && (
+        <div
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+          onClick={() => setDeleteConfirm(null)}
+        >
+          <div
+            className="bg-white rounded-xl shadow-xl max-w-sm w-full p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="text-center mb-5">
+              <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+                <i className="ri-delete-bin-line text-red-500 text-2xl"></i>
+              </div>
+              <h3 className="font-serif text-lg font-semibold text-deep mb-2">
+                {deleteConfirm.type === 'entry' ? 'Delete Entry' :
+                 deleteConfirm.type === 'month' ? 'Delete All Entries' :
+                 'Delete All Entries'}
+              </h3>
+              <p className="text-sm text-warm-gray">
+                {deleteConfirm.type === 'entry'
+                  ? `Are you sure you want to delete this entry from ${deleteConfirm.label}? This action cannot be undone.`
+                  : deleteConfirm.type === 'month'
+                  ? `Are you sure you want to delete all entries in ${deleteConfirm.label}? This action cannot be undone.`
+                  : `Are you sure you want to delete all entries from ${deleteConfirm.label}? This action cannot be undone.`}
+              </p>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 border border-blush text-warm-gray rounded-lg text-sm font-medium hover:bg-cream transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  if (deleteConfirm.type === 'entry') handleDeleteNote(deleteConfirm.id);
+                  else if (deleteConfirm.type === 'month') handleDeleteMonth(deleteConfirm.id);
+                  else handleDeleteYear(deleteConfirm.id);
+                }}
+                disabled={isDeleting}
+                className="flex-1 px-4 py-2.5 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600 transition-colors cursor-pointer disabled:opacity-50 flex items-center justify-center"
+              >
+                {isDeleting ? (
+                  <><i className="ri-loader-4-line animate-spin mr-2"></i>Deleting...</>
+                ) : (
+                  'Delete'
+                )}
               </button>
             </div>
           </div>

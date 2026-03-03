@@ -24,7 +24,7 @@ interface PurchaseOptionsProps {
 
 const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
   const [sortBy, setSortBy] = useState<string>('trust');
-  const [showTaxInfo, setShowTaxInfo] = useState(false);
+  const [showPricingTooltip, setShowPricingTooltip] = useState<boolean>(false);
 
   // Mock retailer data
   const retailers: Retailer[] = [
@@ -176,48 +176,41 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
             </select>
           </div>
 
-          <button
-            onClick={() => setShowTaxInfo(!showTaxInfo)}
-            className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer"
+          <div
+            className="relative"
+            onMouseEnter={() => setShowPricingTooltip(true)}
+            onMouseLeave={() => setShowPricingTooltip(false)}
           >
-            <i className="ri-information-line text-lg"></i>
-            <span className="font-medium">About Pricing</span>
-          </button>
-        </div>
-
-        {/* Tax Info Banner */}
-        {showTaxInfo && (
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 mb-8">
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 flex items-center justify-center bg-blue-100 rounded-full flex-shrink-0">
-                <i className="ri-information-line text-xl text-blue-600"></i>
-              </div>
-              <div>
-                <h3 className="text-lg font-semibold text-deep-900 mb-2">
-                  Understanding Total Costs
-                </h3>
-                <ul className="space-y-2 text-sm text-gray-700">
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Estimated taxes</strong> are calculated based on your location and may vary at checkout</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Shipping costs</strong> are provided by each retailer and may change based on delivery speed</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span><strong>Total price</strong> includes product price + shipping + estimated tax for easy comparison</span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <i className="ri-checkbox-circle-fill text-taupe mt-0.5"></i>
-                    <span>Final price will be confirmed at the retailer's checkout</span>
-                  </li>
-                </ul>
-              </div>
+            <button
+              onClick={() => setShowPricingTooltip((prev) => !prev)}
+              onFocus={() => setShowPricingTooltip(true)}
+              onBlur={() => setShowPricingTooltip(false)}
+              aria-expanded={showPricingTooltip}
+              aria-describedby="pricing-tooltip-search"
+              className="flex items-center space-x-2 text-sm text-taupe hover:text-taupe-700 cursor-pointer focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none rounded-md"
+            >
+              <i className="ri-information-line text-lg" aria-hidden="true"></i>
+              <span className="font-medium">About Pricing</span>
+            </button>
+            <div
+              id="pricing-tooltip-search"
+              role="tooltip"
+              className={`absolute right-0 top-full mt-2 w-80 max-w-[calc(100vw-2rem)] p-4 bg-deep text-white text-sm rounded-xl shadow-xl z-50 motion-safe:transition-all motion-safe:duration-200 ${
+                showPricingTooltip
+                  ? 'opacity-100 translate-y-0 pointer-events-auto'
+                  : 'opacity-0 -translate-y-1 pointer-events-none'
+              }`}
+            >
+              <div className="absolute -top-2 right-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-deep" aria-hidden="true"></div>
+              <p className="font-semibold mb-2">How Pricing Works</p>
+              <ul className="space-y-1.5 text-white/80 text-xs">
+                <li><strong className="text-white">Prices and shipping costs</strong> are provided by each retailer</li>
+                <li><strong className="text-white">Tax estimates</strong> are approximate and may differ at checkout</li>
+                <li>You complete your purchase on the <strong className="text-white">retailer's own site</strong>, where the final price is confirmed</li>
+              </ul>
             </div>
           </div>
-        )}
+        </div>
 
         {/* Retailer List */}
         <div className="space-y-4">

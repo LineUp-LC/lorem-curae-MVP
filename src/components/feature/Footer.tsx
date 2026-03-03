@@ -72,8 +72,8 @@ const supportLinks = [
 
 // Community items with their proper routes
 const communityLinks = [
-  { name: 'Nutrire', path: '/community' },
-  { name: 'Indie Market', path: '/marketplace' },
+  { name: 'Nutrire', path: '/community', comingSoon: true },
+  { name: 'Indie Market', path: '/marketplace', comingSoon: true },
   { name: 'Product Reviews', path: '/reviews-products' },
   { name: 'Retailer Reviews', path: '/retailer-reviews' },
 ];
@@ -190,6 +190,16 @@ export default function Footer() {
         
         .lc-footer-link:hover::after {
           width: 100%;
+        }
+
+        .lc-footer-coming-soon {
+          display: block;
+          font-size: 0.625rem;
+          font-weight: 600;
+          letter-spacing: 0.05em;
+          color: #C4704D;
+          line-height: 1;
+          margin-top: 2px;
         }
         
         .lc-footer-newsletter {
@@ -354,7 +364,12 @@ export default function Footer() {
             {communityLinks.map((item) => (
               <li key={item.name}>
                 <motion.div whileHover={linkHover}>
-                  <Link to={item.path} className="lc-footer-link">{item.name}</Link>
+                  <Link to={item.path} className="lc-footer-link">
+                    {item.name}
+                    {item.comingSoon && (
+                      <span className="lc-footer-coming-soon">Coming Soon</span>
+                    )}
+                  </Link>
                 </motion.div>
               </li>
             ))}

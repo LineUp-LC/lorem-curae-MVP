@@ -1,6 +1,4 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from '@/components/feature/Navbar';
-import Footer from '@/components/feature/Footer';
 import ProgressBar from './components/ProgressBar';
 import StepCard from './components/StepCard';
 import MultiSelect from './components/MultiSelect';
@@ -516,8 +514,8 @@ export default function CreatorOnboardingPage() {
             <div>
               <h5 className="font-medium text-deep mb-1">Revenue Sharing</h5>
               <p>
-                Creators receive 70% of net revenue from premium content sales.
-                Payments are processed monthly via Stripe Connect.
+                Creators receive a share of revenue from premium content sales.
+                Revenue terms are finalized during onboarding. Payments are processed via Stripe Connect.
               </p>
             </div>
             <div>
@@ -613,7 +611,6 @@ export default function CreatorOnboardingPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream to-white">
-      <Navbar />
 
       <main className="pt-24 pb-20 px-4 sm:px-6">
         <div className="max-w-xl mx-auto">
@@ -644,7 +641,6 @@ export default function CreatorOnboardingPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

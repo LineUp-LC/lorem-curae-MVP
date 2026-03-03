@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 const CommunityCreatePage = () => {
   const navigate = useNavigate();
@@ -55,7 +53,6 @@ const CommunityCreatePage = () => {
   if (!canCreateCommunity) {
     return (
       <div className="min-h-screen bg-cream-50">
-        <Navbar />
         
         <main className="max-w-4xl mx-auto px-6 lg:px-12 py-24">
           <div className="bg-white rounded-2xl p-12 text-center">
@@ -140,14 +137,12 @@ const CommunityCreatePage = () => {
           </div>
         </main>
 
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="max-w-4xl mx-auto px-6 lg:px-12 py-12">
         <div className="mb-8">
@@ -438,7 +433,6 @@ const CommunityCreatePage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

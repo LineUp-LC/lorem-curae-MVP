@@ -4,28 +4,9 @@ import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveComplexion, get
 import { calculateSimilarityWeight, getTierBadgeInfo, isComplexionMatch } from '../../../lib/utils/reviewSimilarity';
 import { matchesConcern } from '../../../lib/utils/matching';
 import Dropdown from '../../../components/ui/Dropdown';
+import { getReviewsForProduct, type MockReview } from '../../../mocks/reviews';
 
-interface Review {
-  id: number;
-  userName: string;
-  userAvatar: string;
-  rating: number;
-  title: string;
-  content: string;
-  date: string;
-  verified: boolean;
-  helpful: number;
-  skinType: string;
-  skinConcerns: string[];
-  complexion?: string;
-  lifestyle?: string[];
-  age: number;
-  routineLength: string;
-  // usageDurationWeeks replaces the submission date display.
-  // Duration of product use is more meaningful than submission date
-  // when evaluating product performance and results credibility.
-  usageDurationWeeks: number;
-}
+type Review = MockReview;
 
 interface UserProfileData {
   skinType: string;
@@ -49,11 +30,9 @@ interface ProductReviewsProps {
 
 const ProductReviews = ({ productId }: ProductReviewsProps) => {
   // Get user skin profile from sessionState (unified source of truth)
-  const rawSkinType = getEffectiveSkinType() || '';
-  const rawConcerns = getEffectiveConcerns();
-  const hasSurveyData = !!(rawSkinType || rawConcerns.length > 0);
-  const skinType = rawSkinType || 'combination';
-  const concerns = rawConcerns;
+  const skinType = getEffectiveSkinType() || '';
+  const effectiveConcerns = getEffectiveConcerns();
+  const concerns = effectiveConcerns;
 
   const complexion = getEffectiveComplexion() || '';
   const lifestyle = getEffectiveLifestyle();
@@ -63,7 +42,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     primaryConcerns: concerns,
     complexion,
     lifestyle,
-    age: 28,
+    age: 0,
     routineLength: '3-6 months'
   };
 
@@ -147,132 +126,21 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
     setShowProfileModal(true);
   };
 
-  // All reviews data with expanded skin profile information
-  const allReviews: Review[] = [
-    {
-      id: 1,
-      userName: 'Sarah M.',
-      userAvatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=60&h=60&fit=crop&q=80',
-      rating: 5,
-      title: 'Clear results for combination skin',
-      content: 'I\'ve been using this serum for 3 months now and the difference has been significant. My T-zone is no longer oily by midday, and my cheeks feel hydrated. The texture is lightweight and absorbs quickly without any sticky residue. Perfect for my combination skin type!',
-      date: '2024-01-15',
-      verified: true,
-      helpful: 24,
-      skinType: 'combination',
-      skinConcerns: ['Acne Prone', 'Lack of Hydration'],
-      complexion: 'Type III',
-      lifestyle: ['Active', 'Screen-heavy'],
-      age: 29,
-      routineLength: '3-6 months',
-      usageDurationWeeks: 14
-    },
-    {
-      id: 2,
-      userName: 'Jessica R.',
-      userAvatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=60&h=60&fit=crop&q=80',
-      rating: 4,
-      title: 'Great for sensitive skin',
-      content: 'As someone with very sensitive skin, I was hesitant to try this. But it\'s been gentle and effective. No irritation at all, and I\'ve noticed my redness has decreased significantly. Takes time to see results but worth the patience.',
-      date: '2024-01-10',
-      verified: true,
-      helpful: 18,
-      skinType: 'sensitive',
-      skinConcerns: ['Damaged Skin Barrier', 'Rosacea'],
-      complexion: 'Type II',
-      lifestyle: ['Low-stress', 'Indoor'],
-      age: 25,
-      routineLength: '6+ months',
-      usageDurationWeeks: 28
-    },
-    {
-      id: 3,
-      userName: 'Michael K.',
-      userAvatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=60&h=60&fit=crop&q=80',
-      rating: 5,
-      title: 'Finally found my holy grail serum',
-      content: 'After trying countless serums, this one actually delivers. The niacinamide really helps with my enlarged pores, and the hyaluronic acid keeps my skin plump all day. Great for oily skin that needs hydration without heaviness.',
-      date: '2024-01-08',
-      verified: false,
-      helpful: 31,
-      skinType: 'oily',
-      skinConcerns: ['Enlarged Pores', 'Congested skin'],
-      complexion: 'Type IV',
-      lifestyle: ['Active', 'Outdoor'],
-      age: 32,
-      routineLength: '1-3 months',
-      usageDurationWeeks: 6
-    },
-    {
-      id: 4,
-      userName: 'Emma L.',
-      userAvatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=60&h=60&fit=crop&q=80',
-      rating: 5,
-      title: 'Perfect match for combination acne-prone skin',
-      content: 'This serum has made a real difference for my combination skin with persistent breakouts. It controls oil in my T-zone while keeping my cheeks moisturized. The acne-fighting ingredients work without over-drying. Highly recommend for similar skin types!',
-      date: '2024-01-20',
-      verified: true,
-      helpful: 35,
-      skinType: 'combination',
-      skinConcerns: ['Acne Prone', 'Uneven Skin Tone', 'Enlarged Pores'],
-      complexion: 'Type III',
-      lifestyle: ['Active', 'Screen-heavy'],
-      age: 26,
-      routineLength: '3-6 months',
-      usageDurationWeeks: 16
-    },
-    {
-      id: 5,
-      userName: 'David C.',
-      userAvatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=60&h=60&fit=crop&q=80',
-      rating: 4,
-      title: 'Effective for dark spots and uneven tone',
-      content: 'Been dealing with hyperpigmentation from old acne scars. This serum has noticeably faded the dark spots over 4 months of consistent use. The vitamin C and niacinamide combo works well. Patience is key with pigmentation issues.',
-      date: '2024-01-12',
-      verified: true,
-      helpful: 22,
-      skinType: 'combination',
-      skinConcerns: ['Uneven Skin Tone', 'Scarring'],
-      complexion: 'Type V',
-      lifestyle: ['Active'],
-      age: 30,
-      routineLength: '3-6 months',
-      usageDurationWeeks: 18
-    },
-    {
-      id: 6,
-      userName: 'Lisa K.',
-      userAvatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=60&h=60&fit=crop&q=80',
-      rating: 4,
-      title: 'Good anti-aging benefits',
-      content: 'At 45, I\'m always looking for products that help with fine lines and firmness. This serum has improved my skin texture and reduced some fine lines around my eyes. Takes consistent use to see results.',
-      date: '2024-01-05',
-      verified: true,
-      helpful: 19,
-      skinType: 'dry',
-      skinConcerns: ['Signs of Aging', 'Dullness'],
-      complexion: 'Type II',
-      lifestyle: ['Low-stress'],
-      age: 45,
-      routineLength: '6+ months',
-      usageDurationWeeks: 32
-    }
-  ];
+  // All reviews data from shared module (canonical source of truth)
+  const allReviews: Review[] = getReviewsForProduct(productId);
 
   // Get personalized and general reviews using shared Similarity Weight utility (12.15)
-  const personalizedReviews = hasSurveyData
-    ? allReviews
-      .map(review => {
-        const result = calculateSimilarityWeight(
-          { skinType: review.skinType, skinConcerns: review.skinConcerns, complexion: review.complexion, lifestyle: review.lifestyle, age: review.age },
-          { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: userSkinProfile.complexion, sensitivity: '', lifestyle: userSkinProfile.lifestyle, age: userSkinProfile.age }
-        );
-        return { ...review, similarityScore: result.score, matchTier: result.matchTier };
-      })
-      .filter(review => review.similarityScore >= 15)
-      .sort((a, b) => b.similarityScore - a.similarityScore)
-      .slice(0, 3)
-    : [];
+  const personalizedReviews = allReviews
+    .map(review => {
+      const result = calculateSimilarityWeight(
+        { skinType: review.skinType, skinConcerns: review.skinConcerns, complexion: review.complexion, lifestyle: review.lifestyle, age: review.age },
+        { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: userSkinProfile.complexion, sensitivity: '', lifestyle: userSkinProfile.lifestyle, age: userSkinProfile.age }
+      );
+      return { ...review, similarityScore: result.score, matchTier: result.matchTier };
+    })
+    .filter(review => review.similarityScore >= 15) // Only show reviews with ≥15% similarity
+    .sort((a, b) => b.similarityScore - a.similarityScore)
+    .slice(0, 3);
 
   // Apply user-selected filters
   const filteredReviews = useMemo(() => {
@@ -309,7 +177,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   };
 
   return (
-    <div id="reviews" className="py-16">
+    <div id="reviews" className="py-16 bg-white">
       <div className="max-w-7xl mx-auto px-6">
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
@@ -335,7 +203,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
               </h3>
               <p className="text-gray-600 text-sm mb-3">
                 Showing reviews from similar individuals with <strong>{userSkinProfile.skinType} skin</strong> concerned about{' '}
-                <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong> that are looking into buying this product
+                <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong> that bought this product
               </p>
               <span className="text-xs text-primary-700 bg-light/30 border border-primary-300 px-2.5 py-1 rounded-full font-medium">
                 {personalizedReviews.length} matching reviews found
@@ -457,8 +325,10 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
               ? getTierBadgeInfo(review.matchTier, review.similarityScore)
               : null;
             
+            const isFullMatch = 'matchTier' in review && review.matchTier === 'full';
+
             return (
-              <div key={review.id} className="bg-white rounded-2xl p-6 shadow-lg">
+              <div key={review.id} className={`rounded-2xl p-6 shadow-lg ${isFullMatch ? 'bg-light/30 border border-primary-300' : 'bg-white'}`}>
                 {/* Review Header */}
                 <div className="flex items-start space-x-3 mb-4">
                   <button
@@ -502,7 +372,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                         product usage duration is more meaningful for evaluating
                         product performance and results credibility. */}
                     <p className="text-xs text-gray-500 mb-2">
-                      {hasSurveyData && review.skinType === userSkinProfile.skinType ? (
+                      {review.skinType === userSkinProfile.skinType ? (
                         <span className="text-primary-700 font-medium">{review.skinType} skin</span>
                       ) : (
                         <span>{review.skinType} skin</span>
@@ -515,22 +385,18 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 {/* Skin Concerns */}
                 <div className="mb-3">
                   <div className="flex flex-wrap gap-1">
-                    {review.skinConcerns.map((concern, idx) => {
-                      const isConcernMatch = hasSurveyData && matchesConcern(concern, userSkinProfile.primaryConcerns);
-                      return (
-                        <span
-                          key={idx}
-                          className={`px-2 py-1 text-xs rounded-full ${
-                            isConcernMatch
-                              ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
-                              : 'bg-gray-100 text-gray-600'
-                          }`}
-                        >
-                          {isConcernMatch && <i className="ri-check-line mr-0.5"></i>}
-                          {concern}
-                        </span>
-                      );
-                    })}
+                    {review.skinConcerns.map((concern, idx) => (
+                      <span
+                        key={idx}
+                        className={`px-2 py-1 text-xs rounded-full ${
+                          matchesConcern(concern, userSkinProfile.primaryConcerns)
+                            ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}
+                      >
+                        {concern}
+                      </span>
+                    ))}
                   </div>
                 </div>
 

@@ -1,11 +1,12 @@
-import { useState } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
+import { useState, useMemo } from 'react';
 import FoodLibrary from './components/FoodLibrary';
 import FoodDetailModal from './components/FoodDetailModal';
 import MealPlanner from './components/MealPlanner';
 import NutrientTracker from './components/NutrientTracker';
 import { supabase } from '../../lib/supabase-browser';
+import AIInsightBlock from '../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../lib/ai/surfaceContext';
+import { getEffectiveConcerns } from '../../lib/utils/sessionState';
 
 interface Food {
   id: string;
@@ -80,10 +81,20 @@ const NutritionPage = () => {
     }
   };
 
+  const nutritionAIContext = useMemo(() => {
+    const concerns = getEffectiveConcerns();
+    return buildAIContext('nutrition', {
+      page: {
+        mode: 'nutrition',
+        foods: [],
+        userConcerns: concerns,
+      },
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
-      
+
       <main className="max-w-7xl mx-auto px-6 lg:px-12 py-24">
         {/* Header */}
         <div className="text-center mb-12">
@@ -92,6 +103,13 @@ const NutritionPage = () => {
             Discover skin-beneficial foods, plan your meals, and track your nutrient intake
           </p>
         </div>
+
+        {/* AI Nutrition Insight */}
+        {nutritionAIContext && (
+          <div className="mb-8">
+            <AIInsightBlock context={nutritionAIContext} compact />
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex items-center space-x-2 mb-8 border-b border-blush">
@@ -130,7 +148,6 @@ const NutritionPage = () => {
         </div>
       </main>
 
-      <Footer />
 
       {/* Food Detail Modal */}
       {selectedFood && (

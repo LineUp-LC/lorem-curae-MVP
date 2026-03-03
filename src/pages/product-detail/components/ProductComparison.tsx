@@ -1,9 +1,12 @@
+import { useMemo } from 'react';
 import { productData } from '../../../mocks/products';
 import { useNavigate } from 'react-router-dom';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
 } from '../../../lib/utils/sessionState';
+import AIInsightBlock from '../../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
 
 interface ProductComparisonProps {
   productIds: number[];
@@ -21,13 +24,20 @@ const ProductComparison = ({
 
   // Get user profile from sessionState (unified source of truth)
   const userProfile = {
-    skinType: getEffectiveSkinType() || 'combination',
-    concerns:
-      getEffectiveConcerns().length > 0
-        ? getEffectiveConcerns()
-        : ['hydration', 'texture'],
+    skinType: getEffectiveSkinType() || '',
+    concerns: getEffectiveConcerns(),
     budget: 50,
   };
+
+  const comparisonAIContext = useMemo(() => {
+    if (products.length < 2) return null;
+    return buildAIContext('comparison', {
+      page: {
+        mode: 'comparison',
+        products,
+      },
+    });
+  }, [products.map(p => p.id).join(',')]);
 
   const handleNavigate = (id: number) => {
     navigate(`/product/${id}`);
@@ -64,36 +74,40 @@ const ProductComparison = ({
 
             <p className="text-sm text-gray-600">{product.brand}</p>
 
-            <div className="mt-2">
-              <p className="text-xs font-medium text-gray-700">
-                Skin Type Match:
-              </p>
-              <p className="text-sm">
-                {product.skinTypes?.includes(userProfile.skinType)
-                  ? '✔ Good match'
-                  : '⚠ Not ideal'}
-              </p>
-            </div>
+            {userProfile.skinType && (
+              <div className="mt-2">
+                <p className="text-xs font-medium text-gray-700">
+                  Skin Type Match:
+                </p>
+                <p className="text-sm">
+                  {product.skinTypes?.includes(userProfile.skinType)
+                    ? '✔ Good match'
+                    : '⚠ Not ideal'}
+                </p>
+              </div>
+            )}
 
-            <div className="mt-2">
-              <p className="text-xs font-medium text-gray-700">
-                Concern Match:
-              </p>
-              <ul className="text-sm list-disc ml-4">
-                {userProfile.concerns.map((concern) => (
-                  <li
-                    key={concern}
-                    className={
-                      product.concerns?.includes(concern)
-                        ? 'text-taupe'
-                        : 'text-gray-500'
-                    }
-                  >
-                    {concern}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {userProfile.concerns.length > 0 && (
+              <div className="mt-2">
+                <p className="text-xs font-medium text-gray-700">
+                  Concern Match:
+                </p>
+                <ul className="text-sm list-disc ml-4">
+                  {userProfile.concerns.map((concern) => (
+                    <li
+                      key={concern}
+                      className={
+                        product.concerns?.includes(concern)
+                          ? 'text-taupe'
+                          : 'text-gray-500'
+                      }
+                    >
+                      {concern}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
 
             <div className="mt-2">
               <p className="text-xs font-medium text-gray-700">
@@ -115,6 +129,13 @@ const ProductComparison = ({
           </div>
         ))}
       </div>
+
+      {/* AI Comparison Insight */}
+      {comparisonAIContext && (
+        <div className="mt-4">
+          <AIInsightBlock context={comparisonAIContext} />
+        </div>
+      )}
     </div>
   );
 };

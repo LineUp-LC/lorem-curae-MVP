@@ -177,7 +177,7 @@ export function initializeMemoryFromContext(
   skinProfile: SkinProfile | null,
   interactionHistory: {
     viewedProducts?: ProductReference[];
-    favoritedProducts?: ProductReference[];
+    savedProducts?: ProductReference[];
     purchasedProducts?: ProductReference[];
     frequentConcerns?: string[];
   }
@@ -204,7 +204,7 @@ export function initializeMemoryFromContext(
   if (interactionHistory) {
     memory.productHistory = {
       viewed: interactionHistory.viewedProducts || [],
-      saved: interactionHistory.favoritedProducts || [],
+      saved: interactionHistory.savedProducts || [],
       purchased: interactionHistory.purchasedProducts || [],
       discussed: [],
     };

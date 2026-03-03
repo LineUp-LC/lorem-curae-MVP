@@ -57,29 +57,6 @@ const tutorialSteps: TutorialStep[] = [
     position: 'right',
     scrollBlock: 'center',
   },
-  {
-    id: 'notes-tab',
-    title: 'Routine Notes',
-    description: 'Switch to the "Routine Notes" tab to journal how your skin looks and feels. Add photos, track reactions, and note what\'s working.',
-    icon: 'ri-file-text-line',
-    targetSelector: '[title="Track daily observations and skin progress"]',
-    position: 'bottom',
-    scrollBlock: 'center',
-  },
-  {
-    id: 'progress-assessment',
-    title: 'Progress Assessment',
-    description: 'In the Notes tab, use "Progress Assessment" to analyze your skincare journey over a selected time period, receiving personalized insights and suggestions.',
-    icon: 'ri-line-chart-line',
-    targetSelector: '[data-tutorial="progress-assessment"]',
-    position: 'bottom',
-    scrollBlock: 'center',
-    action: () => {
-      // Click the Notes tab to switch to it
-      const notesTab = document.querySelector('[title="Track daily observations and skin progress"]') as HTMLElement;
-      if (notesTab) notesTab.click();
-    },
-  },
 ];
 
 interface RoutineTutorialProps {

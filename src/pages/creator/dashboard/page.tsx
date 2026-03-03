@@ -1,11 +1,7 @@
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { fadeInUp, transitions } from '@/lib/motion/motionVariants';
-
-// Mock creator data (will be replaced with real auth later)
-const creator = {
-  display_name: 'Dr. Skin Example',
-  email: 'creator@example.com',
-};
+import { useAuth } from '@/lib/auth/AuthContext';
 
 // Sidebar navigation items
 const NAV_ITEMS = [
@@ -49,7 +45,7 @@ const COMING_SOON_FEATURES = [
   },
   {
     title: 'Earnings & Payouts',
-    description: 'Track your revenue from programs, affiliate commissions, and manage your payout preferences.',
+    description: 'When available: Track revenue from programs and commissions, and manage payout preferences.',
   },
 ];
 
@@ -303,6 +299,13 @@ function ComingSoonCard({ title, description }: { title: string; description: st
 // Main Dashboard Page
 export default function CreatorDashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, profile } = useAuth();
+
+  // Derive creator display data from real auth
+  const creator = {
+    display_name: profile?.full_name || user?.email?.split('@')[0] || 'Creator',
+    email: user?.email || '',
+  };
 
   return (
     <div className="min-h-screen bg-cream flex">

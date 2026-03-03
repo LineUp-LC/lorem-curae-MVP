@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { supabase } from '../../lib/supabase-browser';
 import { UserProfile, SubscriptionPlanRow } from '../../lib/supabase';
 
@@ -95,7 +93,6 @@ export default function SubscriptionPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         {/* Hero Section */}
@@ -410,7 +407,6 @@ export default function SubscriptionPage() {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 }

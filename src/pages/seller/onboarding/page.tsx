@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 interface OnboardingData {
   businessType: 'products' | 'services' | '';
@@ -358,7 +356,6 @@ export default function SellerOnboardingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Navbar />
       
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Header */}
@@ -432,7 +429,6 @@ export default function SellerOnboardingPage() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

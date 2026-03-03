@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const PrivacyPage = () => {
   useEffect(() => {
@@ -19,7 +17,6 @@ const PrivacyPage = () => {
 
   return (
     <div className="min-h-screen bg-cream-50">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-4xl mx-auto px-6 lg:px-12">
@@ -184,7 +181,6 @@ const PrivacyPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

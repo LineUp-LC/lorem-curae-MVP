@@ -5,7 +5,7 @@
  */
 
 import { supabase } from '../supabase-browser';
-import { favoritesState } from '../utils/favoritesState';
+import { savedProductsState } from '../utils/favoritesState';
 import { recentlyViewedState } from '../utils/recentlyViewedState';
 import type {
   AIChatRequest,
@@ -32,14 +32,14 @@ const AI_CHAT_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/
  */
 export function getClientContext(): AIChatRequest['clientContext'] {
   try {
-    // Get favorited products
-    const favorites = favoritesState.getFavorites();
-    const favoritedProducts: ProductReference[] = favorites.map((f) => ({
-      id: f.id,
-      name: f.name,
-      brand: f.brand,
-      category: f.category,
-      savedAt: f.savedAt,
+    // Get saved products
+    const saved = savedProductsState.getSavedProducts();
+    const savedProducts: ProductReference[] = saved.map((p) => ({
+      id: p.id,
+      name: p.name,
+      brand: p.brand,
+      category: p.category,
+      savedAt: p.savedAt,
     }));
 
     // Get recently viewed products
@@ -52,9 +52,9 @@ export function getClientContext(): AIChatRequest['clientContext'] {
       viewedAt: v.viewedAt,
     }));
 
-    // Derive frequent categories from viewed and favorited
+    // Derive frequent categories from viewed and saved
     const categoryCount: Record<string, number> = {};
-    [...favoritedProducts, ...viewedProducts].forEach((p) => {
+    [...savedProducts, ...viewedProducts].forEach((p) => {
       if (p.category) {
         categoryCount[p.category] = (categoryCount[p.category] || 0) + 1;
       }
@@ -77,7 +77,7 @@ export function getClientContext(): AIChatRequest['clientContext'] {
 
     return {
       viewedProducts: viewedProducts.slice(0, 20),
-      favoritedProducts: favoritedProducts.slice(0, 20),
+      savedProducts: savedProducts.slice(0, 20),
       frequentCategories,
       recentSearches,
     };

@@ -1,11 +1,8 @@
 import { Link } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 const StorefrontJoinPage = () => {
   return (
     <div className="min-h-screen bg-[#FDF8F5]">
-      <Navbar />
       
       <main className="pt-24">
         {/* Hero Section */}
@@ -396,7 +393,6 @@ const StorefrontJoinPage = () => {
         </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

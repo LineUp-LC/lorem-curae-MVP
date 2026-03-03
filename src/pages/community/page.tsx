@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 import { supabase, UserProfile, Community, CommunityPost } from '../../lib/supabase';
 
 export default function CommunityPage() {
@@ -202,7 +200,6 @@ export default function CommunityPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -569,7 +566,6 @@ export default function CommunityPage() {
         </div>
       )}
 
-      <Footer />
     </div>
   );
 }

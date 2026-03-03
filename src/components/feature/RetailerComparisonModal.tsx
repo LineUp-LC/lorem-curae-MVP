@@ -1,5 +1,3 @@
-import { useMemo } from 'react';
-
 interface Retailer {
   id: number;
   name: string;
@@ -30,24 +28,6 @@ export default function RetailerComparisonModal({
   retailers,
   onRemoveRetailer,
 }: RetailerComparisonModalProps) {
-  // Calculate highlights for comparison
-  const highlights = useMemo(() => {
-    if (retailers.length < 2) return {};
-
-    const prices = retailers.map(r => r.totalPrice);
-    const trustScores = retailers.map(r => r.trustScore);
-    const deliveryDays = retailers.map(r => parseInt(r.deliveryDays.split('-')[0]));
-
-    return {
-      minPrice: Math.min(...prices),
-      maxPrice: Math.max(...prices),
-      maxTrust: Math.max(...trustScores),
-      minTrust: Math.min(...trustScores),
-      minDelivery: Math.min(...deliveryDays),
-      maxDelivery: Math.max(...deliveryDays),
-    };
-  }, [retailers]);
-
   if (!isOpen) return null;
 
   return (
@@ -66,9 +46,9 @@ export default function RetailerComparisonModal({
               <i className="ri-store-2-line text-xl text-primary"></i>
             </div>
             <div>
-              <h2 className="text-xl font-serif font-bold text-deep">Store Comparison</h2>
+              <h2 className="text-xl font-serif font-bold text-deep">Available Stores</h2>
               <p className="text-sm text-warm-gray">
-                Comparing {retailers.length} stores side by side
+                {retailers.length} {retailers.length === 1 ? 'store' : 'stores'} carrying this product
               </p>
             </div>
           </div>
@@ -82,16 +62,10 @@ export default function RetailerComparisonModal({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
-          {/* Comparison Grid */}
+          {/* Retailer Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {retailers.map((retailer) => {
-              const isBestPrice = retailers.length >= 2 && retailer.totalPrice === highlights.minPrice;
-              const isHighestPrice = retailers.length >= 2 && retailer.totalPrice === highlights.maxPrice && highlights.minPrice !== highlights.maxPrice;
               const hasFreeShipping = retailer.shipping === 0;
-              const isHighestTrust = retailers.length >= 2 && retailer.trustScore === highlights.maxTrust;
-              const isLowestTrust = retailers.length >= 2 && retailer.trustScore === highlights.minTrust && highlights.minTrust !== highlights.maxTrust;
-              const isFastestDelivery = retailers.length >= 2 && parseInt(retailer.deliveryDays.split('-')[0]) === highlights.minDelivery;
-              const isSlowestDelivery = retailers.length >= 2 && parseInt(retailer.deliveryDays.split('-')[0]) === highlights.maxDelivery && highlights.minDelivery !== highlights.maxDelivery;
 
               return (
                 <div
@@ -132,18 +106,8 @@ export default function RetailerComparisonModal({
                   {/* Retailer Info */}
                   <div className="p-4 space-y-3">
                     {/* Total Price */}
-                    <div className={`p-3 rounded-xl transition-all ${
-                      isBestPrice ? 'bg-sage/20 ring-2 ring-sage' : isHighestPrice ? 'bg-orange-50 ring-2 ring-orange-400' : 'bg-white'
-                    }`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-warm-gray">Total Price</p>
-                        {isBestPrice && (
-                          <span className="px-2 py-0.5 bg-sage text-white text-xs rounded-full font-semibold">Best Price</span>
-                        )}
-                        {isHighestPrice && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">Highest</span>
-                        )}
-                      </div>
+                    <div className="p-3 rounded-xl bg-white">
+                      <p className="text-xs font-semibold text-warm-gray mb-1">Total Price</p>
                       <span className="text-2xl font-bold text-deep">${retailer.totalPrice.toFixed(2)}</span>
                     </div>
 
@@ -155,9 +119,9 @@ export default function RetailerComparisonModal({
                       </div>
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-warm-gray">Shipping:</span>
-                        <span className={`text-sm font-medium ${hasFreeShipping ? 'text-sage font-semibold' : 'text-deep'}`}>
+                        <span className={`text-sm font-medium ${hasFreeShipping ? 'text-green-600 font-semibold' : 'text-deep'}`}>
                           {retailer.shipping === 0 ? 'FREE' : `$${retailer.shipping.toFixed(2)}`}
-                          {hasFreeShipping && <i className="ri-check-line ml-1 text-sage"></i>}
+                          {hasFreeShipping && <i className="ri-check-line ml-1 text-green-600"></i>}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
@@ -167,23 +131,13 @@ export default function RetailerComparisonModal({
                     </div>
 
                     {/* Trust Score */}
-                    <div className={`p-3 rounded-xl transition-all ${
-                      isHighestTrust ? 'bg-sage/20 ring-2 ring-sage' : isLowestTrust ? 'bg-orange-50 ring-2 ring-orange-400' : 'bg-white'
-                    }`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-warm-gray">Trust Score</p>
-                        {isHighestTrust && (
-                          <span className="px-2 py-0.5 bg-sage text-white text-xs rounded-full font-semibold">Highest</span>
-                        )}
-                        {isLowestTrust && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">Lowest</span>
-                        )}
-                      </div>
+                    <div className="p-3 rounded-xl bg-white">
+                      <p className="text-xs font-semibold text-warm-gray mb-1">Trust Score</p>
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-4 bg-gray-200 rounded-full overflow-hidden border border-gray-300 shadow-inner">
                           <div
                             className={`h-full rounded-full transition-all ${
-                              retailer.trustScore >= 9 ? 'bg-gradient-to-r from-sage to-sage/80' : retailer.trustScore >= 8 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-orange-500 to-orange-400'
+                              retailer.trustScore >= 9 ? 'bg-gradient-to-r from-green-500 to-green-400' : retailer.trustScore >= 8 ? 'bg-gradient-to-r from-amber-500 to-amber-400' : 'bg-gradient-to-r from-orange-500 to-orange-400'
                             }`}
                             style={{ width: `${(retailer.trustScore / 10) * 100}%` }}
                           />
@@ -193,18 +147,8 @@ export default function RetailerComparisonModal({
                     </div>
 
                     {/* Delivery */}
-                    <div className={`p-3 rounded-xl transition-all ${
-                      isFastestDelivery ? 'bg-sage/20 ring-2 ring-sage' : isSlowestDelivery ? 'bg-orange-50 ring-2 ring-orange-400' : 'bg-white'
-                    }`}>
-                      <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-warm-gray">Delivery</p>
-                        {isFastestDelivery && (
-                          <span className="px-2 py-0.5 bg-sage text-white text-xs rounded-full font-semibold">Fastest</span>
-                        )}
-                        {isSlowestDelivery && (
-                          <span className="px-2 py-0.5 bg-orange-500 text-white text-xs rounded-full font-semibold">Slowest</span>
-                        )}
-                      </div>
+                    <div className="p-3 rounded-xl bg-white">
+                      <p className="text-xs font-semibold text-warm-gray mb-1">Delivery</p>
                       <div className="flex items-center gap-2">
                         <i className="ri-truck-line text-warm-gray"></i>
                         <span className="text-sm font-medium text-deep">{retailer.deliveryDays} days</span>
@@ -231,8 +175,8 @@ export default function RetailerComparisonModal({
                       <div className="flex items-center gap-2">
                         {retailer.inStock ? (
                           <>
-                            <i className="ri-checkbox-circle-fill text-sage"></i>
-                            <span className="text-sm font-medium text-sage">In Stock</span>
+                            <i className="ri-checkbox-circle-fill text-green-600"></i>
+                            <span className="text-sm font-medium text-green-600">In Stock</span>
                           </>
                         ) : (
                           <>
@@ -263,29 +207,6 @@ export default function RetailerComparisonModal({
             })}
           </div>
 
-          {/* Legend */}
-          <div className="mt-6 p-4 bg-cream rounded-xl">
-            <div className="flex flex-wrap gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-sage rounded"></div>
-                <span className="text-sm text-warm-gray">Best Value</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-orange-500 rounded"></div>
-                <span className="text-sm text-warm-gray">Lowest Value / Priciest</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Close Button */}
-          <div className="mt-6 text-center">
-            <button
-              onClick={onClose}
-              className="px-8 py-3 bg-gray-100 text-gray-700 rounded-full font-semibold hover:bg-gray-200 transition-all cursor-pointer"
-            >
-              Close Comparison
-            </button>
-          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,3 @@
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 /**
  * AboutPage Component
@@ -11,7 +9,6 @@ import Footer from '../../components/feature/Footer';
 const AboutPage = () => {
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
 
       <main className="pt-24 pb-16">
         {/* Hero Section */}
@@ -24,7 +21,7 @@ const AboutPage = () => {
               We believe skincare should be simple, honest, and built around you
             </h1>
             <p className="text-lg text-warm-gray leading-relaxed">
-              Lorem Curae—Latin for "Customer Care"—is more than a name. It's our promise to put you first at every step of your skincare journey.
+              Lorem Curae (Latin for "Customer Care") is more than a name. It's our promise to put you first at every step of your skincare journey.
             </p>
           </div>
         </section>
@@ -94,15 +91,15 @@ const AboutPage = () => {
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
                     <i className="ri-check-line text-primary mt-1"></i>
-                    <span className="text-warm-gray"><strong className="text-deep">Honesty</strong> — Transparent information so you can make informed choices.</span>
+                    <span className="text-warm-gray"><strong className="text-deep">Honesty</strong>: Transparent information so you can make informed choices.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <i className="ri-check-line text-primary mt-1"></i>
-                    <span className="text-warm-gray"><strong className="text-deep">Authenticity</strong> — Real stories, real results, no false promises.</span>
+                    <span className="text-warm-gray"><strong className="text-deep">Authenticity</strong>: Real stories, real results, no false promises.</span>
                   </li>
                   <li className="flex items-start gap-3">
                     <i className="ri-check-line text-primary mt-1"></i>
-                    <span className="text-warm-gray"><strong className="text-deep">Care</strong> — Your journey is our priority, every step of the way.</span>
+                    <span className="text-warm-gray"><strong className="text-deep">Care</strong>: Your journey is our priority, every step of the way.</span>
                   </li>
                 </ul>
               </div>
@@ -167,15 +164,6 @@ const AboutPage = () => {
             </div>
 
             <div className="bg-white rounded-2xl p-8 md:p-10 border border-warm-gray/10">
-              <div className="relative rounded-xl overflow-hidden mb-8 group cursor-pointer">
-                <div className="aspect-video bg-gradient-to-br from-blush to-cream"></div>
-                <div className="absolute inset-0 flex items-center justify-center bg-deep/30">
-                  <div className="w-16 h-16 flex items-center justify-center bg-white rounded-full shadow-lg group-hover:scale-110 transition-transform">
-                    <i className="ri-play-fill text-3xl text-primary ml-1"></i>
-                  </div>
-                </div>
-              </div>
-
               <blockquote className="text-lg text-warm-gray leading-relaxed italic text-center mb-6">
                 "I started Lorem Curae because I was tired of spending countless hours researching products that didn't work for my skin. I wanted to create a space where everyone could find their perfect skincare match without the overwhelm."
               </blockquote>
@@ -187,39 +175,8 @@ const AboutPage = () => {
           </div>
         </section>
 
-        {/* Subtle Divider */}
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-warm-gray/20"></div>
-        </div>
-
-        {/* CTA Section */}
-        <section className="py-16 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-2xl mx-auto text-center">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-deep mb-4">
-              Join Our Community
-            </h2>
-            <p className="text-warm-gray mb-8">
-              Start your personalized skincare journey today
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <a
-                href="/auth/signup"
-                className="px-8 py-3 bg-primary hover:bg-dark text-white rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer"
-              >
-                Get Started
-              </a>
-              <a
-                href="/skin-survey"
-                className="px-8 py-3 bg-white border-2 border-primary text-deep hover:bg-cream rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer"
-              >
-                Take the Quiz
-              </a>
-            </div>
-          </div>
-        </section>
       </main>
 
-      <Footer />
     </div>
   );
 };

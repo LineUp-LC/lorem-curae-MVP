@@ -1,16 +1,18 @@
 import { useEffect, useRef } from 'react';
-import ConflictDetection from './ConflictDetection';
+import ConflictDetection, { type LiveConflict } from './ConflictDetection';
 
 interface ConflictDetectionPopupProps {
   isOpen: boolean;
   onClose: () => void;
   conflictCount: number;
+  liveConflicts?: LiveConflict[];
 }
 
 export default function ConflictDetectionPopup({
   isOpen,
   onClose,
   conflictCount,
+  liveConflicts = [],
 }: ConflictDetectionPopupProps) {
   const popupRef = useRef<HTMLDivElement>(null);
   const previousActiveElement = useRef<HTMLElement | null>(null);
@@ -112,7 +114,7 @@ export default function ConflictDetectionPopup({
 
         {/* Content - scrollable */}
         <div className="flex-1 overflow-y-auto p-6 bg-cream">
-          <ConflictDetection />
+          <ConflictDetection liveConflicts={liveConflicts} />
         </div>
 
         {/* Footer */}
@@ -120,7 +122,7 @@ export default function ConflictDetectionPopup({
           <div className="flex items-center justify-between">
             <p className="text-xs text-warm-gray flex items-center gap-1">
               <i className="ri-information-line"></i>
-              Powered by dermatological research
+              Based on ingredient compatibility data
             </p>
             <button
               onClick={onClose}

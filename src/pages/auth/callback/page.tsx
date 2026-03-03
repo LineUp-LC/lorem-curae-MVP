@@ -5,11 +5,27 @@ import { supabase } from '../../../lib/supabase';
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
+  const [callbackType, setCallbackType] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
     const handleCallback = async () => {
       try {
+        // Handle PKCE code exchange (Supabase v2 flow)
+        const searchParams = new URLSearchParams(window.location.search);
+        const code = searchParams.get('code');
+        if (code) {
+          const { error: codeError } = await supabase.auth.exchangeCodeForSession(code);
+          if (codeError) {
+            setStatus('error');
+            setErrorMessage(codeError.message);
+            return;
+          }
+          setStatus('success');
+          setTimeout(() => navigate('/account'), 2000);
+          return;
+        }
+
         // Get the URL hash parameters (Supabase sends tokens in the hash)
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
@@ -37,8 +53,17 @@ const AuthCallbackPage = () => {
             return;
           }
 
+          // Check if this is a password recovery flow
+          const type = hashParams.get('type');
+          if (type === 'recovery') {
+            // Redirect to reset password page
+            navigate('/auth/reset-password');
+            return;
+          }
+
+          setCallbackType(type);
           setStatus('success');
-          
+
           // Redirect to account after a short delay
           setTimeout(() => {
             navigate('/account');
@@ -96,10 +121,12 @@ const AuthCallbackPage = () => {
                 <i className="ri-check-line text-3xl text-taupe"></i>
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-4">
-                Email verified!
+                {callbackType === 'email_change' ? 'Email updated' : 'Email verified'}
               </h1>
               <p className="text-gray-600 mb-6">
-                Your account has been verified successfully. Redirecting you to your account...
+                {callbackType === 'email_change'
+                  ? 'Your email address has been updated successfully. Redirecting you to your account...'
+                  : 'Your account has been verified successfully. Redirecting you to your account...'}
               </p>
               <div className="flex items-center justify-center gap-2 text-taupe">
                 <i className="ri-loader-4-line animate-spin"></i>

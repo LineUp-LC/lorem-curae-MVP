@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
+import { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase-browser';
 import { sessionState } from '../../../lib/utils/sessionState';
+import { useAuth } from '../../../lib/auth/AuthContext';
+import AIInsightBlock from '../../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
 
 
 interface SurveyData {
@@ -29,6 +30,7 @@ interface SurveyData {
 
 const SurveyResultsPage = () => {
   const navigate = useNavigate();
+  const { refreshProfile } = useAuth();
   const [surveyData, setSurveyData] = useState<SurveyData | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
 
@@ -95,27 +97,52 @@ const SurveyResultsPage = () => {
     const saveSkinType = async () => {
       if (!surveyData || !surveyData.skinTypes) return;
 
-      console.log("Saving skin type:", surveyData.skinTypes[0]);
-
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
 
-      console.log("User:", user);
+      if (userError || !user) return;
 
-      if (userError || !user) {
-        console.error("No logged-in user, cannot save skin type");
-        return;
-      }
+      // Build full survey data for preferences
+      const fullSurveyData = {
+        skinTypes: surveyData.skinTypes,
+        concerns: surveyData.concerns,
+        allergens: surveyData.allergens,
+        complexion: surveyData.complexion,
+        acneTypes: surveyData.acneTypes,
+        scarringTypes: surveyData.scarringTypes,
+        preferences: surveyData.preferences,
+        lifestyle: surveyData.lifestyle,
+        goals: surveyData.goals,
+        sensitivities: surveyData.sensitivities,
+        routinePreference: surveyData.routinePreference,
+        budgetRange: surveyData.budgetRange,
+        completedAt: new Date().toISOString(),
+      };
+
+      // Fetch existing preferences to MERGE (not overwrite)
+      const { data: existing } = await supabase
+        .from("users_profiles")
+        .select("preferences")
+        .eq("id", user.id)
+        .single();
+
+      const existingPrefs = (existing?.preferences as Record<string, any>) || {};
 
       const { error } = await supabase
         .from("users_profiles")
         .upsert(
           {
             id: user.id,
-            skin_type: surveyData.skinTypes[0] || "Normal",
+            skin_type: (surveyData.skinTypes[0] || "normal").toLowerCase(),
             concerns: surveyData.concerns || [],
+            preferences: {
+              ...existingPrefs,
+              surveyAnswers: fullSurveyData,
+              allergens: surveyData.allergens || [],
+              fitzpatrickType: surveyData.complexion || null,
+            },
           },
           { onConflict: "id" }
         );
@@ -123,7 +150,8 @@ const SurveyResultsPage = () => {
       if (error) {
         console.error("Supabase error:", error);
       } else {
-        console.log("Skin type saved successfully");
+        // Refresh AuthContext profile so /account and other pages see updated data
+        await refreshProfile();
       }
     };
 
@@ -361,6 +389,44 @@ const SurveyResultsPage = () => {
     return products.slice(0, 6);
   };
 
+  const surveyAIContext = useMemo(() => {
+    if (!surveyData) return null;
+
+    const surveyAnswers: Record<string, unknown> = {
+      skinTypes: surveyData.skinTypes,
+      concerns: surveyData.concerns,
+      goals: surveyData.goals,
+      sensitivities: surveyData.sensitivities,
+      complexion: surveyData.complexion,
+      allergens: surveyData.allergens,
+      preferences: surveyData.preferences,
+      routinePreference: surveyData.routinePreference,
+      budgetRange: surveyData.budgetRange,
+      lifestyle: surveyData.lifestyle,
+    };
+
+    const generatedProfile = {
+      skinType: surveyData.skinTypes?.[0] ?? null,
+      concerns: surveyData.concerns || [],
+      complexion: surveyData.complexion || '',
+      sensitivity: surveyData.sensitivities?.length ? 'sensitive' : 'normal',
+      lifestyle: Array.isArray(surveyData.lifestyle) ? surveyData.lifestyle : [],
+      preferences: {
+        fragranceFree: surveyData.preferences?.includes('Fragrance-free') ?? false,
+        crueltyFree: surveyData.preferences?.includes('Cruelty-Free') ?? false,
+        vegan: surveyData.preferences?.includes('Vegan') ?? false,
+      },
+    };
+
+    return buildAIContext('survey_results', {
+      page: {
+        mode: 'survey_results',
+        surveyAnswers,
+        generatedProfile,
+      },
+    });
+  }, [surveyData]);
+
   if (!surveyData || !recommendations) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
@@ -374,7 +440,6 @@ const SurveyResultsPage = () => {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       
       <main className="max-w-6xl mx-auto px-6 lg:px-12 py-24">
         <div className="text-center mb-12">
@@ -417,6 +482,13 @@ const SurveyResultsPage = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Personalised Roadmap */}
+        {surveyAIContext && (
+          <div className="mb-8">
+            <AIInsightBlock context={surveyAIContext} />
+          </div>
+        )}
 
         {/* Routine Recommendation */}
         <div className="bg-gradient-to-br from-light/20 to-cream rounded-xl p-8 border border-blush mb-8">
@@ -524,7 +596,6 @@ const SurveyResultsPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

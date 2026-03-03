@@ -20,9 +20,12 @@ import { CSS } from '@dnd-kit/utilities';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import { routineProgressState } from '../../../lib/utils/routineProgressState';
 import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
+import { checkMultipleCompatibility, type CompatibilityResult } from '../../../lib/ai/ingredientIntelligence';
 import ConflictDetectionPopup from './ConflictDetectionPopup';
 import ProductPickerModal from './ProductPickerModal';
 import CustomStepModal from './CustomStepModal';
+import AIInsightBlock from '../../../components/feature/AIInsightBlock';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
 
 interface Product {
   id: string;
@@ -263,12 +266,12 @@ interface RoutineBuilderProps {
   onAddStep?: (step: any) => void;
   onRemoveStep?: (stepId: string) => void;
   onReorderSteps?: (steps: any[]) => void;
-  onSave?: () => void;
+  onSave?: (data: { morningSteps: RoutineStep[], eveningSteps: RoutineStep[] }) => void;
   onBrowseClick?: () => void;
 }
 
 // FIX #4a: Added onSave to destructured props
-export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilderProps) {
+export default function RoutineBuilder({ steps: initialSteps, onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
 
   // Initialize time filter - default to morning
@@ -276,7 +279,9 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     'routine_builder_time_filter',
     'morning'
   );
-  const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(templateSteps);
+  const [routineSteps, setRoutineSteps] = useState<RoutineStep[]>(
+    initialSteps && initialSteps.length > 0 ? initialSteps : templateSteps
+  );
 
   // Check for unfinished session on mount and restore if needed
   useEffect(() => {
@@ -501,8 +506,42 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     });
   };
 
-  // Mock conflict count - in real app this would come from conflict detection logic
-  const conflictCount = 2;
+  // Compute live conflicts from actual products in routine
+  const liveConflicts = useMemo(() => {
+    // Gather product names/categories from all steps that have products
+    const productNames = routineSteps
+      .filter(s => s.product)
+      .map(s => s.product!.name.toLowerCase());
+
+    if (productNames.length < 2) return [];
+
+    return checkMultipleCompatibility(productNames);
+  }, [routineSteps]);
+
+  const conflictCount = liveConflicts.length;
+
+  // Build AI context for routine analysis
+  const routineAIContext = useMemo(() => {
+    const filtered = routineSteps.filter(s => s.timeOfDay === timeFilter);
+    if (filtered.length === 0) return null;
+    return buildAIContext('routine_builder', {
+      page: {
+        mode: 'routine_builder',
+        steps: filtered.map(s => ({
+          title: s.title,
+          product: s.product ? { name: s.product.name, keyIngredients: [] } : undefined,
+        })),
+        timeOfDay: timeFilter,
+      },
+      evidence: {
+        ingredientConflicts: liveConflicts.map(c => ({
+          ingredients: c.pair,
+          severity: (c.result.level === 'avoid' ? 'critical' : c.result.level === 'caution' ? 'warning' : 'info') as 'critical' | 'warning' | 'info',
+          message: c.result.reason,
+        })),
+      },
+    });
+  }, [routineSteps, timeFilter, liveConflicts]);
 
   // Feature 2: Routine Completion Tracker with daily reset
   const [completedSteps, setCompletedSteps] = useLocalStorageState<{
@@ -671,11 +710,13 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
     setShowBrowseModal(false);
   };
 
-  // Handle save with confirmation
+  // Handle save with confirmation — saves both AM + PM
   const handleSaveWithConfirmation = () => {
-    // Call the parent's onSave
+    const morningSteps = routineSteps.filter(s => s.timeOfDay === 'morning');
+    const eveningSteps = routineSteps.filter(s => s.timeOfDay === 'evening');
+
     if (onSave) {
-      onSave();
+      onSave({ morningSteps, eveningSteps });
     }
 
     // Mark session as complete (routine saved)
@@ -802,6 +843,18 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Save Routine Button */}
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={handleSaveWithConfirmation}
+          className="group relative px-5 py-2 rounded-lg text-sm font-medium cursor-pointer flex items-center gap-2 tracking-wide transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 bg-gradient-to-r from-[#C4704D] to-[#8B4D35] text-white shadow-md shadow-[#C4704D]/20"
+        >
+          <i className="ri-save-line text-base transition-transform duration-300 group-hover:scale-110"></i>
+          <span>Save Routine</span>
+          <i className="ri-arrow-right-line text-sm opacity-0 -translate-x-2 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0"></i>
+        </button>
       </div>
 
       {/* Prominent Routine Type Header */}
@@ -1001,6 +1054,13 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           </div>
       </DndContext>
 
+      {/* AI Routine Analysis */}
+      {routineAIContext && (
+        <div className="mb-6">
+          <AIInsightBlock context={routineAIContext} compact />
+        </div>
+      )}
+
       {/* Tips Section - Rotating Tips */}
       <div className="p-4 bg-gradient-to-r from-cream to-white rounded-xl mb-8 border border-blush/50">
         <div className="flex items-center gap-3">
@@ -1065,27 +1125,17 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
           }`}
           role="status"
           aria-live="polite"
-          aria-label={`${saveConfirmation.routineType === 'morning' ? 'Morning routine' : 'Evening routine'} saved successfully`}
+          aria-label="Routine saved successfully"
         >
           <div className="bg-white rounded-2xl shadow-2xl border border-blush/50 p-5 min-w-[320px] max-w-[400px]">
             <div className="flex items-start gap-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                saveConfirmation.routineType === 'morning'
-                  ? 'bg-amber-100'
-                  : 'bg-indigo-100'
-              }`}>
-                <i className={`text-2xl ${
-                  saveConfirmation.routineType === 'morning'
-                    ? 'ri-sun-line text-amber-600'
-                    : 'ri-moon-line text-indigo-600'
-                }`}></i>
+              <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 bg-sage/20">
+                <i className="ri-check-double-line text-2xl text-sage"></i>
               </div>
               <div className="flex-1">
                 <div className="flex items-start justify-between gap-2 mb-1">
                   <h4 className="font-serif text-lg font-semibold text-deep">
-                    {saveConfirmation.routineType === 'morning'
-                      ? 'Morning Routine Saved'
-                      : 'Evening Routine Saved'}
+                    Routines Saved
                   </h4>
                   <button
                     onClick={() => setSaveConfirmation(null)}
@@ -1096,16 +1146,12 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
                   </button>
                 </div>
                 <p className="text-sm text-warm-gray leading-relaxed">
-                  {saveConfirmation.routineType === 'morning'
-                    ? 'Your morning routine is ready to help you start the day with glowing skin.'
-                    : 'Your evening routine is set to work its magic while you rest.'}
+                  Your morning and evening routines have been saved successfully.
                 </p>
                 <div className="mt-3 pt-3 border-t border-blush/30">
                   <p className="text-xs text-warm-gray/70 flex items-center gap-1">
                     <i className="ri-lightbulb-line"></i>
-                    {saveConfirmation.routineType === 'morning'
-                      ? 'Tip: Consistency is key — try to follow your routine daily.'
-                      : 'Tip: Apply products on clean, slightly damp skin for better absorption.'}
+                    Tip: Consistency is key — try to follow your routine daily.
                   </p>
                 </div>
               </div>
@@ -1119,6 +1165,7 @@ export default function RoutineBuilder({ onBrowseClick, onSave }: RoutineBuilder
         isOpen={showConflictPopup}
         onClose={() => setShowConflictPopup(false)}
         conflictCount={conflictCount}
+        liveConflicts={liveConflicts}
       />
 
       {/* Product Browse Modal */}

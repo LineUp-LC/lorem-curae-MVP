@@ -14,7 +14,7 @@ const RewardsSection = () => {
               Get rewarded for your skincare journey
             </h3>
             <p className="text-lg text-slate-600 mb-6 leading-relaxed">
-              Earn Curae Points when you shop, review products, complete your <a href="/skin-survey" className="text-taupe hover:text-taupe-700 font-medium underline" title="Take skin assessment">skin assessment</a>, and engage with our community. Redeem points for exclusive perks, early access to features, and future discounts.
+              Earn Curae Points when you shop, review products, complete your <Link to="/skin-survey" className="text-taupe hover:text-taupe-700 font-medium underline" title="Take skin assessment">skin assessment</Link>, and engage with our community. Redeem points for exclusive perks, early access to features, and future discounts.
             </p>
             
             {/* Points earning examples */}

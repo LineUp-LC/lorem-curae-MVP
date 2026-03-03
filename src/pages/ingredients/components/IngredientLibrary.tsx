@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
+import { INGREDIENT_CATEGORIES } from '../../../lib/utils/ingredientCategoryRegistry';
 
 interface IngredientLibraryProps {
   onSelectIngredient: (id: string) => void;
@@ -29,6 +29,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedConcern, setSelectedConcern] = useState<string | null>(null);
+  const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
 
   // Load user profile from skinSurveyData
@@ -57,15 +58,6 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       });
     }
   }, []);
-
-  const categories = [
-    { id: 'all', name: 'All Ingredients', icon: 'ri-grid-line' },
-    { id: 'hydration', name: 'Hydration', icon: 'ri-drop-line' },
-    { id: 'brightening', name: 'Brightening', icon: 'ri-sun-line' },
-    { id: 'antiaging', name: 'Anti-Aging', icon: 'ri-time-line' },
-    { id: 'soothing', name: 'Soothing', icon: 'ri-heart-line' },
-    { id: 'exfoliation', name: 'Exfoliation', icon: 'ri-contrast-drop-2-line' },
-  ];
 
   const ingredients = [
     {
@@ -202,7 +194,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
       scientificName: 'Beta Hydroxy Acid (BHA)',
       rating: 4.5,
       reviews: 1765,
-      benefits: ['Exfoliation', 'Pore Clearing', 'Acne Treatment'],
+      benefits: ['Exfoliation', 'Pore Clearing', 'Acne Support'],
       description: 'A BHA that penetrates pores to clear congestion and prevent breakouts.',
       icon: 'ri-contrast-drop-2-line',
       color: 'text-primary',
@@ -402,25 +394,75 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
           </div>
         )}
 
-        {/* Category Filter */}
-        <div className="mb-6 sm:mb-8">
-          <h3 className="text-sm font-semibold text-warm-gray mb-3">Categories</h3>
-          <div className="flex flex-nowrap overflow-x-auto scrollbar-hide gap-2 xs:gap-3 pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 sm:flex-wrap sm:overflow-visible">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
-                className={`flex items-center space-x-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer flex-shrink-0 ${
-                  selectedCategory === category.id
-                    ? 'bg-primary text-white shadow-md'
-                    : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
-                }`}
-              >
-                <i className={`${category.icon} text-base`}></i>
-                <span>{category.name}</span>
-              </button>
-            ))}
-          </div>
+        {/* Category Toggle + Dropdown */}
+        <div className="relative mb-4 sm:mb-6">
+          <button
+            onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-blush hover:border-primary/30 transition-colors cursor-pointer shadow-sm"
+          >
+            <i className="ri-grid-line text-base text-primary"></i>
+            <span className="text-sm font-semibold text-deep">Categories</span>
+            <i className={`ri-arrow-${isCategoriesOpen ? 'up' : 'down'}-s-line text-lg text-warm-gray`}></i>
+          </button>
+
+          {/* Dropdown panel — overlays content */}
+          {isCategoriesOpen && (
+            <>
+              {/* Backdrop to close on outside click */}
+              <div
+                className="fixed inset-0 z-30"
+                onClick={() => setIsCategoriesOpen(false)}
+              />
+
+              {/* Mobile: wrapped pills */}
+              <div className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-4 w-full sm:w-auto lg:hidden">
+                <div className="flex flex-wrap gap-2 xs:gap-3">
+                  {INGREDIENT_CATEGORIES.map((category) => (
+                    <button
+                      key={category.value}
+                      onClick={() => {
+                        setSelectedCategory(category.value);
+                        setIsCategoriesOpen(false);
+                      }}
+                      aria-pressed={selectedCategory === category.value}
+                      className={`flex items-center space-x-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
+                        selectedCategory === category.value
+                          ? 'bg-primary text-white shadow-md'
+                          : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
+                      }`}
+                    >
+                      <i className={`${category.icon} text-base`}></i>
+                      <span>{category.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Desktop: vertical list */}
+              <div className="hidden lg:block absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-3 w-56">
+                <div className="space-y-1">
+                  {INGREDIENT_CATEGORIES.map((category) => (
+                    <button
+                      key={category.value}
+                      onClick={() => {
+                        setSelectedCategory(category.value);
+                        setIsCategoriesOpen(false);
+                      }}
+                      aria-pressed={selectedCategory === category.value}
+                      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+                        selectedCategory === category.value
+                          ? 'bg-primary text-white'
+                          : 'text-warm-gray hover:bg-cream hover:text-deep'
+                      }`}
+                    >
+                      <i className={`${category.icon} text-base`}></i>
+                      <span>{category.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
 
         {/* Results Count */}
@@ -433,10 +475,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
         {/* Recommended for You Section */}
         {recommendedIngredients.length > 0 && (
           <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <NeuralBloomIcon size={22} className="text-primary" />
-              </div>
+            <div className="mb-6">
               <div>
                 <h2 className="text-2xl font-bold text-deep">Recommended for You</h2>
                 <p className="text-sm text-warm-gray">
@@ -454,23 +493,10 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                   onClick={() => onSelectIngredient(ingredient.id)}
                   className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border-2 border-primary ring-2 ring-primary/20 cursor-pointer group"
                 >
-                  <div className="mb-3 flex items-center gap-2 flex-wrap">
+                  <div className="mb-3">
                     <span className="inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
-                      <NeuralBloomIcon size={12} className="text-primary" />
                       Recommended for You
                     </span>
-                    {ingredient.hasSimilarReviews && (
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-terracotta/10 text-terracotta text-xs font-semibold rounded-full shadow-sm">
-                        <i className="ri-user-heart-line"></i>
-                        Similar Skin Reviews
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-14 h-14 flex items-center justify-center ${ingredient.bgColor} rounded-full`}>
-                      <i className={`${ingredient.icon} text-2xl ${ingredient.color}`}></i>
-                    </div>
                   </div>
 
                   <h3 className="text-xl font-semibold text-deep mb-1 group-hover:text-primary transition-colors">
@@ -550,21 +576,6 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
                   onClick={() => onSelectIngredient(ingredient.id)}
                   className="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 border border-blush cursor-pointer group"
                 >
-                  {ingredient.hasSimilarReviews && (
-                    <div className="mb-3">
-                      <span className="inline-flex items-center gap-1 px-3 py-1 bg-terracotta/10 text-terracotta text-xs font-semibold rounded-full shadow-sm">
-                        <i className="ri-user-heart-line"></i>
-                        Similar Skin Reviews
-                      </span>
-                    </div>
-                  )}
-
-                  <div className="flex items-start justify-between mb-4">
-                    <div className={`w-14 h-14 flex items-center justify-center ${ingredient.bgColor} rounded-full`}>
-                      <i className={`${ingredient.icon} text-2xl ${ingredient.color}`}></i>
-                    </div>
-                  </div>
-
                   <h3 className="text-xl font-semibold text-deep mb-1 group-hover:text-primary transition-colors">
                     {ingredient.name}
                   </h3>

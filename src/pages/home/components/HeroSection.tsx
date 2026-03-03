@@ -302,7 +302,7 @@ export default function HeroSection() {
           className="lc-hero-subhead"
           variants={heroVariants.subhead}
         >
-          Lorem Curae is one of the only platforms built to connect your unique skin profile with <em>personalized guidance</em>, <em>trusted retailers</em>, <em>ingredient clarity</em>, and <em>community support</em> into one connected experience. Everything works together so you never have to navigate skincare alone — and finally see <em>clarity</em> where there used to be confusion.
+          Lorem Curae is one of the only platforms built to connect your unique skin profile with <em>personalized guidance</em>, <em>trusted retailers</em>, <em>ingredient clarity</em>, and <em>community support</em> into one connected experience. Everything works together so you never have to navigate skincare alone, and finally see <em>clarity</em> where there used to be confusion.
         </motion.p>
 
         {/* Primary CTA */}

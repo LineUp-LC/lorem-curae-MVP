@@ -1,4 +1,7 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import { requestAIInsight } from '../../../lib/ai/surfaceClient';
+import type { ConversationMessage } from '../../../lib/ai/types';
 
 interface Message {
   id: string;
@@ -25,55 +28,77 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = useCallback(async () => {
     if (!inputValue.trim()) return;
+
+    const question = inputValue;
 
     // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       type: 'user',
-      content: inputValue,
+      content: question,
       timestamp: new Date(),
     };
     setMessages(prev => [...prev, userMessage]);
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI response
-    setTimeout(() => {
-      const aiResponse = generateAIResponse(inputValue, productName, noteContent);
+    try {
+      // Build conversation history from current messages (including the new user message)
+      const conversationHistory: ConversationMessage[] = [
+        ...messages.slice(1).map(m => ({
+          role: (m.type === 'user' ? 'user' : 'assistant') as 'user' | 'assistant',
+          content: m.content,
+        })),
+        { role: 'user' as const, content: question },
+      ];
+
+      // Build chat context with product + note data
+      const ctx = buildAIContext('chat', {
+        page: {
+          mode: 'chat',
+          conversationHistory,
+        },
+      });
+
+      // Enrich question with product/note context for the AI
+      let enrichedQuestion = question;
+      if (productName) {
+        enrichedQuestion += ` (Context: the user is asking about the product "${productName}")`;
+      }
+      if (noteContent) {
+        enrichedQuestion += ` (User's notes: "${noteContent}")`;
+      }
+
+      const result = await requestAIInsight(ctx, {
+        skipCache: true,
+        question: enrichedQuestion,
+      });
+
+      const responseText = result.success
+        ? result.insight
+        : result.fallbackInsight || 'I was unable to generate a response right now. Please try again in a moment.';
+
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content: aiResponse,
+        content: responseText,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiMessage]);
+    } catch {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: 'Something went wrong. Please try again in a moment.',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const generateAIResponse = (query: string, product?: string, note?: string): string => {
-    const lowerQuery = query.toLowerCase();
-    
-    if (lowerQuery.includes('recommend') || lowerQuery.includes('suggest')) {
-      return `Based on your notes about ${product || 'this product'}, I recommend:\n\n1. Continue using it consistently for at least 4-6 weeks to see full results\n2. Apply it on clean, dry skin for better absorption\n3. Consider pairing it with a hydrating serum if you experience any dryness\n4. Track your progress with weekly photos to monitor improvements\n\nWould you like specific product recommendations to complement your routine?`;
     }
-    
-    if (lowerQuery.includes('side effect') || lowerQuery.includes('irritation')) {
-      return `If you're experiencing irritation with ${product || 'this product'}, here's what I suggest:\n\n1. Reduce usage frequency (try every other day)\n2. Apply a thin layer of moisturizer first as a buffer\n3. Ensure you're using SPF during the day\n4. If irritation persists after 1 week, discontinue use\n\nWould you like me to recommend gentler alternatives?`;
-    }
-    
-    if (lowerQuery.includes('how long') || lowerQuery.includes('when')) {
-      return `For ${product || 'most skincare products'}, you can typically expect:\n\n• Initial changes: 2-4 weeks\n• Visible improvements: 4-8 weeks\n• Optimal results: 8-12 weeks\n\nConsistency is key! Keep tracking your progress in your notes, and I'll help you analyze the results.`;
-    }
-    
-    if (lowerQuery.includes('ingredient') || lowerQuery.includes('contains')) {
-      return `Great question about ingredients! ${product || 'This product'} likely contains active ingredients that work best when:\n\n1. Used consistently at the same time each day\n2. Applied to slightly damp skin for better penetration\n3. Followed by a moisturizer to lock in benefits\n4. Protected with SPF during daytime use\n\nWould you like me to explain any specific ingredients?`;
-    }
-    
-    return `Thank you for your question about ${product || 'your skincare'}! Based on your notes, I can see you're making progress. Here are some personalized tips:\n\n1. Keep documenting your observations - your notes are very helpful!\n2. Be patient - skincare results take time\n3. Stay consistent with your routine\n4. Consider taking progress photos weekly\n\nIs there anything specific you'd like to know more about?`;
-  };
+  }, [inputValue, messages, productName, noteContent]);
 
   const quickPrompts = [
     'How long until I see results?',

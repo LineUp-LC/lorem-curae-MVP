@@ -3,7 +3,6 @@ out/
 dist/
 .env
 .env.local
-nul
 
 # Claude Code config
 .claude/

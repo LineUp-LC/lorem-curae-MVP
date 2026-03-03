@@ -1,7 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 
 interface Business {
@@ -39,8 +37,8 @@ export default function ServicesComparePage() {
   const [selectedBusinessName, setSelectedBusinessName] = useState('');
   
   // Get user profile from sessionState (unified source of truth)
-  const skinType = getEffectiveSkinType() || 'combination';
-  const concerns = getEffectiveConcerns().length > 0 ? getEffectiveConcerns() : ['acne', 'hyperpigmentation'];
+  const skinType = getEffectiveSkinType() || '';
+  const concerns = getEffectiveConcerns();
   const [userProfile] = useState({
     skinType,
     concerns,
@@ -136,7 +134,7 @@ export default function ServicesComparePage() {
         author: 'Jessica M.',
         skinType: 'Combination',
         rating: 5,
-        comment: 'Amazing results! My acne has improved significantly after just 3 sessions. The staff really understands combination skin and tailored the treatment perfectly.',
+        comment: 'Noticeably improved results. My acne has improved significantly after just 3 sessions. The staff really understands combination skin and tailored the treatment perfectly.',
         date: '2 weeks ago',
         verified: true,
         helpful: 24,
@@ -181,7 +179,6 @@ export default function ServicesComparePage() {
   if (businesses.length < 2) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
-        <Navbar />
         <main className="pt-24 pb-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center py-20">
             <i className="ri-scales-line text-6xl text-gray-300 mb-4"></i>
@@ -195,14 +192,12 @@ export default function ServicesComparePage() {
             </button>
           </div>
         </main>
-        <Footer />
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-cream-100 to-white">
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -255,25 +250,27 @@ export default function ServicesComparePage() {
               ))}
             </div>
 
-            {/* Best Match for You */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
-              <div className="bg-gray-50 p-4 font-semibold text-deep">
-                Best Match for You
+            {/* Best Match for You — only shown when user has profile data */}
+            {(userProfile.skinType || userProfile.concerns.length > 0) && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
+                <div className="bg-gray-50 p-4 font-semibold text-deep">
+                  Best Match for You
+                </div>
+                {businesses.map((business) => {
+                  const match = getBestMatch(business);
+                  return (
+                    <div key={business.id} className="bg-white p-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getMatchColor(match)}`}>
+                        {match}
+                      </span>
+                      <p className="text-xs text-gray-600 mt-2">
+                        Based on your skin profile
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
-              {businesses.map((business) => {
-                const match = getBestMatch(business);
-                return (
-                  <div key={business.id} className="bg-white p-4">
-                    <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold border ${getMatchColor(match)}`}>
-                      {match}
-                    </span>
-                    <p className="text-xs text-gray-600 mt-2">
-                      Based on your skin profile
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
+            )}
 
             {/* Price Range */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-gray-200">
@@ -480,7 +477,6 @@ export default function ServicesComparePage() {
         </div>
       )}
 
-      <Footer />
     </div>
   );
 }

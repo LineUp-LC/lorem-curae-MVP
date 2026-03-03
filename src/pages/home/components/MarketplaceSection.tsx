@@ -294,7 +294,7 @@ export default function MarketplaceSection() {
               whileHover={buttonHover}
               whileTap={buttonTap}
             >
-              Browse Products
+              Coming Soon
             </MotionLink>
           </motion.div>
         </div>

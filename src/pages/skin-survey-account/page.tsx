@@ -3,8 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-browser';
 import { sessionState } from '../../lib/utils/sessionState';
 import QuizFlow from '../skin-survey/components/QuizFlow';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 export default function SkinSurveyAccountPage() {
   const navigate = useNavigate();
@@ -65,21 +63,39 @@ export default function SkinSurveyAccountPage() {
       sessionState.setTempConcerns(data.concerns);
     }
     
-    // If user is authenticated, save to database
+    // If user is authenticated, save full survey data to database
     if (isAuthenticated) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          // Save to user profile
           await supabase
             .from('users_profiles')
-            .upsert({
-              id: user.id,
+            .update({
               skin_type: data.skinType?.[0] || null,
               concerns: data.concerns || [],
-              fitzpatrick_type: data.complexion || null,
+              survey_completed: true,
+              preferences: {
+                allergens: data.allergens || [],
+                fitzpatrickType: data.complexion || null,
+                productPreferences: data.preferences || [],
+                routinePreferences: data.routine || [],
+                surveyAnswers: data,
+              },
+              lifestyle: {
+                factors: data.lifestyle || [],
+                sleepPattern: data.sleepPattern || null,
+                stressLevel: data.stressLevel || null,
+                dietPattern: data.dietPattern || null,
+                waterIntake: data.waterIntake || null,
+                exerciseFrequency: data.exerciseFrequency || null,
+                environmentalExposure: data.environmentalExposure || [],
+                sexAtBirth: data.sexAtBirth || null,
+                acneType: data.acneType || [],
+                scarringType: data.scarringType || [],
+              },
               updated_at: new Date().toISOString(),
-            });
+            })
+            .eq('id', user.id);
         }
       } catch (error) {
         console.error('Error saving quiz data:', error);
@@ -103,7 +119,6 @@ export default function SkinSurveyAccountPage() {
 
   return (
     <div className="min-h-screen bg-cream">
-      <Navbar />
       <main className="pt-24">
         {showRedoPrompt ? (
           <div className="max-w-2xl mx-auto px-6 lg:px-12 py-24 text-center">
@@ -135,7 +150,6 @@ export default function SkinSurveyAccountPage() {
           <QuizFlow onComplete={handleQuizComplete} />
         )}
       </main>
-      <Footer />
     </div>
   );
 }

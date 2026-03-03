@@ -21,7 +21,7 @@ export function AppRoutes() {
   useEffect(() => {
     window.REACT_APP_NAVIGATE = navigate;
     navigateResolver(window.REACT_APP_NAVIGATE);
-  });
+  }, [navigate]);
   return (
     <Suspense fallback={
       <div className="min-h-screen flex items-center justify-center bg-cream">

@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useUserLocation } from '@/lib/utils/locationState';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
 
 /**
@@ -23,7 +24,8 @@ interface ProfileDropdownProps {
 
 const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const navigate = useNavigate();
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, routineCount, signOut } = useAuth();
+  const { displayString: userLocationDisplay, hasLocation } = useUserLocation();
 
   // Close on Escape key
   useEffect(() => {
@@ -44,17 +46,13 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
     ? `Member since ${new Date(profile.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
     : '';
 
-  // Placeholder badges (could be fetched from profile in future)
-  const badges = [
-    {
-      id: 1,
-      name: 'Early Adopter',
-      icon: 'ri-rocket-line',
-      color: 'bg-[#FDF8F5] border-2 border-[#E8A888]',
-      iconColor: 'text-[#C4704D]',
-      description: 'Joined Lorem Curae in the first month of launch'
-    },
-  ];
+  // Subscription tier (only show badge for paid tiers)
+  const subscriptionTier = profile?.subscription_tier || 'free';
+  const isPaidSubscriber = subscriptionTier === 'plus' || subscriptionTier === 'premium';
+
+  // Badges from profile preferences (or empty if none)
+  const badges: Array<{ id: number; name: string; icon: string; color: string; iconColor: string; description: string }> =
+    (profile?.preferences as any)?.badges || [];
 
   const handleSignOut = async () => {
     await signOut();
@@ -109,7 +107,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
               {/* CTAs */}
               <div className="w-full space-y-2">
                 <Link
-                  to="/auth/register"
+                  to="/auth/signup"
                   className="block w-full py-2.5 bg-[#C4704D] text-white text-sm font-medium rounded-xl text-center hover:bg-[#8B4D35] transition-colors"
                   onClick={onClose}
                 >
@@ -132,14 +130,14 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
           <div className="p-4 border-b border-[#E8D4CC]/30 overflow-visible bg-gradient-to-b from-[#FDF8F5] to-white">
             <div className="flex items-center space-x-3 mb-3">
               <Link
-                to="/profile/edit"
+                to="/profile/customize"
                 className="relative group cursor-pointer"
                 onClick={onClose}
               >
                 <div className="w-11 h-11 rounded-lg overflow-hidden bg-[#FDF8F5] ring-2 ring-[#E8A888]/30">
-                  {profile?.avatar_url ? (
+                  {(profile?.preferences as any)?.avatar_url ? (
                     <img
-                      src={profile.avatar_url}
+                      src={(profile?.preferences as any).avatar_url}
                       alt={displayName}
                       className="w-full h-full object-cover"
                     />
@@ -155,42 +153,72 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
               </Link>
 
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-[#2D2A26] text-sm truncate">{displayName}</h3>
+                <div className="flex items-center gap-1.5">
+                  <h3 className="font-semibold text-[#2D2A26] text-sm truncate">{displayName}</h3>
+                  {isPaidSubscriber && (
+                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold uppercase tracking-wide ${
+                      subscriptionTier === 'premium'
+                        ? 'bg-amber-100 text-amber-700'
+                        : 'bg-[#E8A888]/20 text-[#8B4D35]'
+                    }`}>
+                      {subscriptionTier === 'premium' ? 'Premium' : 'Plus'}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-[#6B635A] truncate">{displayEmail}</p>
                 {memberSince && <p className="text-[10px] text-[#6B635A]/70 mt-0.5">{memberSince}</p>}
+                {hasLocation ? (
+                  <p className="text-[9px] text-[#6B635A]/60 mt-0.5 flex items-center gap-0.5">
+                    <i className="ri-map-pin-line text-[#7A8B7A] text-[8px]"></i>
+                    {userLocationDisplay}
+                  </p>
+                ) : (
+                  <Link
+                    to="/settings?tab=location"
+                    className="text-[9px] text-[#C4704D]/70 mt-0.5 flex items-center gap-0.5 hover:text-[#8B4D35] transition-colors"
+                    onClick={onClose}
+                  >
+                    <i className="ri-map-pin-line text-[8px]"></i>
+                    Add location
+                  </Link>
+                )}
               </div>
             </div>
 
             {/* Badges */}
             <div className="mb-3 overflow-visible">
               <p className="text-[10px] text-[#6B635A] mb-1.5 uppercase tracking-wider font-medium">Badges</p>
-              <div className="flex items-center gap-1.5 overflow-visible">
-                {badges.map((badge) => (
-                <div
-                  key={badge.id}
-                  onClick={() => handleBadgeClick(badge.id)}
-                  className={`relative w-8 h-8 flex items-center justify-center rounded-md ${badge.color} group cursor-pointer hover:scale-110 transition-transform overflow-visible`}
-                  title={badge.name}
-                >
-                  <i className={`${badge.icon} text-sm ${badge.iconColor}`}></i>
-                  <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[9999] w-max hidden sm:block">
-                    <div className="bg-[#2D2A26] text-white text-[10px] rounded-lg px-2 py-1.5 shadow-xl max-w-[160px] whitespace-normal">
-                      <p className="font-semibold mb-0.5">{badge.name}</p>
-                      <p className="text-[#E8D4CC]">{badge.description}</p>
-                      <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                        <div className="border-4 border-transparent border-t-[#2D2A26]"></div>
+              {badges.length > 0 ? (
+                <div className="flex items-center gap-1.5 overflow-visible">
+                  {badges.map((badge) => (
+                    <div
+                      key={badge.id}
+                      onClick={() => handleBadgeClick(badge.id)}
+                      className={`relative w-8 h-8 flex items-center justify-center rounded-md ${badge.color} group cursor-pointer hover:scale-110 transition-transform overflow-visible`}
+                      title={badge.name}
+                    >
+                      <i className={`${badge.icon} text-sm ${badge.iconColor}`}></i>
+                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[9999] w-max hidden sm:block">
+                        <div className="bg-[#2D2A26] text-white text-[10px] rounded-lg px-2 py-1.5 shadow-xl max-w-[160px] whitespace-normal">
+                          <p className="font-semibold mb-0.5">{badge.name}</p>
+                          <p className="text-[#E8D4CC]">{badge.description}</p>
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
+                            <div className="border-4 border-transparent border-t-[#2D2A26]"></div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <p className="text-[10px] text-[#6B635A]/60 italic">No badges yet</p>
+              )}
             </div>
-          </div>
 
             {/* Quick Stats */}
             <div className="flex items-center justify-between pt-3 border-t border-[#E8D4CC]/30">
               <div className="text-center">
-                <p className="text-sm font-semibold text-[#2D2A26]">0/5</p>
+                <p className="text-sm font-semibold text-[#2D2A26]">{routineCount > 0 ? routineCount : '—'}</p>
                 <p className="text-[10px] text-[#6B635A]">Routines</p>
               </div>
               <div className="text-center">
@@ -202,7 +230,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
                 className="px-2.5 py-1 bg-[#C4704D] text-white text-[10px] font-medium rounded-md hover:bg-[#8B4D35] transition-colors cursor-pointer"
                 onClick={onClose}
               >
-                Retake Quiz
+                Retake Survey
               </Link>
             </div>
           </div>
@@ -262,10 +290,10 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             onClick={onClose}
           >
             <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
-              <i className="ri-apple-line text-sm"></i>
+              <i className="ri-leaf-line text-sm"></i>
             </div>
             <div className="ml-2.5 flex-1">
-              <p className="text-xs font-medium text-[#2D2A26]">Nutrition</p>
+              <p className="text-xs font-medium text-[#2D2A26]">Nutrition <span className="text-[9px] font-semibold text-[#C4704D] ml-1">Coming Soon</span></p>
               <p className="text-[10px] text-[#6B635A]">Diet & wellness</p>
             </div>
             <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>

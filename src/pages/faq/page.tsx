@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../../components/feature/Navbar';
-import Footer from '../../components/feature/Footer';
 
 const FAQPage = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -49,7 +47,6 @@ const FAQPage = () => {
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#FDF8F5' }}>
-      <Navbar />
       
       <main className="pt-24 pb-16">
         <div className="max-w-6xl mx-auto px-6 lg:px-12">
@@ -125,7 +122,6 @@ const FAQPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

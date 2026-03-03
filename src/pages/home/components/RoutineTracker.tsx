@@ -29,7 +29,7 @@ export default function RoutineTracker() {
           </h2>
           <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-4">
             Build and track your perfect routine with our guided builder. 
-            Know exactly what's working—and what's causing problems.
+            Know exactly what's working, and what's causing problems.
           </p>
           
           {/* Why Tracking Matters */}

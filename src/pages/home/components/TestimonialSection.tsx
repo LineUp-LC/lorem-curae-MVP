@@ -77,32 +77,32 @@ function AnimatedCounter({
   );
 }
 
+// Representative stories - illustrative of typical user experiences
 const testimonials = [
   {
     quote: "For the first time, I felt like someone understood my skin instead of trying to sell me something.",
-    name: "Sarah M.",
+    name: "Community Member",
     skin: "Combination Skin",
     journey: ""
   },
   {
-    quote: "I stopped guessing. I finally understood my skin — and everything changed.",
-    name: "Daniel R.",
+    quote: "I stopped guessing. I finally understood my skin, and everything changed.",
+    name: "Community Member",
     skin: "Oily Skin",
     journey: ""
   },
   {
     quote: "I didn't feel alone anymore. The guidance finally made skincare make sense.",
-    name: "Keisha L.",
+    name: "Community Member",
     skin: "Sensitive Skin",
     journey: ""
   },
 ];
 
-const stats = [
-  { number: 10000, suffix: '+', label: 'Community Members', decimals: 0 },
-  { number: 100, suffix: '+', label: 'Marketplace Brands', decimals: 0 },
-  { number: 1200, suffix: '+', label: 'Ingredients Decoded', decimals: 0 },
-  { number: 4.9, suffix: '', label: 'App Store Rating', decimals: 1 },
+// Platform highlights - verifiable counts only
+const stats: Array<{ number?: number; suffix?: string; label: string; decimals?: number; text?: string }> = [
+  { text: 'Coming Soon', label: 'Marketplace' },
+  { number: 10, suffix: '+', label: 'Ingredients Simplified', decimals: 0 },
 ];
 
 export default function TestimonialSection() {
@@ -313,11 +313,13 @@ export default function TestimonialSection() {
                 }}
               >
                 <div className="lc-stat-number">
-                  <AnimatedCounter 
-                    target={stat.number} 
-                    suffix={stat.suffix}
-                    decimals={stat.decimals}
-                  />
+                  {stat.text ? stat.text : (
+                    <AnimatedCounter
+                      target={stat.number!}
+                      suffix={stat.suffix}
+                      decimals={stat.decimals}
+                    />
+                  )}
                 </div>
                 <div className="lc-stat-label">{stat.label}</div>
               </motion.div>

@@ -92,7 +92,7 @@ export default function IngredientCarousel() {
         <div className="max-w-3xl mx-auto mb-12">
           <div className="bg-gradient-to-r from-emerald-50 to-taupe-50 rounded-2xl p-6 border border-emerald-100">
             <p className="text-lg text-gray-700 leading-relaxed text-center">
-              Understanding ingredients means you stop buying on hype and start buying on science. Our <Link to="/ingredients" className="text-taupe hover:text-taupe-700 font-medium underline">ingredient library</Link> gives you the truth about every ingredient—what it does, who it's for, and what to watch out for.
+              Understanding ingredients means you stop buying on hype and start buying on science. Our <Link to="/ingredients" className="text-taupe hover:text-taupe-700 font-medium underline">ingredient library</Link> gives you the truth about every ingredient: what it does, who it's for, and what to watch out for.
             </p>
           </div>
         </div>

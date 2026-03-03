@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import Navbar from '../../../components/feature/Navbar';
-import Footer from '../../../components/feature/Footer';
 
 const StorefrontDetailPage = () => {
   const { id } = useParams();
@@ -125,7 +123,6 @@ const StorefrontDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5]">
-      <Navbar />
       
       <main className="pt-24">
         {/* Banner */}
@@ -448,7 +445,6 @@ const StorefrontDetailPage = () => {
         </div>
       </main>
 
-      <Footer />
     </div>
   );
 };

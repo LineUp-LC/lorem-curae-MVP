@@ -1,13 +1,15 @@
 /**
- * Favorites State Management
+ * Saved Products State Management
  *
- * Provides reactive localStorage persistence for user product favorites/bookmarks.
+ * Provides reactive localStorage persistence for user saved products.
  * Follows the existing observable pattern from cartState.ts.
+ * Includes Supabase sync for authenticated users.
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { supabase } from '../supabase-browser';
 
-export interface FavoriteProduct {
+export interface SavedProduct {
   id: number;
   name: string;
   brand: string;
@@ -18,81 +20,155 @@ export interface FavoriteProduct {
   savedAt: string;
 }
 
-class FavoritesStateManager {
-  private listeners: Set<(favorites: FavoriteProduct[]) => void> = new Set();
-  private storageKey = 'user_favorites';
+class SavedProductsStateManager {
+  private listeners: Set<(products: SavedProduct[]) => void> = new Set();
+  private storageKey = 'savedProducts';
 
   // Toast callback for when a product is added
   private onAddCallback: ((productName: string) => void) | null = null;
 
-  // Get all favorites
-  getFavorites(): FavoriteProduct[] {
+  // Get all saved products
+  getSavedProducts(): SavedProduct[] {
     try {
       const saved = localStorage.getItem(this.storageKey);
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      console.error('Failed to load favorites:', e);
+      console.error('Failed to load saved products:', e);
       return [];
     }
   }
 
-  // Save favorites to localStorage
-  private saveFavorites(favorites: FavoriteProduct[]): void {
+  // Save products to localStorage
+  private saveProducts(products: SavedProduct[]): void {
     try {
-      localStorage.setItem(this.storageKey, JSON.stringify(favorites));
+      localStorage.setItem(this.storageKey, JSON.stringify(products));
       this.notifyListeners();
     } catch (e) {
-      console.error('Failed to save favorites:', e);
+      console.error('Failed to save products:', e);
     }
   }
 
-  // Check if a product is favorited
-  isFavorite(productId: number): boolean {
-    const favorites = this.getFavorites();
-    return favorites.some(f => f.id === productId);
+  // Check if a product is saved
+  isSaved(productId: number): boolean {
+    const products = this.getSavedProducts();
+    return products.some(p => p.id === productId);
   }
 
-  // Add a product to favorites
-  addFavorite(product: Omit<FavoriteProduct, 'savedAt'>): void {
-    const favorites = this.getFavorites();
-    if (!favorites.some(f => f.id === product.id)) {
-      favorites.push({
+  // Add a product to saved
+  addSavedProduct(product: Omit<SavedProduct, 'savedAt'>): void {
+    const products = this.getSavedProducts();
+    if (!products.some(p => p.id === product.id)) {
+      products.push({
         ...product,
         savedAt: new Date().toISOString(),
       });
-      this.saveFavorites(favorites);
+      this.saveProducts(products);
       if (this.onAddCallback) {
         this.onAddCallback(product.name);
       }
+      // Sync to Supabase (async, non-blocking)
+      this.syncToSupabase();
     }
   }
 
-  // Remove a product from favorites
-  removeFavorite(productId: number): void {
-    const favorites = this.getFavorites();
-    const filtered = favorites.filter(f => f.id !== productId);
-    this.saveFavorites(filtered);
+  // Remove a product from saved
+  removeSavedProduct(productId: number): void {
+    const products = this.getSavedProducts();
+    const filtered = products.filter(p => p.id !== productId);
+    this.saveProducts(filtered);
+    // Sync to Supabase (async, non-blocking)
+    this.syncToSupabase();
   }
 
-  // Toggle favorite status
-  toggleFavorite(product: Omit<FavoriteProduct, 'savedAt'>): boolean {
-    if (this.isFavorite(product.id)) {
-      this.removeFavorite(product.id);
+  // Toggle saved status
+  toggleSaved(product: Omit<SavedProduct, 'savedAt'>): boolean {
+    if (this.isSaved(product.id)) {
+      this.removeSavedProduct(product.id);
       return false;
     } else {
-      this.addFavorite(product);
+      this.addSavedProduct(product);
       return true;
     }
   }
 
-  // Get favorites count
-  getFavoritesCount(): number {
-    return this.getFavorites().length;
+  // Get saved products count
+  getSavedProductsCount(): number {
+    return this.getSavedProducts().length;
   }
 
-  // Clear all favorites
-  clearFavorites(): void {
-    this.saveFavorites([]);
+  // Clear all saved products
+  clearSavedProducts(): void {
+    this.saveProducts([]);
+  }
+
+  // Sync saved products to Supabase (for authenticated users)
+  async syncToSupabase(): Promise<void> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return; // Only sync for authenticated users
+
+      const products = this.getSavedProducts();
+
+      // Get current profile to merge preferences
+      const { data: profile } = await supabase
+        .from('users_profiles')
+        .select('preferences')
+        .eq('id', user.id)
+        .single();
+
+      const currentPrefs = profile?.preferences || {};
+
+      const { error } = await supabase
+        .from('users_profiles')
+        .update({
+          preferences: {
+            ...currentPrefs,
+            savedProducts: products,
+          },
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (error) {
+        console.error('[DataSync] Failed to sync saved products:', error);
+      } else {
+        console.log('[DataSync] Saved products synced to Supabase');
+      }
+    } catch (e) {
+      console.error('[DataSync] Error syncing saved products:', e);
+    }
+  }
+
+  // Hydrate saved products from Supabase profile
+  async hydrateFromSupabase(): Promise<void> {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('users_profiles')
+        .select('preferences')
+        .eq('id', user.id)
+        .single();
+
+      const serverProducts: SavedProduct[] = profile?.preferences?.savedProducts || [];
+      const localProducts = this.getSavedProducts();
+
+      // Merge: combine server and local, dedupe by ID
+      const mergedMap = new Map<number, SavedProduct>();
+      serverProducts.forEach(p => mergedMap.set(p.id, p));
+      localProducts.forEach(p => {
+        if (!mergedMap.has(p.id)) {
+          mergedMap.set(p.id, p);
+        }
+      });
+
+      const merged = Array.from(mergedMap.values());
+      this.saveProducts(merged);
+      console.log('[DataSync] Saved products hydrated from Supabase');
+    } catch (e) {
+      console.error('[DataSync] Error hydrating saved products:', e);
+    }
   }
 
   // Set callback for when a product is added (for toast notifications)
@@ -100,68 +176,68 @@ class FavoritesStateManager {
     this.onAddCallback = callback;
   }
 
-  // Subscribe to favorites changes
-  subscribe(listener: (favorites: FavoriteProduct[]) => void): () => void {
+  // Subscribe to saved products changes
+  subscribe(listener: (products: SavedProduct[]) => void): () => void {
     this.listeners.add(listener);
     // Immediately call with current state
-    listener(this.getFavorites());
+    listener(this.getSavedProducts());
     return () => this.listeners.delete(listener);
   }
 
   // Notify all listeners of changes
   private notifyListeners(): void {
-    const favorites = this.getFavorites();
-    this.listeners.forEach(listener => listener(favorites));
+    const products = this.getSavedProducts();
+    this.listeners.forEach(listener => listener(products));
   }
 }
 
 // Singleton instance
-export const favoritesState = new FavoritesStateManager();
+export const savedProductsState = new SavedProductsStateManager();
 
-// React hook for favorites list
-export function useFavorites(): {
-  favorites: FavoriteProduct[];
-  addFavorite: (product: Omit<FavoriteProduct, 'savedAt'>) => void;
-  removeFavorite: (productId: number) => void;
-  toggleFavorite: (product: Omit<FavoriteProduct, 'savedAt'>) => boolean;
-  isFavorite: (productId: number) => boolean;
-  clearFavorites: () => void;
+// React hook for saved products list
+export function useSavedProducts(): {
+  savedProducts: SavedProduct[];
+  addSavedProduct: (product: Omit<SavedProduct, 'savedAt'>) => void;
+  removeSavedProduct: (productId: number) => void;
+  toggleSaved: (product: Omit<SavedProduct, 'savedAt'>) => boolean;
+  isSaved: (productId: number) => boolean;
+  clearSavedProducts: () => void;
   count: number;
 } {
-  const [favorites, setFavorites] = useState<FavoriteProduct[]>(favoritesState.getFavorites());
+  const [savedProducts, setSavedProducts] = useState<SavedProduct[]>(savedProductsState.getSavedProducts());
 
   useEffect(() => {
-    return favoritesState.subscribe(setFavorites);
+    return savedProductsState.subscribe(setSavedProducts);
   }, []);
 
   return {
-    favorites,
-    addFavorite: favoritesState.addFavorite.bind(favoritesState),
-    removeFavorite: favoritesState.removeFavorite.bind(favoritesState),
-    toggleFavorite: favoritesState.toggleFavorite.bind(favoritesState),
-    isFavorite: favoritesState.isFavorite.bind(favoritesState),
-    clearFavorites: favoritesState.clearFavorites.bind(favoritesState),
-    count: favorites.length,
+    savedProducts,
+    addSavedProduct: savedProductsState.addSavedProduct.bind(savedProductsState),
+    removeSavedProduct: savedProductsState.removeSavedProduct.bind(savedProductsState),
+    toggleSaved: savedProductsState.toggleSaved.bind(savedProductsState),
+    isSaved: savedProductsState.isSaved.bind(savedProductsState),
+    clearSavedProducts: savedProductsState.clearSavedProducts.bind(savedProductsState),
+    count: savedProducts.length,
   };
 }
 
-// React hook for single product favorite status (optimized for product cards)
-export function useFavoriteStatus(productId: number): {
-  isFavorite: boolean;
+// React hook for single product saved status (optimized for product cards)
+export function useSavedProductStatus(product: Omit<SavedProduct, 'savedAt'>): {
+  isSaved: boolean;
   toggle: () => void;
 } {
-  const [isFavorite, setIsFavorite] = useState(() => favoritesState.isFavorite(productId));
+  const [isSaved, setIsSaved] = useState(() => savedProductsState.isSaved(product.id));
 
   useEffect(() => {
-    const unsubscribe = favoritesState.subscribe(() => {
-      setIsFavorite(favoritesState.isFavorite(productId));
+    const unsubscribe = savedProductsState.subscribe(() => {
+      setIsSaved(savedProductsState.isSaved(product.id));
     });
     return unsubscribe;
-  }, [productId]);
+  }, [product.id]);
 
   const toggle = useCallback(() => {
-    setIsFavorite(prev => !prev);
-  }, []);
+    savedProductsState.toggleSaved(product);
+  }, [product]);
 
-  return { isFavorite, toggle };
+  return { isSaved, toggle };
 }
