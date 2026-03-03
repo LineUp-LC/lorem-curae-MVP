@@ -658,3 +658,38 @@ export {
   type UserProfileMetadata,
   type CrossCheckResult,
 } from './dataValidationIntelligence';
+
+// Surface Context (Unified AI Context Builder)
+export {
+  buildAIContext,
+  computeConcernAlignment,
+  generateContextCacheKey,
+  serializeContextForAPI,
+  type AIMode,
+  type AIUserProfile,
+  type AISurfaceContext,
+  type PageContext,
+  type EvidenceBundle,
+  type InteractionHistory,
+  type PageDataInput,
+  type IngredientConflict,
+  type NutritionFood,
+  type Retailer as AIRetailer,
+  type RoutineStep as AIRoutineStep,
+} from './surfaceContext';
+
+// System Prompt Builder
+export {
+  buildSystemPrompt,
+  getMaxTokensForMode,
+  validateAIResponse,
+} from './systemPrompt';
+
+// Surface Client (AI Insight API caller)
+export {
+  requestAIInsight,
+  clearInsightCache,
+  type AIInsightSuccess,
+  type AIInsightError,
+  type AIInsightResult,
+} from './surfaceClient';
