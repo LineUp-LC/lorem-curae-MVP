@@ -107,7 +107,7 @@ function ingredientsInSet(ingredients: string[], set: string[]): string[] {
   );
 }
 
-interface MatchedIngredients {
+export interface MatchedIngredients {
   protective: string[];
   supportive: string[];
   sensitizing: string[];
@@ -119,7 +119,7 @@ interface MatchedIngredients {
   peptide: string[];
 }
 
-function classifyIngredients(ingredients: string[]): MatchedIngredients {
+export function classifyIngredients(ingredients: string[]): MatchedIngredients {
   return {
     protective: ingredientsInSet(ingredients, UV_PROTECTIVE),
     supportive: ingredientsInSet(ingredients, UV_SUPPORTIVE),
@@ -238,13 +238,13 @@ function buildLiveExplanation(
   // --- sentence 3: reviewer evidence OR concern alignment ---
 
   if (s.length < 3 && reviewer && reviewer.count > 0 && reviewer.sentiment === 'positive' && reviewer.detail) {
-    s.push(`${reviewer.count} reviewers with similar profiles ${reviewer.detail}.`);
+    s.push(`${reviewer.count} people with a similar skin profile ${reviewer.detail}.`);
   } else if (s.length < 3) {
     const concerns = matchedConcerns(product, userConcerns);
     if (concerns.length > 0) {
       s.push(s.length > 0
-        ? `It also addresses ${list(concerns)}, which aligns with your profile.`
-        : `${product.name} addresses ${list(concerns)}, which aligns with your profile.`);
+        ? `It also targets ${list(concerns)}, which matches what your skin needs right now.`
+        : `${product.name} targets ${list(concerns)}, which matches what your skin needs right now.`);
     }
   }
 
@@ -256,7 +256,7 @@ function buildLiveExplanation(
     if (any.length > 0) {
       return `${product.name}'s ${list(any)} ${any.length > 1 ? 'help maintain' : 'helps maintain'} skin comfort through ${season ? season.toLowerCase() + '\'s' : 'the'} conditions in ${loc}. With ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels, this ${catLabel(product.category).toLowerCase()} fits well in your routine.`;
     }
-    return `${product.name} is a ${catLabel(product.category).toLowerCase()} suited to ${season ? season.toLowerCase() : 'current'} conditions in ${loc}. Its formulation supports daily use at ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels.`;
+    return `${product.name} is a ${catLabel(product.category).toLowerCase()} suited to ${season ? season.toLowerCase() : 'current'} conditions in ${loc}. Its blend supports daily use at ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels.`;
   }
 
   return s.slice(0, 3).join(' ');
@@ -325,13 +325,13 @@ function buildPartialExplanation(
   // --- sentence 3: reviewer or concern ---
 
   if (s.length < 3 && reviewer && reviewer.count > 0 && reviewer.sentiment === 'positive' && reviewer.detail) {
-    s.push(`Reviewers with similar profiles ${reviewer.detail}.`);
+    s.push(`People with a similar skin profile ${reviewer.detail}.`);
   } else if (s.length < 3) {
     const concerns = matchedConcerns(product, userConcerns);
     if (concerns.length > 0) {
       s.push(s.length > 0
-        ? `It also addresses ${list(concerns)}, which aligns with your profile.`
-        : `${product.name} addresses ${list(concerns)}, which aligns with your profile.`);
+        ? `It also targets ${list(concerns)}, which matches what your skin needs right now.`
+        : `${product.name} targets ${list(concerns)}, which matches what your skin needs right now.`);
     }
   }
 
@@ -404,11 +404,11 @@ function buildMockExplanation(
   if (texPhrase) {
     s.push(texPhrase.charAt(0).toUpperCase() + texPhrase.slice(1) + '.');
   } else if (reviewer && reviewer.count > 0 && reviewer.sentiment === 'positive' && reviewer.detail) {
-    s.push(`Reviewers with similar profiles ${reviewer.detail}.`);
+    s.push(`People with a similar skin profile ${reviewer.detail}.`);
   } else {
     const concerns = matchedConcerns(product, userConcerns);
     if (concerns.length > 0) {
-      s.push(`It addresses ${list(concerns)}, which aligns with your profile.`);
+      s.push(`It targets ${list(concerns)}, which matches what your skin needs right now.`);
     }
   }
 
@@ -431,11 +431,11 @@ function buildReviewerInsight(
 
   if (matches.sentiment === 'positive') {
     return matches.detail
-      ? `${matches.count} reviewers with similar profiles ${matches.detail}.`
-      : `${matches.count} reviewers with similar profiles rated ${product.name} positively in comparable conditions.`;
+      ? `${matches.count} people with a similar skin profile ${matches.detail}.`
+      : `${matches.count} people with a similar skin profile gave ${product.name} positive ratings in similar conditions.`;
   }
 
-  return 'Reviewers with similar profiles had mixed experiences — individual results may vary.';
+  return 'People with a similar skin profile had mixed results — your experience may differ.';
 }
 
 // ---------------------------------------------------------------------------

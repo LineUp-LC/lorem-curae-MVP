@@ -61,8 +61,8 @@ export function aggregateReviewerEvidence(
 
   const detail =
     sentiment === 'positive'
-      ? `rated this product positively (avg ${avgRating.toFixed(1)} stars)`
-      : `had mixed experiences with this product (avg ${avgRating.toFixed(1)} stars)`;
+      ? `gave this a ${avgRating.toFixed(1)}-star average — they found it worked well for their skin`
+      : `had mixed results with this one (${avgRating.toFixed(1)}-star average) — your experience may differ`;
 
   // Top 3 scored reviews for modal rendering
   const scoredReviews: ScoredReviewEntry[] = scored.slice(0, 3).map(entry => ({

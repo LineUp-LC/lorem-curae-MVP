@@ -5,7 +5,8 @@ import ProductReviews from './components/ProductReviews';
 import PurchaseOptions from './components/PurchaseOptions';
 import SimilarProducts from './components/SimilarProducts';
 import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
-import AIInsightBlock from '../../components/feature/AIInsightBlock';
+import EnvironmentFitModal from './components/EnvironmentFitModal';
+import { generateSeasonalModalContent } from '../../lib/utils/seasonalModalContent';
 import { useSavedProducts } from '../../lib/utils/favoritesState';
 import { recentlyViewedState } from '../../lib/utils/recentlyViewedState';
 import { getEffectiveSkinType, getEffectiveConcerns, getEffectivePreferences, getEffectiveComplexion, getEffectiveSensitivity, getEffectiveLifestyle } from '../../lib/utils/sessionState';
@@ -19,8 +20,6 @@ import { useEnvironmentContext } from '../../lib/environment/useEnvironmentConte
 import { useDocumentTitle } from '../../lib/utils/useDocumentTitle';
 import { generateEnvironmentFitExplanation } from '../../lib/utils/environmentFit';
 import { aggregateReviewerEvidence } from '../../lib/utils/reviewerEvidence';
-import { getTierBadgeInfo } from '../../lib/utils/reviewSimilarity';
-import { buildAIContext } from '../../lib/ai/surfaceContext';
 import { productData } from '../../mocks/products';
 
 export default function ProductDetailPage() {
@@ -120,29 +119,25 @@ export default function ProductDetailPage() {
     ? generateEnvironmentFitExplanation(productFromMock, env, reviewerEvidence, userConcerns)
     : null;
 
-  // Highlight product name in environment fit text
-  const envFitHighlight = (text: string) => {
-    const name = productFromMock?.name;
-    if (!name) return <>{text}</>;
-    const idx = text.indexOf(name);
-    if (idx === -1) return <>{text}</>;
-    return <>{text.slice(0, idx)}<span className="font-medium text-primary">{name}</span>{text.slice(idx + name.length)}</>;
-  };
-
-  // Build unified AI context for the AIInsightBlock
-  const aiContext = useMemo(() => {
-    if (!productFromMock) return null;
-    const safety = assessProductSafety(productFromMock.keyIngredients || [], getUserProfile());
-    return buildAIContext('product_detail', {
-      page: { mode: 'product_detail', product: productFromMock },
-      environment: env ?? null,
-      evidence: {
-        environmentFit: envFit ?? undefined,
-        reviewerEvidence: reviewerEvidence ?? undefined,
-        safetyAssessment: safety,
+  // Build seasonal modal content for the Learn More modal
+  const seasonalModalContent = useMemo(() => {
+    if (!productFromMock || !env || env.source === 'mock') return null;
+    const disc = envFit?.disclaimer || 'Personalized for your local conditions. Update your location in Settings anytime.';
+    return generateSeasonalModalContent(
+      productFromMock,
+      env,
+      reviewerEvidence?.scoredReviews || [],
+      disc,
+      {
+        skinType: userSkinType || undefined,
+        concerns: userConcerns.length > 0 ? userConcerns : undefined,
+        sensitivity: getEffectiveSensitivity() || undefined,
+        complexion: getEffectiveComplexion() || undefined,
+        lifestyle: getEffectiveLifestyle(),
+        preferences: getEffectivePreferences(),
       },
-    });
-  }, [productFromMock?.id, env?.climate, env?.uvBand, env?.season, userSkinType, userConcerns.join(',')]);
+    );
+  }, [productFromMock?.id, env?.climate, env?.uvBand, env?.season, reviewerEvidence?.scoredReviews, userSkinType, userConcerns.join(',')]);
 
   const retailers = [
     { id: 1, name: 'DermStore', price: 43.50, totalPrice: 43.50, shipping: 'Free', shippingCost: 0, tax: 0, deliveryTime: '3-5 days', trustScore: 98, verified: true, logo: 'https://via.placeholder.com/100x40?text=DermStore', returnPolicy: '30 days', rewards: 'Earn 5% back in points', url: 'https://www.dermstore.com' },
@@ -558,24 +553,6 @@ export default function ProductDetailPage() {
                           {envLocationDisplay}
                         </span>
                       )}
-                      {envClimate && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
-                          <i className="ri-cloud-line"></i>
-                          {envClimate}
-                        </span>
-                      )}
-                      {envUvLabel && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
-                          <i className="ri-sun-line"></i>
-                          UV {envUvLabel}
-                        </span>
-                      )}
-                      {envSeason && (
-                        <span className="inline-flex items-center gap-1 px-3 py-1 text-xs font-medium rounded-full bg-light/30 text-primary-700 border border-primary-300">
-                          <i className="ri-leaf-line"></i>
-                          {envSeason}
-                        </span>
-                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs text-warm-gray italic">
@@ -621,153 +598,13 @@ export default function ProductDetailPage() {
                 ) : null;
               })()}
 
-              {/* AI Insight */}
-              {aiContext && (
-                <div className="mb-4">
-                  <AIInsightBlock
-                    context={aiContext}
-                    scoredReviews={reviewerEvidence?.scoredReviews}
-                    environmentBadges={env ? {
-                      uv: envUvLabel || undefined,
-                      climate: envClimate || undefined,
-                      season: envSeason || undefined,
-                    } : undefined}
-                  />
-                </div>
-              )}
-
               {/* Location Explanation Modal */}
-              {showLocationModal && env && (
-                <div
-                  className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-                  onClick={() => setShowLocationModal(false)}
-                >
-                  <div
-                    className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 max-h-[85vh] overflow-y-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full">
-                          <i className="ri-map-pin-line text-xl text-primary"></i>
-                        </div>
-                        <h3 className="text-lg font-semibold text-deep">Your Location & This Product</h3>
-                      </div>
-                      <button
-                        onClick={() => setShowLocationModal(false)}
-                        aria-label="Close"
-                        className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
-                      >
-                        <i className="ri-close-line text-xl"></i>
-                      </button>
-                    </div>
-                    <div className="space-y-4 text-sm text-warm-gray leading-relaxed">
-                      {/* AI explanation — always first, directly under header */}
-                      <p className="leading-relaxed">{envFit ? envFitHighlight(envFit.explanation) : null}</p>
-
-                      {/* Reviewer insight — summary + mini review cards */}
-                      {envFit?.reviewerInsight && (
-                        <div className="space-y-2.5">
-                          {/* Summary header */}
-                          <div className="flex items-start gap-2 bg-cream/50 rounded-lg px-3 py-2">
-                            <i className="ri-group-line text-primary mt-0.5 shrink-0"></i>
-                            <p className="text-xs">{envFit.reviewerInsight}</p>
-                          </div>
-
-                          {/* Mini review cards (max 3) */}
-                          {reviewerEvidence?.scoredReviews && reviewerEvidence.scoredReviews.length > 0 && (
-                            <div className="space-y-2">
-                              {reviewerEvidence.scoredReviews.map((entry) => {
-                                const badge = getTierBadgeInfo(entry.matchTier, entry.score);
-                                return (
-                                  <div
-                                    key={entry.review.id}
-                                    className="bg-white border border-blush/60 rounded-xl px-3 py-2.5"
-                                  >
-                                    {/* Card header: avatar, name, badge, stars */}
-                                    <div className="flex items-center gap-2 mb-1.5">
-                                      <img
-                                        src={entry.review.userAvatar}
-                                        alt={entry.review.userName}
-                                        className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-                                      />
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1.5 flex-wrap">
-                                          <span className="text-xs font-medium text-deep truncate">
-                                            {entry.review.userName}
-                                          </span>
-                                          {entry.review.verified && (
-                                            <i className="ri-shield-check-fill text-[10px] text-warm-gray-500" title="Verified buyer"></i>
-                                          )}
-                                          {badge && (
-                                            <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 ${badge.color} text-[9px] font-medium rounded-full`}>
-                                              <i className={`${badge.icon} text-[9px]`}></i>
-                                              {badge.label}
-                                            </span>
-                                          )}
-                                        </div>
-                                        <div className="flex items-center gap-1.5 mt-0.5">
-                                          {/* Compact star rating */}
-                                          <div className="flex items-center">
-                                            {Array.from({ length: 5 }, (_, i) => (
-                                              <i
-                                                key={i}
-                                                className={`text-[10px] ${
-                                                  i < entry.review.rating
-                                                    ? 'ri-star-fill text-amber-500'
-                                                    : 'ri-star-line text-amber-500'
-                                                }`}
-                                              ></i>
-                                            ))}
-                                          </div>
-                                          <span className="text-[10px] text-warm-gray">
-                                            {entry.review.skinType} skin · {entry.review.usageDurationWeeks}w use
-                                          </span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    {/* Content excerpt */}
-                                    <p className="text-[11px] text-warm-gray leading-relaxed line-clamp-2">
-                                      {entry.review.content}
-                                    </p>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      {/* Environment context badges — secondary detail */}
-                      {env.source !== 'mock' && (envClimate || envUvLabel || envSeason) && (
-                        <div className="flex flex-wrap gap-1.5 pt-1">
-                          {envUvLabel && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full bg-cream text-deep">
-                              <i className="ri-sun-line text-primary"></i>
-                              UV {envUvLabel}
-                            </span>
-                          )}
-                          {envClimate && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full bg-cream text-deep">
-                              <i className="ri-cloud-line text-primary"></i>
-                              {envClimate}
-                            </span>
-                          )}
-                          {envSeason && (
-                            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 text-xs font-medium rounded-full bg-cream text-deep">
-                              <i className="ri-leaf-line text-primary"></i>
-                              {envSeason}
-                            </span>
-                          )}
-                        </div>
-                      )}
-
-                      <p className="text-xs text-warm-gray/70 italic">
-                        {envFit?.disclaimer}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              {showLocationModal && env && seasonalModalContent && (
+                <EnvironmentFitModal
+                  content={seasonalModalContent}
+                  reviews={reviewerEvidence?.scoredReviews || []}
+                  onClose={() => setShowLocationModal(false)}
+                />
               )}
 
               {/* Action Buttons */}

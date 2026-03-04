@@ -527,6 +527,7 @@ Components must scale across all surfaces defined in Section 12.3.
 25. Nutrition & Wellness Governance (24)
 26. AR Surface Governance (25)
 27. Environment & Location Personalization (26)
+28. Personalized Content Generation Standard (18.6 + `/ai-governance/CLAUDE_PRODUCT.md`)
 
 These layers remain active for all design, motion, UX, and component tasks unless explicitly disabled.
 
@@ -1446,6 +1447,42 @@ Claude must never:
 - Display different matching results for the same user data on different surfaces
 - Break graceful degradation for guest users
 
+## 18.6 Personalized Content Generation Standard
+
+Product-facing voice, content structure, data-source requirements, and prohibited patterns
+have been moved to:
+
+    /ai-governance/CLAUDE_PRODUCT.md
+
+The following developer-facing subsections remain here:
+
+### 18.6.6 Canonical Content Utilities
+
+All personalized content generation must flow through shared utilities:
+
+| Utility | Path | Purpose |
+|---------|------|---------|
+| seasonalModalContent | `src/lib/utils/seasonalModalContent.ts` | Learn More modal content generation |
+| productKnowledge | `src/lib/environment/productKnowledge.ts` | Category, texture, and mechanism knowledge base |
+| surfaceClient | `src/lib/ai/surfaceClient.ts` | AI insight generation for all surfaces |
+| buildAIContext | `src/lib/ai/surfaceContext.ts` | Unified AI context assembly |
+| sessionState getters | `src/lib/utils/sessionState.ts` | Profile data retrieval with fallback chain |
+| environmentFit | `src/lib/utils/environmentFit.ts` | Environment‑fit scoring and review aggregation |
+
+No component may generate personalized text inline. All text generation must use these utilities.
+
+### 18.6.7 Plain Language Knowledge Base Maintenance
+
+When adding or modifying entries in `CATEGORY_BEHAVIOR`, `TEXTURE_BEHAVIOR`, `SKIN_IMPACT`, `CLASS_BENEFIT`, `CLASS_CONDITION_OVERRIDE`, or `CONDITION_PROBLEM`:
+- All text must be plain language — no jargon, no clinical terms
+- Verify zero instances of prohibited terms: "transepidermal", "photoaging", "oxidative", "lipid barrier", "sebum", "photosensitizing", "formulation", "occlusion"
+- Follow Section 26.8 scientific accuracy rules (conditional language, no medical claims)
+- Run `npx tsc --noEmit` and `npx vite build` after changes
+
+### 18.6.8 Mandatory Enforcement Scope
+
+Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 9.
+
 ---
 
 # 19. GLOBAL SHARED COMPONENT CONSISTENCY & PROPAGATION LAYER
@@ -1540,14 +1577,7 @@ AI features must ALWAYS:
 
 ## 20.2 AI Tone Consistency
 
-AI‑generated text must be indistinguishable from platform‑written copy in tone and quality:
-
-- Same brand voice as Section 5: calm, premium, educational, science‑rooted
-- Same diagnostic‑adjacent safety as Section 5.5
-- Same emotional intelligence as Section 5.4
-- No chatbot clichés ("I'm just an AI," "As a language model," "Great question!")
-- No overly casual language that breaks premium tone
-- No bullet‑point dumps — responses should feel conversational and curated
+Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 7.
 
 ## 20.3 AI‑to‑Personalization Integration
 
@@ -1570,12 +1600,7 @@ AI must only reference data that exists in the system:
 
 ## 20.5 Surface‑Specific AI Rules
 
-| Surface | Rules |
-|---------|-------|
-| **AI Chat** | Follow Sections 20.1–20.4. Responses must feel like a knowledgeable skincare advisor, not a search engine. Limit response length to avoid overwhelming users. |
-| **Search / Recommendations** | AI‑ranked results must be explainable. Never rank by hidden commercial criteria. Surface the reason for each recommendation. |
-| **Routine Suggestions** | Must respect conflict detection engine. Never suggest ingredients that conflict with the user's current routine without a warning. |
-| **Ingredient Analysis** | Must follow Section 17.2 scientific accuracy. Never overstate benefits or risks. |
+Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 7.
 
 ## 20.6 Future AI Surfaces (Deferred per Section 13)
 
@@ -1957,9 +1982,7 @@ All fields are optional and nullable. Existing users with only city/state/zip co
 
 ### Copy Rules by Source
 
-- `source === 'live'`: "These insights are personalized based on your profile location."
-- `source === 'partial'`: "These insights are partially personalized based on your saved location."
-- `source === 'mock'`: "These insights are based on default data. Update your location in settings for more accurate recommendations."
+Copy templates moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 8.
 
 **Critical rule:** Never claim personalization when `source === 'mock'`.
 
@@ -2038,5 +2061,43 @@ When adding new product categories, ingredient classes, texture types, or condit
 6. Run `npx tsc --noEmit` and `npx vite build` to confirm zero errors
 
 ---
+
+# ROLE SEPARATION DIRECTIVE
+
+You must treat this file (CLAUDE.md) as DEVELOPER GOVERNANCE ONLY.
+
+This file governs your behavior exclusively when you are acting as the engineering partner who helps build, modify, and maintain the codebase. When operating under this file, you must:
+
+- Use engineering tone and reasoning
+- Follow architecture rules
+- Follow Git hygiene
+- Use diff-first workflows
+- Avoid hallucinating files
+- Never use product-facing tone, personalization logic, or environment-fit reasoning
+
+A separate governance file exists for the product-facing AI:
+
+    /ai-governance/CLAUDE_PRODUCT.md
+
+This file governs ALL user-facing behavior, including:
+- Learn More popup content
+- Environment Fit explanations
+- Product detail insights
+- Routine builder guidance
+- Ingredient explanations
+- Reviewer insights
+- Any text that speaks directly to the user
+- All personalization, environment, skin, routine, and reviewer-based reasoning
+
+When a request is product-facing, user-facing, or requires personalization, environment-fit logic, or plain-language explanations, you must load and follow the rules in:
+
+    /ai-governance/CLAUDE_PRODUCT.md
+
+When a request is engineering-facing, code-related, architectural, or repository-related, you must follow THIS file (CLAUDE.md).
+
+You must never mix these two roles.
+
+End of directive.
+
 
 # End of CLAUDE.md

@@ -190,7 +190,7 @@ class AdaptiveAIEngine {
 
     // Add personalized context if available
     if (preferences.concerns && preferences.concerns.length > 0 && topic !== 'general') {
-      message += ` Since you're focusing on ${preferences.concerns.join(' and ')}, `;
+      message += ` For your ${preferences.concerns.join(' and ')} concerns, `;
       message += this.addConcernSpecificAdvice(preferences.concerns[0], complexity);
     }
 
@@ -201,7 +201,7 @@ class AdaptiveAIEngine {
       message,
       suggestions: suggestions.slice(0, 3),
       confidence,
-      reasoning: `Based on your ${preferences.skinType || 'skin'} profile and ${patterns.engagementLevel} engagement`,
+      reasoning: `Matched to your ${preferences.skinType || 'skin'} type and browsing patterns`,
     };
   }
 
@@ -223,7 +223,7 @@ class AdaptiveAIEngine {
     if (intent === 'recommendation') {
       const routineProducts = retrieveRoutineProducts(userProfile);
 
-      let response = `Here's a personalized ${routinePreference} routine for your ${skinType} skin:\n\n`;
+      let response = `Here's a ${routinePreference} routine matched to your ${skinType} skin:\n\n`;
 
       // Morning routine
       response += `**Morning Routine:**\n`;
@@ -294,12 +294,12 @@ class AdaptiveAIEngine {
 
       if (result.products.length > 0) {
         const context = category
-          ? `Based on your ${skinType} skin, here are my top ${category} recommendations:`
-          : `Here are personalized product recommendations for your ${skinType} skin:`;
+          ? `For your ${skinType} skin, here are ${category} options that fit:`
+          : `Here are product options matched to your ${skinType} skin:`;
         return formatRecommendations(result.products, context);
       }
 
-      return `I'd love to recommend products for your ${skinType} skin. Could you tell me what type of product you're looking for (cleanser, serum, moisturizer, sunscreen)?`;
+      return `I can find products for your ${skinType} skin. What type are you looking for — cleanser, serum, moisturizer, or sunscreen?`;
     } else if (intent === 'comparison') {
       return `I'll help you compare products. What specific aspects matter most to you - ingredients, price, effectiveness, or user reviews?`;
     }
@@ -307,7 +307,7 @@ class AdaptiveAIEngine {
     // Default: retrieve general recommendations
     const result = retrieveProducts(userProfile, { limit: 3 });
     if (result.products.length > 0) {
-      return formatRecommendations(result.products, `Here are some products I think would work well for your ${skinType} skin:`);
+      return formatRecommendations(result.products, `Here are products that suit your ${skinType} skin:`);
     }
 
     return `I can recommend products tailored to your ${skinType} skin. What type of product are you looking for?`;
@@ -318,7 +318,7 @@ class AdaptiveAIEngine {
       if (complexity === 'simple') {
         return `This ingredient works by targeting specific skin concerns. Would you like to know if it's suitable for you?`;
       } else {
-        return `Let me explain this ingredient in detail. It works at the cellular level to address concerns like ${preferences.concerns?.[0] || 'various skin issues'}. ${preferences.sensitivities ? `Given your sensitivities to ${preferences.sensitivities.join(', ')}, I'll also check for potential reactions.` : ''}`;
+        return `Here's what this ingredient does and why it matters for your skin. It can help with ${preferences.concerns?.[0] || 'overall skin health'}. ${preferences.sensitivities ? `Since you're sensitive to ${preferences.sensitivities.join(' and ')}, it's worth checking how your skin responds.` : ''}`;
       }
     }
 
@@ -331,13 +331,13 @@ class AdaptiveAIEngine {
 
     if (intent === 'recommendation') {
       if (complexity === 'simple') {
-        return `For ${skinType} skin with ${concerns[0] || 'your concerns'}, focus on gentle, targeted treatments.`;
+        return `For your ${skinType} skin, gentle products that address ${concerns[0] || 'your needs'} tend to work best.`;
       } else {
-        return `Your ${skinType} skin profile shows ${concerns.length > 0 ? `primary concerns: ${concerns.join(', ')}` : 'balanced characteristics'}. I recommend a personalized approach focusing on ${concerns[0] || 'maintenance and prevention'}. Track your progress regularly to see what works best.`;
+        return `With your ${skinType} skin${concerns.length > 0 ? ` and focus on ${concerns.join(' and ')}` : ''}, a steady routine is what matters most. Start with ${concerns[0] || 'the basics'} and track how your skin responds over time.`;
       }
     }
 
-    return `Let's analyze your skin. Your current profile shows ${skinType} skin${concerns.length > 0 ? ` with focus on ${concerns.join(' and ')}` : ''}. What would you like to know?`;
+    return `Your ${skinType} skin${concerns.length > 0 ? ` with ${concerns.join(' and ')} as priorities` : ''} gives us a clear starting point. What would you like to explore?`;
   }
 
   private generateConcernResponse(input: string, preferences: any, complexity: string, intent: string): string {
@@ -356,7 +356,7 @@ class AdaptiveAIEngine {
     const hasProfile = preferences.skinType || preferences.concerns?.length > 0;
 
     if (!hasProfile) {
-      return `I'm here to help with your skincare journey! To give you the most personalized product recommendations, I'd love to learn about your skin type and concerns. Have you taken our skin quiz yet? In the meantime, I can still suggest some popular, well-reviewed products.`;
+      return `To give you the most relevant recommendations, it helps to know your skin type and concerns. Have you taken our skin quiz yet? In the meantime, I can suggest well-reviewed products to explore.`;
     }
 
     // Build user profile for retrieval
@@ -390,21 +390,21 @@ class AdaptiveAIEngine {
 
   private addConcernSpecificAdvice(concern: string, complexity: string): string {
     const advice: Record<string, string> = {
-      acne: complexity === 'simple' 
-        ? 'focus on salicylic acid and benzoyl peroxide.'
-        : 'I recommend ingredients like salicylic acid for exfoliation, niacinamide for inflammation, and benzoyl peroxide for bacteria control.',
+      acne: complexity === 'simple'
+        ? 'look for products that help clear pores and calm breakouts.'
+        : 'products that gently exfoliate, reduce redness, and keep pores clear tend to work well together.',
       'dark-spots': complexity === 'simple'
-        ? 'vitamin C and niacinamide work well.'
-        : 'look for vitamin C, niacinamide, and alpha arbutin to brighten and even skin tone over time.',
+        ? 'brightening products with antioxidants tend to help over time.'
+        : 'products that brighten and even out skin tone work best when used consistently — look for antioxidant-rich options.',
       wrinkles: complexity === 'simple'
-        ? 'retinol is highly effective.'
-        : 'retinol, peptides, and hyaluronic acid can help reduce fine lines and improve skin texture.',
+        ? 'products that boost cell renewal and hydration can help.'
+        : 'products that support skin renewal, add moisture, and firm the skin tend to show results with consistent use.',
       dryness: complexity === 'simple'
-        ? 'hyaluronic acid and ceramides help.'
-        : 'focus on hydrating ingredients like hyaluronic acid, ceramides, and glycerin to restore moisture barrier.',
+        ? 'deep hydration and barrier-supporting products help most.'
+        : 'products that draw in moisture and strengthen your skin\'s natural barrier tend to make the biggest difference.',
       sensitivity: complexity === 'simple'
-        ? 'gentle, fragrance-free products are best.'
-        : 'choose fragrance-free, hypoallergenic products with soothing ingredients like centella and allantoin.',
+        ? 'gentle, fragrance-free products are the safest choice.'
+        : 'fragrance-free products with calming, soothing properties are the safest bet for reactive skin.',
     };
 
     return advice[concern] || 'I can provide targeted recommendations.';

@@ -8,7 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
-import type { AISurfaceContext, AIMode, ScoredReviewEntry } from '../../lib/ai/surfaceContext';
+import type { AISurfaceContext, AIMode } from '../../lib/ai/surfaceContext';
 import type { AIInsightResult } from '../../lib/ai/surfaceClient';
 
 // ---------------------------------------------------------------------------
@@ -24,9 +24,7 @@ interface AIInsightBlockProps {
   compact?: boolean;
   /** Skip localStorage cache */
   skipCache?: boolean;
-  /** Pre-computed scored reviews for mini cards (product_detail mode) */
-  scoredReviews?: ScoredReviewEntry[];
-  /** Environment badges (product_detail mode) */
+  /** Environment badges (non-product_detail modes) */
   environmentBadges?: {
     uv?: string;
     climate?: string;
@@ -78,38 +76,6 @@ function EnvironmentBadges({ badges }: { badges: { uv?: string; climate?: string
   );
 }
 
-function MiniReviewCard({ entry }: { entry: ScoredReviewEntry }) {
-  return (
-    <div className="bg-white border border-blush/40 rounded-lg px-3 py-2">
-      <div className="flex items-center gap-2 mb-1">
-        <img
-          src={entry.review.userAvatar}
-          alt={entry.review.userName}
-          className="w-6 h-6 rounded-full object-cover flex-shrink-0"
-          onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/24?text=U'; }}
-        />
-        <span className="text-xs font-medium text-deep truncate">{entry.review.userName}</span>
-        {entry.review.verified && (
-          <i className="ri-shield-check-fill text-[10px] text-warm-gray" title="Verified buyer" />
-        )}
-        <div className="flex items-center ml-auto">
-          {Array.from({ length: 5 }, (_, i) => (
-            <i
-              key={i}
-              className={`text-[9px] ${
-                i < entry.review.rating ? 'ri-star-fill text-amber-500' : 'ri-star-line text-amber-300'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-      <p className="text-[11px] text-warm-gray leading-relaxed line-clamp-2">
-        {entry.review.content}
-      </p>
-    </div>
-  );
-}
-
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
@@ -119,7 +85,6 @@ export default function AIInsightBlock({
   question,
   compact = false,
   skipCache = false,
-  scoredReviews,
   environmentBadges,
 }: AIInsightBlockProps) {
   const [result, setResult] = useState<AIInsightResult | null>(null);
@@ -160,6 +125,54 @@ export default function AIInsightBlock({
   }
 
   const isCached = result?.success && result.cached;
+  const isProductDetail = context.mode === 'product_detail';
+  const isPersonalized = !!context.user.skinType;
+
+  // Product detail mode: bullet points, color highlighting, no extras
+  if (isProductDetail && !compact) {
+    const bullets = insightText
+      .split(/(?<=\.)\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 0);
+
+    return (
+      <div
+        className={`rounded-xl p-4 ${
+          isPersonalized
+            ? 'bg-light/20 border border-primary/20'
+            : 'bg-cream/30 border border-blush/40'
+        }`}
+        role="complementary"
+        aria-label="Why this product fits"
+      >
+        <div className="flex items-center gap-2 mb-2.5">
+          <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
+            <i className="ri-sparkling-line text-xs text-primary" />
+          </div>
+          <span className="text-xs font-semibold text-deep">
+            Why this product fits
+          </span>
+          {isCached && (
+            <span className="text-[9px] text-warm-gray/50 ml-auto">cached</span>
+          )}
+        </div>
+        <ul className="space-y-1.5">
+          {bullets.map((bullet, i) => (
+            <li key={i} className="flex items-start gap-2">
+              <i className={`ri-checkbox-circle-fill text-xs mt-0.5 flex-shrink-0 ${
+                isPersonalized ? 'text-primary' : 'text-warm-gray/40'
+              }`} />
+              <span className={`text-sm leading-relaxed ${
+                isPersonalized ? 'text-deep' : 'text-warm-gray'
+              }`}>
+                {bullet}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -187,25 +200,6 @@ export default function AIInsightBlock({
 
       {/* Environment badges */}
       {environmentBadges && <EnvironmentBadges badges={environmentBadges} />}
-
-      {/* Mini review cards (product_detail mode) */}
-      {scoredReviews && scoredReviews.length > 0 && !compact && (
-        <div className="mt-3 space-y-1.5">
-          <p className="text-[10px] font-medium text-warm-gray uppercase tracking-wide">
-            Similar profiles
-          </p>
-          {scoredReviews.slice(0, 3).map((entry) => (
-            <MiniReviewCard key={entry.review.id} entry={entry} />
-          ))}
-        </div>
-      )}
-
-      {/* Disclaimer */}
-      {!compact && shouldShowDisclaimer(context.mode) && (
-        <p className="mt-2 text-[10px] text-warm-gray/60 italic">
-          This is not medical advice.
-        </p>
-      )}
     </div>
   );
 }
@@ -216,7 +210,7 @@ export default function AIInsightBlock({
 
 function getModeLabel(mode: AIMode): string {
   switch (mode) {
-    case 'product_detail': return 'Personalised for you';
+    case 'product_detail': return 'Personalized for you';
     case 'ingredient_detail': return 'Ingredient insight';
     case 'routine_builder': return 'Routine analysis';
     case 'search': return 'Search insight';
@@ -224,11 +218,8 @@ function getModeLabel(mode: AIMode): string {
     case 'marketplace': return 'Marketplace insight';
     case 'nutrition': return 'Nutrition insight';
     case 'chat': return 'AI response';
-    case 'survey_results': return 'Your personalised roadmap';
+    case 'survey_results': return 'Your personalized roadmap';
     default: return 'AI insight';
   }
 }
 
-function shouldShowDisclaimer(mode: AIMode): boolean {
-  return ['product_detail', 'ingredient_detail', 'survey_results', 'nutrition'].includes(mode);
-}

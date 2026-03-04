@@ -101,13 +101,21 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
   const { evidence } = ctx;
 
   if (evidence.environmentFit?.explanation) {
-    parts.push(evidence.environmentFit.explanation);
+    let explanation = evidence.environmentFit.explanation;
+    // For product_detail, strip reviewer sentence — review cards shown separately
+    if (ctx.mode === 'product_detail') {
+      explanation = explanation.replace(/\s*(?:Reviewers|People) with (?:similar|a similar skin) profile[s]?(?:[^.]|\.\d)*\./i, '').trim();
+    }
+    if (explanation) parts.push(explanation);
   }
 
   if (evidence.reviewerEvidence) {
     const re = evidence.reviewerEvidence;
-    if (re.detail) {
-      parts.push(`${re.count} reviewers with similar profiles ${re.detail}.`);
+    // Skip if already mentioned in environment fit or if product_detail (cards shown separately)
+    const alreadyCovered = ctx.mode === 'product_detail'
+      || parts.some(p => p.toLowerCase().includes('similar skin profile') || p.toLowerCase().includes('reviewers with similar profiles'));
+    if (re.detail && !alreadyCovered) {
+      parts.push(`${re.count} people with a similar skin profile ${re.detail}.`);
     }
   }
 
@@ -115,10 +123,10 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
     const { matched, unmatched } = evidence.concernAlignment;
     if (matched.length > 0 && unmatched.length > 0) {
       parts.push(
-        `This product addresses your ${matched.join(' and ')} concerns but does not specifically target ${unmatched.join(' or ')}.`,
+        `This product targets ${matched.join(' and ')}, which matches what your skin needs right now, but does not specifically address ${unmatched.join(' or ')}.`,
       );
     } else if (matched.length > 0) {
-      parts.push(`This product aligns with your ${matched.join(' and ')} concerns.`);
+      parts.push(`This product helps with ${matched.join(' and ')}, which is what your skin is looking for.`);
     }
   }
 
