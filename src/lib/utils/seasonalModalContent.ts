@@ -411,15 +411,38 @@ function buildProductFitNarrative(ctx: NarrativeContext): ProductFitNarrative {
     sentences.push(
       'Since your skin tends to be sensitive, it\'s worth easing into this product and always wearing sunscreen during the day.'
     );
+  } else if (userSensitivity === 'high') {
+    sentences.push(
+      'Since your skin tends to be sensitive, introducing any new product gradually and watching how your skin responds is always a good idea.'
+    );
   } else if (userComplexion && conditions.includes('high_uv')) {
     const fitzIndex = COMPLEXION_TIERS.findIndex(t => t.toLowerCase() === userComplexion.toLowerCase());
     if (fitzIndex >= 0 && fitzIndex <= 1) {
       sentences.push(
         'Fair skin is especially vulnerable to sun damage right now, so sunscreen is a must alongside this product.'
       );
+    } else if (fitzIndex >= 2 && fitzIndex <= 3) {
+      sentences.push(
+        'With current UV levels, sunscreen helps protect against uneven tone and sun damage — even with medium skin tones.'
+      );
     } else if (fitzIndex >= 4) {
       sentences.push(
         'Even with naturally more resilient skin, sunscreen is still important for keeping your tone even in strong sun.'
+      );
+    }
+  } else if (userComplexion && (conditions.includes('cold') || conditions.includes('dry_air'))) {
+    const fitzIndex = COMPLEXION_TIERS.findIndex(t => t.toLowerCase() === userComplexion.toLowerCase());
+    if (fitzIndex >= 0 && fitzIndex <= 1) {
+      sentences.push(
+        'Fair skin can show redness and irritation more easily in cold, dry weather — gentle, hydrating products help keep it calm.'
+      );
+    } else if (fitzIndex >= 2 && fitzIndex <= 3) {
+      sentences.push(
+        'Cold, dry weather can leave your skin feeling tight or looking dull — staying well-moisturized helps keep your complexion looking its best.'
+      );
+    } else if (fitzIndex >= 4) {
+      sentences.push(
+        'Deeper skin tones can show dryness as a grayish or ashy cast in cold weather — keeping skin well-moisturized helps maintain an even, healthy look.'
       );
     }
   }
@@ -452,7 +475,7 @@ function buildProductFitNarrative(ctx: NarrativeContext): ProductFitNarrative {
       .slice(0, 2);
     if (readable.length > 0) {
       sentences.push(
-        `You've noted a preference for ${listJoin(readable)} products — check the label to confirm this one meets that standard.`
+        `You've noted a preference for ${listJoin(readable)} products, which is worth considering as you explore this option.`
       );
     }
   }
@@ -475,9 +498,9 @@ function buildInsightText(label: string, matchingReviews: ScoredReviewEntry[]): 
   if (hasSimilar && avgRating >= 4.0) {
     return `People with similar skin said they noticed a difference with ${label} after a few weeks of use.`;
   } else if (avgRating >= 4.0) {
-    return `Reviewers who mentioned ${label} rated the product ${avgRating.toFixed(1)} stars on average.`;
+    return `People who mentioned ${label} generally had great results with this product.`;
   } else if (avgRating >= 3.0) {
-    return `Reviewers had mixed but mostly positive experiences with ${label}.`;
+    return `People who mentioned ${label} had mixed but mostly positive experiences.`;
   }
   return `Results varied for ${label} — some people saw a difference, others less so.`;
 }

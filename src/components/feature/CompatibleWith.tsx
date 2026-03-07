@@ -81,7 +81,9 @@ const CompatibleWith = ({ productId }: CompatibleWithProps) => {
         <div className="mb-8">
           <h2 className="text-3xl font-serif text-deep-900 mb-3">Compatible With</h2>
           <p className="text-gray-600">
-            See which products pair safely with this one in your routine
+            See which products pair safely with{' '}
+            <span className="text-primary-700 font-medium">{currentProduct.name}</span>{' '}
+            in your routine
           </p>
         </div>
 

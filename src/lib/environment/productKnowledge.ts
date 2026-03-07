@@ -36,7 +36,7 @@ export type InferredTexture =
 export const MECHANISM_PHRASES: Record<IngredientClass, Partial<Record<ConditionKey, string>>> = {
   humectant: {
     humid:        'draw atmospheric moisture into the skin effectively',
-    dry_air:      'pull moisture toward the skin — pairing with an occlusive layer helps retain it in drier air',
+    dry_air:      'pull moisture toward the skin — pairing with a heavier layer on top helps lock it in during drier air',
     hot:          'support hydration as perspiration depletes surface moisture',
     cold:         'attract available moisture to counteract cold-air dryness',
     transitional: 'help the skin adapt as ambient humidity levels shift',
@@ -45,7 +45,7 @@ export const MECHANISM_PHRASES: Record<IngredientClass, Partial<Record<Condition
     humid:        'form a light protective film without trapping excess moisture in humidity',
     dry_air:      'lock in moisture beneath a protective layer — especially important when ambient humidity is low',
     hot:          'seal in hydration, though lighter application avoids heaviness in heat',
-    cold:         'create a barrier against cold-induced transepidermal water loss',
+    cold:         'help seal in moisture and protect it from escaping in cold, dry air',
     transitional: 'maintain consistent moisture levels as conditions change',
   },
   emollient: {
@@ -56,32 +56,32 @@ export const MECHANISM_PHRASES: Record<IngredientClass, Partial<Record<Condition
     transitional: 'maintain skin smoothness as environmental conditions fluctuate',
   },
   supportive: {
-    high_uv:      'help neutralize UV-generated free radicals that accelerate oxidative stress',
+    high_uv:      'help protect your skin from the extra environmental stress that strong sun can cause',
     low_uv:       'continue antioxidant support, with cumulative benefits during lower-UV periods',
-    hot:          'provide antioxidant defense as heat and UV combine to increase oxidative load',
-    humid:        'deliver antioxidant protection without requiring heavy vehicles in humid conditions',
+    hot:          'help protect your skin from the combined environmental stress of heat and sun',
+    humid:        'deliver antioxidant protection without feeling heavy in humid conditions',
     transitional: 'maintain antioxidant defense as seasonal UV levels shift',
   },
   sensitizing: {
-    high_uv:      'increase photosensitivity — dedicated SPF is essential during high-UV periods',
-    low_uv:       'benefit from reduced UV exposure, making this a favorable time for cell-turnover actives',
+    high_uv:      'can make your skin more sensitive to the sun — dedicated SPF is essential during high-UV periods',
+    low_uv:       'benefit from reduced UV exposure, making this a favorable time for products that help your skin renew',
     hot:          'may increase irritation potential when skin is heat-stressed — evening use is recommended',
     cold:         'pair well with protective layers that shield sensitized skin from cold and wind',
     transitional: 'require consistent SPF as UV levels can be unpredictable during seasonal shifts',
   },
   protective: {
-    high_uv:      'provide mineral-based UV deflection well-matched to elevated UV levels',
+    high_uv:      'provide mineral-based sun protection well-matched to elevated UV levels',
     low_uv:       'maintain consistent mineral UV defense even during lower-exposure periods',
     hot:          'offer stable mineral protection that does not degrade with heat',
-    humid:        'maintain UV deflection without the instability some chemical filters show in humidity',
+    humid:        'maintain steady sun protection that holds up well in humid conditions',
     transitional: 'provide reliable UV defense through changing seasonal conditions',
   },
   barrier: {
-    dry_air:      'reinforce the lipid barrier against moisture loss in dry conditions',
-    cold:         'strengthen the skin barrier when cold air can compromise lipid integrity',
-    humid:        'support barrier function without occluding, letting the skin breathe in humidity',
+    dry_air:      'reinforce the skin barrier against moisture loss in dry conditions',
+    cold:         'strengthen the skin barrier when cold air can weaken its natural protective layer',
+    humid:        'support barrier function without feeling heavy, letting the skin breathe in humidity',
     transitional: 'help the barrier adapt as environmental conditions shift between seasons',
-    hot:          'maintain barrier integrity when heat and perspiration stress the lipid layer',
+    hot:          'help maintain the skin barrier when heat and perspiration put it under stress',
     high_uv:      'support the barrier as a first line of defense against UV-related stress',
   },
   soothing: {
@@ -92,11 +92,11 @@ export const MECHANISM_PHRASES: Record<IngredientClass, Partial<Record<Condition
     dry_air:      'help comfort skin that dry air has left irritated or reactive',
   },
   peptide: {
-    cold:         'signal repair processes that support recovery from cold-weather barrier stress',
-    hot:          'remain stable across temperature ranges, continuing to support collagen signaling',
-    high_uv:      'support repair signaling that may help skin recover from UV-related stress',
-    low_uv:       'work consistently during lower-UV periods, complementing barrier-repair routines',
-    transitional: 'provide steady repair signals as the skin adjusts to changing conditions',
+    cold:         'support your skin\'s natural recovery from cold-weather dryness and stress',
+    hot:          'remain stable across temperature ranges, continuing to support your skin\'s natural firmness',
+    high_uv:      'support your skin\'s natural recovery from UV-related stress',
+    low_uv:       'work consistently during lower-UV periods, complementing your skin\'s natural recovery',
+    transitional: 'provide steady support as the skin adjusts to changing conditions',
   },
 };
 

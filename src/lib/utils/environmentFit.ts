@@ -61,6 +61,23 @@ const PEPTIDE = [
   'palmitoyl tripeptide', 'palmitoyl tetrapeptide', 'acetyl hexapeptide',
 ];
 
+/** Plain-language labels for ingredient classes (no ingredient names in user-facing text). */
+const CLASS_PLAIN_LABEL: Record<IngredientClass, string> = {
+  humectant: 'hydrating ingredients',
+  barrier: 'barrier-supporting ingredients',
+  soothing: 'calming ingredients',
+  supportive: 'protective ingredients',
+  sensitizing: 'active ingredients',
+  protective: 'sun-shielding ingredients',
+  emollient: 'smoothing ingredients',
+  occlusive: 'moisture-sealing ingredients',
+  peptide: 'firming ingredients',
+};
+
+function classLabel(cls: IngredientClass): string {
+  return CLASS_PLAIN_LABEL[cls];
+}
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -191,19 +208,19 @@ function buildLiveExplanation(
 
   let usedClass: IngredientClass | null = null;
 
-  for (const { cls, names } of activeClasses) {
+  for (const { cls } of activeClasses) {
     const phrase = getMechanismPhrase(cls, conditions);
     if (phrase) {
       // Special handling for sensitizing + pm-only products
       if (cls === 'sensitizing' && isPmOnly(product)) {
         const isHighUv = conditions.includes('high_uv');
         if (isHighUv || conditions.includes('hot')) {
-          s.push(`${product.name} is best used in the evening, so its ${list(names)} can work while naturally avoiding peak sun exposure in ${loc}.`);
+          s.push(`${product.name} is best used in the evening, so its ${classLabel(cls)} can work while naturally avoiding peak sun exposure in ${loc}.`);
         } else {
-          s.push(`${product.name}'s ${list(names)} ${phrase} in ${loc}.`);
+          s.push(`${product.name}'s ${classLabel(cls)} ${phrase} in ${loc}.`);
         }
       } else {
-        s.push(`${product.name}'s ${list(names)} ${phrase} in ${loc}.`);
+        s.push(`${product.name}'s ${classLabel(cls)} ${phrase} in ${loc}.`);
       }
       usedClass = cls;
       break;
@@ -224,11 +241,11 @@ function buildLiveExplanation(
       s.push(texPhrase.charAt(0).toUpperCase() + texPhrase.slice(1) + '.');
     } else {
       // Try a second ingredient class mechanism phrase
-      for (const { cls, names } of activeClasses) {
+      for (const { cls } of activeClasses) {
         if (cls === usedClass) continue;
         const phrase = getMechanismPhrase(cls, conditions);
         if (phrase) {
-          s.push(`Its ${list(names)} ${phrase}.`);
+          s.push(`Its ${classLabel(cls)} ${phrase}.`);
           break;
         }
       }
@@ -238,7 +255,7 @@ function buildLiveExplanation(
   // --- sentence 3: reviewer evidence OR concern alignment ---
 
   if (s.length < 3 && reviewer && reviewer.count > 0 && reviewer.sentiment === 'positive' && reviewer.detail) {
-    s.push(`${reviewer.count} people with a similar skin profile ${reviewer.detail}.`);
+    s.push(`People with a similar skin profile ${reviewer.detail}.`);
   } else if (s.length < 3) {
     const concerns = matchedConcerns(product, userConcerns);
     if (concerns.length > 0) {
@@ -252,9 +269,9 @@ function buildLiveExplanation(
 
   if (s.length === 0) {
     const season = env.season ? env.season.charAt(0).toUpperCase() + env.season.slice(1) : null;
-    const any = [...m.barrier, ...m.humectants, ...m.soothing, ...m.supportive].slice(0, 2);
-    if (any.length > 0) {
-      return `${product.name}'s ${list(any)} ${any.length > 1 ? 'help maintain' : 'helps maintain'} skin comfort through ${season ? season.toLowerCase() + '\'s' : 'the'} conditions in ${loc}. With ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels, this ${catLabel(product.category).toLowerCase()} fits well in your routine.`;
+    const hasHydratingIngredients = m.barrier.length > 0 || m.humectants.length > 0 || m.soothing.length > 0 || m.supportive.length > 0;
+    if (hasHydratingIngredients) {
+      return `${product.name} helps maintain skin comfort through ${season ? season.toLowerCase() + '\'s' : 'the'} conditions in ${loc}. With ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels, this ${catLabel(product.category).toLowerCase()} fits well in your routine.`;
     }
     return `${product.name} is a ${catLabel(product.category).toLowerCase()} suited to ${season ? season.toLowerCase() : 'current'} conditions in ${loc}. Its blend supports daily use at ${env.uvBand ? env.uvBand.replace(/_/g, ' ') : 'current'} UV levels.`;
   }
@@ -287,10 +304,10 @@ function buildPartialExplanation(
 
   // --- sentence 1: primary mechanism phrase ---
 
-  for (const { cls, names } of activeClasses) {
+  for (const { cls } of activeClasses) {
     const phrase = getMechanismPhrase(cls, conditions);
     if (phrase) {
-      s.push(`${product.name}'s ${list(names)} ${phrase} during ${season?.toLowerCase() || 'current'} months.`);
+      s.push(`${product.name}'s ${classLabel(cls)} ${phrase} during ${season?.toLowerCase() || 'current'} months.`);
       break;
     }
   }
@@ -299,14 +316,14 @@ function buildPartialExplanation(
   if (s.length === 0) {
     if (m.sensitizing.length > 0) {
       if (env.season === 'summer' || env.season === 'spring') {
-        s.push(`${product.name}'s ${list(m.sensitizing)} can increase UV sensitivity — consistent SPF use is important during ${season?.toLowerCase()} months.`);
+        s.push(`${product.name}'s ${classLabel('sensitizing')} can increase UV sensitivity — consistent SPF use is important during ${season?.toLowerCase()} months.`);
       } else if (env.season === 'winter' || env.season === 'autumn') {
-        s.push(`${season}'s lower UV makes this a favorable time for ${product.name}'s ${list(m.sensitizing)}.`);
+        s.push(`${season}'s lower UV makes this a favorable time for ${product.name}'s ${classLabel('sensitizing')}.`);
       }
     } else if (m.protective.length > 0) {
-      s.push(`${product.name}'s ${list(m.protective)} ${m.protective.length > 1 ? 'provide' : 'provides'} mineral-based UV defense across all seasons.`);
+      s.push(`${product.name}'s ${classLabel('protective')} provide mineral-based UV defense across all seasons.`);
     } else if (m.supportive.length > 0) {
-      s.push(`${product.name}'s ${list(m.supportive)} ${m.supportive.length > 1 ? 'complement' : 'complements'} daily SPF year-round.`);
+      s.push(`${product.name}'s ${classLabel('supportive')} complement daily SPF year-round.`);
     }
   }
 
@@ -338,9 +355,9 @@ function buildPartialExplanation(
   // --- fallback ---
 
   if (s.length === 0) {
-    const any = [...m.barrier, ...m.humectants, ...m.supportive, ...m.soothing, ...m.protective].slice(0, 2);
-    if (any.length > 0 && season) {
-      return `${product.name}'s ${list(any)} ${any.length > 1 ? 'are' : 'is'} relevant across a range of conditions. During ${season.toLowerCase()}, add your full location for a more specific assessment.`;
+    const hasRelevantIngredients = m.barrier.length > 0 || m.humectants.length > 0 || m.supportive.length > 0 || m.soothing.length > 0 || m.protective.length > 0;
+    if (hasRelevantIngredients && season) {
+      return `${product.name}'s ingredients are relevant across a range of conditions. During ${season.toLowerCase()}, add your full location for a more specific assessment.`;
     }
     if (season) {
       return `During ${season.toLowerCase()}, ${product.name}'s ${catLabel(product.category).toLowerCase()} formula can be assessed against local conditions. Add your full location for deeper insights.`;
@@ -371,10 +388,10 @@ function buildMockExplanation(
   // --- sentence 1: ingredient class statement ---
 
   let foundMechanism = false;
-  for (const { cls, names } of activeClasses) {
+  for (const { cls } of activeClasses) {
     const phrase = getMechanismPhrase(cls, generalConditions);
     if (phrase) {
-      s.push(`${product.name}'s ${list(names)} ${phrase}.`);
+      s.push(`${product.name}'s ${classLabel(cls)} ${phrase}.`);
       foundMechanism = true;
       break;
     }
@@ -383,16 +400,15 @@ function buildMockExplanation(
   // Fallback to existing pattern if no mechanism phrase matched
   if (!foundMechanism) {
     if (m.protective.length > 0) {
-      s.push(`${product.name}'s ${list(m.protective)} ${m.protective.length > 1 ? 'provide' : 'provides'} mineral-based UV defense across all conditions.`);
+      s.push(`${product.name}'s ${classLabel('protective')} provide mineral-based UV defense across all conditions.`);
     } else if (m.supportive.length > 0) {
-      s.push(`${product.name}'s ${list(m.supportive)} ${m.supportive.length > 1 ? 'complement' : 'complements'} daily SPF by helping neutralize environmental free radicals.`);
+      s.push(`${product.name}'s ${classLabel('supportive')} complement daily SPF by helping protect against environmental stress.`);
     } else if (m.sensitizing.length > 0) {
-      s.push(`${product.name} contains ${list(m.sensitizing)}, which may increase UV sensitivity — pairing with SPF is recommended.`);
+      s.push(`${product.name}'s ${classLabel('sensitizing')} may increase UV sensitivity — pairing with SPF is recommended.`);
     } else if (m.barrier.length > 0 || m.humectants.length > 0) {
-      const ing = [...m.barrier, ...m.humectants].slice(0, 2);
-      s.push(`${product.name}'s ${list(ing)} ${ing.length > 1 ? 'support' : 'supports'} hydration and barrier health across varying conditions.`);
+      s.push(`${product.name}'s hydrating and barrier-supporting ingredients support skin health across varying conditions.`);
     } else if (m.soothing.length > 0) {
-      s.push(`${product.name}'s ${list(m.soothing)} may help keep skin calm when environmental stressors shift.`);
+      s.push(`${product.name}'s ${classLabel('soothing')} may help keep skin calm when environmental stressors shift.`);
     } else {
       s.push(`${product.name} is a ${catLabel(product.category).toLowerCase()} designed to perform across a range of conditions.`);
     }
@@ -431,8 +447,8 @@ function buildReviewerInsight(
 
   if (matches.sentiment === 'positive') {
     return matches.detail
-      ? `${matches.count} people with a similar skin profile ${matches.detail}.`
-      : `${matches.count} people with a similar skin profile gave ${product.name} positive ratings in similar conditions.`;
+      ? `People with a similar skin profile ${matches.detail}.`
+      : `People with a similar skin profile gave ${product.name} positive ratings in similar conditions.`;
   }
 
   return 'People with a similar skin profile had mixed results — your experience may differ.';

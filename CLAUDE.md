@@ -90,30 +90,12 @@ Never introduce new colors.
 
 ---
 
-# 4. Trusted Retailer Logic (Critical for Messaging)
-When editing copy or UI related to retailers, Claude must follow these definitions:
+# 4. Trusted Retailer Architecture
 
-### **4.1 "Trusted or reputable retailers" means:**
-- Community‑reviewed
-- Trust‑scored
-- Ranked by fulfillment reliability
-- Authenticity guarantees
-- Return policy quality
-- Customer service
-- Shipping consistency
+> For user‑facing retailer framing, trust score explanations, and rewards copy, see
+> `CLAUDE_PRODUCT.md` Section 10.
 
-### **4.2 It does NOT mean:**
-- Paid partnerships
-- Sponsored recommendations
-- Retailer integrations
-- Brand‑driven placement
-
-### **4.3 Rewards Model**
-When referencing rewards:
-- Users earn points/discounts from a portion of our affiliate commission.
-- This is transparent and user‑aligned.
-
-### **4.4 Trust Score Architecture**
+### **4.1 Trust Score Architecture**
 
 Trust scores must be:
 - Derived from verifiable attributes (community reviews, fulfillment reliability, return policy, shipping consistency, authenticity guarantees)
@@ -123,7 +105,7 @@ Trust scores must be:
 
 All trust score logic must live in shared utilities (`src/lib/utils/retailerSort.ts` or equivalent). No inline score calculations in components.
 
-### **4.5 Retailer Data Architecture**
+### **4.2 Retailer Data Architecture**
 
 All retailer data must:
 - Use the canonical `Retailer` type from `src/types/retailer.ts`
@@ -132,7 +114,7 @@ All retailer data must:
 - Never use hard‑coded retailer names or prices in components
 - Scale from 3 retailers to 30+ without layout or performance issues
 
-### **4.6 Sorting & Filtering Rules**
+### **4.3 Sorting & Filtering Rules**
 
 Retailer sorting must:
 - Use shared utility functions (`sortRetailers`, `getPriceRange`) — never inline
@@ -144,7 +126,7 @@ Retailer filtering (future) must:
 - Support budget range, shipping preference, location, trust score threshold
 - Use shared filter utilities — never inline in components
 
-### **4.7 Sponsored & Affiliate Transparency**
+### **4.4 Sponsored & Affiliate Transparency**
 
 When displaying sponsored or affiliate retailers:
 - Always label sponsored retailers with a visible badge
@@ -170,45 +152,8 @@ When displaying sponsored or affiliate retailers:
 - Supportive, empathetic, non‑judgmental.
 - Avoid clinical coldness.
 
-### **5.4 Emotional Intelligence in UX Writing**
-
-The target audience is cautious, research‑heavy, and skeptical of hype. They seek clarity,
-confidence, and feeling seen. UX writing must:
-
-- Lead with clarity over cleverness — plain language that builds trust
-- Acknowledge uncertainty without creating anxiety ("we help you explore" not "we know what's wrong")
-- Use "we" language that feels like a knowledgeable friend, not a salesperson or clinician
-- Celebrate progress without overpromising results ("your routine is evolving" not "you're cured")
-- Frame data as empowerment, not judgment ("here's what we found" not "here's what's wrong")
-- Respect the user's intelligence — no oversimplification, no condescension
-- Never use urgency or scarcity language ("limited time," "running out," "act now")
-
-### **5.5 Diagnostic‑Adjacent UX Safety**
-
-Features that analyze, recommend, or assess (skin analysis, AI chat, patch tests, ingredient
-warnings) are diagnostic‑adjacent. Copy must carefully avoid implying medical authority.
-
-**Prohibited language:**
-- "diagnose," "treat," "cure," "prescribe," "medical advice," "clinical result"
-- "you have [condition]," "this will fix [problem]"
-
-**Required framing:**
-- "Based on your profile…" not "Your diagnosis is…"
-- "This ingredient is commonly associated with…" not "This ingredient treats…"
-- "Consider consulting a dermatologist for…" when concerns are beyond skincare scope
-- Always include soft disclaimers on analysis surfaces: "This is not medical advice"
-
-### **5.6 Price‑Conscious UX Patterns**
-
-The audience is price‑sensitive but quality‑driven. Pricing UX must feel transparent and
-empowering, never anxiety‑inducing.
-
-- Always show price ranges when multiple retailers exist, not just the highest price
-- Show value indicators (free shipping, rewards eligibility, bulk options) alongside prices
-- Never hide costs — shipping, tax estimates, and fees must be visible before the user clicks out
-- Never use urgency pricing language unless explicitly requested by the user
-- Frame affiliate rewards transparently: "You earn back a portion of our commission"
-- When comparing prices, highlight savings without implying the user is overpaying elsewhere
+> For user‑facing emotional intelligence templates, diagnostic‑adjacent safety framing,
+> and price‑conscious UX copy rules, see `CLAUDE_PRODUCT.md` Sections 3, 5, and 11.
 
 ---
 
@@ -394,15 +339,7 @@ When AI‑generated text appears alongside platform UI components (e.g., AI chat
 - AI responses must never visually overpower surrounding UI (no oversized text, no attention-grabbing containers)
 - AI content areas must be subtly distinguished (e.g., a soft background tint or a slim left border) without breaking the design system
 
-**Tone Consistency:**
-- AI text must be indistinguishable in tone from platform‑written copy (Section 20.2)
-- No chatbot framing ("Here's what I found for you!") — use editorial framing ("Based on your profile…")
-- AI and UI must never contradict each other on the same surface
-
-**Personalization Integration:**
-- AI must reference the same personalization data as surrounding UI components (Section 18.3)
-- If the UI highlights an ingredient as "matching," the AI must not contradict this
-- AI personalization must degrade gracefully alongside UI personalization (Section 18.2)
+> For AI tone consistency and personalization consistency rules, see `CLAUDE_PRODUCT.md` Section 7.
 
 **Accessibility:**
 - AI‑generated content must meet the same WCAG AA+ contrast requirements as platform UI
@@ -508,10 +445,10 @@ Components must scale across all surfaces defined in Section 12.3.
 5. Motion Systems Layer (12.4)
 6. Typography & Spacing Philosophy Layer (12.5)
 7. Component Architecture Layer (12.6)
-8. Intelligent UX Reasoning & Common-Sense Additions Layer (12.8)
-9. Full‑Functionality Enforcement (12.13 — incorporates 12.9, 12.10, 12.11, 12.12)
+8. Intelligent UX Reasoning & Common‑Sense Additions Layer (12.8)
+9. Full‑Functionality Enforcement (12.13)
 10. Co‑Founder Intelligence Layer (12.14)
-12. Duplicate‑Detection & Canonical Alignment Layer (12.15)
+11. Duplicate‑Detection & Canonical Alignment Layer (12.15)
 13. Full‑Site Audit & Verification Layer (12.16)
 14. MoSCoW Roadmap Governance (13)
 15. QA Execution Mode (14)
@@ -886,7 +823,7 @@ Claude must then perform a full, context‑aware QA sweep using the appropriate 
 feature, surface, or file being validated.
 
 This system ensures:
-- No partial features (12.12)
+- No partial features (12.13)
 - No regressions
 - No token drift (12.15)
 - No UX drift (12.3)
@@ -1093,7 +1030,7 @@ Claude must:
 
 ### 1. Extract reusable utilities
 All classification logic must be extracted into:
-`src/utils/classification/**`
+`src/lib/utils/`
 
 ### 2. Normalize all metadata
 Claude must ensure:
@@ -1161,7 +1098,7 @@ Claude may only mark a feature as complete when:
 
 ---
 
-## 16.2 Environment Safety Rules
+## 16.1 Environment Safety Rules
 
 Claude Code must ALWAYS:
 
@@ -1185,7 +1122,7 @@ Claude must NEVER:
 
 ---
 
-## 16.3 Safe Supabase & Database Workflow
+## 16.2 Safe Supabase & Database Workflow
 
 When working with Supabase or database logic, Claude Code must:
 
@@ -1197,7 +1134,7 @@ When working with Supabase or database logic, Claude Code must:
 
 ---
 
-## 16.7 Beginner‑Protection Rules
+## 16.3 Beginner‑Protection Rules
 
 Claude Code must:
 
@@ -1236,34 +1173,10 @@ Claude Code must NEVER:
 
 ## 17.2 Scientific Accuracy Rules
 
-All ingredient explanations must be:
+> All user‑facing prohibited/allowed phrasing for ingredients, nutrition, patch tests, and
+> environment claims is consolidated in `CLAUDE_PRODUCT.md` Section 5.
 
-- Evidence‑based
-- Neutral and educational
-- Non‑medical
-- Non‑diagnostic
-- Non‑prescriptive
-
-Claude Code must:
-
-- Use widely accepted cosmetic science principles
-- Avoid overstating benefits
-- Avoid implying medical treatment
-- Avoid promising results
-- Avoid FDA‑regulated language
-
-Examples of prohibited phrasing:
-- "treats acne"
-- "cures hyperpigmentation"
-- "clinically proven" (unless a study is provided)
-- "heals eczema"
-- "guarantees results"
-
-Allowed phrasing:
-- "may help improve the appearance of…"
-- "commonly used for…"
-- "often recommended for…"
-- "can support the skin barrier…"
+Claude Code must verify all generated content against those rules before presenting it.
 
 ---
 
@@ -1307,64 +1220,11 @@ If ANY step fails, Claude must stop and flag the issue before proceeding.
 
 ---
 
-## 17.8 Nutrition Science Accuracy
+## 17.8 Domain‑Specific Claim Boundaries
 
-All nutrition‑to‑skin claims must follow the same evidence‑based, non‑medical, non‑diagnostic
-rules as ingredient science (Section 17.2).
-
-**Prohibited:**
-- "this food cures acne"
-- "eat X to fix wrinkles"
-- "this diet treats eczema"
-- Any claim implying dietary changes replace medical treatment
-
-**Allowed:**
-- "commonly associated with skin health"
-- "may support overall skin wellness"
-- "often included in skin‑supportive diets"
-- "some research suggests a connection between…"
-
-Nutrition content must always acknowledge individual variation and recommend consulting a
-healthcare professional for medical dietary needs.
-
----
-
-## 17.9 Patch Test Claim Boundaries
-
-Patch test features are diagnostic‑adjacent. Copy must follow Section 5.5 framing rules.
-
-**Prohibited:**
-- "diagnose allergies," "test for conditions," "medical screening"
-- "this test proves you are allergic to…"
-- Implying patch test results are clinically validated
-
-**Allowed:**
-- "check for sensitivity," "monitor your skin's reaction," "track tolerance"
-- "this helps you observe how your skin responds to…"
-- "if irritation persists, consult a dermatologist"
-
-Patch test timing recommendations must reflect widely accepted dermatological guidance
-(typically 24–48 hours for cosmetic patch testing). Never recommend shorter windows without
-explicit justification.
-
----
-
-## 17.10 Retailer Trust Score Transparency
-
-Trust scores displayed on the platform must be:
-- Explainable — the user must understand the basis (community reviews, fulfillment reliability, return policy, shipping consistency)
-- Accessible — a tooltip, modal, or linked explanation must be available near the score
-- Neutral — never presented as an endorsement, guarantee, or recommendation
-- Consistent — the same score must render identically across all surfaces (product detail, comparison modal, retailer reviews)
-
-**Prohibited:**
-- "we recommend this retailer" (implies endorsement)
-- "guaranteed authentic" without verifiable basis
-- Hidden or unexplained trust scores
-
-**Required:**
-- Context for what the score measures
-- Acknowledgment that scores reflect community data and platform criteria, not guarantees
+> Nutrition science accuracy rules → `CLAUDE_PRODUCT.md` Section 5.4
+> Patch test claim boundaries → `CLAUDE_PRODUCT.md` Section 5.5
+> Retailer trust score transparency → `CLAUDE_PRODUCT.md` Section 10
 
 ---
 
@@ -1479,10 +1339,6 @@ When adding or modifying entries in `CATEGORY_BEHAVIOR`, `TEXTURE_BEHAVIOR`, `SK
 - Follow Section 26.8 scientific accuracy rules (conditional language, no medical claims)
 - Run `npx tsc --noEmit` and `npx vite build` after changes
 
-### 18.6.8 Mandatory Enforcement Scope
-
-Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 9.
-
 ---
 
 # 19. GLOBAL SHARED COMPONENT CONSISTENCY & PROPAGATION LAYER
@@ -1575,11 +1431,10 @@ AI features must ALWAYS:
 - Match brand tone (Section 2.5): calm, educational, supportive, never salesy
 - Include soft disclaimers on analysis surfaces
 
-## 20.2 AI Tone Consistency
+> AI tone, surface‑specific voice rules, and multi‑modal behavior are governed by
+> `CLAUDE_PRODUCT.md` Sections 6–7.
 
-Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 7.
-
-## 20.3 AI‑to‑Personalization Integration
+## 20.2 AI‑to‑Personalization Integration
 
 When personalization data is available, AI must use it:
 
@@ -1589,7 +1444,7 @@ When personalization data is available, AI must use it:
 - Follow the same matching utilities (Section 18.3) — no separate AI matching logic
 - When personalization data is missing, AI must not fabricate a profile — respond generically
 
-## 20.4 AI Data Integrity
+## 20.3 AI Data Integrity
 
 AI must only reference data that exists in the system:
 
@@ -1598,11 +1453,7 @@ AI must only reference data that exists in the system:
 - Ingredient science must follow Section 17.2 rules
 - If the AI is unsure about a data point, it must say so rather than guess
 
-## 20.5 Surface‑Specific AI Rules
-
-Moved to `/ai-governance/CLAUDE_PRODUCT.md` Section 7.
-
-## 20.6 Future AI Surfaces (Deferred per Section 13)
+## 20.4 Future AI Surfaces (Deferred per Section 13)
 
 The following AI surfaces are Scale‑tier and must not be implemented until Growth features
 are stable. When they are built, they must follow all rules in this section plus:
@@ -1625,38 +1476,24 @@ transparent, and brand‑aligned.
 
 ---
 
-## 21.1 Marketplace UX Philosophy
+## 21.1 Marketplace Voice
 
-The marketplace must feel like a curated, trust‑first shopping experience — not a generic
-e‑commerce platform.
-
-- Product listings must follow the same design system as platform‑curated products
-- Seller storefronts must use platform typography, spacing, and color tokens — no custom branding that breaks cohesion
-- Price display must follow Section 5.6 (price‑conscious UX) and Section 4.7 (transparency)
-- Trust scores must be visible on every seller and product listing
-- Community reviews must be accessible from every listing
+> For user‑facing marketplace UX philosophy and product listing content rules, see
+> `CLAUDE_PRODUCT.md` Section 13.
 
 ## 21.2 Seller Onboarding Rules
 
 Seller onboarding flows must:
-- Follow the same calm, premium tone as user onboarding (Section 5.4)
+- Follow the same calm, premium tone as user onboarding (`CLAUDE_PRODUCT.md` Section 3)
 - Never use aggressive sales language ("start earning today," "unlimited potential")
 - Clearly explain commission structure, platform fees, and payout timing
 - Integrate with Stripe Connect without exposing Stripe implementation details to the user
 - Follow Section 7 rules — never modify Stripe Connect logic without explicit approval
 
-## 21.3 Product Listing Content Rules
+## 21.3 Commission & Affiliate Transparency
 
-Seller‑submitted product descriptions must follow:
-- Section 17.1 (content originality) — no copied descriptions from other platforms
-- Section 17.2 (scientific accuracy) — no medical claims, no miracle language
-- Section 5.5 (diagnostic‑adjacent safety) — no diagnostic or prescriptive framing
-- Brand tone (Section 2.5) — listings that violate tone should be flagged, not silently published
-
-## 21.4 Commission & Affiliate Transparency
-
-- Commission structure must never be visible to end users beyond the rewards framing in Section 4.3
-- Affiliate links must be clearly labeled per Section 4.7
+- Commission structure must never be visible to end users beyond the rewards framing in `CLAUDE_PRODUCT.md` Section 10
+- Affiliate links must be clearly labeled per `CLAUDE_PRODUCT.md` Section 10
 - Revenue‑sharing details are seller‑facing only — never surface to buyers
 - Pricing must never be inflated to cover commission — prices must reflect genuine market value
 
@@ -1672,17 +1509,10 @@ product, while protecting users from harmful content and maintaining brand integ
 
 ---
 
-## 22.1 Community Tone & Moderation Principles
+## 22.1 Community Voice
 
-All community surfaces must follow:
-- Section 5.3 (supportive, empathetic, non‑judgmental)
-- Section 5.4 (emotional intelligence — users sharing skin journeys are vulnerable)
-- Never allow shaming, gatekeeping, or unsolicited medical advice in community copy or UI prompts
-
-Platform‑generated prompts, labels, and CTAs on community surfaces must:
-- Encourage sharing without pressure ("share if you'd like" not "tell everyone")
-- Frame progress neutrally ("your journey" not "your transformation")
-- Never compare users against each other competitively
+> For community tone, progress sharing safety, and reviewer evidence framing, see
+> `CLAUDE_PRODUCT.md` Section 9.
 
 ## 22.2 User‑Generated Content Rules
 
@@ -1710,193 +1540,44 @@ Reviews must be displayed consistently across all surfaces per Section 12.15:
 - Similarity badges, match breakdowns, and helpful/report actions must behave identically
 - Sorting and filtering options must use shared utilities — never inline
 
-## 22.5 Progress Sharing Safety
+---
 
-When users share progress (photos, routine results, skin journey updates):
-- Never imply that progress is expected or guaranteed
-- Never compare one user's progress to another's
-- Always frame sharing as optional and personal
-- Photo features must include privacy controls and consent language
-- Progress data must follow Section 18.2 persistence rules (Supabase + localStorage fallback)
+# 23. CREATOR ECOSYSTEM GOVERNANCE (SCALE‑TIER — PLACEHOLDER)
+
+Per Section 13.1, the creator ecosystem is Scale‑tier. Full governance will be defined when
+Growth features are stable. Key architectural constraints:
+
+- Formulation workflows require mandatory ingredient interaction checks before finalization
+- Creator product launches must follow a governed pipeline: formulation → patch test guidance → content review → pricing → marketplace listing
+- AI formulation assistance must follow Section 20 safety rules
+
+> For creator product user‑facing framing and liability‑safe language, see
+> `CLAUDE_PRODUCT.md` Section 16.
 
 ---
 
-# 23. CREATOR ECOSYSTEM GOVERNANCE (SCALE‑TIER)
+# 24. NUTRITION & WELLNESS GOVERNANCE (PLACEHOLDER)
 
-**Applies to:** Creator tools, product builder, formulation workflows, manufacturing pipelines,
-and creator‑submitted marketplace listings — when these features are built
+Per Section 13.1, basic nutrition management is MVP; advanced nutrition‑wellness integration is
+Won't‑Have. All user‑facing nutrition voice, claim boundaries, dietary restriction rules,
+and safety disclaimers are consolidated in `CLAUDE_PRODUCT.md` Section 12.
 
-Per Section 13.1, the creator ecosystem is Scale‑tier. This section defines governance rules
-only — no implementation until Growth features are stable.
-
----
-
-## 23.1 Creator Tool Principles
-
-Creator tools (product builder, dashboard, manufacturing pipeline) must:
-- Follow the same design system, typography, and motion rules as all other surfaces
-- Feel like a premium creative studio — not a generic admin panel
-- Use brand tone (Section 2.5) in all creator‑facing copy
-- Never expose raw technical complexity (API keys, webhook URLs) without contextual guidance
-
-## 23.2 Formulation Workflow Guardrails
-
-When creators build product formulations:
-- Ingredient interaction checks must be mandatory before any formulation is finalized
-- Regulatory concerns (restricted concentrations, banned substances by region) must be flagged automatically
-- Formulations must never be presented as FDA‑approved, clinically validated, or medically endorsed
-- All formulation‑related copy must follow Section 17.2 (scientific accuracy) and Section 5.5 (diagnostic‑adjacent safety)
-- AI formulation assistance must follow Section 20.6 rules
-
-## 23.3 Patch Test Integration
-
-Creator products must:
-- Include patch test guidance per Section 17.9 claim boundaries
-- Never skip sensitivity warnings
-- Provide clear instructions using widely accepted cosmetic patch testing guidance (24–48 hours)
-
-## 23.4 Manufacturing & Fulfillment Partners
-
-When integrating with manufacturing or fulfillment partners:
-- Partner selection criteria must be transparent to creators
-- Quality assurance requirements must be documented
-- Never imply platform guarantees for third‑party manufacturing quality
-- Liability language must be reviewed — the platform facilitates, it does not manufacture
-
-## 23.5 Launch Pipeline Sequencing
-
-Creator product launches must follow a governed pipeline:
-1. Formulation complete + ingredient interaction check passed
-2. Patch test guidance attached
-3. Product listing content reviewed against Section 17 and Section 21.3
-4. Pricing set per Section 5.6 transparency rules
-5. Marketplace listing published with trust score baseline
-
-No step may be skipped. Claude must enforce this sequence when building launch pipeline features.
-
-## 23.6 Liability‑Safe Language
-
-All creator‑facing and buyer‑facing copy for creator products must:
-- Clearly distinguish platform‑facilitated products from platform‑manufactured products
-- Never imply the platform endorses, certifies, or guarantees creator formulations
-- Use framing: "Created by [Creator Name] using the Lorem Curae product builder"
-- Follow all rules in Sections 5.5, 17.2, and 20.1
+Developer constraint: Nutrition features must integrate with the personalization engine
+(Section 18) for skin‑relevant highlights and follow the same data flow patterns.
 
 ---
 
-# 24. NUTRITION & WELLNESS GOVERNANCE (SCALE‑TIER)
+# 25. AR SURFACE GOVERNANCE (SCALE‑TIER — PLACEHOLDER)
 
-**Applies to:** Nutrition management surfaces, meal planning features, nutrition‑to‑skin
-content, and dietary recommendation logic — when these features are built
+Per Section 13.1, AR is Scale‑tier. Full governance will be defined when AR development begins.
+Key constraint: never present visual analysis as clinical diagnosis.
 
-Per Section 13.1, nutrition management is an MVP table stake at a basic level. Advanced
-nutrition‑wellness integration is Won't‑Have for now. This section governs the boundary.
+> For AR disclaimer copy and camera permission UX copy, see `CLAUDE_PRODUCT.md` Section 16.
 
----
-
-## 24.1 Nutrition Content Principles
-
-All nutrition content must:
-- Follow Section 17.8 (nutrition science accuracy) — evidence‑based, non‑medical, non‑prescriptive
-- Acknowledge individual variation in every recommendation
-- Never replace professional dietary advice
-- Use framing: "commonly associated with," "may support," "often included in"
-
-## 24.2 Nutrition‑to‑Skin Claim Boundaries
-
-The connection between nutrition and skin health must be presented as:
-- Supportive and educational, not causal or prescriptive
-- Based on widely accepted nutritional science, not emerging or contested research
-- Always accompanied by a disclaimer: "Nutrition is one factor among many that may influence skin health"
-
-**Prohibited:**
-- "Eating X will clear your skin"
-- "This meal plan treats [condition]"
-- "Proven diet for [skin concern]"
-
-**Allowed:**
-- "Foods rich in antioxidants are commonly associated with skin health"
-- "Hydration may support overall skin wellness"
-- "Some research suggests omega‑3 fatty acids may benefit skin barrier function"
-
-## 24.3 Dietary Restriction Handling
-
-When users specify dietary restrictions:
-- Restrictions must be respected absolutely — never suggest foods that violate them
-- Medical dietary restrictions (allergies, celiac, diabetes) must include a disclaimer: "Consult your healthcare provider for medical dietary needs"
-- Preference‑based restrictions (vegan, halal, kosher) must be respected without judgment
-- Restriction data must follow Section 18.2 persistence rules
-
-## 24.4 Meal Planner UX Rules
-
-Meal planning surfaces must:
-- Follow the same design system as all other surfaces (Section 12.3)
-- Use calm, supportive tone — never guilt‑inducing ("you should eat better")
-- Present meal suggestions as options, not prescriptions
-- Support empty states gracefully ("Add your first meal to get started")
-- Integrate with personalization engine (Section 18) for skin‑relevant highlights
-
-## 24.5 Safety Disclaimers
-
-Every nutrition surface must include:
-- A visible disclaimer that nutrition content is educational, not medical advice
-- A recommendation to consult healthcare professionals for medical dietary needs
-- Clear framing that the platform is a skincare platform with nutritional support, not a nutrition platform
-
----
-
-# 25. AR SURFACE GOVERNANCE (SCALE‑TIER)
-
-**Applies to:** AR skin analysis, virtual try‑ons, and any future augmented reality features —
-when these features are built
-
-Per Section 13.1, AR is Scale‑tier. This section defines minimal governance rules as a
-placeholder. Detailed implementation rules should be added when AR development begins.
-
----
-
-## 25.1 AR Accuracy & Disclaimers
-
-All AR analysis features must:
-- Include a visible disclaimer: "This analysis is for informational purposes only and is not a medical diagnosis"
-- Never present visual analysis as clinically validated
-- Never use terms like "diagnose," "detect," or "identify [condition]" (Section 5.5)
-- Use framing: "Based on visual analysis, your skin may have characteristics associated with…"
-- Always offer professional consultation links alongside AR results
-
-## 25.2 Camera Permission UX
-
-Camera permission flows must:
-- Clearly explain why camera access is needed before requesting it
-- Use calm, non‑pressuring language ("To analyze your skin, we'll need camera access")
-- Provide a graceful fallback if permission is denied (manual input, photo upload)
-- Never re‑request permission aggressively after denial
-- Follow platform privacy policy and never store images without explicit consent
-
-## 25.3 AR Visual & Performance Rules
-
-AR overlays must:
-- Follow the design system — use brand colors, typography tokens, and spacing scale
-- Never obstruct critical UI elements (navigation, close buttons, disclaimers)
-- Maintain 60fps performance — degrade gracefully on lower‑end devices
-- Follow Section 12.4 motion rules — soft, intentional, never jarring
-- Provide reduced‑motion alternatives
-
-## 25.4 AR Personalization Integration
-
-AR features must:
-- Integrate with the personalization engine (Section 18) when analyzing or recommending
-- Use the same matching utilities as other surfaces — no separate AR matching logic
-- Show personalization highlights consistently with product detail and discover pages
-- Degrade gracefully when personalization data is missing
-
-## 25.5 AR Safety Boundaries
-
-AR features must NEVER:
-- Imply they can replace a dermatologist visit
-- Present confidence scores as medical certainty
-- Analyze or comment on conditions beyond cosmetic skincare scope
-- Store biometric data without explicit user consent and clear data retention policies
+When building AR features, also ensure:
+- Integration with personalization engine (Section 18)
+- 60fps performance with graceful degradation (Section 12.4)
+- Reduced‑motion alternatives
 
 ---
 
@@ -2017,11 +1698,10 @@ Claude must never:
 
 ## 26.8 Scientific Accuracy in Environment Claims
 
-Mechanism phrases in `productKnowledge.ts` must:
-- Use conditional language: "may help", "can support", "commonly associated with"
-- Never make medical claims, guarantee results, or imply clinical treatment
-- Follow all rules in Sections 17.2 and 5.5
-- Be reviewed for cosmetic science accuracy before inclusion
+> All mechanism phrase voice rules and plain‑language requirements are consolidated in
+> `CLAUDE_PRODUCT.md` Section 5.6.
+
+Claude must verify all entries in `productKnowledge.ts` against those rules.
 
 ## 26.9 Texture Inference Governance
 
@@ -2035,20 +1715,17 @@ Rules:
 
 ## 26.10 Mechanism Phrase Governance
 
-All entries in `MECHANISM_PHRASES`, `CATEGORY_BEHAVIOR`, and `TEXTURE_BEHAVIOR` maps must:
-- Use conditional voice ("draw moisture", "may help", "can support")
-- Avoid absolute claims ("will fix", "guaranteed to", "proven to")
-- Be consistent with each other (humectant + humid phrases should not contradict)
-- Be reviewed for accuracy when new condition keys or ingredient classes are added
+> Mechanism phrase voice rules (conditional language, prohibited absolutes) are consolidated
+> in `CLAUDE_PRODUCT.md` Section 5.6.
 
 ## 26.11 Reviewer Evidence Integration Rules
 
 The `reviewerEvidence.ts` aggregator must:
 - Never fabricate review data or reviewer profiles
 - Use a minimum 30% similarity threshold (partial match tier from `reviewSimilarity.ts`)
-- Frame evidence as "reviewers with similar profiles" — never imply identical conditions
 - Return `undefined` when no reviews meet the threshold (graceful degradation)
-- Never expose raw similarity scores in environment-fit copy
+
+> For user‑facing reviewer evidence framing language, see `CLAUDE_PRODUCT.md` Section 9.
 
 ## 26.12 Knowledge Base Maintenance
 
@@ -2062,38 +1739,89 @@ When adding new product categories, ingredient classes, texture types, or condit
 
 ---
 
+# 27. AI MODULE REGISTRY
+
+Canonical paths for all AI integration modules:
+
+| Module | Path | Purpose |
+|--------|------|---------|
+| surfaceContext | `src/lib/ai/surfaceContext.ts` | Unified context builder (9 AI modes) |
+| systemPrompt | `src/lib/ai/systemPrompt.ts` | 5‑layer system prompt builder |
+| surfaceClient | `src/lib/ai/surfaceClient.ts` | Client‑side API caller with caching + fallback |
+| AIInsightBlock | `src/components/feature/AIInsightBlock.tsx` | Shared AI insight rendering component |
+| ai‑insight | `supabase/functions/ai-insight/index.ts` | Edge Function (Claude Sonnet 4.5) |
+| index barrel | `src/lib/ai/index.ts` | Public API exports |
+
+When adding new AI features, register them here. When modifying AI modules, verify all
+consumers are updated (Section 19 propagation rules apply).
+
+---
+
+# 28. SYSTEMPROMPT.TS SYNC PROTOCOL
+
+`src/lib/ai/systemPrompt.ts` contains a hardcoded `GOVERNANCE_PROMPT` string that is the
+runtime‑optimized version of `CLAUDE_PRODUCT.md`. Because this is a compiled TypeScript
+module (not a dynamic loader), the two files can drift.
+
+### Sync Rules
+
+1. When `CLAUDE_PRODUCT.md` is modified, `systemPrompt.ts` GOVERNANCE_PROMPT must be updated
+   in the same PR to reflect the change
+2. The `GOVERNANCE_VERSION` comment in `systemPrompt.ts` must be updated with the date
+3. New prohibited terms added to `CLAUDE_PRODUCT.md` Section 5 must be added to the
+   `validateAIResponse()` prohibited terms array
+4. New surfaces added to `CLAUDE_PRODUCT.md` Section 7 must have corresponding
+   `MODE_INSTRUCTIONS` entries in `systemPrompt.ts`
+5. Claude must never modify `GOVERNANCE_PROMPT` without verifying alignment with
+   `CLAUDE_PRODUCT.md`
+
+---
+
 # ROLE SEPARATION DIRECTIVE
 
 You must treat this file (CLAUDE.md) as DEVELOPER GOVERNANCE ONLY.
 
-This file governs your behavior exclusively when you are acting as the engineering partner who helps build, modify, and maintain the codebase. When operating under this file, you must:
+This file governs your behavior exclusively when you are acting as the engineering partner
+who helps build, modify, and maintain the codebase. When operating under this file, you must:
 
 - Use engineering tone and reasoning
 - Follow architecture rules
 - Follow Git hygiene
-- Use diff-first workflows
+- Use diff‑first workflows
 - Avoid hallucinating files
-- Never use product-facing tone, personalization logic, or environment-fit reasoning
+- Never use product‑facing tone, personalization logic, or environment‑fit reasoning
 
-A separate governance file exists for the product-facing AI:
+A separate governance file exists for the product‑facing AI:
 
     /ai-governance/CLAUDE_PRODUCT.md
 
-This file governs ALL user-facing behavior, including:
+That file is the single source of truth for ALL user‑facing behavior, including:
 - Learn More popup content
 - Environment Fit explanations
 - Product detail insights
 - Routine builder guidance
 - Ingredient explanations
 - Reviewer insights
+- Community tone and progress sharing
+- Retailer trust score explanations
+- Pricing display copy
+- Nutrition voice and disclaimers
+- Marketplace product descriptions
+- Safety assessment and warning copy
+- Concern alignment language
 - Any text that speaks directly to the user
-- All personalization, environment, skin, routine, and reviewer-based reasoning
+- All personalization, environment, skin, routine, and reviewer‑based reasoning
 
-When a request is product-facing, user-facing, or requires personalization, environment-fit logic, or plain-language explanations, you must load and follow the rules in:
+**Runtime sync:** `src/lib/ai/systemPrompt.ts` contains the runtime‑optimized version of
+`CLAUDE_PRODUCT.md`. See Section 28 for the sync protocol. Changes to product governance
+require updates to both files.
 
-    /ai-governance/CLAUDE_PRODUCT.md
+When a request is product‑facing, user‑facing, or requires personalization, environment‑fit
+logic, or plain‑language explanations, you must load and follow the rules in
+`CLAUDE_PRODUCT.md`.
 
-When a request is engineering-facing, code-related, architectural, or repository-related, you must follow THIS file (CLAUDE.md).
+When a request is engineering‑facing, code‑related, architectural, or repository‑related,
+you must follow THIS file (CLAUDE.md).
 
 You must never mix these two roles.
 
