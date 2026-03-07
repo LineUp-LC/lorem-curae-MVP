@@ -1,23 +1,13 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-
-interface Retailer {
-  id: number;
-  name: string;
-  logo: string;
-  price: number;
-  shipping: number;
-  estimatedTax: number;
-  totalPrice: number;
-  trustScore: number;
-  deliveryDays: string;
-  inStock: boolean;
-  url: string;
-  features: string[];
-  isAffiliate?: boolean;
-  isSponsored?: boolean;
-  secureCheckout?: boolean;
-}
+import type { Retailer } from '../../../types/retailer';
+import {
+  getPriceFreshness,
+  formatPriceLabel,
+  getFreshnessNote,
+  formatShippingLabel,
+  formatTaxLabel,
+} from '../../../lib/utils/retailerPricing';
 
 interface PurchaseOptionsProps {
   productId: number;
@@ -74,8 +64,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       logo: 'https://images.unsplash.com/photo-1629198688000-71f23e745b6e?w=80&h=80&fit=crop&q=80',
       price: 45.00,
       shipping: 0,
-      estimatedTax: 3.94,
-      totalPrice: 48.94,
+      totalPrice: 45.00,
       trustScore: 9.8,
       deliveryDays: '2-3',
       inStock: true,
@@ -83,7 +72,8 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       features: ['Free Shipping', 'Authenticity Guaranteed', 'Rewards Program'],
       isAffiliate: true,
       isSponsored: true,
-      secureCheckout: true
+      secureCheckout: true,
+      lastUpdated: new Date().toISOString(),
     },
     {
       id: 2,
@@ -91,15 +81,15 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       logo: 'https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=80&h=80&fit=crop&q=80',
       price: 45.00,
       shipping: 5.99,
-      estimatedTax: 4.46,
-      totalPrice: 55.45,
+      totalPrice: 50.99,
       trustScore: 9.5,
       deliveryDays: '3-5',
       inStock: true,
       url: 'https://example.com',
       features: ['Verified Seller', 'Easy Returns', 'Customer Support'],
       isAffiliate: true,
-      isSponsored: false
+      isSponsored: false,
+      lastUpdated: new Date().toISOString(),
     },
     {
       id: 3,
@@ -107,15 +97,15 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       logo: 'https://images.unsplash.com/photo-1596755389378-c31d21fd1273?w=80&h=80&fit=crop&q=80',
       price: 43.50,
       shipping: 4.99,
-      estimatedTax: 4.24,
-      totalPrice: 52.73,
+      totalPrice: 48.49,
       trustScore: 9.2,
       deliveryDays: '4-6',
       inStock: true,
       url: 'https://example.com',
       features: ['Price Match', 'Loyalty Points', 'Gift Wrapping'],
       isAffiliate: false,
-      isSponsored: true
+      isSponsored: true,
+      lastUpdated: new Date().toISOString(),
     },
     {
       id: 4,
@@ -123,8 +113,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       logo: 'https://images.unsplash.com/photo-1617897903246-719242758050?w=80&h=80&fit=crop&q=80',
       price: 46.00,
       shipping: 3.99,
-      estimatedTax: 4.37,
-      totalPrice: 54.36,
+      totalPrice: 49.99,
       trustScore: 8.9,
       deliveryDays: '3-4',
       inStock: true,
@@ -132,7 +121,8 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       features: ['Expert Advice', 'Sample Included', 'Secure Checkout'],
       isAffiliate: false,
       isSponsored: false,
-      secureCheckout: true
+      secureCheckout: true,
+      lastUpdated: new Date().toISOString(),
     },
     {
       id: 5,
@@ -140,15 +130,15 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
       logo: 'https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=80&h=80&fit=crop&q=80',
       price: 44.99,
       shipping: 6.50,
-      estimatedTax: 4.50,
-      totalPrice: 55.99,
+      totalPrice: 51.49,
       trustScore: 8.7,
       deliveryDays: '5-7',
       inStock: false,
       url: 'https://example.com',
       features: ['Eco Packaging', 'Carbon Neutral', 'Cruelty Free'],
       isAffiliate: true,
-      isSponsored: false
+      isSponsored: false,
+      lastUpdated: new Date().toISOString(),
     }
   ];
 
@@ -201,7 +191,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
         <div className="mb-4">
           <h2 className="text-2xl font-serif text-deep mb-1">Where to Buy</h2>
           <p className="text-sm text-warm-gray">
-            Compare prices from trusted retailers. All prices include estimated shipping and taxes.
+            Compare prices from trusted retailers. Taxes calculated at checkout.
           </p>
         </div>
 
@@ -272,8 +262,8 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                 <div className="absolute -top-2 right-4 w-0 h-0 border-l-8 border-r-8 border-b-8 border-transparent border-b-deep" aria-hidden="true"></div>
                 <p className="font-semibold mb-2">How Pricing Works</p>
                 <ul className="space-y-1.5 text-white/80 text-xs">
-                  <li><strong className="text-white">Prices and shipping costs</strong> are provided by each retailer</li>
-                  <li><strong className="text-white">Tax estimates</strong> are approximate and may differ at checkout</li>
+                  <li><strong className="text-white">Prices and shipping costs</strong> are provided by each retailer and updated regularly</li>
+                  <li><strong className="text-white">Taxes</strong> are calculated at checkout on the retailer's site</li>
                   <li>You complete your purchase on the <strong className="text-white">retailer's own site</strong>, where the final price is confirmed</li>
                 </ul>
               </div>
@@ -345,35 +335,46 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
 
                 {/* Pricing Details */}
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6">
+                  {(() => {
+                    const freshness = getPriceFreshness(retailer.lastUpdated);
+                    const freshnessNote = getFreshnessNote(freshness, retailer.lastUpdated);
+                    return (
                   <div className="space-y-1">
                     <div className="flex items-center justify-between gap-6">
                       <span className="text-xs text-warm-gray">Product:</span>
                       <span className="text-xs font-medium text-deep">
-                        ${retailer.price.toFixed(2)}
+                        {formatPriceLabel(retailer.price, freshness)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-6">
                       <span className="text-xs text-warm-gray">Shipping:</span>
                       <span className="text-xs font-medium text-deep">
-                        {retailer.shipping === 0 ? 'FREE' : `$${retailer.shipping.toFixed(2)}`}
+                        {formatShippingLabel(retailer.shipping, retailer.shippingLabel)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-6">
-                      <span className="text-xs text-warm-gray">Est. Tax:</span>
+                      <span className="text-xs text-warm-gray">Tax:</span>
                       <span className="text-xs font-medium text-deep">
-                        ${retailer.estimatedTax.toFixed(2)}
+                        {formatTaxLabel(retailer.estimatedTax, retailer.taxIncluded)}
                       </span>
                     </div>
                     <div className="flex items-center justify-between gap-6 pt-1 border-t border-blush">
                       <span className="text-xs font-semibold text-deep">Total:</span>
                       <span className="text-lg font-bold text-deep">
-                        ${retailer.totalPrice.toFixed(2)}
+                        {formatPriceLabel(retailer.totalPrice, freshness)}
                       </span>
                     </div>
                     <p className="text-[10px] text-warm-gray text-right">
                       Delivery: {retailer.deliveryDays} days
                     </p>
+                    {freshnessNote && (
+                      <p className="text-[10px] text-amber-600 text-right">
+                        <i className="ri-time-line"></i> {freshnessNote}
+                      </p>
+                    )}
                   </div>
+                    );
+                  })()}
 
                   {/* CTA Button */}
                   <div className="flex flex-col items-end space-y-1.5">
@@ -513,9 +514,9 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
                   </div>
                   <div className="flex items-center justify-between sm:justify-end gap-4 flex-shrink-0 pl-13 sm:pl-0">
                     <div className="text-left sm:text-right">
-                      <p className="text-lg font-bold text-deep">${retailer.totalPrice.toFixed(2)}</p>
+                      <p className="text-lg font-bold text-deep">{formatPriceLabel(retailer.totalPrice, getPriceFreshness(retailer.lastUpdated))}</p>
                       <p className="text-[11px] text-warm-gray">
-                        ${retailer.price.toFixed(2)} + {retailer.shipping === 0 ? 'free' : `$${retailer.shipping.toFixed(2)}`} ship
+                        {formatPriceLabel(retailer.price, getPriceFreshness(retailer.lastUpdated))} + {formatShippingLabel(retailer.shipping, retailer.shippingLabel)} ship
                       </p>
                     </div>
                     <a

@@ -109,10 +109,19 @@ All trust score logic must live in shared utilities (`src/lib/utils/retailerSort
 
 All retailer data must:
 - Use the canonical `Retailer` type from `src/types/retailer.ts`
-- Include: id, name, logo, price, shipping, totalPrice, trustScore, deliveryDays, inStock, url
-- Support optional fields: isAffiliate, isSponsored, secureCheckout, features
+- Include: id, name, logo, price, shipping, totalPrice, trustScore, deliveryDays, inStock, url, features
+- Support optional fields: isAffiliate, isSponsored, secureCheckout, shippingLabel, taxIncluded, deepLink, source, lastUpdated
 - Never use hard‑coded retailer names or prices in components
 - Scale from 3 retailers to 30+ without layout or performance issues
+
+All retailer prices must:
+- Originate from an auditable data source (affiliate feed, retailer API, or manual entry with timestamp)
+- Include a `source` field indicating provenance (`'affiliate_feed'`, `'retailer_api'`, or `'manual'`)
+- Include a `lastUpdated` ISO timestamp for freshness detection
+- Never be AI‑generated, scraped, or user‑submitted
+- Never include fabricated tax estimates — display "Tax calculated at checkout" unless the retailer provides tax‑inclusive pricing
+
+All retailer pricing display logic must use shared utilities in `src/lib/utils/retailerPricing.ts`. No inline price formatting in components.
 
 ### **4.3 Sorting & Filtering Rules**
 
@@ -134,6 +143,20 @@ When displaying sponsored or affiliate retailers:
 - Never rank sponsored retailers higher in trust score — only pin them first in sort order
 - Sponsored placement must be visually distinct but not deceptive
 - Affiliate commission structure must never be visible to users beyond the rewards framing in 4.3
+
+### **4.5 Price Freshness & Staleness Rules**
+
+Retailer prices must display freshness indicators based on the `lastUpdated` timestamp:
+
+| Freshness | Age | UI Treatment |
+|-----------|-----|-------------|
+| Fresh | < 24 hours | Price displayed without qualifier |
+| Aging | 24–48 hours | Price displayed without qualifier (within tolerance) |
+| Stale | 48 hours – 7 days | Prefix with "Est." and show "Price as of [date]" |
+| Very stale | > 7 days | Prefix with "~" and show "Verify at retailer" |
+| Unknown | No timestamp | Treat as stale — prefix with "Est." |
+
+Freshness logic must live in `src/lib/utils/retailerPricing.ts` (`getPriceFreshness`, `formatPriceLabel`, `getFreshnessNote`). No inline freshness calculations in components.
 
 ---
 

@@ -4,7 +4,7 @@ export interface Retailer {
   logo: string;
   price: number;
   shipping: number;
-  estimatedTax: number;
+  estimatedTax?: number;
   totalPrice: number;
   trustScore: number;
   deliveryDays: string;
@@ -14,6 +14,11 @@ export interface Retailer {
   isAffiliate?: boolean;
   isSponsored?: boolean;
   secureCheckout?: boolean;
+  shippingLabel?: string;
+  taxIncluded?: boolean;
+  deepLink?: string;
+  source?: 'affiliate_feed' | 'retailer_api' | 'manual';
+  lastUpdated?: string;
 }
 
 export type RetailerSortKey = 'trust' | 'price-low' | 'price-high' | 'delivery';

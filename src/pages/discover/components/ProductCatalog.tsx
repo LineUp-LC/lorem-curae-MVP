@@ -622,8 +622,8 @@ export default function ProductCatalog({
               onClick={() => setIsCategoriesOpen(false)}
             />
 
-            {/* Mobile: wrapped pills */}
-            <div className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-4 w-full sm:w-auto lg:hidden">
+            {/* Horizontal wrapped pills */}
+            <div className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-4 w-full sm:w-auto sm:max-w-xl">
               <div className="flex flex-wrap gap-2 xs:gap-3">
                 {PRODUCT_CATEGORIES.map((category) => (
                   <button
@@ -634,35 +634,10 @@ export default function ProductCatalog({
                       setIsCategoriesOpen(false);
                     }}
                     aria-pressed={selectedCategory === category.value}
-                    className={`flex items-center space-x-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
+                    className={`flex items-center gap-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
                       selectedCategory === category.value
                         ? 'bg-primary text-white shadow-md'
                         : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
-                    }`}
-                  >
-                    <i className={`${category.icon} text-base`}></i>
-                    <span>{category.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Desktop: vertical list */}
-            <div className="hidden lg:block absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-3 w-56">
-              <div className="space-y-1">
-                {PRODUCT_CATEGORIES.map((category) => (
-                  <button
-                    key={category.value}
-                    onClick={() => {
-                      setSelectedCategory(category.value);
-                      onFilterChange('category', category.value);
-                      setIsCategoriesOpen(false);
-                    }}
-                    aria-pressed={selectedCategory === category.value}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
-                      selectedCategory === category.value
-                        ? 'bg-primary text-white'
-                        : 'text-warm-gray hover:bg-cream hover:text-deep'
                     }`}
                   >
                     <i className={`${category.icon} text-base`}></i>
@@ -836,7 +811,7 @@ export default function ProductCatalog({
           <div className="flex items-center gap-2 xs:gap-3 mb-4 flex-wrap">
             <h2 className="text-lg xs:text-xl font-semibold text-primary-700">Recommended for You</h2>
             <span className="px-2 xs:px-3 py-1 bg-light/30 text-primary-700 text-xs xs:text-sm rounded-full">
-              Based on your skin concerns
+              Based on your skin profile
             </span>
           </div>
           {/* FIXED: Responsive grid gaps - smaller on xs screens */}

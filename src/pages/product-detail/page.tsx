@@ -140,11 +140,11 @@ export default function ProductDetailPage() {
   }, [productFromMock?.id, env?.climate, env?.uvBand, env?.season, reviewerEvidence?.scoredReviews, userSkinType, userConcerns.join(',')]);
 
   const retailers = [
-    { id: 1, name: 'DermStore', price: 43.50, totalPrice: 43.50, shipping: 'Free', shippingCost: 0, tax: 0, deliveryTime: '3-5 days', trustScore: 98, verified: true, logo: 'https://via.placeholder.com/100x40?text=DermStore', returnPolicy: '30 days', rewards: 'Earn 5% back in points', url: 'https://www.dermstore.com' },
-    { id: 2, name: 'Sephora', price: 45.00, totalPrice: 45.00, shipping: 'Free over $50', shippingCost: 0, tax: 0, deliveryTime: '2-4 days', trustScore: 99, verified: true, logo: 'https://via.placeholder.com/100x40?text=Sephora', returnPolicy: '60 days', rewards: 'Beauty Insider points', url: 'https://www.sephora.com' },
-    { id: 3, name: 'Ulta Beauty', price: 44.00, totalPrice: 47.99, shipping: '$3.99', shippingCost: 3.99, tax: 0, deliveryTime: '4-6 days', trustScore: 97, verified: true, logo: 'https://via.placeholder.com/100x40?text=Ulta', returnPolicy: '60 days', rewards: 'Ultamate Rewards', url: 'https://www.ulta.com' },
-    { id: 4, name: 'Amazon', price: 42.00, totalPrice: 42.00, shipping: 'Free with Prime', shippingCost: 0, tax: 0, deliveryTime: '1-2 days', trustScore: 92, verified: false, logo: 'https://via.placeholder.com/100x40?text=Amazon', returnPolicy: '30 days', rewards: 'Prime benefits', url: 'https://www.amazon.com' },
-    { id: 5, name: 'Target', price: 44.50, totalPrice: 44.50, shipping: 'Free over $35', shippingCost: 0, tax: 0, deliveryTime: '3-5 days', trustScore: 96, verified: true, logo: 'https://via.placeholder.com/100x40?text=Target', returnPolicy: '90 days', rewards: 'Circle rewards', url: 'https://www.target.com' },
+    { id: 1, name: 'DermStore', price: 43.50, totalPrice: 43.50, shipping: 'Free', shippingCost: 0, deliveryTime: '3-5 days', trustScore: 98, verified: true, logo: 'https://via.placeholder.com/100x40?text=DermStore', returnPolicy: '30 days', rewards: 'Earn 5% back in points', url: 'https://www.dermstore.com' },
+    { id: 2, name: 'Sephora', price: 45.00, totalPrice: 45.00, shipping: 'Free over $50', shippingCost: 0, deliveryTime: '2-4 days', trustScore: 99, verified: true, logo: 'https://via.placeholder.com/100x40?text=Sephora', returnPolicy: '60 days', rewards: 'Beauty Insider points', url: 'https://www.sephora.com' },
+    { id: 3, name: 'Ulta Beauty', price: 44.00, totalPrice: 47.99, shipping: '$3.99', shippingCost: 3.99, deliveryTime: '4-6 days', trustScore: 97, verified: true, logo: 'https://via.placeholder.com/100x40?text=Ulta', returnPolicy: '60 days', rewards: 'Ultamate Rewards', url: 'https://www.ulta.com' },
+    { id: 4, name: 'Amazon', price: 42.00, totalPrice: 42.00, shipping: 'Free with Prime', shippingCost: 0, deliveryTime: '1-2 days', trustScore: 92, verified: false, logo: 'https://via.placeholder.com/100x40?text=Amazon', returnPolicy: '30 days', rewards: 'Prime benefits', url: 'https://www.amazon.com' },
+    { id: 5, name: 'Target', price: 44.50, totalPrice: 44.50, shipping: 'Free over $35', shippingCost: 0, deliveryTime: '3-5 days', trustScore: 96, verified: true, logo: 'https://via.placeholder.com/100x40?text=Target', returnPolicy: '90 days', rewards: 'Circle rewards', url: 'https://www.target.com' },
   ];
 
   // Escape key to close modals
@@ -319,7 +319,7 @@ export default function ProductDetailPage() {
                       </tr>
                       <tr className="border-b border-blush/50">
                         <td className="p-4 font-medium text-warm-gray">Tax</td>
-                        {selectedRetailers.map((retailer) => (<td key={retailer.id} className="p-4"><span className="text-deep">${retailer.tax.toFixed(2)}</span></td>))}
+                        {selectedRetailers.map((retailer) => (<td key={retailer.id} className="p-4"><span className="text-deep">At checkout</span></td>))}
                       </tr>
                       <tr className="border-b border-blush/50">
                         <td className="p-4 font-medium text-warm-gray">Trust Score</td>

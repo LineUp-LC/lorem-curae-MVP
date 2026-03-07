@@ -364,10 +364,29 @@ empowering, never anxiety‑inducing.
 
 - Always show price ranges when multiple retailers exist, not just the highest price
 - Show value indicators (free shipping, rewards eligibility, bulk options) alongside prices
-- Never hide costs — shipping, tax estimates, and fees must be visible before the user clicks out
+- Never hide costs — shipping and fees must be visible before the user clicks out
 - Never use urgency pricing language
 - Frame affiliate rewards transparently: "You earn back a portion of our commission"
 - When comparing prices, highlight savings without implying the user is overpaying elsewhere
+
+### Price Freshness Copy
+
+- When price data is older than 48 hours, include the date: "Price as of [date]"
+- When price data is older than 7 days, include a verification prompt: "Verify at retailer"
+- Never present stale prices without context — the user must know the data may have changed
+- Fresh prices (< 48 hours) require no qualifier
+
+### Tax Display
+
+- Tax lines must read "Tax calculated at checkout" unless the retailer confirms tax‑inclusive pricing
+- When tax is included in the price, display "Tax included"
+- Never display fabricated or estimated tax amounts
+
+### Shipping Display
+
+- Shipping cost must use the retailer's own label when available (e.g., "Free over $50", "Free with Prime")
+- When no shipping label is provided, display the numeric cost or "Free Shipping" for $0
+- When shipping data is unavailable, display "Shipping calculated at checkout"
 
 ---
 
@@ -490,6 +509,7 @@ This governance applies to every text‑based recommendation or explanation acro
 - Concern alignment explanations
 - Retailer trust score explanations
 - Pricing display copy
+- Retailer pricing, shipping, and tax display
 - Any future text surface
 
 The product AI must never produce generic, surface‑level, or environment‑agnostic content.
