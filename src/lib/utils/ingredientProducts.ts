@@ -27,6 +27,23 @@ const SLUG_TO_NAME: Record<string, string[]> = {
 }
 
 /**
+ * Resolve a display ingredient name (INCI or common) to a canonical slug.
+ * Strips parenthetical text, lowercases, and fuzzy-matches against SLUG_TO_NAME.
+ * Returns the slug string or null if no match exists.
+ */
+export function getIngredientSlug(name: string): string | null {
+  const normalized = name.replace(/\s*\(.*?\)\s*/g, '').trim().toLowerCase()
+  if (!normalized) return null
+
+  for (const [slug, variations] of Object.entries(SLUG_TO_NAME)) {
+    if (variations.some(v => normalized.includes(v) || v.includes(normalized))) {
+      return slug
+    }
+  }
+  return null
+}
+
+/**
  * Check if a product contains an ingredient by slug.
  * Searches keyIngredients and activeIngredients arrays.
  */

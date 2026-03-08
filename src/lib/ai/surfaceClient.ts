@@ -100,6 +100,60 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
   const parts: string[] = [];
   const { evidence } = ctx;
 
+  // Ingredient-specific fallback: assemble from structured ingredient data
+  if (ctx.mode === 'ingredient_detail' && ctx.page.mode === 'ingredient_detail') {
+    const ing = ctx.page.ingredient;
+    if (ing.benefits && ing.benefits.length > 0) {
+      const b = ing.benefits[0];
+      const bLower = b.toLowerCase();
+      // If benefit is a verb phrase ("Helps reduce..."), use directly
+      // If benefit is a noun/label ("Brightening", "Deep Hydration"), use "is known for"
+      const isVerbPhrase = bLower.startsWith('help') || bLower.startsWith('reduc') || bLower.startsWith('support') || bLower.startsWith('protect');
+      if (isVerbPhrase) {
+        parts.push(`${ing.name} ${b.charAt(0).toLowerCase()}${b.slice(1)}${b.endsWith('.') ? '' : '.'}`);
+      } else {
+        parts.push(`${ing.name} is known for ${bLower}${b.endsWith('.') ? '' : '.'}`);
+      }
+    }
+    if (evidence.concernAlignment) {
+      const { matched } = evidence.concernAlignment;
+      if (matched.length > 0) {
+        parts.push(`This ingredient is commonly used for ${matched.join(' and ')}, which aligns with your skin concerns.`);
+      }
+    }
+    if (ing.safetyNotes && ing.safetyNotes.length > 0 && ing.safetyNotes[0]) {
+      parts.push(ing.safetyNotes[0]);
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Routine-builder-specific fallback: conflict summary + step analysis
+  if (ctx.mode === 'routine_builder' && ctx.page.mode === 'routine_builder') {
+    const steps = ctx.page.steps;
+    const filledSteps = steps.filter(s => s.product);
+    const { timeOfDay } = ctx.page;
+
+    if (filledSteps.length === 0) return undefined;
+
+    const skinType = ctx.user.skinType;
+    if (skinType) {
+      parts.push(`Your ${timeOfDay} routine has ${filledSteps.length} product${filledSteps.length > 1 ? 's' : ''} selected for ${skinType} skin.`);
+    } else {
+      parts.push(`Your ${timeOfDay} routine has ${filledSteps.length} product${filledSteps.length > 1 ? 's' : ''} selected.`);
+    }
+
+    if (evidence.ingredientConflicts && evidence.ingredientConflicts.length > 0) {
+      const first = evidence.ingredientConflicts[0];
+      parts.push(`Heads up: ${first.ingredients.join(' and ')} may not work well together — ${first.message.charAt(0).toLowerCase()}${first.message.slice(1)}`);
+    }
+
+    if (filledSteps.length < steps.length) {
+      parts.push(`${steps.length - filledSteps.length} step${steps.length - filledSteps.length > 1 ? 's' : ''} still need${steps.length - filledSteps.length === 1 ? 's' : ''} a product — filling these can help you get the most from your routine.`);
+    }
+
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
   if (evidence.environmentFit?.explanation) {
     let explanation = evidence.environmentFit.explanation;
     // For product_detail, strip reviewer sentence — review cards shown separately

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { matchesConcern, matchesIngredient } from '../../../lib/utils/matching';
 import ConcentrationRow from '../../../components/ui/ConcentrationRow';
 import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
-import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
+import { normalizeSkinTypes, isSkinTypeMatch, isAllMetadata, getMetadataDisplayLabel } from '../../../lib/utils/productMetadata';
 import {
   calculatePPML,
   formatPPML,
@@ -287,23 +287,28 @@ export default function ProductComparison({
                       <p className="text-xs font-semibold text-gray-700 mb-2">Addresses:</p>
                       <div className="flex flex-wrap gap-1">
                         {product.concerns.length > 0 ? (
-                          product.concerns.slice(0, 3).map((concern, idx) => {
-                            const isMatch = matchesConcern(concern, safeUserConcerns);
+                          (() => {
+                            const displayConcerns = product.concerns.some(isAllMetadata)
+                              ? product.concerns.filter(isAllMetadata)
+                              : product.concerns;
+                            return displayConcerns.slice(0, 3).map((concern, idx) => {
+                              const isMatch = matchesConcern(concern, safeUserConcerns);
 
-                            return (
-                              <span
-                                key={idx}
-                                className={
-                                  isMatch
-                                    ? 'px-2 py-1 bg-light/30 text-primary-700 text-xs rounded-full capitalize font-medium border border-primary-300'
-                                    : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize'
-                                }
-                              >
-                                {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                                {concern}
-                              </span>
-                            );
-                          })
+                              return (
+                                <span
+                                  key={idx}
+                                  className={
+                                    isMatch
+                                      ? 'px-2 py-1 bg-light/30 text-primary-700 text-xs rounded-full capitalize font-medium border border-primary-300'
+                                      : 'px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full capitalize'
+                                  }
+                                >
+                                  {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                  {getMetadataDisplayLabel(concern, 'concern')}
+                                </span>
+                              );
+                            });
+                          })()
                         ) : (
                           <span className="text-xs text-gray-400 italic">Not specified</span>
                         )}
@@ -388,11 +393,14 @@ export default function ProductComparison({
                     {(() => {
                       const normalized = normalizeSkinTypes(product.skinTypes);
                       const userSkinType = getEffectiveSkinType();
-                      return normalized.length > 0 && (
+                      const displayTypes = normalized.some(isAllMetadata)
+                        ? normalized.filter(isAllMetadata)
+                        : normalized;
+                      return displayTypes.length > 0 && (
                         <div className="bg-white p-2 sm:p-3 rounded-xl">
                           <p className="text-xs font-semibold text-gray-700 mb-2">Skin Types:</p>
                           <div className="flex flex-wrap gap-1">
-                            {normalized.map((type, idx) => {
+                            {displayTypes.map((type, idx) => {
                               const isMatch = isSkinTypeMatch(type, userSkinType);
                               return (
                                 <span
@@ -404,7 +412,7 @@ export default function ProductComparison({
                                   }`}
                                 >
                                   {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                                  {type}
+                                  {getMetadataDisplayLabel(type, 'skinType')}
                                 </span>
                               );
                             })}
@@ -448,7 +456,7 @@ export default function ProductComparison({
                       }`}
                     >
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-xs font-semibold text-gray-700">Price</p>
+                        <p className="text-xs font-semibold text-gray-700">Avg. Price</p>
                         {isLowestPrice && (
                           <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold">
                             Best

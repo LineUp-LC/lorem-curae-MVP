@@ -217,6 +217,24 @@ When creating a new entity type:
 
 Claude must never create a local `interface` in a component if the same shape exists or could exist in `src/types/`.
 
+### **6.5 Metadata "All" Override Rule**
+
+When a product metadata array (e.g., `skinTypes`, `concerns`, `timeOfDay`) contains the value `"all"` (case‑insensitive):
+
+1. `"all"` overrides all other values in that category — it is the only active metadata
+2. The UI must display only the `"all"` tag, not other values alongside it
+3. The `"all"` tag must always display a checkmark (`ri-check-line`) — regardless of whether the user has a profile
+4. The `"all"` tag must display a human‑readable label (e.g., "All Skin Types") via `getMetadataDisplayLabel()`
+5. Detection must use `isAllMetadata()` from `src/lib/utils/productMetadata.ts` — no inline string comparisons
+6. Display labels must use `getMetadataDisplayLabel()` — no hard‑coded "all" strings in components
+
+Canonical utilities:
+- `isAllMetadata(value)` — returns `true` if value is "all"
+- `getMetadataDisplayLabel(value, category)` — returns user‑friendly label
+- `isSkinTypeMatch(type, userSkinType)` — returns `true` when type is "all" regardless of user profile
+
+These utilities live in `src/lib/utils/productMetadata.ts`.
+
 ---
 
 # 7. Supabase + Stripe Rules
@@ -1759,6 +1777,77 @@ When adding new product categories, ingredient classes, texture types, or condit
 4. Update `inferTexture()` if the new texture requires inference rules
 5. Verify all 12 mock products still produce reasonable explanations across all 3 modes
 6. Run `npx tsc --noEmit` and `npx vite build` to confirm zero errors
+
+## 26.13 Environment‑Linked Product Fit + Jargon‑Free Rule
+
+**Applies to:** Every "Why this product fits" explanation, product‑fit narrative,
+and environment‑linked product recommendation — without exception
+
+### Purpose
+
+Product‑fit explanations must be written in simple, direct language that any user
+can understand without skincare knowledge. Every sentence must tie the product's
+qualities to the user's current environment, skin type, and concerns using
+cause‑and‑effect reasoning.
+
+### Jargon‑Free Rules
+
+1. **Never expose ingredient class names to the user.** Internal class names
+   (humectant, emollient, occlusive, barrier, sensitizing, supportive, peptide,
+   protective, soothing) are engineering labels. The user sees what ingredients
+   DO, not what category they belong to.
+2. **Never use technical skin‑science language.** Prohibited terms in product‑fit
+   text: "atmospheric moisture," "ambient humidity," "depletes surface moisture,"
+   "counteract," "transepidermal," "occlusion," "antioxidant defense,"
+   "mineral‑based protection," "barrier function," "sensitized skin,"
+   "UV‑related stress," "environmental stress," "perspiration," "congesting."
+   Replace with plain equivalents.
+3. **Never use weather/climate jargon.** Say "cold, dry air" not "low ambient
+   humidity." Say "strong sun" not "elevated UV levels." Say "the weather keeps
+   changing" not "seasonal transitions." Every weather term must be
+   understandable by someone who has never read a skincare article.
+
+### Environment‑Linking Rules
+
+1. **Always name location + season + the most impactful weather condition in the
+   opening sentence.** Use the pattern: "[Season] in [Location] means [weather
+   condition] — [skin type] skin [specific impact]."
+2. **Always use cause‑and‑effect language.** Every weather reference must explain
+   what it does to skin. Never state conditions abstractly.
+3. **Select the condition that matters most for the user's skin type first.** The
+   secondary condition only appears if it directly relates to a product quality.
+
+### Product‑Quality Rules
+
+1. **Describe what the product does, not what it contains.** The action is the
+   explanation.
+2. **Tie every product quality to the current condition in the same sentence.**
+   Use "even when," "because," or "which [condition] tends to [effect]"
+   connectors.
+3. **When the product matches a user concern, explain why that concern is harder
+   to manage in the current environment.** Never just say "it addresses
+   [concern]" — say why the concern matters more right now.
+
+### Sentence Structure
+
+Product‑fit narratives follow this structure (max 4 bullets):
+
+1. **Environment opener:** [Season] in [Location] means [condition] —
+   [skin type] skin [impact].
+2. **Primary product action:** This [product type] [what it does], [tied to
+   current condition].
+3. **Secondary product action or texture note:** It also [what it does], [tied
+   to condition or skin type].
+4. **Concern alignment (conditional):** [Concern] [why it's harder right now],
+   so this product [why it helps].
+
+### Enforcement
+
+- `MECHANISM_PHRASES` in `productKnowledge.ts` must use plain language
+- `buildProductFitNarrative()` must never expose ingredient class names
+- All product‑fit text must pass the "would a first‑time skincare user
+  understand this?" test
+- When in doubt, use shorter words and simpler grammar
 
 ---
 

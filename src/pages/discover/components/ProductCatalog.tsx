@@ -1,19 +1,18 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { productData } from '../../../mocks/products';
-import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
-import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
+import { productMatchesUserConcerns } from '../../../lib/utils/matching';
+import { getEffectiveSkinType } from '../../../lib/utils/sessionState';
 import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
 import type { Product } from '../../../types/product';
 import { useSavedProducts } from '../../../lib/utils/favoritesState';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import Dropdown from '../../../components/ui/Dropdown';
-import SafetyBadge from '../../../components/feature/SafetyBadge';
-import { assessProductSafety, getUserProfile } from '../../../lib/utils/productSafety';
 import { classifyTimeOfDay } from '../../../lib/utils/classifyTimeOfDay';
 import { PRODUCT_CATEGORIES } from '../../../lib/utils/categoryRegistry';
 import AIInsightBlock from '../../../components/feature/AIInsightBlock';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import ProductCard_CompactB from './ProductCard_CompactB';
 
 /**
  * ProductCatalog Component
@@ -32,17 +31,6 @@ const skinTypes = [
   { value: 'normal', label: 'Normal' },
   { value: 'sensitive', label: 'Sensitive' },
 ];
-
-const preferenceLabels: Record<string, string> = {
-  vegan: 'Vegan',
-  crueltyFree: 'Cruelty-Free',
-  fragranceFree: 'Fragrance-Free',
-  glutenFree: 'Gluten-Free',
-  alcoholFree: 'Alcohol-Free',
-  siliconeFree: 'Silicone-Free',
-  plantBased: 'Plant-Based',
-  chemicalFree: 'Chemical-Free',
-};
 
 interface ProductCatalogProps {
   userConcerns: string[];
@@ -249,24 +237,6 @@ export default function ProductCatalog({
     });
   }, [searchQuery, sortedMatchedProducts, sortedOtherProducts]);
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    const fullStars = Math.floor(rating);
-    const hasHalfStar = rating % 1 >= 0.5;
-
-    for (let i = 0; i < fullStars; i++) {
-      stars.push(<i key={`full-${i}`} className="ri-star-fill text-amber-500"></i>);
-    }
-    if (hasHalfStar) {
-      stars.push(<i key="half" className="ri-star-half-fill text-amber-500"></i>);
-    }
-    const emptyStars = 5 - Math.ceil(rating);
-    for (let i = 0; i < emptyStars; i++) {
-      stars.push(<i key={`empty-${i}`} className="ri-star-line text-amber-500"></i>);
-    }
-    return stars;
-  };
-
   // Check if product is in compare list (using safe list)
   const isInCompareList = (productId: number) => {
     return safeCompareList.some((p) => p.id === productId);
@@ -305,265 +275,33 @@ export default function ProductCatalog({
     const isSelected = isInCompareList(product.id);
 
     return (
-      <div
+      <ProductCard_CompactB
         key={product.id}
-        onClick={() => navigate(`/product-detail?id=${product.id}`)}
-        className={`
-          bg-white rounded-2xl overflow-hidden transition-[transform,box-shadow] duration-300 group cursor-pointer relative hover:-translate-y-1 transform-gpu
-          ${
-            isRecommended
-              ? 'ring-2 ring-primary ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
-              : 'shadow-md hover:shadow-xl border border-blush'
-          }
-        `}
-      >
-        {isRecommended && (
-          <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded-full shadow z-10">
-            Best Match
-          </span>
-        )}
-
-        {/* Action Buttons - Horizontal Layout */}
-        <div className="absolute top-3 right-3 flex flex-row items-center gap-2 z-10">
-          {/* Save Button */}
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              const wasAlreadySaved = isSaved(product.id);
-              toggleSaved({
-                id: product.id,
-                name: product.name,
-                brand: product.brand,
-                image: product.image,
-                priceRange: `$${(product.price * 0.9).toFixed(2)} - $${(product.price * 1.1).toFixed(2)}`,
-                category: product.category,
-                skinTypes: product.skinTypes,
-              });
-              setSaveNotification({ show: true, productName: product.name, isAdding: !wasAlreadySaved });
-              setTimeout(() => setSaveNotification({ show: false, productName: '', isAdding: true }), 3000);
-            }}
-            className={`w-10 h-10 flex items-center justify-center rounded-full transition-all cursor-pointer shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-              isSaved(product.id)
-                ? 'bg-primary text-white'
-                : 'bg-white text-warm-gray hover:bg-light/30 hover:text-primary'
-            }`}
-            title={isSaved(product.id) ? 'Remove from saved' : 'Save product'}
-            aria-label={isSaved(product.id) ? `Remove ${product.name} from saved` : `Save ${product.name}`}
-            aria-pressed={isSaved(product.id)}
-          >
-            <i className={`${isSaved(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-xl`}></i>
-          </button>
-
-          {/* Comparison Button */}
-          {(() => {
-            const isMaxReached = safeCompareList.length >= 3 && !isSelected;
-            return (
-              <div className="relative">
-                <button
-                  onClick={(e) => !isMaxReached && handleAddToCompare(product, e)}
-                  disabled={isMaxReached}
-                  className={`w-10 h-10 flex items-center justify-center rounded-full transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 ${
-                    highlightCompare
-                      ? 'ring-4 ring-primary/50 animate-pulse '
-                      : ''
-                  }${
-                    isSelected
-                      ? 'bg-primary text-white cursor-pointer'
-                      : isMaxReached
-                      ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                      : 'bg-white text-warm-gray hover:bg-light/30 cursor-pointer'
-                  }`}
-                  title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
-                  aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
-                  aria-pressed={isSelected}
-                >
-                  {isSelected ? (
-                    <i className="ri-check-line text-xl"></i>
-                  ) : (
-                    <i className="ri-scales-line text-xl"></i>
-                  )}
-                </button>
-                {highlightCompare && (
-                  <div className="absolute top-full right-0 mt-2 whitespace-nowrap bg-deep text-white text-xs px-3 py-1.5 rounded-lg shadow-lg z-20">
-                    Tap to compare products
-                    <div className="absolute -top-1 right-4 w-2 h-2 bg-deep rotate-45"></div>
-                  </div>
-                )}
-              </div>
-            );
-          })()}
-        </div>
-
-        {/* Product Image */}
-        <div className="relative w-full h-80 overflow-hidden bg-cream">
-          <img
-            src={product.image || '/placeholder-product.svg'}
-            alt={product.name}
-            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300 transform-gpu"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder-product.svg';
-            }}
-          />
-          {!product.inStock && (
-            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-              <span className="px-4 py-2 bg-white text-deep font-semibold rounded-full text-sm">
-                Out of Stock
-              </span>
-            </div>
-          )}
-
-          {/* Category Label */}
-          <div className="absolute bottom-4 left-4">
-            <span className="px-2.5 py-1 text-xs font-medium bg-white/90 text-deep-900 rounded-full capitalize shadow-sm">
-              {product.category}
-            </span>
-          </div>
-        </div>
-
-        {/* Product Info */}
-        <div className="p-4 xs:p-5">
-          <p className="text-xs font-semibold text-primary uppercase tracking-wide mb-2">
-            {product.brand}
-          </p>
-
-          <h3 className="text-base xs:text-lg font-semibold text-deep mb-2 line-clamp-2">
-            {product.name}
-          </h3>
-
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="flex items-center space-x-1">{renderStars(product.rating)}</div>
-            <span className="text-sm font-medium text-warm-gray">{product.rating}</span>
-            <span className="text-sm text-warm-gray/80">({product.reviewCount})</span>
-          </div>
-
-          <p className="text-sm text-warm-gray mb-3 line-clamp-1">{product.description}</p>
-
-          {/* Concerns - with highlighting for matching concerns */}
-          <div className="mb-3">
-            <p className="text-xs font-semibold text-warm-gray mb-1.5">Addresses:</p>
-            <div className="flex flex-wrap gap-1">
-              {product.concerns.slice(0, 3).map((concern, idx) => {
-                const isMatchingConcern = productMatchesUserConcerns([concern], safeUserConcerns);
-
-                return (
-                  <span
-                    key={idx}
-                    className={`px-2 py-1 text-xs rounded-full border capitalize ${
-                      isMatchingConcern
-                        ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                        : 'bg-cream text-warm-gray border-blush'
-                    }`}
-                  >
-                    {isMatchingConcern && <i className="ri-check-line mr-0.5"></i>}
-                    {concern}
-                  </span>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Key Ingredients */}
-          {product.keyIngredients && product.keyIngredients.length > 0 && (
-            <div className="mb-3">
-              <p className="text-xs font-semibold text-warm-gray mb-1.5">Key Ingredients:</p>
-              <div className="flex flex-wrap gap-1">
-                {product.keyIngredients.slice(0, 3).map((ingredient, idx) => {
-                  const isMatch = matchesIngredient(ingredient, safeUserConcerns);
-                  return (
-                    <span
-                      key={idx}
-                      className={`px-2 py-1 text-xs rounded-full border ${
-                        isMatch
-                          ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                          : 'bg-cream text-warm-gray border-blush'
-                      }`}
-                    >
-                      {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                      {ingredient}
-                    </span>
-                  );
-                })}
-              </div>
-
-              {/* Safety Warning */}
-              {(() => {
-                const safety = assessProductSafety(product.keyIngredients || [], getUserProfile());
-                return safety.level !== 'safe' ? <SafetyBadge result={safety} compact /> : null;
-              })()}
-            </div>
-          )}
-
-          {/* Preferences */}
-          {product.preferences && Object.values(product.preferences).some(v => v === true) && (
-            <div className="mb-3">
-              <p className="text-xs font-semibold text-warm-gray mb-1.5">Preferences:</p>
-              <div className="flex flex-wrap gap-1">
-                {(() => {
-                  const userPrefs = getEffectivePreferences();
-                  return Object.entries(product.preferences)
-                    .filter(([_, value]) => value === true)
-                    .slice(0, 3)
-                    .map(([key]) => {
-                      const isPrefMatch = userPrefs[key] === true;
-                      return (
-                        <span
-                          key={key}
-                          className={`px-2 py-1 text-xs rounded-full border ${
-                            isPrefMatch
-                              ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                              : 'bg-cream text-warm-gray border-blush'
-                          }`}
-                        >
-                          {isPrefMatch && <i className="ri-check-line mr-0.5"></i>}
-                          {preferenceLabels[key] || key}
-                        </span>
-                      );
-                    });
-                })()}
-              </div>
-            </div>
-          )}
-
-          {/* Skin Types */}
-          {(() => {
-            const normalized = normalizeSkinTypes(product.skinTypes);
-            const userSkinType = getEffectiveSkinType();
-            return normalized.length > 0 && (
-              <div className="mb-3">
-                <p className="text-xs font-semibold text-warm-gray mb-1.5">Skin Types:</p>
-                <div className="flex flex-wrap gap-1">
-                  {normalized.slice(0, 3).map((type, idx) => {
-                    const isMatch = isSkinTypeMatch(type, userSkinType);
-                    return (
-                      <span
-                        key={idx}
-                        className={`px-2 py-1 text-xs rounded-full capitalize border ${
-                          isMatch
-                            ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                            : 'bg-cream text-warm-gray border-blush'
-                        }`}
-                      >
-                        {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                        {type}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
-            );
-          })()}
-
-          <div className="flex items-center justify-between pt-4 border-t border-blush">
-            <div>
-              <p className="text-xs text-warm-gray/80 mb-1">Estimated price range</p>
-              <span className="text-lg xs:text-xl font-bold text-deep">
-                ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+        product={product}
+        highlightCompare={highlightCompare}
+        isRecommended={isRecommended}
+        isSelected={isSelected}
+        isProductSaved={isSaved(product.id)}
+        compareCount={safeCompareList.length}
+        safeUserConcerns={safeUserConcerns}
+        onProductClick={(id: number) => navigate(`/product-detail?id=${id}`)}
+        onToggleSave={(e: React.MouseEvent) => {
+          e.stopPropagation();
+          const wasAlreadySaved = isSaved(product.id);
+          toggleSaved({
+            id: product.id,
+            name: product.name,
+            brand: product.brand,
+            image: product.image,
+            priceRange: `$${(product.price * 0.9).toFixed(2)} - $${(product.price * 1.1).toFixed(2)}`,
+            category: product.category,
+            skinTypes: product.skinTypes,
+          });
+          setSaveNotification({ show: true, productName: product.name, isAdding: !wasAlreadySaved });
+          setTimeout(() => setSaveNotification({ show: false, productName: '', isAdding: true }), 3000);
+        }}
+        onAddToCompare={(e: React.MouseEvent) => handleAddToCompare(product, e)}
+      />
     );
   };
 
@@ -606,48 +344,52 @@ export default function ProductCatalog({
       <div className="relative mb-4 sm:mb-6">
         <button
           onClick={() => setIsCategoriesOpen(!isCategoriesOpen)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-white rounded-xl border border-blush hover:border-primary/30 transition-colors cursor-pointer shadow-sm"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl border border-blush hover:border-primary/30 transition-colors cursor-pointer shadow-sm"
         >
-          <i className="ri-grid-line text-base text-primary"></i>
-          <span className="text-sm font-semibold text-deep">Categories</span>
-          <i className={`ri-arrow-${isCategoriesOpen ? 'up' : 'down'}-s-line text-lg text-warm-gray`}></i>
+          <i className="ri-grid-line text-xs text-primary"></i>
+          <span className="text-xs font-medium text-deep">Categories</span>
+          <i className={`ri-arrow-${isCategoriesOpen ? 'up' : 'down'}-s-line text-sm text-warm-gray`}></i>
         </button>
 
-        {/* Dropdown panel — overlays content */}
+        {/* Backdrop to close on outside click */}
         {isCategoriesOpen && (
-          <>
-            {/* Backdrop to close on outside click */}
-            <div
-              className="fixed inset-0 z-30"
-              onClick={() => setIsCategoriesOpen(false)}
-            />
-
-            {/* Horizontal wrapped pills */}
-            <div className="absolute left-0 top-full mt-2 z-40 bg-white rounded-2xl border border-blush/30 shadow-lg p-4 w-full sm:w-auto sm:max-w-xl">
-              <div className="flex flex-wrap gap-2 xs:gap-3">
-                {PRODUCT_CATEGORIES.map((category) => (
-                  <button
-                    key={category.value}
-                    onClick={() => {
-                      setSelectedCategory(category.value);
-                      onFilterChange('category', category.value);
-                      setIsCategoriesOpen(false);
-                    }}
-                    aria-pressed={selectedCategory === category.value}
-                    className={`flex items-center gap-2 px-3 xs:px-4 py-2 rounded-full font-medium text-sm transition-all whitespace-nowrap cursor-pointer ${
-                      selectedCategory === category.value
-                        ? 'bg-primary text-white shadow-md'
-                        : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
-                    }`}
-                  >
-                    <i className={`${category.icon} text-base`}></i>
-                    <span>{category.label}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </>
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setIsCategoriesOpen(false)}
+          />
         )}
+
+        {/* Dropdown panel */}
+        <div className={`
+          absolute left-0 top-full mt-1.5 z-40 bg-white rounded-xl border border-blush/30 shadow-lg shadow-warm-gray/10 p-2.5 w-full sm:w-auto sm:max-w-md
+          transition-all duration-200 origin-top
+          ${isCategoriesOpen
+            ? 'opacity-100 scale-100 translate-y-0'
+            : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'
+          }
+        `}>
+          <div className="flex flex-wrap gap-1.5">
+            {PRODUCT_CATEGORIES.map((category) => (
+              <button
+                key={category.value}
+                onClick={() => {
+                  setSelectedCategory(category.value);
+                  onFilterChange('category', category.value);
+                  setIsCategoriesOpen(false);
+                }}
+                aria-pressed={selectedCategory === category.value}
+                className={`flex items-center gap-1 px-2.5 py-1 rounded-full font-medium text-xs transition-all whitespace-nowrap cursor-pointer ${
+                  selectedCategory === category.value
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
+                }`}
+              >
+                <i className={`${category.icon} text-xs`}></i>
+                <span>{category.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Filters */}
@@ -656,22 +398,23 @@ export default function ProductCatalog({
         <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
 
           {/* Skin Type + Time of Day + Compare */}
-          <div className="flex flex-col xs:flex-row items-start xs:items-end gap-3 xs:gap-4 w-full sm:w-auto">
-
-            {/* Skin Type — dropdown if no survey, label if survey completed */}
-            <div className="w-full xs:w-auto">
-              <label
-                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
-              >
-                Skin Type
-              </label>
+          <div className="w-full sm:w-auto">
+            {/* Labels row */}
+            <div className="flex gap-3 xs:gap-3 mb-1">
+              <span className="text-xs font-medium text-warm-gray uppercase tracking-wide min-w-[120px]">Skin Type</span>
+              <span className="text-xs font-medium text-warm-gray uppercase tracking-wide min-w-[120px] text-center">Time of Day</span>
+              <span className="text-xs font-medium text-warm-gray uppercase tracking-wide text-center pl-1.5">Compare</span>
+            </div>
+            {/* Controls row */}
+            <div className="flex items-center gap-3">
+              {/* Skin Type */}
               {effectiveSkinType ? (
                 <div
-                  className="flex items-center gap-2 px-4 py-2.5 bg-light/30 border border-primary-300 rounded-full text-sm font-medium text-primary-700 min-w-[150px]"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-light/30 border border-primary-300 rounded-xl text-xs font-medium text-primary-700 min-w-[120px]"
                   title="Based on your skin survey"
                 >
-                  <i className="ri-check-line text-base"></i>
-                  Filtered for {effectiveSkinType}
+                  <i className="ri-check-line text-xs"></i>
+                  {effectiveSkinType} skin
                 </div>
               ) : (
                 <Dropdown
@@ -683,19 +426,12 @@ export default function ProductCatalog({
                     onFilterChange('skinType', value);
                   }}
                   options={skinTypes}
-                  className="min-w-[150px]"
+                  compact
+                  className="min-w-[120px]"
                 />
               )}
-            </div>
 
-            {/* Time of Day */}
-            <div className="w-full xs:w-auto">
-              <label
-                htmlFor="filter-time-of-day"
-                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
-              >
-                Time of Day
-              </label>
+              {/* Time of Day */}
               <Dropdown
                 id="filter-time-of-day"
                 name="timeOfDay"
@@ -709,22 +445,18 @@ export default function ProductCatalog({
                   { value: 'am', label: 'AM (Morning)' },
                   { value: 'pm', label: 'PM (Evening)' },
                 ]}
-                className="min-w-[150px]"
+                compact
+                className="min-w-[120px]"
               />
-            </div>
 
-            {/* Compare CTA */}
-            <div className="w-full xs:w-auto flex flex-col items-center -mt-8">
-              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5">
-                Compare
-              </label>
+              {/* Compare */}
               <button
                 onClick={handleCompareAll}
                 title="Compare Products"
                 aria-label="Compare Products"
-                className="w-[42px] h-[42px] flex items-center justify-center rounded-full bg-white border border-blush text-warm-gray hover:border-primary/50 hover:bg-cream/30 hover:text-primary transition-all cursor-pointer"
+                className="flex items-center justify-center px-2.5 py-1.5 rounded-xl bg-white border border-blush text-xs text-warm-gray hover:border-primary/50 hover:bg-cream/30 hover:text-primary transition-all cursor-pointer"
               >
-                <i className="ri-scales-line text-xl"></i>
+                <i className="ri-scales-line"></i>
               </button>
             </div>
           </div>
@@ -735,7 +467,7 @@ export default function ProductCatalog({
             <div className="w-full xs:w-auto">
               <label
                 htmlFor="filter-sort-by"
-                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1.5"
+                className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-1"
               >
                 Sort By
               </label>
@@ -753,7 +485,8 @@ export default function ProductCatalog({
                   { value: 'price-high', label: 'Price: High to Low' },
                   { value: 'favorites', label: 'Saved First' },
                 ]}
-                className="min-w-[170px]"
+                compact
+                className="min-w-[120px]"
               />
             </div>
 
@@ -784,6 +517,11 @@ export default function ProductCatalog({
 
       {/* Results Count */}
       <div className="mb-4 sm:mb-6">
+        {safeUserConcerns.length === 0 && !effectiveSkinType && (
+          <p className="text-sm text-warm-gray/90 mb-3">
+            Your product matches are based on your skin profile. <Link to="/auth/signup" className="text-primary hover:text-dark underline">Sign in</Link> to see personalized suggestions tailored to your skin type, concerns, and preferences.
+          </p>
+        )}
         <p className="text-sm text-warm-gray">
           Showing{' '}
           <span className="font-semibold text-deep">
@@ -792,7 +530,7 @@ export default function ProductCatalog({
           products
           {safeUserConcerns.length > 0 && sortedMatchedProducts.length > 0 && (
             <span className="text-primary ml-2">
-              ({sortedMatchedProducts.length} recommended for your concerns)
+              ({sortedMatchedProducts.length} suggestions based on your skin profile)
             </span>
           )}
         </p>
@@ -810,9 +548,6 @@ export default function ProductCatalog({
         <section className="mb-8 sm:mb-10">
           <div className="flex items-center gap-2 xs:gap-3 mb-4 flex-wrap">
             <h2 className="text-lg xs:text-xl font-semibold text-primary-700">Recommended for You</h2>
-            <span className="px-2 xs:px-3 py-1 bg-light/30 text-primary-700 text-xs xs:text-sm rounded-full">
-              Based on your skin profile
-            </span>
           </div>
           {/* FIXED: Responsive grid gaps - smaller on xs screens */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-6">
@@ -870,22 +605,24 @@ export default function ProductCatalog({
 
       {/* Comparison Bar */}
       {/* FIXED: Added iOS safe area bottom padding */}
-      {showCompareBar && (
-        <div
-          ref={compareBarRef}
-          role="region"
-          aria-label="Product comparison bar"
-          aria-live="polite"
-          className={`
-            fixed bottom-0 left-0 right-0 z-50
-            border-t-2 border-primary shadow-2xl
-            transition-all duration-300 ease-out
-            motion-safe:animate-slide-up
-            ${isScrolled ? 'bg-white/90 backdrop-blur-md' : 'bg-white'}
-            ${isCompareBarMinimized ? 'py-2' : ''}
-          `}
-          style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-        >
+      <div
+        ref={compareBarRef}
+        role="region"
+        aria-label="Product comparison bar"
+        aria-live="polite"
+        className={`
+          fixed left-0 right-0 z-50
+          border-t-2 border-primary shadow-2xl
+          transition-all duration-300 ease-out
+          ${showCompareBar
+            ? 'bottom-0 opacity-100 translate-y-0'
+            : 'bottom-0 opacity-0 translate-y-full pointer-events-none'
+          }
+          ${isScrolled ? 'bg-white/90 backdrop-blur-md' : 'bg-white'}
+          ${isCompareBarMinimized ? 'py-2' : ''}
+        `}
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
           {/* Minimize Toggle Button */}
           <button
             onClick={() => setIsCompareBarMinimized(!isCompareBarMinimized)}
@@ -1001,8 +738,7 @@ export default function ProductCatalog({
               </div>
             )}
           </div>
-        </div>
-      )}
+      </div>
 
       {/* Save Notification Popup */}
       {saveNotification.show && (

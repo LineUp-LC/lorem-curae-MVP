@@ -6,10 +6,15 @@
  * Environment Fit section on the product detail page.
  */
 
-import { useState } from 'react';
-import type { SeasonalModalContent } from '../../../lib/utils/seasonalModalContent';
-import type { ScoredReviewEntry } from '../../../lib/utils/environmentFit';
-import { getTierBadgeInfo } from '../../../lib/utils/reviewSimilarity';
+import { useState, useEffect } from 'react';
+import type { SeasonalModalContent, UserProfileForModal } from '../../../lib/utils/seasonalModalContent';
+import { buildProductFitContext, formatProductFitPrompt } from '../../../lib/utils/seasonalModalContent';
+import type { EnvironmentContext } from '../../../lib/environment/context';
+import type { Product } from '../../../types/product';
+import { requestAIInsight } from '../../../lib/ai/surfaceClient';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
+import { getProductConcernVariations } from '../../../lib/utils/matching';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -17,66 +22,103 @@ import { getTierBadgeInfo } from '../../../lib/utils/reviewSimilarity';
 
 interface EnvironmentFitModalProps {
   content: SeasonalModalContent;
-  reviews: ScoredReviewEntry[];
+  season?: string | null;
+  env: EnvironmentContext;
   onClose: () => void;
+  onSaveSeasonalNotes?: (current: string, other: string) => void;
+  userSkinType?: string;
+  /** Product data for AI-assisted product fit generation */
+  product?: Product;
+  /** Reviewer evidence for AI context */
+  reviewerEvidence?: { count: number; sentiment: string; detail?: string } | null;
+  /** User profile for AI context */
+  userProfile?: UserProfileForModal;
+}
+
+// ---------------------------------------------------------------------------
+// Highlight helper — wraps key phrases in styled spans for scannability
+// ---------------------------------------------------------------------------
+
+/** Skin behavior keywords eligible for Tier 2 highlighting. */
+const BEHAVIOR_WORDS = [
+  // Multi-word (longest first for matching priority)
+  'oilier T-zone', 'T-zone', 'drier areas', 'dry patches', 'rough patches',
+  'drier patches', 'more clogged', 'more shine', 'more comfortable',
+  'excess oil', 'loses moisture', 'reacts faster', 'mostly balanced',
+  'holds up well', 'adjusts well', 'bounces back',
+  // Single-word negative / attention-worthy
+  'tightness', 'flaking', 'redness', 'irritation', 'stinging',
+  'discomfort', 'uncomfortable', 'unsettled', 'dehydrate',
+  'clogged', 'shinier', 'tighter', 'drier', 'heavy',
+  'uneven', 'rough', 'tight', 'oily', 'shine',
+  // Single-word positive / reassuring
+  'balanced', 'comfortable', 'calmer', 'soothing', 'hydrated',
+  // Anatomical
+  'pores', 'cheeks',
+];
+
+/** Condition keywords eligible for Tier 2 highlighting in skin impact text. */
+const CONDITION_WORDS = [
+  'strong sun', 'less intense sun', 'humid weather', 'dry air',
+  'oil and sweat', 'dark spots', 'uneven tone', 'cold air',
+  'heat', 'sunscreen', 'wind',
+  'tight', 'rough', 'oily', 'congested', 'dry',
+  'moisture', 'irritated', 'uncomfortable', 'hydrated',
+];
+
+const TIER1_CLASS = 'font-semibold text-primary-700';
+const TIER2_CLASS = 'font-medium text-primary-700';
+
+/**
+ * Wraps matching phrases in styled <span> elements.
+ *
+ * `priorityPhrases` get Tier 1 styling (brand accent).
+ * All other `phrases` get Tier 2 styling (subtle emphasis).
+ * Matches longest phrases first; caps at `maxHighlights` per text block.
+ */
+function highlightPhrases(
+  text: string,
+  phrases: string[],
+  priorityPhrases: string[] = [],
+  maxHighlights = 8,
+): React.ReactNode {
+  const all = [...new Set([...priorityPhrases, ...phrases])].filter(Boolean);
+  if (all.length === 0 || !text) return text;
+
+  // Sort longest-first so "oilier T-zone" matches before "T-zone"
+  const sorted = all.sort((a, b) => b.length - a.length);
+  const escaped = sorted.map(p => p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const pattern = new RegExp(`(${escaped.join('|')})`, 'gi');
+
+  const prioritySet = new Set(priorityPhrases.map(p => p.toLowerCase()));
+  const segments: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let highlightCount = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (highlightCount >= maxHighlights) break;
+    if (match.index > lastIndex) {
+      segments.push(text.slice(lastIndex, match.index));
+    }
+    const cls = prioritySet.has(match[0].toLowerCase()) ? TIER1_CLASS : TIER2_CLASS;
+    segments.push(
+      <span key={`hl-${match.index}`} className={cls}>{match[0]}</span>,
+    );
+    lastIndex = match.index + match[0].length;
+    highlightCount++;
+  }
+
+  if (lastIndex < text.length) {
+    segments.push(text.slice(lastIndex));
+  }
+
+  return segments.length > 0 ? <>{segments}</> : text;
 }
 
 // ---------------------------------------------------------------------------
 // Sub-components
 // ---------------------------------------------------------------------------
-
-function ReviewCard({ entry }: { entry: ScoredReviewEntry }) {
-  const badge = getTierBadgeInfo(entry.matchTier, entry.score);
-
-  return (
-    <div className="bg-white border border-blush/60 rounded-xl px-3 py-2.5">
-      <div className="flex items-center gap-2 mb-1.5">
-        <img
-          src={entry.review.userAvatar}
-          alt={entry.review.userName}
-          className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-          onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/28?text=U'; }}
-        />
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs font-medium text-deep truncate">
-              {entry.review.userName}
-            </span>
-            {entry.review.verified && (
-              <i className="ri-shield-check-fill text-[10px] text-warm-gray-500" title="Verified buyer"></i>
-            )}
-            {badge && (
-              <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 ${badge.color} text-[9px] font-medium rounded-full`}>
-                <i className={`${badge.icon} text-[9px]`}></i>
-                {badge.label}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 mt-0.5">
-            <div className="flex items-center">
-              {Array.from({ length: 5 }, (_, i) => (
-                <i
-                  key={i}
-                  className={`text-[10px] ${
-                    i < entry.review.rating
-                      ? 'ri-star-fill text-amber-500'
-                      : 'ri-star-line text-amber-500'
-                  }`}
-                ></i>
-              ))}
-            </div>
-            <span className="text-[10px] text-warm-gray">
-              {entry.review.skinType} skin · {entry.review.usageDurationWeeks}w use
-            </span>
-          </div>
-        </div>
-      </div>
-      <p className="text-[11px] text-warm-gray leading-relaxed line-clamp-2">
-        {entry.review.content}
-      </p>
-    </div>
-  );
-}
 
 // ---------------------------------------------------------------------------
 // Main component
@@ -84,22 +126,114 @@ function ReviewCard({ entry }: { entry: ScoredReviewEntry }) {
 
 export default function EnvironmentFitModal({
   content,
-  reviews,
+  season,
+  env,
   onClose,
+  onSaveSeasonalNotes,
+  userSkinType,
+  product,
+  reviewerEvidence,
+  userProfile,
 }: EnvironmentFitModalProps) {
-  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
+  const { user } = useAuth();
+  const isGuest = !user;
 
-  const { header, productFit, keywordInsights, categoryPhrase, texturePhrase, disclaimer, personalized } = content;
+  // AI-assisted product fit — shows rule-based instantly, replaces with AI on success
+  const [aiNarrative, setAiNarrative] = useState<string | null>(null);
 
-  // Find insight text for selected keyword
-  const selectedInsight = selectedKeyword
-    ? keywordInsights.find(ki => ki.label === selectedKeyword)
+  useEffect(() => {
+    if (!product) return;
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const fitContext = buildProductFitContext(product, env, userProfile, reviewerEvidence);
+        const question = formatProductFitPrompt(fitContext);
+        const aiContext = buildAIContext({
+          page: { mode: 'product_detail', product },
+          environment: env,
+        });
+        const result = await requestAIInsight(aiContext, { question });
+        if (!cancelled && result.success) {
+          setAiNarrative(result.insight);
+        }
+      } catch {
+        // Silently fall back to rule-based narrative
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [product?.id, env.season, env.uvBand, userSkinType]);
+
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedbackSaved, setFeedbackSaved] = useState(false);
+
+  // Pre-populate from localStorage if notes exist for this season
+  const [feedbackText, setFeedbackText] = useState(() => {
+    if (!season) return '';
+    try {
+      const stored = localStorage.getItem('seasonal_skin_notes');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed[season]?.current || '';
+      }
+    } catch { /* ignore */ }
+    return '';
+  });
+  const [otherSeasonsText, setOtherSeasonsText] = useState(() => {
+    if (!season) return '';
+    try {
+      const stored = localStorage.getItem('seasonal_skin_notes');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        return parsed[season]?.other || '';
+      }
+    } catch { /* ignore */ }
+    return '';
+  });
+
+  const handleSaveFeedback = () => {
+    if (!season) return;
+    onSaveSeasonalNotes?.(feedbackText.trim(), otherSeasonsText.trim());
+    setFeedbackSaved(true);
+    setTimeout(() => {
+      setShowFeedback(false);
+      setFeedbackSaved(false);
+    }, 1500);
+  };
+
+  const { header, skinTypeImpact, productFit, categoryPhrase, texturePhrase, disclaimer, personalized } = content;
+
+  // Highlight keyword assembly — built from user context
+  const skinTypeLabel = userSkinType
+    ? userSkinType.charAt(0).toUpperCase() + userSkinType.slice(1).toLowerCase() + ' skin'
+    : null;
+  const seasonLabel = season
+    ? season.charAt(0).toUpperCase() + season.slice(1).toLowerCase()
     : null;
 
-  // Filter reviews by selected keyword
-  const filteredReviews = selectedKeyword
-    ? reviews.filter(r => r.review.content.toLowerCase().includes(selectedKeyword.toLowerCase()))
-    : reviews;
+  // User concern phrases — expand through synonym map so related terms highlight too
+  // e.g., "Uneven Skin Tone" → ["dark spots", "brightening", "discoloration", ...]
+  const userConcernPhrases = [
+    ...new Set(
+      (userProfile?.concerns || []).flatMap(c => getProductConcernVariations(c))
+    ),
+  ];
+
+  // Lifestyle phrases — map labels to keywords that appear in generated text
+  const LIFESTYLE_KEYWORDS: Record<string, string[]> = {
+    'screen time heavy': ['screen time', 'skin fatigue'],
+    'high stress levels': ['stress', 'reactive'],
+    'frequent travel': ['travel', 'changing conditions'],
+    'frequently wears makeup': ['makeup', 'layer well'],
+    'active lifestyle': ['active lifestyle', 'movement'],
+    'outdoor work environment': ['outdoors', 'working outdoors'],
+    'indoor work environment': ['indoor', 'recirculated air'],
+    'sun exposure daily': ['sun exposure', 'daily sun'],
+  };
+  const lifestylePhrases = (userProfile?.lifestyle || []).flatMap(
+    l => LIFESTYLE_KEYWORDS[l.toLowerCase()] || [l.toLowerCase()],
+  );
 
   return (
     <div
@@ -111,7 +245,7 @@ export default function EnvironmentFitModal({
         onClick={(e) => e.stopPropagation()}
       >
         {/* ── Section 1: Seasonal & Environmental Header ── */}
-        <div className="px-6 pt-6 pb-4">
+        <div id="section-env-header" className="px-6 pt-6 pb-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 flex items-center justify-center bg-primary/10 rounded-full">
@@ -158,23 +292,170 @@ export default function EnvironmentFitModal({
           {/* Skin impact explanation */}
           {header.skinImpact && (
             <p className="text-xs text-warm-gray leading-relaxed">
-              {header.skinImpact}
+              {highlightPhrases(header.skinImpact, CONDITION_WORDS, [...userConcernPhrases, ...lifestylePhrases])}
             </p>
           )}
         </div>
 
-        <div className="border-t border-blush/30" />
+        {/* ── Section 1b: Your Skin in This Season ── */}
+        {skinTypeImpact && (
+          <>
+            <div className="border-t border-blush/30" />
+            <div id="section-skin-type" className="px-6 py-4">
+              <h4 className="text-xs font-semibold text-deep uppercase tracking-wide mb-2">
+                {skinTypeLabel && seasonLabel
+                  ? `${skinTypeLabel} in ${seasonLabel}`
+                  : skinTypeLabel
+                    ? skinTypeLabel
+                    : seasonLabel
+                      ? `Your skin in ${seasonLabel}`
+                      : 'Your skin in this season'}
+              </h4>
+              <p className="text-xs text-warm-gray leading-relaxed">
+                {skinTypeImpact.skinTypeLabel ? (
+                  <>
+                    <span className="font-semibold text-primary-700">{skinTypeImpact.skinTypeLabel}: </span>
+                    {highlightPhrases(
+                      skinTypeImpact.text,
+                      [...(seasonLabel ? [seasonLabel] : []), ...BEHAVIOR_WORDS],
+                      [...userConcernPhrases, ...lifestylePhrases],
+                    )}
+                  </>
+                ) : highlightPhrases(
+                  skinTypeImpact.text,
+                  [...(seasonLabel ? [seasonLabel] : []), ...BEHAVIOR_WORDS],
+                  [...(skinTypeLabel ? [skinTypeLabel] : []), ...userConcernPhrases, ...lifestylePhrases],
+                )}
+              </p>
+
+              {/* Feedback trigger */}
+              {!showFeedback && (
+                <button
+                  onClick={() => setShowFeedback(true)}
+                  className="mt-2 text-[11px] text-warm-gray/60 hover:text-primary transition-colors underline underline-offset-2 cursor-pointer"
+                >
+                  Not quite right?
+                </button>
+              )}
+
+              {/* Inline feedback expander */}
+              {showFeedback && (
+                <div className="mt-3 p-3 bg-cream/40 rounded-xl border border-blush/30 space-y-3">
+                  <h5 className="text-xs font-semibold text-deep">
+                    Help us get it right
+                  </h5>
+
+                  <div>
+                    <label htmlFor="seasonal-feedback-current" className="block text-[11px] text-warm-gray mb-1">
+                      How does your skin usually feel in this weather?
+                    </label>
+                    <textarea
+                      id="seasonal-feedback-current"
+                      value={feedbackText}
+                      onChange={(e) => setFeedbackText(e.target.value.slice(0, 200))}
+                      placeholder="e.g., My skin gets oily in winter even though it's usually dry"
+                      rows={2}
+                      className="w-full text-xs text-deep bg-white border border-blush/50 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-primary transition-colors placeholder:text-warm-gray/40"
+                    />
+                    <span className="block text-[10px] text-warm-gray/40 text-right mt-0.5">
+                      {feedbackText.length}/200
+                    </span>
+                  </div>
+
+                  <div>
+                    <label htmlFor="seasonal-feedback-other" className="block text-[11px] text-warm-gray mb-1">
+                      Does it behave differently in other seasons?
+                      <span className="text-warm-gray/40 ml-1">(optional)</span>
+                    </label>
+                    <textarea
+                      id="seasonal-feedback-other"
+                      value={otherSeasonsText}
+                      onChange={(e) => setOtherSeasonsText(e.target.value.slice(0, 200))}
+                      placeholder="e.g., In summer my skin feels balanced"
+                      rows={2}
+                      className="w-full text-xs text-deep bg-white border border-blush/50 rounded-lg px-3 py-2 resize-none focus:outline-none focus:border-primary transition-colors placeholder:text-warm-gray/40"
+                    />
+                    <span className="block text-[10px] text-warm-gray/40 text-right mt-0.5">
+                      {otherSeasonsText.length}/200
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between">
+                    <p className="text-[10px] text-warm-gray/50 italic max-w-[200px]">
+                      This helps personalize your experience. Never share medical information.
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => setShowFeedback(false)}
+                        className="px-3 py-1.5 text-[11px] text-warm-gray hover:text-deep transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      {feedbackSaved ? (
+                        <span className="inline-flex items-center gap-1 px-3 py-1.5 text-[11px] font-medium text-primary">
+                          <i className="ri-check-line"></i> Saved
+                        </span>
+                      ) : (
+                        <button
+                          onClick={handleSaveFeedback}
+                          disabled={feedbackText.trim().length === 0}
+                          className={`px-3 py-1.5 text-[11px] font-medium rounded-full transition-all ${
+                            feedbackText.trim().length > 0
+                              ? 'bg-primary text-white hover:bg-dark cursor-pointer'
+                              : 'bg-gray-200 text-warm-gray/60 cursor-not-allowed'
+                          }`}
+                        >
+                          Save
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* ── Section 2: Why This Product Fits ── */}
-        <div className="px-6 py-4">
+        <div className="border-t border-blush/30" />
+        <div id="section-product-fit" className="px-6 py-4">
           <h4 className="text-xs font-semibold text-deep uppercase tracking-wide mb-3">
             Why this product fits
           </h4>
-          {productFit.narrative ? (() => {
-            const bullets = productFit.narrative
+          {(() => {
+            // Use AI narrative when available, otherwise fall back to rule-based
+            const narrativeText = aiNarrative || productFit.narrative;
+            if (!narrativeText) {
+              return (
+                <p className="text-xs text-warm-gray italic">
+                  No specific product-environment interactions identified for current conditions.
+                </p>
+              );
+            }
+
+            const bullets = narrativeText
               .split(/(?<=\.)\s+/)
               .map(s => s.trim())
               .filter(s => s.length > 0);
+
+            // Priority phrases (Tier 1): skin type, season, location, user concerns, lifestyle
+            const fitPriority: string[] = [
+              ...(skinTypeLabel ? [skinTypeLabel] : []),
+              ...(seasonLabel ? [seasonLabel] : []),
+              ...userConcernPhrases,
+              ...lifestylePhrases,
+            ];
+            const loc = env.source !== 'mock' && env.location?.city
+              ? [env.location.city, env.location.region].filter(Boolean).join(', ')
+              : null;
+            if (loc) fitPriority.push(loc);
+
+            // Secondary phrases (Tier 2): referenced ingredients + behavior/condition words
+            const fitSecondary: string[] = [
+              ...productFit.referencedIngredients,
+              ...BEHAVIOR_WORDS,
+            ];
+
             return (
               <ul className="space-y-2">
                 {bullets.map((bullet, i) => (
@@ -185,85 +466,35 @@ export default function EnvironmentFitModal({
                     <span className={`text-xs leading-relaxed ${
                       personalized ? 'text-deep' : 'text-warm-gray'
                     }`}>
-                      {bullet}
+                      {highlightPhrases(bullet, fitSecondary, fitPriority)}
                     </span>
                   </li>
                 ))}
               </ul>
             );
-          })() : (
-            <p className="text-xs text-warm-gray italic">
-              No specific product-environment interactions identified for current conditions.
+          })()}
+
+          {/* Guest nudge — rule-based indicator + sign-in prompt */}
+          {isGuest && !aiNarrative && (
+            <p className="text-[10px] text-warm-gray/50 mt-3 flex items-center gap-1">
+              <i className="ri-information-line text-[10px]" />
+              Based on general guidance.
+              <button
+                onClick={onClose}
+                className="text-primary hover:text-dark transition-colors underline underline-offset-2 cursor-pointer"
+              >
+                Sign in
+              </button>
+              {' '}for personalized AI insights.
             </p>
           )}
         </div>
-
-        {/* ── Section 3: Review Insights (Filterable) ── */}
-        {reviews.length > 0 && (
-          <>
-            <div className="border-t border-blush/30" />
-            <div className="px-6 py-4">
-              <h4 className="text-xs font-semibold text-deep uppercase tracking-wide mb-2">
-                Review insights
-              </h4>
-
-              {/* Keyword filter chips */}
-              {keywordInsights.length > 0 && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
-                  <button
-                    onClick={() => setSelectedKeyword(null)}
-                    className={`px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors ${
-                      selectedKeyword === null
-                        ? 'bg-primary/10 text-primary border-primary/30'
-                        : 'bg-cream text-warm-gray border-blush/30 hover:border-blush'
-                    }`}
-                  >
-                    All ({reviews.length})
-                  </button>
-                  {keywordInsights.map((ki) => (
-                    <button
-                      key={ki.label}
-                      onClick={() => setSelectedKeyword(ki.label === selectedKeyword ? null : ki.label)}
-                      className={`px-2.5 py-1 text-[11px] font-medium rounded-full border transition-colors capitalize ${
-                        selectedKeyword === ki.label
-                          ? 'bg-primary/10 text-primary border-primary/30'
-                          : 'bg-cream text-warm-gray border-blush/30 hover:border-blush'
-                      }`}
-                    >
-                      {ki.label} ({ki.count})
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {/* Insight text for selected keyword */}
-              {selectedInsight && (
-                <p className="text-xs text-warm-gray leading-relaxed mb-3 bg-cream/40 rounded-lg px-3 py-2">
-                  {selectedInsight.insight}
-                </p>
-              )}
-
-              {/* Review cards */}
-              <div className="space-y-2">
-                {filteredReviews.length > 0 ? (
-                  filteredReviews.map((entry) => (
-                    <ReviewCard key={entry.review.id} entry={entry} />
-                  ))
-                ) : (
-                  <p className="text-xs text-warm-gray italic py-2">
-                    No reviews match this filter.
-                  </p>
-                )}
-              </div>
-            </div>
-          </>
-        )}
 
         {/* ── Section 4: Additional Insights ── */}
         {(categoryPhrase || texturePhrase || disclaimer) && (
           <>
             <div className="border-t border-blush/30" />
-            <div className="px-6 py-4">
+            <div id="section-insights" className="px-6 py-4">
               {(categoryPhrase || texturePhrase) && (
                 <>
                   <h4 className="text-xs font-semibold text-deep uppercase tracking-wide mb-2">

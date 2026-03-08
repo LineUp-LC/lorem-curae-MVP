@@ -3,8 +3,9 @@ import { productData } from '../../mocks/products';
 import type { Product, ActiveIngredient } from '../../types/product';
 import { matchesConcern, matchesIngredient } from '../../lib/utils/matching';
 import ConcentrationRow from '../ui/ConcentrationRow';
-import { normalizeSkinTypes, isSkinTypeMatch } from '../../lib/utils/productMetadata';
+import { normalizeSkinTypes, isSkinTypeMatch, isAllMetadata, getMetadataDisplayLabel } from '../../lib/utils/productMetadata';
 import { getEffectiveSkinType, getEffectivePreferences } from '../../lib/utils/sessionState';
+import { useRecentlyViewed } from '../../lib/utils/recentlyViewedState';
 import {
   calculatePPML,
   formatPPML,
@@ -144,6 +145,9 @@ export default function ComparisonPickerModal({
   // Get user preferences from profile/session/localStorage fallback chain
   const userPrefs = useMemo(() => getEffectivePreferences(), []);
 
+  // Recently viewed products
+  const { items: recentlyViewedItems } = useRecentlyViewed();
+
   const prefLabels: Record<string, string> = {
     chemicalFree: 'Chemical-Free',
     vegan: 'Vegan',
@@ -275,22 +279,27 @@ export default function ComparisonPickerModal({
                           <p className="text-xs font-semibold text-warm-gray mb-2">Addresses:</p>
                           <div className="flex flex-wrap gap-1">
                             {product.concerns.length > 0 ? (
-                              product.concerns.slice(0, 3).map((concern, idx) => {
-                                const isMatch = matchesConcern(concern, userConcerns);
-                                return (
-                                  <span
-                                    key={idx}
-                                    className={`px-2 py-1 text-xs rounded-full capitalize border ${
-                                      isMatch
-                                        ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
-                                        : 'bg-cream text-warm-gray border-transparent'
-                                    }`}
-                                  >
-                                    {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                                    {concern}
-                                  </span>
-                                );
-                              })
+                              (() => {
+                                const displayConcerns = product.concerns.some(isAllMetadata)
+                                  ? product.concerns.filter(isAllMetadata)
+                                  : product.concerns;
+                                return displayConcerns.slice(0, 3).map((concern, idx) => {
+                                  const isMatch = matchesConcern(concern, userConcerns);
+                                  return (
+                                    <span
+                                      key={idx}
+                                      className={`px-2 py-1 text-xs rounded-full capitalize border ${
+                                        isMatch
+                                          ? 'bg-light/30 text-primary-700 border-primary-300 font-medium'
+                                          : 'bg-cream text-warm-gray border-transparent'
+                                      }`}
+                                    >
+                                      {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                                      {getMetadataDisplayLabel(concern, 'concern')}
+                                    </span>
+                                  );
+                                });
+                              })()
                             ) : (
                               <span className="text-xs text-warm-gray/60 italic">Not specified</span>
                             )}
@@ -355,11 +364,14 @@ export default function ComparisonPickerModal({
                         {(() => {
                           const normalized = normalizeSkinTypes(product.skinTypes);
                           const userSkinType = getEffectiveSkinType();
-                          return normalized.length > 0 && (
+                          const displayTypes = normalized.some(isAllMetadata)
+                            ? normalized.filter(isAllMetadata)
+                            : normalized;
+                          return displayTypes.length > 0 && (
                             <div className="bg-white p-3 rounded-xl">
                               <p className="text-xs font-semibold text-warm-gray mb-2">Skin Types:</p>
                               <div className="flex flex-wrap gap-1">
-                                {normalized.map((type, idx) => {
+                                {displayTypes.map((type, idx) => {
                                   const isMatch = isSkinTypeMatch(type, userSkinType);
                                   return (
                                     <span
@@ -371,7 +383,7 @@ export default function ComparisonPickerModal({
                                       }`}
                                     >
                                       {isMatch && <i className="ri-check-line mr-0.5"></i>}
-                                      {type}
+                                      {getMetadataDisplayLabel(type, 'skinType')}
                                     </span>
                                   );
                                 })}
@@ -402,7 +414,7 @@ export default function ComparisonPickerModal({
                           isLowestPrice ? 'bg-light/30 ring-2 ring-primary-300' : isHighestPrice ? 'bg-orange-50 ring-2 ring-orange-300' : 'bg-white'
                         }`}>
                           <div className="flex items-center justify-between mb-1">
-                            <p className="text-xs font-semibold text-warm-gray">Price</p>
+                            <p className="text-xs font-semibold text-warm-gray">Avg. Price</p>
                             {isLowestPrice && (
                               <span className="px-2 py-0.5 bg-primary text-white text-xs rounded-full font-semibold">Best</span>
                             )}
@@ -594,6 +606,71 @@ export default function ComparisonPickerModal({
                         </button>
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recently Viewed */}
+              {recentlyViewedItems.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <i className="ri-history-line text-sm text-warm-gray"></i>
+                    <p className="text-xs font-semibold text-warm-gray uppercase tracking-wide">Recently Viewed</p>
+                  </div>
+                  <div className="flex items-stretch gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                    {recentlyViewedItems
+                      .filter(item => {
+                        // Exclude currently viewing product (already shown above)
+                        if (currentlyViewingProduct && item.id === currentlyViewingProduct.id) return false;
+                        return true;
+                      })
+                      .slice(0, 8)
+                      .map((item) => {
+                        const selected = isSelected(item.id);
+                        const disabled = !selected && selectedProducts.length >= 3;
+                        const fullProduct = productData.find(p => p.id === item.id);
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              if (disabled || !fullProduct) return;
+                              handleToggleProduct(fullProduct);
+                            }}
+                            className={`flex-shrink-0 w-28 rounded-xl p-2 border-2 transition-all ${
+                              selected
+                                ? 'border-primary bg-primary/5 cursor-pointer'
+                                : disabled
+                                ? 'border-blush/50 bg-gray-50 opacity-50 cursor-not-allowed'
+                                : 'border-blush hover:border-primary/50 hover:shadow-md cursor-pointer'
+                            }`}
+                          >
+                            <div className="relative w-full h-20 rounded-lg overflow-hidden bg-cream mb-2">
+                              {item.image ? (
+                                <img
+                                  src={item.image}
+                                  alt={item.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <i className="ri-shopping-bag-line text-xl text-primary/30"></i>
+                                </div>
+                              )}
+                              {selected && (
+                                <div className="absolute top-1 right-1 w-5 h-5 bg-primary text-white rounded-full flex items-center justify-center">
+                                  <i className="ri-check-line text-xs"></i>
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[10px] font-semibold text-primary uppercase tracking-wide truncate">
+                              {item.brand}
+                            </p>
+                            <h5 className="text-xs font-medium text-deep truncate leading-tight">
+                              {item.name}
+                            </h5>
+                          </div>
+                        );
+                      })}
                   </div>
                 </div>
               )}

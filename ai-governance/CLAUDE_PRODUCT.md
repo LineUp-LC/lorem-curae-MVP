@@ -494,9 +494,10 @@ This governance applies to every text‑based recommendation or explanation acro
 
 - Learn More popup
 - Product detail insights
+- Product fit narratives (AI‑assisted)
 - Routine builder guidance
-- Ingredient explanations
-- Review summaries
+- Ingredient explanations (AI‑assisted)
+- Review summaries (AI‑assisted)
 - Seasonal/environmental insights
 - AI chat responses
 - Search result explanations
@@ -515,5 +516,275 @@ This governance applies to every text‑based recommendation or explanation acro
 The product AI must never produce generic, surface‑level, or environment‑agnostic content.
 It must always use the full personalization dataset available. Every sentence must be relevant
 to the user's real environment and skin.
+
+---
+
+## 18. AI‑Assisted Product Fit Narrative
+
+### Purpose
+
+The "Why this product fits" section in the Learn More popup uses AI to generate a personalized
+explanation of how the current product connects to the user's skin, environment, and concerns.
+The AI receives deterministic, pre‑computed inputs only — it does not fetch data.
+
+### Data Sources (deterministic inputs — AI does not fetch data)
+
+| Input | Source |
+|-------|--------|
+| Location, season, UV band, climate conditions | EnvironmentContext |
+| Skin type, concerns, sensitivity | User profile via sessionState getters |
+| Product name, category, ingredient classes, texture | Product metadata + inference utilities |
+| Concern overlap | Intersection of product metadata and user concerns |
+| Reviewer evidence summary | reviewerEvidence aggregator |
+| Skin‑condition impact phrase | seasonalModalContent.ts phrase maps |
+
+### Output Structure
+
+1. **Environment reality** (1 sentence) — what the user's current conditions mean for their
+   skin type, in plain language
+2. **Product connection** (1–2 sentences) — how this product's ingredients and texture help
+   in those conditions
+3. **Concern alignment** (1 sentence, if applicable) — how this connects to the user's
+   specific concerns
+
+Maximum 3–4 sentences total. No headers, no bullet points, no numbered lists.
+
+### Voice Rules
+
+- Lead with the user's reality, not the product's features
+- Name the skin type and concerns specifically ("for your combination skin", not "for your profile")
+- Reference location and season naturally ("In spring in Chicago...")
+- Explain what ingredient classes DO, never name‑drop without context
+- Use conditional language: "can help", "may support", "tends to"
+
+### Prohibited
+
+- Generic filler ("brings conditions that affect your skin")
+- Clinical jargon ("transepidermal", "oxidative", "lipid barrier", "sebum")
+- Marketing language ("revolutionary", "miracle", "breakthrough", "game‑changing")
+- Absolute claims ("will fix", "guaranteed to", "eliminates")
+- Repeating the same mechanism phrase in different words within the same narrative
+- Mentioning ingredients by name without explaining what they do
+- Statistics or numeric data in the narrative ("3 out of 5 reviewers")
+
+### Fallback Behavior
+
+| Condition | Behavior |
+|-----------|----------|
+| Guest user (no auth) | Rule‑based `buildProductFitNarrative()` with guest nudge: "Based on general guidance. Sign in for personalized AI insights." |
+| API failure | Silent fallback to rule‑based narrative — no error shown to user |
+| Missing profile data | Degrade gracefully — skip skin‑type or concern‑specific sentences |
+| Missing environment data | Skip location/season framing — focus on product properties |
+
+---
+
+## 19. AI‑Assisted Ingredient Explanations
+
+### Purpose
+
+The ingredient detail page uses AI to generate a personalized explanation of what the
+ingredient does for the user's specific skin type, concerns, and current environment.
+
+### Data Sources (deterministic inputs — AI does not fetch data)
+
+| Input | Source |
+|-------|--------|
+| Ingredient structured data | IngredientKnowledge (name, aliases, category, benefits, compatibility, concentrations, safety notes, skin types, concerns) |
+| Related products | Products containing this ingredient |
+| Skin type, concerns, sensitivity, preferences | User profile via sessionState getters |
+| Current environment | EnvironmentContext (season, climate, UV) |
+
+### Output Structure
+
+1. **What it does for your skin** (1 sentence) — explain the benefit in everyday terms,
+   not mechanism names
+2. **Why it matters for you right now** (1 sentence) — tied to the user's skin type,
+   concerns, or current environment
+3. **How to use it** (1 sentence) — practical, specific to their routine context
+4. **Watch for** (if applicable) — sensitivity or interaction note relevant to their profile
+
+Maximum 4 sentences.
+
+### Voice Rules
+
+- Explain what the ingredient DOES, not its chemical mechanism
+- Name the user's skin type and concerns specifically
+- Reference environmental context when relevant ("in dry winter air...")
+- Use "helps", "can support", "commonly used for" — never absolutes
+- For sensitizing ingredients: lead with the benefit, then note the caution
+
+### Prohibited
+
+- Chemical mechanism names without explanation (e.g., "increases cell turnover" without
+  explaining what that means for skin)
+- Ingredient name‑dropping without context
+- Contradicting safety metadata displayed elsewhere on the page
+- Medical claims or diagnostic language
+- "Transepidermal water loss", "oxidative stress", "lipid barrier", "sebum production",
+  "photoaging" (use plain equivalents)
+
+### Controversial/Sensitizing Ingredient Rules
+
+| Ingredient Class | Required Framing |
+|-----------------|-----------------|
+| Retinoids | Emphasize gradual introduction, sun sensitivity, pregnancy caution |
+| AHAs/BHAs | Emphasize concentration awareness, sun sensitivity |
+| Essential oils | Acknowledge irritation potential for sensitive skin |
+| Fragrance | Neutral framing — note potential for sensitivity without alarmism |
+| High‑concentration actives | Note that patch testing is recommended |
+
+For all sensitizing ingredients: "Consider consulting a dermatologist" when concerns persist.
+
+### Fallback Behavior
+
+| Condition | Behavior |
+|-----------|----------|
+| Guest user (no auth) | `buildFallbackInsight()` assembles: ingredient category benefit + concern alignment + safety note |
+| API failure | Silent fallback to evidence‑based text |
+| Missing profile data | Generic ingredient explanation without personalization |
+| Missing environment data | Skip environment‑specific sentences |
+
+---
+
+## 20. AI‑Assisted Review Summaries
+
+### Purpose
+
+The product reviews section uses AI to synthesize what similar‑profile reviewers actually said
+about the product, generating a natural‑language paragraph that surfaces real patterns rather
+than formulaic statistics.
+
+### Data Sources (deterministic inputs — AI does not fetch data)
+
+| Input | Source |
+|-------|--------|
+| Similar‑profile reviews | ScoredReviewEntry filtered by similarity tier (full, strong, partial) |
+| Review content, ratings, skin types | Individual review data |
+| Keyword analysis | Climate, texture, and wear keyword matching |
+| Aggregate statistics | Match count, average rating, top keywords |
+| User skin type, concerns, sensitivity | User profile via sessionState getters |
+| Current environment | EnvironmentContext (season, climate, UV) |
+
+### Output Structure
+
+1. **Pattern summary** (1–2 sentences) — what similar reviewers consistently noticed
+   (texture, feel, performance, seasonal behavior)
+2. **Sentiment context** (1 sentence) — overall experience framing with rating context
+3. **Environment‑specific finding** (1 sentence, if applicable) — how the product performed
+   in conditions similar to the user's
+
+Maximum 3–4 sentences. No statistics, no review counts, no raw scores in the output.
+
+### Voice Rules
+
+- Use "people with similar skin" — never "3 reviewers" or "users"
+- Synthesize patterns, don't list individual reviews
+- Reference specific observations: "found it absorbs quickly" not "had positive experiences"
+- When reviews conflict, acknowledge both sides: "Most found it lightweight, though a few
+  with drier skin wanted more richness"
+- Reference the user's environment naturally when review content aligns
+
+### Prohibited
+
+- Raw statistics ("3 out of 5 reviewers", "average rating 4.2")
+- Exposing similarity scores or match tiers to the user
+- Fabricating review content not present in the data
+- Implying identical conditions ("people with the same skin" — use "similar")
+- Generic summaries that don't reference actual review content
+- "Users reported" or clinical survey language
+- Bullet‑point or numbered list formatting
+
+### Review Selection Rules
+
+When preparing review data for AI input:
+- Select top 5 reviews by relevance score (similarity + keyword match + preference boost)
+- Truncate each review excerpt to 200 characters to manage token budget
+- Include reviewer skin type and match tier for context
+- Flag which keyword categories (climate, texture, wear) are covered
+- When fewer than 2 reviews meet the similarity threshold, fall back to rule‑based summary
+
+### Fallback Behavior
+
+| Condition | Behavior |
+|-----------|----------|
+| Guest user (no auth) | `generateReviewEnvironmentInsight()` provides keyword‑based rule‑based summary with guest nudge |
+| API failure | Silent fallback to rule‑based summary |
+| Fewer than 2 similar reviews | Rule‑based summary from general review pool |
+| No reviews for product | Skip review summary section entirely — never fabricate |
+| Missing profile data | Show general review summary without similarity framing |
+
+---
+
+## 21. AI‑Assisted Routine Analysis
+
+### Purpose
+
+The routine builder uses AI to analyze the user's current routine for their specific skin type,
+concerns, and environment. The AI receives the routine steps, time of day, ingredient conflicts,
+and pre‑computed evidence — it does not fetch data. The analysis appears below the routine
+step list via `AIInsightBlock` in compact mode.
+
+### Data Sources (deterministic inputs — AI does not fetch data)
+
+| Input | Source |
+|-------|--------|
+| Routine steps (titles, assigned products) | RoutineBuilder step state, filtered by timeOfDay |
+| Time of day | Morning/evening toggle |
+| Ingredient conflicts | `checkMultipleCompatibility()` from ingredientIntelligence.ts |
+| Skin type, concerns, sensitivity | User profile via sessionState getters |
+| Current environment | EnvironmentContext (season, climate, UV) |
+
+### Output Structure
+
+1. **Routine fit** (1 sentence) — how this routine works for the user's skin type and
+   current conditions
+2. **Conflicts or ordering issues** (if any) — explained in plain language, not ingredient
+   chemistry
+3. **What's missing** (if applicable) — tied to the user's specific concerns or environment
+   (e.g., missing SPF in summer, missing heavier moisturizer in winter)
+4. **One actionable next step** (1 sentence)
+
+Maximum 6 sentences. No statistics, no headers, no bullet points.
+
+### Voice Rules
+
+- Reference the user's skin type and concerns by name ("for your oily skin", not "for your profile")
+- Reference season and environment when relevant ("during summer", "in humid conditions")
+- Explain what routine steps DO, not the ingredient mechanisms behind them
+- Use "can help", "tends to work well", "you might consider" — never absolutes
+- When conflicts exist, explain the practical consequence, not the chemistry ("these two
+  products may reduce each other's effectiveness when used together")
+- Frame missing steps as opportunities, not failures ("Adding sunscreen would round out your
+  morning routine")
+
+### Prohibited
+
+- Ingredient chemistry jargon ("pH‑dependent actives", "oxidative stress", "lipid barrier")
+- Implying the current routine is wrong or dangerous
+- Making it sound like a medical prescription
+- Generic advice that ignores the user's actual steps ("every routine needs a toner")
+- Referencing products the user hasn't added
+- Marketing language or product recommendations by brand name
+
+### Relationship to AI Chat Assistant
+
+The AI Routine Analysis block (`AIInsightBlock`, `routine_builder` mode) provides proactive,
+contextual analysis that updates as the routine changes. The AI Assistant (`AIAssistant.tsx`,
+`chat` mode) provides reactive, conversational help in response to user questions. These are
+complementary — the analysis block summarizes the current state while the chat answers
+specific follow‑up questions.
+
+### Fallback Behavior
+
+| Condition | Behavior |
+|-----------|----------|
+| Guest user (no auth) | Rule‑based fallback: conflict summary + missing step hint. Guest nudge: "Based on general guidance. Sign in for personalized routine insights." |
+| API failure | Silent fallback to rule‑based conflict/gap analysis |
+| No steps filled with products | Skip AI analysis — do not analyze an empty routine |
+| Fewer than 2 filled steps | Rule‑based analysis only |
+| Missing profile data | Generic routine analysis without skin‑type framing |
+| Missing environment data | Skip environment‑specific recommendations |
+
+---
 
 End of product‑governance instructions.

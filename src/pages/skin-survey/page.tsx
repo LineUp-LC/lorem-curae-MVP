@@ -14,8 +14,8 @@ const SkinSurveyPage = () => {
   // Check both Supabase profile and localStorage for survey completion
   const surveyCompleted = profile?.survey_completed || localStorage.getItem('survey_completed') === 'true';
 
-  // Show loading state while checking auth
-  if (loading) {
+  // Show loading state only on initial auth check — not on background token refresh
+  if (loading && !user) {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -33,8 +33,8 @@ const SkinSurveyPage = () => {
     return (
       <div className="min-h-screen bg-cream flex items-center justify-center px-6">
         <div className="max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-sage/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i className="ri-checkbox-circle-fill text-3xl text-sage"></i>
+          <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <i className="ri-check-line text-2xl text-primary"></i>
           </div>
           <h1 className="text-2xl font-serif font-bold text-deep mb-3">
             Your Skin Survey Is Complete

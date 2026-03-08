@@ -5,6 +5,15 @@ import { calculateSimilarityWeight, getTierBadgeInfo, isComplexionMatch } from '
 import { matchesConcern } from '../../../lib/utils/matching';
 import Dropdown from '../../../components/ui/Dropdown';
 import { getReviewsForProduct, type MockReview } from '../../../mocks/reviews';
+import { generateReviewEnvironmentInsight, getFilterChipCounts, getSmartDefaultFilter, FILTER_LABELS, type FilterCategory } from '../../../lib/utils/reviewEnvironmentInsight';
+import { deriveConditions } from '../../../lib/environment/productKnowledge';
+import { aggregateReviewerEvidence } from '../../../lib/utils/reviewerEvidence';
+import { buildReviewSummaryContext, formatReviewSummaryPrompt } from '../../../lib/utils/reviewSummaryContext';
+import { requestAIInsight } from '../../../lib/ai/surfaceClient';
+import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
+import type { EnvironmentContext } from '../../../lib/environment/context';
+import type { Product } from '../../../types/product';
 
 type Review = MockReview;
 
@@ -26,9 +35,15 @@ interface UserProfileData {
 
 interface ProductReviewsProps {
   productId: number;
+  product?: Product;
+  env?: EnvironmentContext;
+  season?: string | null;
 }
 
-const ProductReviews = ({ productId }: ProductReviewsProps) => {
+const ProductReviews = ({ productId, product, env, season }: ProductReviewsProps) => {
+  const { user: authUser } = useAuth();
+  const isGuest = !authUser;
+
   // Get user skin profile from sessionState (unified source of truth)
   const skinType = getEffectiveSkinType() || '';
   const effectiveConcerns = getEffectiveConcerns();
@@ -47,8 +62,6 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   };
 
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [filterConcern, setFilterConcern] = useState<string>('all');
-  const [filterRating, setFilterRating] = useState<number>(0);
   const [selectedReviewer, setSelectedReviewer] = useState<Review | null>(null);
   const [matchPopupReview, setMatchPopupReview] = useState<Review | null>(null);
   const [helpfulReviews, setHelpfulReviews] = useState<Set<number>>(new Set());
@@ -58,6 +71,24 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   const [showReportModal, setShowReportModal] = useState<number | null>(null);
   const [reportReason, setReportReason] = useState<string>('');
   const [reportDetails, setReportDetails] = useState<string>('');
+
+  // Category filter chips (environment-aware smart default)
+  const conditions = useMemo(() => env ? deriveConditions(env) : [], [env]);
+  const [activeFilter, setActiveFilter] = useState<FilterCategory>(() =>
+    getSmartDefaultFilter(conditions),
+  );
+
+  // User preference warm-prompt (persists via localStorage)
+  const [preferenceText, setPreferenceText] = useState(() => {
+    try {
+      return localStorage.getItem('review_preference') || '';
+    } catch { return ''; }
+  });
+  const [preferenceApplied, setPreferenceApplied] = useState(() => {
+    try {
+      return !!localStorage.getItem('review_preference');
+    } catch { return false; }
+  });
 
   // Escape key to close modals
   useEffect(() => {
@@ -74,14 +105,12 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
   const handleHelpfulClick = (reviewId: number) => {
     if (helpfulReviews.has(reviewId)) {
-      // Remove from helpful
       setHelpfulReviews(prev => {
         const newSet = new Set(prev);
         newSet.delete(reviewId);
         return newSet;
       });
     } else {
-      // Add to helpful with animation
       setAnimatingReview(reviewId);
       setHelpfulReviews(prev => new Set(prev).add(reviewId));
       setTimeout(() => setAnimatingReview(null), 300);
@@ -96,8 +125,6 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   const handleSubmitReport = () => {
     if (showReportModal && reportReason) {
       setReportedReviews(prev => new Set(prev).add(showReportModal));
-      // Here you would send to API: { reviewId: showReportModal, reason: reportReason, details: reportDetails }
-      console.log('Report submitted:', { reviewId: showReportModal, reason: reportReason, details: reportDetails });
       setShowReportModal(null);
       setReportReason('');
       setReportDetails('');
@@ -129,7 +156,21 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   // All reviews data from shared module (canonical source of truth)
   const allReviews: Review[] = getReviewsForProduct(productId);
 
-  // Get personalized and general reviews using shared Similarity Weight utility (12.15)
+  // Build scored reviews for the environment insight utility
+  const scoredReviews = useMemo(() => {
+    if (!env) return [];
+    const evidence = aggregateReviewerEvidence(productId, {
+      skinType: userSkinProfile.skinType,
+      primaryConcerns: userSkinProfile.primaryConcerns,
+      complexion: userSkinProfile.complexion,
+      sensitivity: '',
+      lifestyle: userSkinProfile.lifestyle,
+      age: userSkinProfile.age,
+    });
+    return evidence?.scoredReviews || [];
+  }, [productId, userSkinProfile.skinType, userSkinProfile.primaryConcerns.join(',')]);
+
+  // Get personalized reviews using shared Similarity Weight utility
   const personalizedReviews = allReviews
     .map(review => {
       const result = calculateSimilarityWeight(
@@ -138,25 +179,64 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       );
       return { ...review, similarityScore: result.score, matchTier: result.matchTier };
     })
-    .filter(review => review.similarityScore >= 15) // Only show reviews with ≥15% similarity
+    .filter(review => review.similarityScore >= 15)
     .sort((a, b) => b.similarityScore - a.similarityScore)
-    .slice(0, 3);
+    .slice(0, 6);
 
-  // Apply user-selected filters
-  const filteredReviews = useMemo(() => {
-    return allReviews.filter((review) => {
-      const matchesConcern = filterConcern === 'all' || review.skinConcerns.includes(filterConcern);
-      const matchesRating = review.rating >= filterRating;
-      return matchesConcern && matchesRating;
-    });
-  }, [allReviews, filterConcern, filterRating]);
-
-  const featuredReviews = personalizedReviews.length > 0 && filterConcern === 'all' && filterRating === 0
+  const featuredReviews = personalizedReviews.length > 0
     ? personalizedReviews
-    : filteredReviews.slice(0, 6);
+    : allReviews.slice(0, 6);
 
-  const totalReviews = 247;
-  const averageRating = 4.3;
+  // Review environment insight (keyword-driven summary + matched reviews)
+  const appliedPref = preferenceApplied ? preferenceText : undefined;
+  const reviewEnvInsight = useMemo(
+    () => generateReviewEnvironmentInsight(scoredReviews, season, skinType, activeFilter, appliedPref),
+    [scoredReviews, season, skinType, activeFilter, appliedPref],
+  );
+
+  // Chip counts for filter badges
+  const chipCounts = useMemo(
+    () => getFilterChipCounts(scoredReviews),
+    [scoredReviews],
+  );
+
+  // AI-assisted review summary (authenticated users only)
+  const [aiReviewSummary, setAiReviewSummary] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!product || scoredReviews.length < 2 || isGuest) return;
+    let cancelled = false;
+
+    (async () => {
+      try {
+        const summaryInput = buildReviewSummaryContext(
+          scoredReviews, reviewEnvInsight, env ?? null, skinType || null, concerns, product.name,
+        );
+        const question = formatReviewSummaryPrompt(summaryInput);
+        const aiContext = buildAIContext('product_detail', {
+          page: { mode: 'product_detail', product },
+          environment: env,
+        });
+        const result = await requestAIInsight(aiContext, { question });
+        if (!cancelled && result.success) {
+          setAiReviewSummary(result.insight);
+        }
+      } catch {
+        // Silently fall back to rule-based summary
+      }
+    })();
+
+    return () => { cancelled = true; };
+  }, [product?.id, scoredReviews.length, env?.season, skinType]);
+
+  const totalReviews = allReviews.length;
+  const averageRating = allReviews.length > 0
+    ? Math.round((allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length) * 10) / 10
+    : 0;
+
+  const skinTypeLabel = skinType
+    ? skinType.charAt(0).toUpperCase() + skinType.slice(1).toLowerCase() + ' skin'
+    : null;
 
   const renderStars = (rating: number) => {
     const stars = [];
@@ -177,61 +257,43 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
   };
 
   return (
-    <div id="reviews" className="py-16 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
+    <div id="reviews" className="py-8 bg-white">
+      <div className="max-w-7xl mx-auto">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-8">
-          <div className="flex items-center space-x-4 mb-4 md:mb-0">
-            <div className="w-14 h-14 bg-taupe-100 rounded-full flex items-center justify-center">
-              <i className="ri-chat-3-line text-2xl text-taupe"></i>
-            </div>
-            <div>
-              <h2 className="text-3xl font-serif font-bold text-deep-900">
-                Community Reviews
-              </h2>
-              <p className="text-gray-600 mt-1">Real experiences from verified buyers</p>
-            </div>
+        <div className="flex items-center gap-3 mb-6">
+          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0">
+            <i className="ri-chat-3-line text-lg text-primary"></i>
+          </div>
+          <div>
+            <h2 className="text-xl font-serif font-bold text-deep">
+              {skinTypeLabel
+                ? <>What people with <span className="text-primary">{skinTypeLabel.toLowerCase()}</span> noticed</>
+                : 'What people noticed'}
+            </h2>
+            <p className="text-xs text-warm-gray mt-0.5">Real experiences from verified buyers</p>
           </div>
         </div>
 
-        {/* Personalization Banner */}
-        {personalizedReviews.length > 0 && (
-          <div className="bg-taupe-50 rounded-2xl p-6 mb-8 border border-taupe-200">
-            <div>
-              <h3 className="text-lg font-semibold text-deep-900 mb-1">
-                Personalized for Your Skin
-              </h3>
-              <p className="text-gray-600 text-sm mb-3">
-                Showing reviews from similar individuals with <strong>{userSkinProfile.skinType} skin</strong> concerned about{' '}
-                <strong>{userSkinProfile.primaryConcerns.join(' & ')}</strong> that bought this product
-              </p>
-              <span className="text-xs text-primary-700 bg-light/30 border border-primary-300 px-2.5 py-1 rounded-full font-medium">
-                {personalizedReviews.length} matching reviews found
-              </span>
-            </div>
-          </div>
-        )}
-
         {/* Rating Overview */}
-        <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="bg-cream/50 rounded-xl p-5 mb-6 border border-blush/30">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Overall Rating */}
             <div className="text-center lg:col-span-2">
-              <div className="text-6xl font-bold text-deep-900 mb-2">
+              <div className="text-5xl font-bold text-deep mb-1">
                 {averageRating}
               </div>
-              <div className="flex items-center justify-center space-x-1 mb-2">
+              <div className="flex items-center justify-center space-x-1 mb-1">
                 {renderStars(Math.round(averageRating))}
               </div>
-              <p className="text-gray-600">
+              <p className="text-xs text-warm-gray">
                 {totalReviews} total reviews
               </p>
             </div>
 
             {/* Rating Distribution */}
             <div className="lg:col-span-3">
-              <div className="space-y-3">
-                {([{ star: 5, count: 98 }, { star: 4, count: 72 }, { star: 3, count: 41 }, { star: 2, count: 22 }, { star: 1, count: 14 }]).map(({ star: rating, count }) => {
+              <div className="space-y-2">
+                {([5, 4, 3, 2, 1].map(s => ({ star: s, count: allReviews.filter(r => Math.round(r.rating) === s).length }))).map(({ star: rating, count }) => {
                   const percentage = (count / totalReviews) * 100;
                   return (
                     <Link
@@ -239,16 +301,16 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                       to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}&rating=${rating}`}
                       className="flex items-center space-x-3 hover:bg-cream/50 rounded-lg px-2 py-0.5 -mx-2 transition-colors cursor-pointer"
                     >
-                      <span className="text-sm font-medium text-gray-700 w-8">
+                      <span className="text-xs font-medium text-warm-gray w-6">
                         {rating}★
                       </span>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="flex-1 h-1.5 bg-blush/30 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-amber-500 transition-all"
                           style={{ width: `${percentage}%` }}
                         ></div>
                       </div>
-                      <span className="text-sm text-gray-500 w-12 text-right">
+                      <span className="text-xs text-warm-gray w-8 text-right">
                         {count}
                       </span>
                     </Link>
@@ -259,196 +321,277 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
           </div>
         </div>
 
-        {/* Smart Review Filters */}
-        <div className="bg-white rounded-2xl p-6 mb-8 shadow-lg">
-          <div className="flex items-center gap-2 mb-4">
-            <i className="ri-filter-3-line text-taupe"></i>
-            <h3 className="text-lg font-semibold text-deep-900">Filter Reviews</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Concern Filter */}
-            <div>
-              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
-                Skin Concern
-              </label>
-              <Dropdown
-                id="filter-concern"
-                value={filterConcern}
-                onChange={setFilterConcern}
-                options={[
-                  { value: 'all', label: 'All Concerns' },
-                  ...userSkinProfile.primaryConcerns.map((concern) => ({ value: concern, label: concern })),
-                ]}
-              />
-            </div>
-            {/* Rating Filter */}
-            <div>
-              <label className="block text-xs font-medium text-warm-gray uppercase tracking-wide mb-2">
-                Minimum Rating
-              </label>
-              <Dropdown
-                id="filter-rating"
-                value={String(filterRating)}
-                onChange={(value) => setFilterRating(Number(value))}
-                options={[
-                  { value: '0', label: 'All Ratings' },
-                  { value: '5', label: '5 Stars Only' },
-                  { value: '4', label: '4+ Stars' },
-                  { value: '3', label: '3+ Stars' },
-                  { value: '2', label: '2+ Stars' },
-                  { value: '1', label: '1+ Stars' },
-                ]}
-              />
-            </div>
-          </div>
-          {/* Clear filters */}
-          {(filterConcern !== 'all' || filterRating > 0) && (
-            <div className="mt-4 pt-4 border-t border-blush/50">
-              <button
-                onClick={() => {
-                  setFilterConcern('all');
-                  setFilterRating(0);
+        {/* Preference input + category filter chips */}
+        <div className="mb-6">
+          {/* "What matters most to you?" input */}
+          <div className="mb-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={preferenceText}
+                onChange={(e) => {
+                  setPreferenceText(e.target.value.slice(0, 120));
+                  if (preferenceApplied) setPreferenceApplied(false);
                 }}
-                className="px-3 py-1.5 text-xs rounded-full bg-gray-100 text-warm-gray hover:bg-gray-200 transition-colors cursor-pointer flex items-center gap-1"
-              >
-                <i className="ri-close-line"></i>
-                Clear filters
-              </button>
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && preferenceText.trim()) {
+                    try { localStorage.setItem('review_preference', preferenceText.trim()); } catch { /* ignore */ }
+                    setPreferenceApplied(true);
+                  }
+                }}
+                placeholder="What matters most to you? e.g., lightweight in humidity"
+                aria-label="What matters most to you about this product"
+                className="flex-1 text-sm text-deep bg-white border border-blush/50 rounded-lg px-3 py-2.5 focus:outline-none focus:border-primary transition-colors placeholder:text-warm-gray/40"
+              />
+              {preferenceText.trim() && !preferenceApplied && (
+                <button
+                  onClick={() => {
+                    try { localStorage.setItem('review_preference', preferenceText.trim()); } catch { /* ignore */ }
+                    setPreferenceApplied(true);
+                  }}
+                  className="px-3 py-2.5 text-xs font-medium text-primary hover:text-dark transition-colors cursor-pointer flex-shrink-0"
+                >
+                  Apply
+                </button>
+              )}
+              {preferenceApplied && (
+                <button
+                  onClick={() => {
+                    setPreferenceText('');
+                    setPreferenceApplied(false);
+                    try { localStorage.removeItem('review_preference'); } catch { /* ignore */ }
+                  }}
+                  aria-label="Clear preference"
+                  className="w-8 h-8 flex items-center justify-center text-warm-gray/50 hover:text-deep rounded-full hover:bg-cream transition-all cursor-pointer flex-shrink-0"
+                >
+                  <i className="ri-close-line text-sm"></i>
+                </button>
+              )}
             </div>
-          )}
+            {preferenceApplied && (
+              <p className="text-[10px] text-primary/70 mt-1">
+                Reviews prioritized based on your preference
+              </p>
+            )}
+          </div>
+
+          {/* Category filter chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {([
+              { key: 'all' as FilterCategory, count: chipCounts.all },
+              { key: 'climate' as FilterCategory, count: chipCounts.climate },
+              { key: 'feel' as FilterCategory, count: chipCounts.feel },
+              { key: 'wear_behavior' as FilterCategory, count: chipCounts.wear_behavior },
+            ] as const).map(chip => (
+              <button
+                key={chip.key}
+                onClick={() => setActiveFilter(chip.key)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-colors cursor-pointer ${
+                  activeFilter === chip.key
+                    ? 'bg-primary/10 text-primary border-primary/30'
+                    : chip.count === 0
+                      ? 'bg-cream/50 text-warm-gray/40 border-blush/20'
+                      : 'bg-cream text-warm-gray border-blush/30 hover:border-blush'
+                }`}
+              >
+                {FILTER_LABELS[chip.key]}{chip.count > 0 ? ` (${chip.count})` : ''}
+              </button>
+            ))}
+          </div>
         </div>
 
-        {/* Featured Reviews */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Personalized summary + keyword chips */}
+        {(aiReviewSummary || reviewEnvInsight) ? (
+          <div className="mb-6">
+            {/* AI-generated summary (authenticated) or rule-based fallback */}
+            {aiReviewSummary ? (
+              <div className="bg-cream/30 border border-blush/40 rounded-xl p-3 mb-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-5 h-5 bg-blush/30 rounded-full flex items-center justify-center">
+                    <i className="ri-sparkling-line text-[10px] text-primary" />
+                  </div>
+                  <span className="text-[10px] font-medium text-warm-gray">
+                    Review insights
+                  </span>
+                </div>
+                <p className="text-sm text-deep leading-relaxed">
+                  {aiReviewSummary}
+                </p>
+              </div>
+            ) : reviewEnvInsight ? (
+              <>
+                {/* Fallback notice */}
+                {reviewEnvInsight.isFallback && (
+                  <p className="text-[10px] text-warm-gray/50 italic mb-2">
+                    No reviews specifically mention {FILTER_LABELS[activeFilter].toLowerCase()} yet. Here's what similar users said overall.
+                  </p>
+                )}
+
+                <p className="text-sm text-warm-gray leading-relaxed mb-3">
+                  {reviewEnvInsight.summary}
+                </p>
+
+                {/* Guest nudge */}
+                {isGuest && (
+                  <p className="text-[10px] text-warm-gray/50 mt-1 flex items-center gap-1">
+                    <i className="ri-information-line text-[10px]" />
+                    Based on general guidance.
+                    <Link to="/login" className="text-primary hover:text-deep transition-colors underline underline-offset-2">
+                      Sign in
+                    </Link>
+                    {' '}for personalized review insights.
+                  </p>
+                )}
+              </>
+            ) : null}
+
+            {/* Top keyword chips (shown for both AI and rule-based) */}
+            {reviewEnvInsight && reviewEnvInsight.topKeywords.length > 0 && (
+              <div className="flex flex-wrap gap-1.5 mt-3">
+                {reviewEnvInsight.topKeywords.map(kw => (
+                  <span
+                    key={kw}
+                    className="inline-flex items-center px-2.5 py-1 text-xs text-warm-gray bg-cream/60 border border-blush/30 rounded-full capitalize"
+                  >
+                    {kw}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : scoredReviews.length > 0 ? (
+          <p className="text-sm text-warm-gray/70 leading-relaxed italic mb-6">
+            We haven't found reviews from people with a similar skin profile mentioning these conditions yet.
+          </p>
+        ) : null}
+
+        {/* Review Cards */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
           {featuredReviews.map((review) => {
             const similarityBadge = 'matchTier' in review
               ? getTierBadgeInfo(review.matchTier, review.similarityScore)
               : null;
-            
+
             const isFullMatch = 'matchTier' in review && review.matchTier === 'full';
 
             return (
-              <div key={review.id} className={`rounded-2xl p-6 shadow-lg ${isFullMatch ? 'bg-light/30 border border-primary-300' : 'bg-white'}`}>
+              <div key={review.id} className={`rounded-xl p-4 border ${isFullMatch ? 'bg-light/20 border-primary-300' : 'bg-white border-blush/40'}`}>
                 {/* Review Header */}
-                <div className="flex items-start space-x-3 mb-4">
+                <div className="flex items-start gap-3 mb-3">
                   <button
                     onClick={() => handleReviewerClick(review)}
-                    className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-taupe-500 transition-all"
+                    className="w-9 h-9 rounded-full overflow-hidden bg-cream flex-shrink-0 cursor-pointer hover:ring-2 hover:ring-primary/30 transition-all"
                   >
                     <img
                       src={review.userAvatar}
                       alt={review.userName}
                       className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.src = 'https://via.placeholder.com/36?text=U'; }}
                     />
                   </button>
                   <div className="flex-1 min-w-0">
-                    <button
-                      onClick={() => handleReviewerClick(review)}
-                      className="font-semibold text-gray-900 truncate hover:text-taupe cursor-pointer transition-colors mb-1"
-                    >
-                      {review.userName}
-                    </button>
-                    <div className="flex items-center space-x-1.5 flex-wrap gap-y-1 mb-1">
+                    <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
+                      <button
+                        onClick={() => handleReviewerClick(review)}
+                        className="text-sm font-medium text-deep truncate hover:text-primary cursor-pointer transition-colors"
+                      >
+                        {review.userName}
+                      </button>
                       {review.verified && (
-                        <span className="flex items-center space-x-1 px-2 py-0.5 bg-taupe-100 text-taupe-800 text-[10px] font-medium rounded-full flex-shrink-0">
-                          <i className="ri-shield-check-fill"></i>
-                          <span>Verified</span>
-                        </span>
+                        <i className="ri-shield-check-fill text-[10px] text-warm-gray" title="Verified buyer"></i>
                       )}
                       {similarityBadge && (
                         <button
                           onClick={() => setMatchPopupReview(review)}
-                          className={`inline-flex items-center space-x-0.5 px-1.5 py-0.5 ${similarityBadge.color} text-[10px] font-medium rounded-full flex-shrink-0 hover:opacity-80 transition-opacity cursor-pointer`}
+                          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 ${similarityBadge.color} text-[9px] font-medium rounded-full hover:opacity-80 transition-opacity cursor-pointer`}
                         >
-                          <i className={similarityBadge.icon}></i>
-                          <span>{similarityBadge.label}</span>
+                          <i className={`${similarityBadge.icon} text-[9px]`}></i>
+                          {similarityBadge.label}
                         </button>
                       )}
                     </div>
-                    <div className="flex items-center space-x-1 mb-1">
-                      {renderStars(review.rating)}
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center">
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <i
+                            key={i}
+                            className={`text-[10px] ${
+                              i < review.rating
+                                ? 'ri-star-fill text-amber-500'
+                                : 'ri-star-line text-amber-500'
+                            }`}
+                          ></i>
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-warm-gray">
+                        {review.skinType === userSkinProfile.skinType ? (
+                          <span className="text-primary-700 font-medium">{review.skinType} skin</span>
+                        ) : (
+                          <span>{review.skinType} skin</span>
+                        )} · {review.usageDurationWeeks}w use
+                      </span>
                     </div>
-                    {/* Duration of use shown instead of submission date —
-                        product usage duration is more meaningful for evaluating
-                        product performance and results credibility. */}
-                    <p className="text-xs text-gray-500 mb-2">
-                      {review.skinType === userSkinProfile.skinType ? (
-                        <span className="text-primary-700 font-medium">{review.skinType} skin</span>
-                      ) : (
-                        <span>{review.skinType} skin</span>
-                      )} • Age {review.age} • Used for {review.usageDurationWeeks} weeks
-                    </p>
-                    
                   </div>
                 </div>
 
                 {/* Skin Concerns */}
-                <div className="mb-3">
-                  <div className="flex flex-wrap gap-1">
-                    {review.skinConcerns.map((concern, idx) => (
-                      <span
-                        key={idx}
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          matchesConcern(concern, userSkinProfile.primaryConcerns)
-                            ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
-                            : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {concern}
-                      </span>
-                    ))}
-                  </div>
+                <div className="flex flex-wrap gap-1 mb-2">
+                  {review.skinConcerns.map((concern, idx) => (
+                    <span
+                      key={idx}
+                      className={`px-2 py-0.5 text-[10px] rounded-full ${
+                        matchesConcern(concern, userSkinProfile.primaryConcerns)
+                          ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
+                          : 'bg-cream text-warm-gray'
+                      }`}
+                    >
+                      {concern}
+                    </span>
+                  ))}
                 </div>
 
                 {/* Review Content */}
-                <h4 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                  {review.title}
-                </h4>
-                <p className="text-gray-700 text-sm leading-relaxed mb-4 line-clamp-4">
+                {review.title && (
+                  <h4 className="text-sm font-medium text-deep mb-1 line-clamp-1">
+                    {review.title}
+                  </h4>
+                )}
+                <p className="text-xs text-warm-gray leading-relaxed mb-3 line-clamp-3">
                   {review.content}
                 </p>
 
                 {/* Review Footer */}
-                <div className="pt-4 border-t border-gray-100 space-y-2">
-                  <div className="flex items-center justify-between">
+                <div className="pt-3 border-t border-blush/30 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleHelpfulClick(review.id)}
-                      className={`flex items-center space-x-2 px-3 py-1.5 rounded-full transition-all cursor-pointer ${
+                      className={`flex items-center gap-1 px-2.5 py-1 rounded-full transition-all cursor-pointer text-xs ${
                         helpfulReviews.has(review.id)
                           ? 'bg-primary/10 text-primary'
-                          : 'text-gray-600 hover:bg-gray-100'
+                          : 'text-warm-gray hover:bg-cream'
                       } ${animatingReview === review.id ? 'scale-110' : 'scale-100'}`}
                       style={{ transition: 'transform 0.15s ease-out, background-color 0.2s, color 0.2s' }}
                     >
                       <i className={`${helpfulReviews.has(review.id) ? 'ri-thumb-up-fill' : 'ri-thumb-up-line'} ${animatingReview === review.id ? 'animate-bounce' : ''}`}></i>
-                      <span className="text-sm">Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
+                      <span>Helpful ({review.helpful + (helpfulReviews.has(review.id) ? 1 : 0)})</span>
                     </button>
-                    <Link
-                      to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-                      className="text-taupe hover:text-taupe-700 text-sm font-medium cursor-pointer"
-                    >
-                      Read full review
-                    </Link>
-                  </div>
-                  <div className="pl-3">
                     {reportedReviews.has(review.id) ? (
-                      <span className="text-xs text-warm-gray/60 flex items-center gap-1">
-                        <i className="ri-flag-fill text-xs"></i>
+                      <span className="text-[10px] text-warm-gray/60 flex items-center gap-0.5">
+                        <i className="ri-flag-fill text-[10px]"></i>
                         Reported
                       </span>
                     ) : showReportConfirm === review.id ? (
                       <div className="flex items-center gap-1.5">
-                        <i className="ri-flag-line text-xs text-warm-gray/60"></i>
-                        <span className="text-xs text-warm-gray">Report this review?</span>
+                        <span className="text-[10px] text-warm-gray">Report?</span>
                         <button
                           onClick={() => handleReportReview(review.id)}
-                          className="text-xs text-red-500 hover:text-red-600 font-medium cursor-pointer"
+                          className="text-[10px] text-red-500 hover:text-red-600 font-medium cursor-pointer"
                         >
                           Yes
                         </button>
                         <button
                           onClick={() => setShowReportConfirm(null)}
-                          className="text-xs text-warm-gray hover:text-deep cursor-pointer"
+                          className="text-[10px] text-warm-gray hover:text-deep cursor-pointer"
                         >
                           No
                         </button>
@@ -456,14 +599,21 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                     ) : (
                       <button
                         onClick={() => setShowReportConfirm(review.id)}
-                        className="text-warm-gray/50 hover:text-warm-gray text-xs cursor-pointer flex items-center gap-1"
+                        className="text-warm-gray/40 hover:text-warm-gray text-[10px] cursor-pointer flex items-center gap-0.5"
                         title="Report review"
                       >
-                        <i className="ri-flag-line text-xs"></i>
-                        <span>Report</span>
+                        <i className="ri-flag-line text-[10px]"></i>
+                        Report
                       </button>
                     )}
                   </div>
+                  <Link
+                    to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
+                    className="text-xs text-primary hover:text-dark font-medium cursor-pointer transition-colors flex items-center gap-0.5"
+                  >
+                    View full review
+                    <i className="ri-arrow-right-s-line text-xs"></i>
+                  </Link>
                 </div>
               </div>
             );
@@ -471,10 +621,10 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         </div>
 
         {/* Call to Action */}
-        <div className="text-center mt-8">
+        <div className="text-center">
           <Link
             to={`/reviews-products?id=${productId}&skinType=${userSkinProfile.skinType}&concerns=${userSkinProfile.primaryConcerns.join(',')}`}
-            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-taupe hover:text-dark text-sm font-medium transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 text-primary hover:text-dark text-sm font-medium transition-colors cursor-pointer"
           >
             <span>Read All {totalReviews} Reviews</span>
             <i className="ri-arrow-right-line"></i>
@@ -487,24 +637,24 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+            <div className="p-6 border-b border-blush/30 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <img
                   src={selectedReviewer.userAvatar}
                   alt={selectedReviewer.userName}
-                  className="w-16 h-16 rounded-full object-cover"
+                  className="w-14 h-14 rounded-full object-cover"
                 />
                 <div>
-                  <h3 className="text-xl font-bold text-gray-900">{selectedReviewer.userName}</h3>
-                  <p className="text-sm text-gray-500">{selectedReviewer.skinType} Skin • Age {selectedReviewer.age}</p>
+                  <h3 className="text-lg font-bold text-deep">{selectedReviewer.userName}</h3>
+                  <p className="text-sm text-warm-gray">{selectedReviewer.skinType} Skin · Age {selectedReviewer.age}</p>
                 </div>
               </div>
               <button
                 onClick={() => setShowProfileModal(false)}
                 aria-label="Close"
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
+                className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
               >
-                <i className="ri-close-line text-2xl"></i>
+                <i className="ri-close-line text-xl"></i>
               </button>
             </div>
 
@@ -512,15 +662,15 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
             <div className="p-6 space-y-6">
               {/* My-Skin Profile */}
               <div>
-                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2">
-                  <i className="ri-user-heart-line text-taupe"></i>
+                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2 text-sm">
+                  <i className="ri-user-heart-line text-primary"></i>
                   My-Skin Profile
                 </h4>
-                <div className="bg-taupe-50 rounded-xl p-4">
-                  <p className="text-sm text-gray-700 mb-2"><span className="font-medium">Skin Type:</span> {getReviewerProfile(selectedReviewer).skinType}</p>
+                <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
+                  <p className="text-sm text-warm-gray mb-2"><span className="font-medium text-deep">Skin Type:</span> {getReviewerProfile(selectedReviewer).skinType}</p>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {getReviewerProfile(selectedReviewer).concerns.map((concern, idx) => (
-                      <span key={idx} className="px-3 py-1 bg-taupe-100 text-taupe-700 text-xs font-medium rounded-full">
+                      <span key={idx} className="px-3 py-1 bg-cream text-warm-gray text-xs font-medium rounded-full">
                         {concern}
                       </span>
                     ))}
@@ -530,32 +680,32 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
               {/* Routine */}
               <div>
-                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2">
-                  <i className="ri-calendar-check-line text-taupe"></i>
+                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2 text-sm">
+                  <i className="ri-calendar-check-line text-primary"></i>
                   Daily Routine
                 </h4>
                 <div className="grid md:grid-cols-2 gap-4">
-                  <div className="bg-amber-50 rounded-xl p-4">
-                    <p className="font-medium text-amber-800 mb-2 flex items-center gap-2">
-                      <i className="ri-sun-line"></i> Morning
+                  <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
+                    <p className="font-medium text-deep mb-2 flex items-center gap-2 text-sm">
+                      <i className="ri-sun-line text-primary"></i> Morning
                     </p>
                     <ul className="space-y-1">
                       {getReviewerProfile(selectedReviewer).routine.morning.map((step, idx) => (
-                        <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
-                          <span className="w-5 h-5 bg-amber-100 text-amber-700 rounded-full text-xs flex items-center justify-center">{idx + 1}</span>
+                        <li key={idx} className="text-xs text-warm-gray flex items-center gap-2">
+                          <span className="w-5 h-5 bg-primary/10 text-primary rounded-full text-[10px] flex items-center justify-center">{idx + 1}</span>
                           {step}
                         </li>
                       ))}
                     </ul>
                   </div>
-                  <div className="bg-indigo-50 rounded-xl p-4">
-                    <p className="font-medium text-indigo-800 mb-2 flex items-center gap-2">
-                      <i className="ri-moon-line"></i> Evening
+                  <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
+                    <p className="font-medium text-deep mb-2 flex items-center gap-2 text-sm">
+                      <i className="ri-moon-line text-primary"></i> Evening
                     </p>
                     <ul className="space-y-1">
                       {getReviewerProfile(selectedReviewer).routine.evening.map((step, idx) => (
-                        <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
-                          <span className="w-5 h-5 bg-indigo-100 text-indigo-700 rounded-full text-xs flex items-center justify-center">{idx + 1}</span>
+                        <li key={idx} className="text-xs text-warm-gray flex items-center gap-2">
+                          <span className="w-5 h-5 bg-primary/10 text-primary rounded-full text-[10px] flex items-center justify-center">{idx + 1}</span>
                           {step}
                         </li>
                       ))}
@@ -566,26 +716,26 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
               {/* Routine Notes */}
               <div>
-                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2">
-                  <i className="ri-sticky-note-line text-taupe"></i>
+                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2 text-sm">
+                  <i className="ri-sticky-note-line text-primary"></i>
                   Routine Notes
                 </h4>
-                <div className="bg-cream-100 rounded-xl p-4">
-                  <p className="text-sm text-gray-700 italic">"{getReviewerProfile(selectedReviewer).routineNotes}"</p>
+                <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
+                  <p className="text-xs text-warm-gray italic">"{getReviewerProfile(selectedReviewer).routineNotes}"</p>
                 </div>
               </div>
 
               {/* Nutrition Meal Planner */}
               <div>
-                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2">
-                  <i className="ri-restaurant-line text-taupe"></i>
+                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2 text-sm">
+                  <i className="ri-restaurant-line text-primary"></i>
                   Nutrition Meal Plan
                 </h4>
-                <div className="bg-taupe-50 rounded-xl p-4">
+                <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
                   <ul className="space-y-2">
                     {getReviewerProfile(selectedReviewer).nutritionMealPlan.map((meal, idx) => (
-                      <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
-                        <i className="ri-checkbox-circle-fill text-taupe-500"></i>
+                      <li key={idx} className="text-xs text-warm-gray flex items-center gap-2">
+                        <i className="ri-checkbox-circle-fill text-primary/60"></i>
                         {meal}
                       </li>
                     ))}
@@ -595,23 +745,23 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
 
               {/* Nutrition Tracker */}
               <div>
-                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2">
-                  <i className="ri-bar-chart-box-line text-taupe"></i>
+                <h4 className="font-semibold text-deep mb-3 flex items-center gap-2 text-sm">
+                  <i className="ri-bar-chart-box-line text-primary"></i>
                   Nutrition Tracker
                 </h4>
-                <div className="bg-blue-50 rounded-xl p-4">
+                <div className="bg-cream/50 rounded-xl p-4 border border-blush/30">
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.calories}</p>
-                      <p className="text-xs text-gray-600">Calories</p>
+                      <p className="text-xl font-bold text-primary">{getReviewerProfile(selectedReviewer).nutritionTracker.calories}</p>
+                      <p className="text-[10px] text-warm-gray">Calories</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.protein}g</p>
-                      <p className="text-xs text-gray-600">Protein</p>
+                      <p className="text-xl font-bold text-primary">{getReviewerProfile(selectedReviewer).nutritionTracker.protein}g</p>
+                      <p className="text-[10px] text-warm-gray">Protein</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-blue-700">{getReviewerProfile(selectedReviewer).nutritionTracker.vitamins.length}</p>
-                      <p className="text-xs text-gray-600">Key Vitamins</p>
+                      <p className="text-xl font-bold text-primary">{getReviewerProfile(selectedReviewer).nutritionTracker.vitamins.length}</p>
+                      <p className="text-[10px] text-warm-gray">Key Vitamins</p>
                     </div>
                   </div>
                 </div>
@@ -625,8 +775,8 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
       {showReportModal && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="text-xl font-bold text-gray-900">Report Review</h3>
+            <div className="p-6 border-b border-blush/30 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-deep">Report Review</h3>
               <button
                 onClick={() => {
                   setShowReportModal(null);
@@ -634,9 +784,9 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   setReportDetails('');
                 }}
                 aria-label="Close"
-                className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
+                className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
               >
-                <i className="ri-close-line text-2xl"></i>
+                <i className="ri-close-line text-xl"></i>
               </button>
             </div>
             <div className="p-6 space-y-4">
@@ -663,28 +813,28 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                   onChange={(e) => setReportDetails(e.target.value)}
                   placeholder="Provide more context..."
                   rows={3}
-                  className="w-full px-4 py-3 rounded-lg border border-blush bg-white text-deep focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+                  className="w-full px-4 py-3 rounded-lg border border-blush/50 bg-white text-deep text-sm focus:outline-none focus:border-primary transition-colors resize-none placeholder:text-warm-gray/40"
                 />
               </div>
             </div>
-            <div className="p-6 border-t border-gray-200 flex justify-end gap-3">
+            <div className="p-6 border-t border-blush/30 flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowReportModal(null);
                   setReportReason('');
                   setReportDetails('');
                 }}
-                className="px-4 py-2 text-warm-gray hover:text-deep transition-colors cursor-pointer"
+                className="px-4 py-2 text-warm-gray hover:text-deep transition-colors cursor-pointer text-sm"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSubmitReport}
                 disabled={!reportReason}
-                className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer ${
+                className={`px-6 py-2 rounded-lg font-medium transition-colors cursor-pointer text-sm ${
                   reportReason
                     ? 'bg-red-500 hover:bg-red-600 text-white'
-                    : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-200 text-warm-gray/60 cursor-not-allowed'
                 }`}
               >
                 Submit Report
@@ -723,22 +873,22 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         return (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+              <div className="p-5 border-b border-blush/30 flex items-center justify-between">
                 <div>
-                  <h3 className="text-lg font-bold text-deep">Match Breakdown</h3>
-                  <p className="text-sm text-warm-gray mt-1">{r.userName}'s profile vs yours</p>
+                  <h3 className="text-base font-bold text-deep">Match Breakdown</h3>
+                  <p className="text-xs text-warm-gray mt-0.5">{r.userName}'s profile vs yours</p>
                 </div>
                 <button
                   onClick={() => setMatchPopupReview(null)}
                   aria-label="Close"
-                  className="text-gray-400 hover:text-gray-600 transition-colors cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:rounded-full"
+                  className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                  <i className="ri-close-line text-2xl"></i>
+                  <i className="ri-close-line text-xl"></i>
                 </button>
               </div>
-              <div className="p-6">
+              <div className="p-5">
                 {popupBadge && (
-                  <div className="flex justify-center mb-6">
+                  <div className="flex justify-center mb-5">
                     <span className={`flex items-center space-x-1.5 px-4 py-2 ${popupBadge.color} text-sm font-semibold rounded-full`}>
                       <i className={popupBadge.icon}></i>
                       <span>{popupBadge.label}</span>
@@ -747,9 +897,9 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                 )}
                 <div className="space-y-2">
                   {rows.map((row, idx) => (
-                    <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${row.matched ? 'bg-light/20 border border-primary-200' : 'bg-gray-50'}`}>
+                    <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${row.matched ? 'bg-light/20 border border-primary-200' : 'bg-cream/50'}`}>
                       <div className="flex items-center space-x-3">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.matched ? 'bg-primary/20 text-primary-700' : 'bg-gray-200 text-gray-400'}`}>
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.matched ? 'bg-primary/20 text-primary-700' : 'bg-blush/30 text-warm-gray/40'}`}>
                           <i className={row.matched ? 'ri-check-line text-sm' : 'ri-close-line text-sm'}></i>
                         </div>
                         <div>
@@ -759,13 +909,13 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
                           </p>
                         </div>
                       </div>
-                      <span className={`text-xs font-semibold ${row.matched ? 'text-primary-700' : 'text-gray-400'}`}>
+                      <span className={`text-xs font-semibold ${row.matched ? 'text-primary-700' : 'text-warm-gray/40'}`}>
                         +{row.earned}
                       </span>
                     </div>
                   ))}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-200 flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-blush/30 flex items-center justify-between">
                   <span className="text-sm font-semibold text-deep">Total Score</span>
                   <span className="text-lg font-bold text-primary">{Math.min(result.score, 100)}%</span>
                 </div>

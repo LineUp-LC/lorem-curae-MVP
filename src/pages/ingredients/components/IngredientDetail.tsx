@@ -6,6 +6,8 @@ import { getPersonalizedIngredientProducts } from '../../../lib/utils/ingredient
 import ExplainWhyDropdown from '../../../components/shared/ExplainWhyDropdown';
 import AIInsightBlock from '../../../components/feature/AIInsightBlock';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
 import { getEffectiveSkinType, getEffectiveConcerns } from '../../../lib/utils/sessionState';
 
 interface IngredientDetailProps {
@@ -71,6 +73,9 @@ const StarRating = ({ rating, size = 'text-lg', showNumeric = false, onClick }: 
 };
 
 const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
+  const { env } = useEnvironmentContext();
+  const { user: authUser } = useAuth();
+  const isGuest = !authUser;
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showSimilarProfileReviews, setShowSimilarProfileReviews] = useState(false);
   const [showAllReviewsModal, setShowAllReviewsModal] = useState(false);
@@ -446,8 +451,9 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
         },
         relatedProducts: matchedProducts,
       },
+      environment: env,
     });
-  }, [ingredientId, ingredient?.name]);
+  }, [ingredientId, ingredient?.name, env?.season, env?.uvBand]);
 
   // Ingredient-specific community reviews keyed by slug
   const ingredientReviewData: Record<string, Review[]> = {
@@ -583,7 +589,22 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
           <div className="lg:col-span-2 space-y-6">
             {/* AI Ingredient Insight */}
             {aiContext && (
-              <AIInsightBlock context={aiContext} compact />
+              <div>
+                <AIInsightBlock context={aiContext} compact />
+                {isGuest && (
+                  <p className="text-[10px] text-warm-gray/50 mt-1.5 flex items-center gap-1 px-3">
+                    <i className="ri-information-line text-[10px]" />
+                    Based on general guidance.
+                    <button
+                      onClick={() => navigate('/login')}
+                      className="text-primary hover:text-deep transition-colors underline underline-offset-2 cursor-pointer"
+                    >
+                      Sign in
+                    </button>
+                    {' '}for personalized ingredient insights.
+                  </p>
+                )}
+              </div>
             )}
 
             {/* Benefits */}

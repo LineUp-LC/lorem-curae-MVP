@@ -9,6 +9,15 @@ const AuthCallbackPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
+    const getPostAuthRedirect = () => {
+      const stored = localStorage.getItem('postAuthRedirect');
+      if (stored) {
+        localStorage.removeItem('postAuthRedirect');
+        return stored;
+      }
+      return '/account';
+    };
+
     const handleCallback = async () => {
       try {
         // Handle PKCE code exchange (Supabase v2 flow)
@@ -22,7 +31,7 @@ const AuthCallbackPage = () => {
             return;
           }
           setStatus('success');
-          setTimeout(() => navigate('/account'), 2000);
+          setTimeout(() => navigate(getPostAuthRedirect()), 2000);
           return;
         }
 
@@ -64,18 +73,18 @@ const AuthCallbackPage = () => {
           setCallbackType(type);
           setStatus('success');
 
-          // Redirect to account after a short delay
+          // Redirect after a short delay
           setTimeout(() => {
-            navigate('/account');
+            navigate(getPostAuthRedirect());
           }, 2000);
         } else {
           // No tokens - check if there's an existing session
           const { data: { session } } = await supabase.auth.getSession();
-          
+
           if (session) {
             setStatus('success');
             setTimeout(() => {
-              navigate('/account');
+              navigate(getPostAuthRedirect());
             }, 2000);
           } else {
             setStatus('error');

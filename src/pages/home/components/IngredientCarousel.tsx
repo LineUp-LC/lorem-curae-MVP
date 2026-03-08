@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getIngredientSlug } from '../../../lib/utils/ingredientProducts';
 
 const ingredients = [
   {
@@ -139,8 +140,9 @@ export default function IngredientCarousel() {
                   Best for: {ingredient.forWhom}
                 </p>
                 <Link
-                  to="/ingredients"
+                  to={`/ingredients?id=${getIngredientSlug(ingredient.name) || ''}`}
                   className="inline-flex items-center space-x-1 text-taupe hover:text-taupe-700 font-medium text-sm transition-colors"
+                  aria-label={`View ingredient details for ${ingredient.name}`}
                 >
                   <span>Learn More</span>
                   <i className="ri-arrow-right-line group-hover:translate-x-1 transition-transform"></i>

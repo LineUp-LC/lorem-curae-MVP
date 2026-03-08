@@ -223,6 +223,28 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     }));
   };
 
+  const getPrevStep = () => {
+    if (currentStep === 6) {
+      // Going back from complexion — check if acne or scarring steps were shown
+      if (surveyData.concerns.includes('Acne Prone')) {
+        return 5; // Back to acne type
+      } else if (surveyData.concerns.includes('Scarring')) {
+        return 4; // Back to scarring type
+      } else {
+        return 3; // Back to concerns
+      }
+    }
+    if (currentStep === 5) {
+      // Going back from acne type — check if scarring was also shown
+      if (surveyData.concerns.includes('Scarring')) {
+        return 4; // Back to scarring type
+      } else {
+        return 3; // Back to concerns
+      }
+    }
+    return currentStep - 1;
+  };
+
   const getNextStep = () => {
     if (currentStep === 3) {
       // After concerns, check for scarring or acne
@@ -299,17 +321,33 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What's your skin type?</h2>
             <p className="text-warm-gray text-sm mb-6">Select the option that best describes your skin</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {['Normal', 'Dry', 'Oily', 'Combination', 'Sensitive'].map((type) => (
+              {[
+                { label: 'Normal', tip: 'Your skin is generally balanced — not too oily or too dry, with few imperfections' },
+                { label: 'Dry', tip: 'Your skin often feels tight, rough, or flaky, and may lack moisture throughout the day' },
+                { label: 'Oily', tip: 'Your skin tends to look shiny, especially in the T-zone, and may be prone to clogged pores' },
+                { label: 'Combination', tip: 'Some areas of your face are oily (usually forehead, nose, chin) while others feel dry or normal' },
+                { label: 'Sensitive', tip: 'Your skin reacts easily to products or environment — redness, stinging, or irritation are common' },
+              ].map(({ label, tip }) => (
                 <button
-                  key={type}
-                  onClick={() => setSurveyData(prev => ({ ...prev, skinType: [type] }))}
+                  key={label}
+                  onClick={() => setSurveyData(prev => ({ ...prev, skinType: [label] }))}
                   className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
-                    surveyData.skinType.includes(type)
+                    surveyData.skinType.includes(label)
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
                       : 'border-blush hover:border-primary/50 hover:bg-cream/50'
                   }`}
                 >
-                  {type}
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>
@@ -656,15 +694,15 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Tell us about your daily environment</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Active lifestyle', tip: 'Regular exercise affects sweat production, pore activity, and product wear' },
-                { label: 'Indoor work environment', tip: 'Dry air and artificial lighting can reduce skin hydration over time' },
-                { label: 'Frequent travel', tip: 'Changing climates, cabin pressure, and water quality shift your skin\'s needs' },
-                { label: 'High stress levels', tip: 'Stress triggers cortisol which can lead to breakouts and sensitivity' },
-                { label: 'Outdoor work environment', tip: 'Regular sun and wind exposure increases the need for UV protection and barrier repair' },
-                { label: 'Frequently wears makeup', tip: 'Daily makeup influences product selection for compatibility and skin recovery' },
-                { label: 'Screen time heavy', tip: 'Blue light from screens may contribute to hyperpigmentation and premature aging' },
-                { label: 'Sun exposure daily', tip: 'Consistent UV exposure requires stronger photoprotection and antioxidant support' },
-                { label: 'Wears glasses or headsets regularly', tip: 'Pressure and friction from frames or headsets can cause congestion in contact areas' },
+                { label: 'Active lifestyle', tip: 'You exercise regularly — running, gym, sports, or other physical activities' },
+                { label: 'Indoor work environment', tip: 'You spend most of your working hours indoors, such as in an office or at home' },
+                { label: 'Frequent travel', tip: 'You travel often, whether for work or leisure, and experience different climates regularly' },
+                { label: 'High stress levels', tip: 'You feel stressed on most days from work, personal life, or other responsibilities' },
+                { label: 'Outdoor work environment', tip: 'You spend a significant part of your day working outdoors or commuting in open air' },
+                { label: 'Frequently wears makeup', tip: 'You wear makeup on most days, whether a full face or just a few key products' },
+                { label: 'Screen time heavy', tip: 'You spend many hours a day in front of screens — computer, phone, or tablet' },
+                { label: 'Sun exposure daily', tip: 'You spend noticeable time in direct sunlight each day, whether by choice or routine' },
+                { label: 'Wears glasses or headsets regularly', tip: 'You wear eyeglasses, sunglasses, or over-ear headsets for extended periods daily' },
               ].map(({ label, tip }) => (
                 <button
                   key={label}
@@ -704,7 +742,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
               ].map(({ label, tip }) => (
                 <button
                   key={label}
-                  onClick={() => handleMultiSelect('routine', label)}
+                  onClick={() => setSurveyData(prev => ({ ...prev, routine: prev.routine.includes(label) ? [] : [label] }))}
                   className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
                     surveyData.routine.includes(label)
                       ? 'border-primary bg-primary/5 text-deep shadow-sm'
@@ -765,10 +803,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Stress can trigger various skin conditions and affect healing</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Low - Generally calm', tip: 'Lower cortisol levels support balanced oil production and skin barrier health' },
-                { label: 'Moderate - Occasional stress', tip: 'Periodic stress can cause temporary flare-ups like breakouts or dullness' },
-                { label: 'High - Frequently stressed', tip: 'Elevated cortisol can increase oil production, trigger breakouts, and slow healing' },
-                { label: 'Very High - Chronic stress', tip: 'Prolonged stress can weaken the skin barrier, worsen inflammation, and accelerate aging' },
+                { label: 'Low - Generally calm', tip: 'You rarely feel stressed and tend to feel relaxed most of the time' },
+                { label: 'Moderate - Occasional stress', tip: 'You experience stress from time to time, such as during busy periods at work or life changes' },
+                { label: 'High - Frequently stressed', tip: 'You feel stressed on most days, whether from work, relationships, or daily responsibilities' },
+                { label: 'Very High - Chronic stress', tip: 'You feel overwhelmed or under pressure nearly all the time, with little relief' },
               ].map(({ label, tip }) => (
                 <button
                   key={label}
@@ -803,12 +841,12 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Nutrition plays a key role in skin health</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Balanced - Variety of whole foods', tip: 'Rich in antioxidants, vitamins, and healthy fats that support skin repair and glow' },
-                { label: 'Plant-based/Vegetarian', tip: 'High in anti-inflammatory compounds, though may need supplementation for B12 and zinc' },
-                { label: 'High protein focus', tip: 'Supports collagen production, but dairy-heavy diets may trigger breakouts for some' },
-                { label: 'Processed/Fast food heavy', tip: 'High glycemic foods and excess sodium can contribute to inflammation and breakouts' },
-                { label: 'Limited/Restricted diet', tip: 'May affect nutrient availability for skin health depending on what is restricted' },
-                { label: 'Variable/Inconsistent', tip: 'Inconsistent nutrition can lead to fluctuations in skin clarity and hydration' },
+                { label: 'Balanced - Variety of whole foods', tip: 'You eat a mix of fruits, vegetables, grains, proteins, and healthy fats on a regular basis' },
+                { label: 'Plant-based/Vegetarian', tip: 'Your diet is mostly or entirely made up of plant-derived foods, with little to no meat' },
+                { label: 'High protein focus', tip: 'Your meals emphasize protein-rich foods like meat, eggs, dairy, or protein supplements' },
+                { label: 'Processed/Fast food heavy', tip: 'You frequently eat packaged, pre-made, or fast food meals rather than cooking from scratch' },
+                { label: 'Limited/Restricted diet', tip: 'You follow a diet that excludes certain food groups, whether by choice or due to allergies or intolerances' },
+                { label: 'Variable/Inconsistent', tip: 'Your eating habits change often — some days are healthier than others, with no set pattern' },
               ].map(({ label, tip }) => (
                 <button
                   key={label}
@@ -964,7 +1002,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+          onClick={() => setCurrentStep(Math.max(1, getPrevStep()))}
           disabled={currentStep === 1}
           className={`inline-flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
             currentStep === 1

@@ -191,7 +191,7 @@ const PurchaseOptions = ({ productId }: PurchaseOptionsProps) => {
         <div className="mb-4">
           <h2 className="text-2xl font-serif text-deep mb-1">Where to Buy</h2>
           <p className="text-sm text-warm-gray">
-            Compare prices from trusted retailers. Taxes calculated at checkout.
+            Compare available retailers.
           </p>
         </div>
 

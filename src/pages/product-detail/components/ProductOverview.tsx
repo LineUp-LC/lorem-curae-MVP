@@ -1,6 +1,7 @@
 import { productData } from '../../../mocks/products';
 import { getEffectiveConcerns } from '../../../lib/utils/sessionState';
 import { matchesIngredient } from '../../../lib/utils/matching';
+import IngredientLink from '../../../components/feature/IngredientLink';
 
 interface ProductOverviewProps {
   productId: number;
@@ -45,7 +46,7 @@ export default function ProductOverview({ productId }: ProductOverviewProps) {
                   : 'bg-cream text-warm-gray border-transparent'
               }`}>
                 {isMatch && <i className="ri-check-line mr-1"></i>}
-                {ing}
+                <IngredientLink name={ing} className={isMatch ? 'text-primary-700' : 'text-warm-gray'} />
               </span>
             );
           })}

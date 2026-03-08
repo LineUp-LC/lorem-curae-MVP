@@ -5,22 +5,27 @@ import ProductReviews from './components/ProductReviews';
 import PurchaseOptions from './components/PurchaseOptions';
 import SimilarProducts from './components/SimilarProducts';
 import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
+import ProductGuideChat from '../../components/feature/ProductGuideChat';
 import EnvironmentFitModal from './components/EnvironmentFitModal';
 import { generateSeasonalModalContent } from '../../lib/utils/seasonalModalContent';
 import { useSavedProducts } from '../../lib/utils/favoritesState';
 import { recentlyViewedState } from '../../lib/utils/recentlyViewedState';
 import { getEffectiveSkinType, getEffectiveConcerns, getEffectivePreferences, getEffectiveComplexion, getEffectiveSensitivity, getEffectiveLifestyle } from '../../lib/utils/sessionState';
 import { matchesConcern, matchesIngredient } from '../../lib/utils/matching';
+import { normalizeSkinTypes, isSkinTypeMatch, isAllMetadata, getMetadataDisplayLabel } from '../../lib/utils/productMetadata';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 import CompatibleWith from '../../components/feature/CompatibleWith';
 import SafetyBadge from '../../components/feature/SafetyBadge';
+import IngredientLink from '../../components/feature/IngredientLink';
 import { assessProductSafety, getUserProfile } from '../../lib/utils/productSafety';
 import { useUserLocation } from '../../lib/utils/locationState';
 import { useEnvironmentContext } from '../../lib/environment/useEnvironmentContext';
 import { useDocumentTitle } from '../../lib/utils/useDocumentTitle';
 import { generateEnvironmentFitExplanation } from '../../lib/utils/environmentFit';
 import { aggregateReviewerEvidence } from '../../lib/utils/reviewerEvidence';
+import { useAuth } from '../../lib/auth/AuthContext';
 import { productData } from '../../mocks/products';
+import { getReviewsForProduct } from '../../mocks/reviews';
 
 export default function ProductDetailPage() {
   // URL params
@@ -39,9 +44,12 @@ export default function ProductDetailPage() {
   const [showComparison, setShowComparison] = useState(false);
   const [showComparisonPicker, setShowComparisonPicker] = useState(false);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [showInciList, setShowInciList] = useState(false);
+  const [expandedIngredientCats, setExpandedIngredientCats] = useState<Set<string>>(new Set(['Active Ingredients']));
 
   // Saved products state
   const { isSaved, toggleSaved } = useSavedProducts();
+  const { user } = useAuth();
   const { displayString: userLocationDisplay } = useUserLocation();
   const { env } = useEnvironmentContext();
 
@@ -57,7 +65,7 @@ export default function ProductDetailPage() {
     name: productFromMock.name,
     brand: productFromMock.brand,
     rating: productFromMock.rating,
-    reviewCount: productFromMock.reviewCount,
+    reviewCount: getReviewsForProduct(productFromMock.id).length,
     priceRange: `$${(productFromMock.price * 0.9).toFixed(2)} - $${(productFromMock.price * 1.1).toFixed(2)}`,
     images: [
       productFromMock.image,
@@ -123,6 +131,17 @@ export default function ProductDetailPage() {
   const seasonalModalContent = useMemo(() => {
     if (!productFromMock || !env || env.source === 'mock') return null;
     const disc = envFit?.disclaimer || 'Personalized for your local conditions. Update your location in Settings anytime.';
+    // Read seasonal skin notes from localStorage for the current season
+    let seasonalNotes: { current?: string; other?: string; updatedAt?: string } | undefined;
+    if (env.season) {
+      try {
+        const stored = localStorage.getItem('seasonal_skin_notes');
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          seasonalNotes = parsed[env.season] || undefined;
+        }
+      } catch { /* ignore corrupt data */ }
+    }
     return generateSeasonalModalContent(
       productFromMock,
       env,
@@ -135,9 +154,10 @@ export default function ProductDetailPage() {
         complexion: getEffectiveComplexion() || undefined,
         lifestyle: getEffectiveLifestyle(),
         preferences: getEffectivePreferences(),
+        seasonalNotes,
       },
     );
-  }, [productFromMock?.id, env?.climate, env?.uvBand, env?.season, reviewerEvidence?.scoredReviews, userSkinType, userConcerns.join(',')]);
+  }, [productFromMock?.id, env?.climate, env?.uvBand, env?.season, reviewerEvidence?.scoredReviews, userSkinType, userConcerns.join(','), showLocationModal]);
 
   const retailers = [
     { id: 1, name: 'DermStore', price: 43.50, totalPrice: 43.50, shipping: 'Free', shippingCost: 0, deliveryTime: '3-5 days', trustScore: 98, verified: true, logo: 'https://via.placeholder.com/100x40?text=DermStore', returnPolicy: '30 days', rewards: 'Earn 5% back in points', url: 'https://www.dermstore.com' },
@@ -479,38 +499,51 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Suitable For */}
-              <div className="mb-4">
-                <h3 className="text-sm font-semibold text-deep mb-2">Suitable For</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {(productFromMock?.skinTypes || ['Dry', 'Oily', 'Combination', 'Sensitive', 'Normal']).map((type) => {
-                    const isUserSkinType = userSkinType.toLowerCase() === type.toLowerCase();
-                    return (
-                      <span key={type} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isUserSkinType ? 'bg-light/30 text-primary-700 border-primary-300' : 'bg-blush/30 text-warm-gray border-transparent'}`}>
-                        {isUserSkinType && <i className="ri-check-line mr-0.5"></i>}
-                        {type}
-                      </span>
-                    );
-                  })}
-                </div>
-              </div>
+              {(() => {
+                const normalized = normalizeSkinTypes(productFromMock?.skinTypes || ['Dry', 'Oily', 'Combination', 'Sensitive', 'Normal']);
+                const displayTypes = normalized.some(isAllMetadata)
+                  ? normalized.filter(isAllMetadata)
+                  : normalized;
+                return displayTypes.length > 0 && (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-deep mb-2">Suitable For</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {displayTypes.map((type, idx) => {
+                        const isMatch = isSkinTypeMatch(type, userSkinType);
+                        return (
+                          <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border ${isMatch ? 'bg-light/30 text-primary-700 border-primary-300' : 'bg-blush/30 text-warm-gray border-transparent'}`}>
+                            {isMatch && <i className="ri-check-line mr-0.5"></i>}
+                            {getMetadataDisplayLabel(type, 'skinType')}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Addresses */}
-              {productFromMock?.concerns && productFromMock.concerns.length > 0 && (
-                <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-deep mb-2">Addresses</h3>
-                  <div className="flex flex-wrap gap-1.5">
-                    {productFromMock.concerns.map((concern) => {
-                      const isMatchingConcern = matchesConcern(concern, userConcerns);
-                      return (
-                        <span key={concern} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border capitalize ${isMatchingConcern ? 'bg-light/30 text-primary-700 border-primary-300' : 'bg-blush/30 text-warm-gray border-transparent'}`}>
-                          {isMatchingConcern && <i className="ri-check-line mr-0.5"></i>}
-                          {concern}
-                        </span>
-                      );
-                    })}
+              {productFromMock?.concerns && productFromMock.concerns.length > 0 && (() => {
+                const displayConcerns = productFromMock.concerns.some(isAllMetadata)
+                  ? productFromMock.concerns.filter(isAllMetadata)
+                  : productFromMock.concerns;
+                return (
+                  <div className="mb-4">
+                    <h3 className="text-sm font-semibold text-deep mb-2">Addresses</h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {displayConcerns.map((concern, idx) => {
+                        const isMatchingConcern = matchesConcern(concern, userConcerns);
+                        return (
+                          <span key={idx} className={`px-3 py-1 rounded-full text-xs font-medium transition-colors border capitalize ${isMatchingConcern ? 'bg-light/30 text-primary-700 border-primary-300' : 'bg-blush/30 text-warm-gray border-transparent'}`}>
+                            {isMatchingConcern && <i className="ri-check-line mr-0.5"></i>}
+                            {getMetadataDisplayLabel(concern, 'concern')}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
 
               {/* Preferences */}
               <div className="mb-4">
@@ -542,7 +575,7 @@ export default function ProductDetailPage() {
               </div>
 
               {/* Environment Fit */}
-              <div className="mb-4">
+              <div id="section-environment" className="mb-4">
                 <h3 className="text-sm font-semibold text-deep mb-2">Environment Fit</h3>
                 {env && env.source !== 'mock' ? (
                   <>
@@ -577,13 +610,24 @@ export default function ProductDetailPage() {
                       No location set
                     </span>
                     <span className="text-xs text-warm-gray italic">Add your location for personalized environmental insights</span>
-                    <Link
-                      to="/settings?tab=location"
-                      className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
-                    >
-                      <i className="ri-settings-3-line"></i>
-                      Update in Settings
-                    </Link>
+                    {user ? (
+                      <Link
+                        to="/settings?tab=location"
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
+                      >
+                        <i className="ri-settings-3-line"></i>
+                        Update in Settings
+                      </Link>
+                    ) : (
+                      <Link
+                        to="/auth/signup"
+                        onClick={() => localStorage.setItem('postAuthRedirect', '/settings?tab=location')}
+                        className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
+                      >
+                        <i className="ri-user-add-line"></i>
+                        Sign Up
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
@@ -602,7 +646,28 @@ export default function ProductDetailPage() {
               {showLocationModal && env && seasonalModalContent && (
                 <EnvironmentFitModal
                   content={seasonalModalContent}
-                  reviews={reviewerEvidence?.scoredReviews || []}
+                  season={env.season}
+                  env={env}
+                  userSkinType={userSkinType || undefined}
+                  product={productFromMock || undefined}
+                  reviewerEvidence={reviewerEvidence}
+                  userProfile={{
+                    skinType: userSkinType || undefined,
+                    concerns: userConcerns.length > 0 ? userConcerns : undefined,
+                    sensitivity: getEffectiveSensitivity() || undefined,
+                    complexion: getEffectiveComplexion() || undefined,
+                    lifestyle: getEffectiveLifestyle(),
+                    preferences: getEffectivePreferences(),
+                  }}
+                  onSaveSeasonalNotes={(current, other) => {
+                    if (!env.season) return;
+                    try {
+                      const stored = localStorage.getItem('seasonal_skin_notes');
+                      const notes = stored ? JSON.parse(stored) : {};
+                      notes[env.season] = { current, other, updatedAt: new Date().toISOString() };
+                      localStorage.setItem('seasonal_skin_notes', JSON.stringify(notes));
+                    } catch { /* ignore */ }
+                  }}
                   onClose={() => setShowLocationModal(false)}
                 />
               )}
@@ -642,7 +707,7 @@ export default function ProductDetailPage() {
         <PurchaseOptions productId={product.id} />
 
         {/* Tabs Section */}
-        <div className="bg-cream py-16">
+        <div id="section-tabs" className="bg-cream py-16">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="border-b border-blush mb-8">
               <div className="flex gap-8 overflow-x-auto" role="tablist">
@@ -720,61 +785,108 @@ export default function ProductDetailPage() {
                 return ingredientConcerns.some(c => matchesConcern(c, userConcerns));
               };
 
+              const matchingInciNames = new Set(
+                ingredientCategories.flatMap(cat =>
+                  cat.ingredients.filter(ing => isMatchingConcern(ing.concerns)).map(ing => ing.inci)
+                )
+              );
+
+              const inciListItems = [
+                'Aqua (Water)', 'Ascorbic Acid (Vitamin C)', 'Propanediol', 'Glycerin',
+                'Ferulic Acid', 'Tocopherol (Vitamin E)', 'Hyaluronic Acid', 'Panthenol',
+                'Niacinamide', 'Sodium Hyaluronate', 'Aloe Barbadensis Leaf Juice',
+                'Chamomilla Recutita (Matricaria) Flower Extract', 'Camellia Sinensis Leaf Extract',
+                'Citrus Aurantium Dulcis (Orange) Peel Oil', 'Xanthan Gum', 'Sodium Benzoate',
+                'Potassium Sorbate', 'Citric Acid',
+              ];
+
+              const toggleCategory = (name: string) => {
+                setExpandedIngredientCats(prev => {
+                  const next = new Set(prev);
+                  if (next.has(name)) next.delete(name);
+                  else next.add(name);
+                  return next;
+                });
+              };
+
               return (
-                <div className="bg-white rounded-2xl p-8">
-                  <h2 className="text-2xl font-bold text-deep mb-2">Full Ingredient List</h2>
-                  <p className="text-sm text-warm-gray mb-6">
-                    {ingredientCategories.reduce((acc, cat) => acc + cat.ingredients.length, 0)} ingredients categorized by function.{userConcerns.length > 0 ? ' Highlighted ingredients address your skin concerns.' : ''}
+                <div className="bg-white rounded-2xl p-6 sm:p-8">
+                  <h2 className="text-2xl font-bold text-deep mb-1">Full Ingredient List</h2>
+                  <p className="text-sm text-warm-gray mb-5">
+                    {ingredientCategories.reduce((acc, cat) => acc + cat.ingredients.length, 0)} ingredients categorized by function.{userConcerns.length > 0 ? ' Highlighted ingredients match your skin profile.' : ''}
                   </p>
 
-                  {/* INCI List */}
-                  <div className="mb-8 pb-6 border-b border-blush/30">
-                    <h3 className="text-sm font-semibold text-deep mb-2">INCI List</h3>
-                    <p className="text-xs text-warm-gray leading-relaxed">
-                      Aqua (Water), Ascorbic Acid (Vitamin C), Propanediol, Glycerin, Ferulic Acid, Tocopherol (Vitamin E), Hyaluronic Acid, Panthenol, Niacinamide, Sodium Hyaluronate, Aloe Barbadensis Leaf Juice, Chamomilla Recutita (Matricaria) Flower Extract, Camellia Sinensis Leaf Extract, Citrus Aurantium Dulcis (Orange) Peel Oil, Xanthan Gum, Sodium Benzoate, Potassium Sorbate, Citric Acid
-                    </p>
+                  {/* Collapsible INCI List */}
+                  <div className="mb-5">
+                    <button
+                      onClick={() => setShowInciList(prev => !prev)}
+                      className="flex items-center gap-2 text-xs font-medium text-warm-gray hover:text-primary transition-colors cursor-pointer"
+                    >
+                      <i className={`ri-arrow-right-s-line transition-transform duration-200 ${showInciList ? 'rotate-90' : ''}`}></i>
+                      View raw INCI list
+                    </button>
+                    <div className={`overflow-hidden transition-all duration-200 ${showInciList ? 'max-h-40 mt-2' : 'max-h-0'}`}>
+                      <p className="text-xs leading-relaxed p-3 bg-cream/50 rounded-lg border border-blush/30">
+                        {inciListItems.map((name, i) => (
+                          <span key={i}>
+                            <IngredientLink
+                              name={name}
+                              className={matchingInciNames.has(name) ? 'text-primary-700 font-medium' : 'text-warm-gray'}
+                            />
+                            {i < inciListItems.length - 1 && <span className="text-warm-gray">, </span>}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Categorized Breakdown */}
-                  <h3 className="text-sm font-semibold text-deep mb-4">Ingredient Breakdown</h3>
-                  <div className="space-y-8">
-                    {ingredientCategories.map((cat) => (
-                      <div key={cat.category}>
-                        <div className="flex items-center gap-2 mb-3">
-                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                            <i className={`${cat.icon} text-primary`}></i>
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-deep text-sm">{cat.category}</h3>
-                            <p className="text-xs text-warm-gray">{cat.description}</p>
-                          </div>
-                        </div>
+                  {/* Accordion Categories */}
+                  <div className="divide-y divide-blush/30">
+                    {ingredientCategories.map((cat) => {
+                      const isExpanded = expandedIngredientCats.has(cat.category);
+                      const matchCount = cat.ingredients.filter(ing => isMatchingConcern(ing.concerns)).length;
+                      return (
+                        <div key={cat.category}>
+                          <button
+                            onClick={() => toggleCategory(cat.category)}
+                            className="w-full flex items-center gap-3 py-3.5 cursor-pointer group"
+                          >
+                            <span className="font-semibold text-deep text-sm flex-1 text-left">{cat.category}</span>
+                            <span className="text-[11px] text-warm-gray mr-1">{cat.ingredients.length}</span>
+                            {matchCount > 0 && (
+                              <span className="px-1.5 py-0.5 text-[10px] font-medium bg-primary/10 text-primary rounded-full mr-1">
+                                {matchCount} match{matchCount > 1 ? 'es' : ''}
+                              </span>
+                            )}
+                            <i className={`ri-arrow-down-s-line text-warm-gray group-hover:text-primary transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}></i>
+                          </button>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 ml-10">
-                          {cat.ingredients.map((ing) => {
-                            const isMatch = isMatchingConcern(ing.concerns);
-                            return (
-                              <div
-                                key={ing.inci}
-                                className={`rounded-xl p-3 border transition-colors ${
-                                  isMatch
-                                    ? 'bg-light/30 border-primary-300'
-                                    : 'bg-cream/50 border-blush/30'
-                                }`}
-                              >
-                                <div className="flex items-start justify-between gap-2">
-                                  <p className={`text-sm font-medium ${isMatch ? 'text-primary-700' : 'text-deep'}`}>
-                                    {isMatch && <i className="ri-check-line mr-1"></i>}
-                                    {ing.inci}
-                                  </p>
-                                </div>
-                                <p className="text-xs text-warm-gray mt-1 leading-relaxed">{ing.benefit}</p>
-                              </div>
-                            );
-                          })}
+                          <div className={`overflow-hidden transition-all duration-200 origin-top ${isExpanded ? 'max-h-[600px] pb-3' : 'max-h-0'}`}>
+                            <div className="space-y-1 w-fit">
+                              {cat.ingredients.map((ing) => {
+                                const isMatch = isMatchingConcern(ing.concerns);
+                                return (
+                                  <div
+                                    key={ing.inci}
+                                    className={`flex items-start gap-3 py-2 px-3 rounded-lg transition-colors ${
+                                      isMatch ? 'bg-light/30' : ''
+                                    }`}
+                                  >
+                                    <div className="flex-1 min-w-0">
+                                      <p className={`text-sm font-medium leading-tight ${isMatch ? 'text-primary-700' : 'text-deep'}`}>
+                                        {isMatch && <i className="ri-check-line mr-1 text-xs"></i>}
+                                        <IngredientLink name={ing.inci} className={isMatch ? 'text-primary-700' : 'text-deep'} />
+                                      </p>
+                                      <p className="text-xs text-warm-gray mt-0.5 leading-relaxed">{ing.benefit}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
               );
@@ -799,7 +911,7 @@ export default function ProductDetailPage() {
             )}
             {activeTab === 'reviews' && (
               <div className="bg-white rounded-2xl p-8">
-                <ProductReviews productId={product.id} />
+                <ProductReviews productId={product.id} product={productFromMock || undefined} env={env} season={env?.season} />
               </div>
             )}
           </div>
@@ -817,6 +929,34 @@ export default function ProductDetailPage() {
         initialProductId={product.id}
         userConcerns={userConcerns}
       />
+
+      {/* Floating AI Product Guide */}
+      {productFromMock && env && (
+        <ProductGuideChat
+          chatContext={{
+            product: productFromMock,
+            env,
+            userSkinType: userSkinType || undefined,
+            userConcerns: userConcerns.length > 0 ? userConcerns : undefined,
+            userSensitivity: getEffectiveSensitivity() || undefined,
+            reviews: reviewerEvidence?.scoredReviews || [],
+          }}
+          onNavigate={(target) => {
+            // Handle tab-based navigation targets
+            if (target.sectionId === 'section-reviews-tab') {
+              scrollToReviews();
+            } else if (target.sectionId === 'section-ingredients-tab') {
+              scrollToIngredients();
+            } else {
+              // Generic section scroll
+              const el = document.getElementById(target.sectionId);
+              if (el) {
+                el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }
+          }}
+        />
+      )}
 
     </div>
   );

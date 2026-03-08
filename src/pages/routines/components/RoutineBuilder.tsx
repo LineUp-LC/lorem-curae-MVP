@@ -26,6 +26,8 @@ import ProductPickerModal from './ProductPickerModal';
 import CustomStepModal from './CustomStepModal';
 import AIInsightBlock from '../../../components/feature/AIInsightBlock';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 interface Product {
   id: string;
@@ -273,6 +275,9 @@ interface RoutineBuilderProps {
 // FIX #4a: Added onSave to destructured props
 export default function RoutineBuilder({ steps: initialSteps, onBrowseClick, onSave }: RoutineBuilderProps) {
   const navigate = useNavigate();
+  const { env } = useEnvironmentContext();
+  const { user: authUser } = useAuth();
+  const isGuest = !authUser;
 
   // Initialize time filter - default to morning
   const [timeFilter, setTimeFilter] = useLocalStorageState<'morning' | 'evening'>(
@@ -533,6 +538,7 @@ export default function RoutineBuilder({ steps: initialSteps, onBrowseClick, onS
         })),
         timeOfDay: timeFilter,
       },
+      environment: env,
       evidence: {
         ingredientConflicts: liveConflicts.map(c => ({
           ingredients: c.pair,
@@ -541,7 +547,7 @@ export default function RoutineBuilder({ steps: initialSteps, onBrowseClick, onS
         })),
       },
     });
-  }, [routineSteps, timeFilter, liveConflicts]);
+  }, [routineSteps, timeFilter, liveConflicts, env?.season, env?.uvBand]);
 
   // Feature 2: Routine Completion Tracker with daily reset
   const [completedSteps, setCompletedSteps] = useLocalStorageState<{
@@ -1058,6 +1064,16 @@ export default function RoutineBuilder({ steps: initialSteps, onBrowseClick, onS
       {routineAIContext && (
         <div className="mb-6">
           <AIInsightBlock context={routineAIContext} compact />
+          {isGuest && (
+            <p className="text-[10px] text-warm-gray/50 mt-1.5 flex items-center gap-1">
+              <i className="ri-information-line text-[10px]" />
+              Based on general guidance.
+              <button onClick={() => navigate('/login')} className="text-primary hover:text-deep transition-colors underline underline-offset-2 cursor-pointer">
+                Sign in
+              </button>
+              {' '}for personalized routine insights.
+            </p>
+          )}
         </div>
       )}
 

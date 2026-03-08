@@ -1,3 +1,5 @@
+import { isAllMetadata } from './productMetadata';
+
 // =============================================================================
 // CONCERN MAPPING
 // =============================================================================
@@ -82,6 +84,9 @@ export function matchesConcern(
   userConcerns: string[]
 ): boolean {
   const normalizedProductConcern = productConcern.toLowerCase().trim();
+
+  // "all" matches when user has at least one concern
+  if (isAllMetadata(normalizedProductConcern)) return userConcerns.length > 0;
 
   return userConcerns.some((userConcern) => {
     const variations = getProductConcernVariations(userConcern);

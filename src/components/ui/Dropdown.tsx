@@ -14,6 +14,7 @@ interface DropdownProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  compact?: boolean;
 }
 
 /**
@@ -35,6 +36,7 @@ export default function Dropdown({
   placeholder = 'Select...',
   className = '',
   disabled = false,
+  compact = false,
 }: DropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -187,9 +189,9 @@ export default function Dropdown({
         aria-labelledby={id}
         className={`
           w-full flex items-center justify-between gap-2
-          px-4 py-2.5
+          ${compact ? 'px-3 py-1.5' : 'px-4 py-2.5'}
           bg-white border border-blush rounded-xl
-          text-sm font-medium text-deep
+          ${compact ? 'text-xs' : 'text-sm'} font-medium text-deep
           transition-all duration-200
           hover:border-primary/50 hover:bg-cream/30
           focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary
@@ -202,7 +204,7 @@ export default function Dropdown({
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         <i
-          className={`ri-arrow-down-s-line text-lg text-warm-gray transition-transform duration-200 ${
+          className={`ri-arrow-down-s-line ${compact ? 'text-sm' : 'text-lg'} text-warm-gray transition-transform duration-200 ${
             isOpen ? 'rotate-180' : ''
           }`}
         ></i>
@@ -244,8 +246,8 @@ export default function Dropdown({
                 onClick={() => handleSelect(option.value)}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={`
-                  px-4 py-2.5 cursor-pointer
-                  text-sm font-medium
+                  ${compact ? 'px-3 py-1.5' : 'px-4 py-2.5'} cursor-pointer
+                  ${compact ? 'text-xs' : 'text-sm'} font-medium
                   transition-colors duration-100
                   flex items-center justify-between
                   ${isHighlighted ? 'bg-cream' : 'bg-white'}

@@ -287,6 +287,11 @@ export function buildAIContext(
         user.concerns,
         page.product.concerns ?? [],
       );
+    } else if (page.mode === 'ingredient_detail' && user.concerns.length > 0) {
+      evidence.concernAlignment = computeConcernAlignment(
+        user.concerns,
+        page.ingredient.concerns ?? [],
+      );
     } else if (page.mode === 'comparison' && user.concerns.length > 0) {
       // For comparison, align against combined concerns of all products
       const allConcerns = page.products.flatMap(p => p.concerns ?? []);

@@ -6,6 +6,7 @@ import {
   getEffectiveConcerns,
 } from '../../../lib/utils/sessionState';
 import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
+import { useAuth } from '../../../lib/auth/AuthContext';
 
 interface ProductOverviewProps {
   productId: number;
@@ -19,6 +20,7 @@ const ProductOverview = ({
   isInComparison,
 }: ProductOverviewProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
+  const { user } = useAuth();
   const { env } = useEnvironmentContext();
 
   const product = productData.find((p) => p.id === productId);
@@ -151,13 +153,24 @@ const ProductOverview = ({
                 No location set
               </span>
               <span className="text-xs text-warm-gray italic">Add your location for personalized environmental insights</span>
-              <Link
-                to="/settings?tab=location"
-                className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
-              >
-                <i className="ri-settings-3-line"></i>
-                Update in Settings
-              </Link>
+              {user ? (
+                <Link
+                  to="/settings?tab=location"
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
+                >
+                  <i className="ri-settings-3-line"></i>
+                  Update in Settings
+                </Link>
+              ) : (
+                <Link
+                  to="/auth/signup"
+                  onClick={() => localStorage.setItem('postAuthRedirect', '/settings?tab=location')}
+                  className="inline-flex items-center gap-1 text-xs text-primary hover:text-dark font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 rounded"
+                >
+                  <i className="ri-user-add-line"></i>
+                  Sign Up
+                </Link>
+              )}
             </div>
           )}
         </div>
