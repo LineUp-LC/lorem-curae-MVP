@@ -26,22 +26,23 @@ const corsHeaders = {
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
 
-// Mode-specific token budgets (compact responses)
+// Mode-specific token budgets — tuned for 1-4 sentence compact responses.
+// Lower limits = faster generation (less time waiting for output tokens).
 const MODE_MAX_TOKENS: Record<string, number> = {
-  product_detail: 1024,
-  ingredient_detail: 1024,
-  routine_builder: 1024,
-  search: 768,
-  comparison: 1536,
-  marketplace: 1024,
-  nutrition: 1024,
-  survey_results: 1024,
+  product_detail: 512,
+  ingredient_detail: 512,
+  routine_builder: 512,
+  search: 384,
+  comparison: 768,
+  marketplace: 512,
+  nutrition: 512,
+  survey_results: 768,
   chat: 4096, // Fallback — chat mode should use ai-chat function
-  explain_product: 1024,
-  find_alternatives: 1024,
-  review_summary: 1024,
-  natural_discovery: 768,
-  rewrite_explanation: 1024,
+  explain_product: 512,
+  find_alternatives: 512,
+  review_summary: 512,
+  natural_discovery: 384,
+  rewrite_explanation: 512,
 };
 
 // Supported non-chat modes

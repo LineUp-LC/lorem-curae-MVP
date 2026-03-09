@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import { needsPeriodicVerification, initializeVerification } from '../../../lib/auth/periodicVerification';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -9,13 +10,25 @@ const AuthCallbackPage = () => {
   const [errorMessage, setErrorMessage] = useState<string>('');
 
   useEffect(() => {
-    const getPostAuthRedirect = () => {
+    const getPostAuthRedirect = async () => {
       const stored = localStorage.getItem('postAuthRedirect');
       if (stored) {
         localStorage.removeItem('postAuthRedirect');
-        return stored;
       }
-      return '/account';
+      const defaultRedirect = stored || '/account';
+
+      // Check periodic verification for returning users
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const userId = currentSession?.user?.id;
+      const userEmail = currentSession?.user?.email;
+      if (userId) {
+        initializeVerification(userId);
+        if (needsPeriodicVerification(userId) && userEmail) {
+          return `/auth/verify-email?type=periodic&email=${encodeURIComponent(userEmail)}`;
+        }
+      }
+
+      return defaultRedirect;
     };
 
     const handleCallback = async () => {
@@ -31,7 +44,8 @@ const AuthCallbackPage = () => {
             return;
           }
           setStatus('success');
-          setTimeout(() => navigate(getPostAuthRedirect()), 2000);
+          const redirect = await getPostAuthRedirect();
+          setTimeout(() => navigate(redirect), 2000);
           return;
         }
 
@@ -74,8 +88,9 @@ const AuthCallbackPage = () => {
           setStatus('success');
 
           // Redirect after a short delay
+          const redirect2 = await getPostAuthRedirect();
           setTimeout(() => {
-            navigate(getPostAuthRedirect());
+            navigate(redirect2);
           }, 2000);
         } else {
           // No tokens - check if there's an existing session
@@ -83,8 +98,9 @@ const AuthCallbackPage = () => {
 
           if (session) {
             setStatus('success');
+            const redirect3 = await getPostAuthRedirect();
             setTimeout(() => {
-              navigate(getPostAuthRedirect());
+              navigate(redirect3);
             }, 2000);
           } else {
             setStatus('error');

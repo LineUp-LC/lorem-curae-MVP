@@ -48,6 +48,12 @@ const AI_INSIGHT_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/
 /** Cache TTL: 24 hours in milliseconds */
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
+/**
+ * In-flight request deduplication map.
+ * Prevents duplicate parallel API calls for the same context key.
+ */
+const pendingRequests = new Map<string, Promise<AIInsightResult>>();
+
 // ---------------------------------------------------------------------------
 // Cache layer (localStorage)
 // ---------------------------------------------------------------------------
@@ -304,7 +310,30 @@ export async function requestAIInsight(
     }
   }
 
-  // 2. Check auth — guest users get fallback only (no API call)
+  // 2. Deduplicate in-flight requests for the same context
+  const inFlight = pendingRequests.get(cacheKey);
+  if (inFlight) return inFlight;
+
+  const promise = executeAIRequest(ctx, options, cacheKey);
+  pendingRequests.set(cacheKey, promise);
+
+  try {
+    return await promise;
+  } finally {
+    pendingRequests.delete(cacheKey);
+  }
+}
+
+/**
+ * Internal: execute the actual AI request (auth check → prompt → API call).
+ * Separated from requestAIInsight to allow deduplication wrapping.
+ */
+async function executeAIRequest(
+  ctx: AISurfaceContext,
+  options: { skipCache?: boolean; question?: string } | undefined,
+  cacheKey: string,
+): Promise<AIInsightResult> {
+  // 1. Check auth — guest users get fallback only (no API call)
   const { data: { session } } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
@@ -325,15 +354,15 @@ export async function requestAIInsight(
     return { success: false, error: 'Sign in for personalised AI insights' };
   }
 
-  // 3. Build system prompt
+  // 2. Build system prompt
   const systemPrompt = buildSystemPrompt(ctx);
 
-  // 4. Build user message
+  // 3. Build user message
   const userMessage =
     options?.question ||
     `Analyze this ${ctx.mode.replace(/_/g, ' ')} context and provide a concise insight.`;
 
-  // 5. Call Edge Function
+  // 4. Call Edge Function
   try {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -354,7 +383,6 @@ export async function requestAIInsight(
     const data = await response.json();
 
     if (!response.ok || !data.success) {
-      // API error — fall back to evidence
       const fallback = buildFallbackInsight(ctx);
       return {
         success: false,
@@ -363,11 +391,10 @@ export async function requestAIInsight(
       };
     }
 
-    // 6. Validate response
+    // 5. Validate response
     const issues = validateAIResponse(data.insight, ctx.mode);
     if (issues.length > 0) {
       console.warn('[SurfaceClient] Response validation issues:', issues);
-      // Use fallback instead of invalid response
       const fallback = buildFallbackInsight(ctx);
       if (fallback) {
         return {
@@ -380,7 +407,7 @@ export async function requestAIInsight(
       }
     }
 
-    // 7. Cache the response
+    // 6. Cache the response
     setCachedInsight(cacheKey, data.insight, ctx.mode);
 
     return {

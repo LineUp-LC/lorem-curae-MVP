@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import Toast from '../../../components/feature/Toast';
@@ -356,11 +356,14 @@ function VersionHistory({ productId }: { productId: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let cancelled = false;
     setLoading(true);
     fetchVersionHistory(productId).then(v => {
+      if (cancelled) return;
       setVersions(v);
       setLoading(false);
     });
+    return () => { cancelled = true; };
   }, [productId]);
 
   function relativeTime(dateStr: string): string {
@@ -1000,18 +1003,21 @@ function ProductListView() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
-  const loadProducts = useCallback(async () => {
+  useEffect(() => {
+    let cancelled = false;
     setLoading(true);
-    const data = await fetchAllProducts({
+    fetchAllProducts({
       status: statusFilter,
       category: categoryFilter === 'all' ? undefined : categoryFilter,
       search: searchDebounce || undefined,
+    }).then(data => {
+      if (!cancelled) {
+        setProducts(data);
+        setLoading(false);
+      }
     });
-    setProducts(data);
-    setLoading(false);
+    return () => { cancelled = true; };
   }, [statusFilter, categoryFilter, searchDebounce]);
-
-  useEffect(() => { loadProducts(); }, [loadProducts]);
 
   return (
     <div>
@@ -1145,11 +1151,13 @@ function ProductEditView({
 
   useEffect(() => {
     if (!productId) return;
+    let cancelled = false;
     setLoading(true);
     Promise.all([
       fetchProductForEdit(productId),
       fetchIngredientLinks(productId),
     ]).then(([prod, slugs]) => {
+      if (cancelled) return;
       if (prod) {
         setProduct(prod);
         setFormData(rowToFormData(prod));
@@ -1157,6 +1165,7 @@ function ProductEditView({
       setLinkedSlugs(slugs);
       setLoading(false);
     });
+    return () => { cancelled = true; };
   }, [productId]);
 
   const handleSave = async (data: ProductFormData, reason?: string) => {

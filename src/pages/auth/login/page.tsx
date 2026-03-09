@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../../../lib/supabase';
+import { needsPeriodicVerification, initializeVerification } from '../../../lib/auth/periodicVerification';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -56,7 +57,12 @@ const LoginPage = () => {
       }
 
       if (data.user) {
-        navigate('/account');
+        initializeVerification(data.user.id);
+        if (needsPeriodicVerification(data.user.id)) {
+          navigate(`/auth/verify-email?type=periodic&email=${encodeURIComponent(formData.email)}`);
+        } else {
+          navigate('/account');
+        }
       }
     } catch (err) {
       setError('An unexpected error occurred. Please try again.');

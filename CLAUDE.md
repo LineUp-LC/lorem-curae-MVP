@@ -506,6 +506,10 @@ Components must scale across all surfaces defined in Section 12.3.
 26. AR Surface Governance (25)
 27. Environment & Location Personalization (26)
 28. Personalized Content Generation Standard (18.6 + `/ai-governance/CLAUDE_PRODUCT.md`)
+29. AI Keyword Highlighting Governance (29)
+30. Auth Flow Governance (30)
+31. Discovery Filter Governance (31)
+32. Admin Page Stability (32)
 
 These layers remain active for all design, motion, UX, and component tasks unless explicitly disabled.
 
@@ -1327,7 +1331,7 @@ Personalization must appear consistently on these surfaces:
 | Surface | What is Personalized |
 |---------|---------------------|
 | Product detail | Key ingredients, skin type suitability, concerns, preferences |
-| Discover / catalog | Product cards (matching badge), sort by relevance |
+| Discover / catalog | Product cards (matching badge), sort by relevance, ingredient filter relevance sorting, AI keyword highlighting |
 | Ingredient library | Ingredient highlights for user concerns |
 | Routine builder | Conflict detection based on user skin type and concerns |
 | Product reviews | Reviewer similarity scoring, match breakdown |
@@ -1863,6 +1867,7 @@ Canonical paths for all AI integration modules:
 | AIInsightBlock | `src/components/feature/AIInsightBlock.tsx` | Shared AI insight rendering component |
 | ai‑insight | `supabase/functions/ai-insight/index.ts` | Edge Function (Claude Sonnet 4.5) |
 | index barrel | `src/lib/ai/index.ts` | Public API exports |
+| highlightKeywords | `src/lib/utils/highlightKeywords.tsx` | Shared keyword highlighting for all AI text surfaces (Section 29) |
 
 When adding new AI features, register them here. When modifying AI modules, verify all
 consumers are updated (Section 19 propagation rules apply).
@@ -1886,6 +1891,235 @@ module (not a dynamic loader), the two files can drift.
    `MODE_INSTRUCTIONS` entries in `systemPrompt.ts`
 5. Claude must never modify `GOVERNANCE_PROMPT` without verifying alignment with
    `CLAUDE_PRODUCT.md`
+
+---
+
+# 29. AI KEYWORD HIGHLIGHTING GOVERNANCE
+
+**Applies to:** Every AI‑generated text surface that uses `highlightRelevantKeywords()` — without exception
+
+This section governs how AI insight text is visually highlighted to surface personally relevant
+keywords (ingredients, concerns, skin types, sentiment) across all AI surfaces.
+
+---
+
+## 29.1 Canonical Utility
+
+All keyword highlighting must flow through the shared utility:
+
+**`src/lib/utils/highlightKeywords.tsx`** → `highlightRelevantKeywords(text, profile)`
+
+No component may implement inline keyword matching, regex highlighting, or custom markup
+for AI text. All highlighting logic is centralized in this single utility.
+
+## 29.2 HighlightProfile Interface
+
+Every AI surface must pass a complete `HighlightProfile` to the highlighting utility:
+
+| Field | Source | Required |
+|-------|--------|----------|
+| `skinType` | `getEffectiveSkinType()` | Yes (nullable) |
+| `concerns` | `getEffectiveConcerns()` | Yes (defaults `[]`) |
+| `sensitivity` | `getEffectiveSensitivity()` | Yes (nullable) |
+| `ingredients` | Product‑specific ingredients not in synonym map | Optional |
+| `excludeNames` | `[product.name, product.brand]` or equivalent | Yes — prevents product names from false‑matching |
+| `highlightSentiment` | `true` for review summaries | Optional (default `false`) |
+
+All surfaces must pass `excludeNames` to prevent product/brand names from triggering false
+keyword highlights (e.g., "CeraVe" matching "ceramide" patterns).
+
+## 29.3 Color Tiers
+
+Three distinct highlight colors are used:
+
+| Tier | CSS Classes | When Applied |
+|------|------------|--------------|
+| Default (ingredient/concern/skin) | `bg-primary/15 text-primary` | Matching ingredients, concerns, skin type keywords |
+| Positive sentiment | `bg-sage/15 text-sage` | Words like "positively," "effective," "well‑reviewed" |
+| Negative sentiment | `bg-yellow-500/15 text-yellow-700` | Words like "negatively," "ineffective," "poorly rated" |
+
+Color assignment is handled by `getHighlightClass()` inside the utility. No component may
+override these colors or introduce additional highlight tiers without updating this section.
+
+## 29.4 Synonym Maps
+
+The utility maintains four synonym maps:
+
+- `INGREDIENT_SYNONYMS` — canonical ingredient names → common aliases (e.g., "hyaluronic acid" → ["ha", "sodium hyaluronate"])
+- `CONCERN_SYNONYMS` — skin concerns → related terms
+- `CATEGORY_SYNONYMS` — product categories → related terms
+- `POSITIVE_SENTIMENT` / `NEGATIVE_SENTIMENT` — sentiment word sets
+
+All known ingredient synonyms are always included in the keyword set regardless of whether
+the user has a profile. This ensures ingredients are highlighted on every surface.
+
+## 29.5 Word Boundary Rule
+
+All keywords in the regex pattern must be wrapped in `\b...\b` word boundaries to prevent
+partial‑word matches (e.g., "ha" must not match inside "has," "that," or "shampoo").
+
+## 29.6 AI Surface Highlighting Registry
+
+| Surface | Component | `excludeNames` | `highlightSentiment` |
+|---------|-----------|----------------|---------------------|
+| Product AI Insight | `AIInsightBlock` | `[product.name, product.brand]` | `false` |
+| Discovery AI Bar | `AIDiscoveryBar` | All visible product names + brands | `false` |
+| Review AI Summary | `AIReviewSummary` | `[product.name, product.brand]` | `true` |
+| AI Explain Panel | `AIExplainPanel` | `[product.name, product.brand]` | `false` |
+| Comparison Modal | `ComparisonPickerModal` | All compared product names + brands | `false` |
+
+When adding a new AI surface, it must be registered here and must pass a complete
+`HighlightProfile`.
+
+## 29.7 Modification Constraints
+
+Claude must never:
+- Implement keyword highlighting inline in a component
+- Add new synonym entries without verifying no partial‑word collisions
+- Change highlight colors without updating this section
+- Remove word boundary enforcement from the regex pattern
+- Add highlight tiers beyond the three defined tiers without explicit approval
+
+---
+
+# 30. AUTH FLOW GOVERNANCE
+
+**Applies to:** All authentication flows — signup, login, password reset, email verification,
+OAuth — without exception
+
+---
+
+## 30.1 Email Verification Flow
+
+After email/password signup, the user is redirected to a 6‑digit OTP verification page:
+
+| Step | Route | Behavior |
+|------|-------|----------|
+| 1. Signup | `/auth/signup` | User submits form → Supabase `signUp()` with hCaptcha token |
+| 2. Redirect | — | On success with no session → redirect to `/auth/verify-email?email=...` |
+| 3. OTP Entry | `/auth/verify-email` | 6‑digit code input with auto‑advance, paste support |
+| 4. Verify | — | `supabase.auth.verifyOtp({ email, token, type: 'signup' })` |
+| 5. Success | `/account` | Redirect after verified |
+
+### OTP Page Rules
+
+- Code inputs: 6 individual digit fields, numeric‑only, auto‑advance on entry
+- Paste support: intercept paste event, distribute digits across fields
+- Auto‑submit: when all 6 digits are entered, verify immediately
+- Backspace: focus previous input when current is empty
+- Resend: 60‑second cooldown via `supabase.auth.resend({ type: 'signup', email })`
+- Expiration: 5‑minute warning displayed
+- Error states: invalid code (clear + refocus first input), expired code (prompt resend)
+- No email param: redirect to `/auth/signup`
+
+### Auth Modification Constraints
+
+Claude must never:
+- Modify OTP verification logic without explicit approval
+- Change the signup → verify‑email redirect flow
+- Remove hCaptcha from the signup form
+- Bypass email verification
+- Change the OTP type from `'signup'` without understanding downstream effects
+
+---
+
+## 30.2 Canonical Auth Routes
+
+| Route | Page | Layout |
+|-------|------|--------|
+| `/auth/login` | LoginPage | No layout |
+| `/auth/signup` | SignupPage | No layout |
+| `/auth/verify-email` | VerifyEmailPage | No layout |
+| `/auth/reset-password` | ResetPasswordPage | No layout |
+| `/auth/callback` | AuthCallbackPage | No layout |
+| `/forgot-password` | ForgotPasswordPage | No layout |
+
+All auth pages are no‑layout routes (no Navbar/Footer). All auth pages must follow the same
+visual pattern: centered card, gradient background, Lorem Curae wordmark, brand colors.
+
+---
+
+# 31. DISCOVERY FILTER GOVERNANCE
+
+**Applies to:** Product catalog filters on the Discover page — without exception
+
+---
+
+## 31.1 Ingredient Filter UX
+
+The ingredient filter uses a hybrid approach:
+
+1. **All ingredients are shown** — never curate or hide ingredients
+2. **Profile‑relevant ingredients sort first** — determined by `matchesIngredient(label, userConcerns)` from `src/lib/utils/matching.ts`
+3. **Three visual tiers:**
+   - Active (selected): primary background + white text
+   - Relevant (profile match, not selected): light background + checkmark icon
+   - Default (no match, not selected): white background
+
+### Rules
+
+- Relevance sorting must use `matchesIngredient()` from shared utilities — never inline
+- Guest users (no concerns) see all ingredients in default order (by product count)
+- The `sortedIngredientOptions` computation must be memoized via `useMemo`
+- Adding new ingredient→concern mappings must be done in `matching.ts`, not in the filter UI
+
+## 31.2 Guest‑Aware Sort Behavior
+
+- **Profiled users** (skin type or concerns set): default sort is `'relevance'` (Best Match)
+- **Guest users** (no profile data): default sort is `'rating'` (Highest Rated)
+- The "Best Match" sort option is hidden from guests entirely
+- The reset button compares against the profile‑aware default: `hasProfile ? 'relevance' : 'rating'`
+- If a profiled user clears their profile mid‑session, the sort auto‑falls back to `'rating'`
+
+## 31.3 Comparison State Sync
+
+The `ComparisonPickerModal` must sync its internal selection state back to the parent
+`DiscoverPage` via the `onSelectionChange` callback:
+
+- `handleToggleProduct` → calls `onSelectionChange(next)`
+- `handleRemoveProduct` → calls `onSelectionChange(next)` using computed `next` array length
+- `handleClearSelection` → calls `onSelectionChange([])`
+
+This ensures the parent page always knows the current comparison selection for badge counts,
+button states, and other dependent UI.
+
+---
+
+# 32. ADMIN PAGE STABILITY
+
+**Applies to:** All admin pages — without exception
+
+---
+
+## 32.1 Data Fetching Pattern
+
+Admin pages that fetch data must use the cancelled‑flag pattern to prevent stale state updates:
+
+```ts
+useEffect(() => {
+  let cancelled = false;
+  setLoading(true);
+  fetchData(params).then(data => {
+    if (!cancelled) {
+      setData(data);
+      setLoading(false);
+    }
+  });
+  return () => { cancelled = true; };
+}, [dependencies]);
+```
+
+This prevents:
+- setState on unmounted components when navigating away
+- Stale data from previous filter combinations appearing after navigation
+- Race conditions between concurrent fetch calls
+
+### Rules
+
+- Never use `useCallback` + separate `useEffect` for data fetching in admin pages
+- Always include a cleanup function that sets `cancelled = true`
+- Always check `!cancelled` before calling setState
+- Loading state must be set synchronously before the async call
 
 ---
 

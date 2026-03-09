@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { productCatalog } from '../../../lib/data/products';
-import { productMatchesUserConcerns } from '../../../lib/utils/matching';
+import { productMatchesUserConcerns, matchesIngredient } from '../../../lib/utils/matching';
 import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
 import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
 import type { Product } from '../../../types/product';
@@ -159,6 +159,17 @@ export default function ProductCatalog({
     () => buildIngredientOptions(products, ingredientLinks),
     [products, ingredientLinks],
   );
+
+  // Sort ingredient options: profile-relevant first (with flag), then rest by product count
+  const sortedIngredientOptions = useMemo(() => {
+    if (safeUserConcerns.length === 0) return ingredientOptions.map(o => ({ ...o, isRelevant: false }));
+    return ingredientOptions
+      .map(o => ({ ...o, isRelevant: matchesIngredient(o.label, safeUserConcerns) }))
+      .sort((a, b) => {
+        if (a.isRelevant !== b.isRelevant) return a.isRelevant ? -1 : 1;
+        return b.productCount - a.productCount;
+      });
+  }, [ingredientOptions, safeUserConcerns]);
 
   // Determine the active skin type filter:
   // If user completed survey, auto-filter by their profile skin type;
@@ -459,7 +470,7 @@ export default function ProductCatalog({
             }
           `}>
             <div className="flex flex-wrap gap-1.5">
-              {ingredientOptions.map((option) => {
+              {sortedIngredientOptions.map((option) => {
                 const isActive = selectedIngredients.includes(option.slug);
                 return (
                   <button
@@ -475,10 +486,13 @@ export default function ProductCatalog({
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-full font-medium text-xs transition-all whitespace-nowrap cursor-pointer ${
                       isActive
                         ? 'bg-primary text-white shadow-sm'
-                        : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
+                        : option.isRelevant
+                          ? 'bg-light/30 text-primary-700 border border-primary-300 hover:border-primary'
+                          : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
                     }`}
                   >
                     {isActive && <i className="ri-check-line text-xs"></i>}
+                    {!isActive && option.isRelevant && <i className="ri-check-line text-xs text-primary/60"></i>}
                     <span>{option.label}</span>
                     <span className={`text-xs ${isActive ? 'text-white/70' : 'text-warm-gray/50'}`}>({option.productCount})</span>
                   </button>

@@ -31,6 +31,7 @@ const LoginPage = lazy(() => import('../pages/auth/login/page'));
 const SignupPage = lazy(() => import('../pages/auth/signup/page'));
 const ForgotPasswordPage = lazy(() => import('../pages/auth/forgot-password/page'));
 const ResetPasswordPage = lazy(() => import('../pages/auth/reset-password/page'));
+const VerifyEmailPage = lazy(() => import('../pages/auth/verify-email/page'));
 const ProductDetailPage = lazy(() => import('../pages/product-detail/page'));
 
 const ServicesPage = lazy(() => import('../pages/services/page'));
@@ -83,6 +84,7 @@ const routes: RouteObject[] = [
   { path: '/signup', element: <SignupPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/auth/reset-password', element: <ResetPasswordPage /> },
+  { path: '/auth/verify-email', element: <VerifyEmailPage /> },
   { path: '/creator/dashboard', element: <CreatorDashboardPage /> },
   { path: '/creator/products', element: <CreatorProductsPage /> },
   { path: '/creator/patch-tests', element: <CreatorPatchTestsPage /> },

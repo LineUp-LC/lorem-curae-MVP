@@ -6,8 +6,9 @@
  * nothing when there is no insight to display.
  */
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
+import { generateContextCacheKey } from '../../lib/ai/surfaceContext';
 import type { AISurfaceContext, AIMode } from '../../lib/ai/surfaceContext';
 import type { AIInsightResult } from '../../lib/ai/surfaceClient';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
@@ -93,17 +94,24 @@ export default function AIInsightBlock({
   const [result, setResult] = useState<AIInsightResult | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Stable key derived from context — prevents re-fetch when object reference
+  // changes but content is semantically identical (parent re-render).
+  const contextKey = useMemo(() => generateContextCacheKey(context), [context]);
+  const contextRef = useRef(context);
+  contextRef.current = context;
+
   const fetchInsight = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await requestAIInsight(context, { skipCache, question });
+      const res = await requestAIInsight(contextRef.current, { skipCache, question });
       setResult(res);
     } catch {
       setResult({ success: false, error: 'Failed to load insight' });
     } finally {
       setLoading(false);
     }
-  }, [context, skipCache, question]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contextKey, skipCache, question]);
 
   useEffect(() => {
     fetchInsight();

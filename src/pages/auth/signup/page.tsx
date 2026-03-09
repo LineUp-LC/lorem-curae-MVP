@@ -1,9 +1,11 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import HCaptcha from '@hcaptcha/react-hcaptcha';
 import { supabase } from '../../../lib/supabase';
+import { setLastVerifiedAt } from '../../../lib/auth/periodicVerification';
 
 const SignUpPage = () => {
+  const navigate = useNavigate();
   const captchaRef = useRef<HCaptcha>(null);
   
   const [formData, setFormData] = useState({
@@ -72,8 +74,11 @@ const SignUpPage = () => {
       }
 
       if (data.user && !data.session) {
-        setSuccess(true);
+        // Redirect to OTP verification page
+        navigate(`/auth/verify-email?email=${encodeURIComponent(formData.email)}`);
+        return;
       } else if (data.user && data.session) {
+        setLastVerifiedAt(data.user.id);
         window.location.href = '/account';
       }
     } catch (err) {
