@@ -1,4 +1,4 @@
-import { productData } from '../../../mocks/products';
+import { getProductsByIds } from '../../../lib/data/products';
 import { useNavigate } from 'react-router-dom';
 import {
   getEffectiveSkinType,
@@ -20,7 +20,7 @@ const ProductComparison = ({
   
   // Safe fallback for productIds to prevent undefined errors
   const safeProductIds = productIds ?? [];
-  const products = productData.filter((p) => safeProductIds.includes(p.id));
+  const products = getProductsByIds(safeProductIds);
 
   if (products.length === 0) {
     return (

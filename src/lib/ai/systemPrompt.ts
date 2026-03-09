@@ -170,6 +170,51 @@ OUTPUT STRUCTURE:
 4. Your next step (1 sentence) — one clear, actionable thing to do
 Use plain language throughout. Reference their specific skin type and concerns.
 Keep total response under 6 sentences. Do not include "This is not medical advice."`,
+
+  explain_product: `TASK: Explain this product in plain language for this user.
+OUTPUT STRUCTURE:
+1. What this product does (1-2 sentences) — in plain terms, tied to the user's skin type
+2. Why it might work for you (1-2 sentences) — connect to their concerns and environment
+3. Key ingredients explained (1-2 sentences) — what each does, no jargon
+4. How to use it (1 sentence) — practical, time-of-day specific
+5. Things to know (if applicable) — sensitivity, layering order, or sun protection note
+Cite deterministic factors: skin type, concerns, ingredients, environment.
+Keep total response under 6 sentences. Do not include "This is not medical advice."`,
+
+  find_alternatives: `TASK: Explain why these alternatives are relevant to this user.
+OUTPUT STRUCTURE:
+1. What you're currently looking at (1 sentence) — summarize the source product
+2. Why these alternatives fit (2-3 sentences) — shared ingredients, shared concerns, complementary approaches
+3. Key differences (1-2 sentences) — what each alternative offers differently
+4. For your skin specifically (1 sentence) — which alternative might suit their profile best and why
+Cite shared ingredients and concern overlap. Reference skin type.
+Keep total response under 5 sentences.`,
+
+  review_summary: `TASK: Summarize reviews for this product in a safe, non-hallucinatory way.
+OUTPUT STRUCTURE:
+1. Overall sentiment (1 sentence) — what most reviewers experienced
+2. Common positives (1-2 sentences) — what worked, tied to specific skin types or concerns
+3. Common concerns (1 sentence) — what some reviewers noted, with context
+4. For someone like you (1 sentence) — what reviewers with a similar skin profile said
+SAFETY: Only reference data provided in the evidence. Never fabricate reviewer quotes or statistics.
+Use "reviewers noted" not "studies show." Use "people with similar skin" not exact counts.
+Keep total response under 5 sentences.`,
+
+  natural_discovery: `TASK: Help the user understand their search results in the context of their skin.
+OUTPUT STRUCTURE:
+1. What you're looking for (1 sentence) — restate their query in skin-profile context
+2. Why these results rank highly (2-3 sentences) — explain scoring factors in plain terms (skin type match, concern alignment, ingredient relevance, preferences)
+3. A suggestion (1 sentence) — what to prioritize or look at first
+Cite deterministic scoring factors. Reference skin type and concerns by name.
+Keep total response under 4 sentences.`,
+
+  rewrite_explanation: `TASK: Rewrite the provided text at the requested complexity level.
+LEVELS:
+- beginner: Use simple words, analogies, no ingredient names without explaining them. Target someone who has never used skincare products.
+- intermediate: Use common skincare terms, explain mechanisms briefly. Target someone with 6+ months experience.
+- advanced: Use precise terminology, reference ingredient mechanisms, concentrations, and interactions. Target someone with deep skincare knowledge.
+Preserve the factual content and safety guardrails. Never add claims not in the original.
+Keep the same approximate length as the original.`,
 };
 
 // ============================================================================
@@ -280,6 +325,74 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
       profile.concerns.length > 0 ? `- Concerns: ${profile.concerns.join(', ')}` : '',
       profile.sensitivity ? `- Sensitivity: ${profile.sensitivity}` : '',
     ].filter(Boolean).join('\n'));
+  } else if (page.mode === 'explain_product') {
+    const p = page.product;
+    sections.push([
+      'PRODUCT:',
+      `- Name: ${p.name}`,
+      `- Brand: ${p.brand}`,
+      `- Category: ${p.category}`,
+      `- Key ingredients: ${p.keyIngredients.join(', ')}`,
+      `- Targets skin types: ${p.skinTypes.join(', ')}`,
+      `- Targets concerns: ${(p.concerns ?? []).join(', ')}`,
+      p.texture ? `- Texture: ${p.texture}` : '',
+      `- Price: $${p.price}`,
+    ].filter(Boolean).join('\n'));
+    if (page.question) {
+      sections.push(`USER QUESTION: "${page.question}"`);
+    }
+  } else if (page.mode === 'find_alternatives') {
+    sections.push([
+      'SOURCE PRODUCT:',
+      `- Name: ${page.sourceProduct.name}`,
+      `- Brand: ${page.sourceProduct.brand}`,
+      `- Category: ${page.sourceProduct.category}`,
+      `- Key ingredients: ${page.sourceProduct.keyIngredients.join(', ')}`,
+      `- Concerns: ${(page.sourceProduct.concerns ?? []).join(', ')}`,
+    ].join('\n'));
+    page.alternatives.forEach((p, i) => {
+      sections.push([
+        `ALTERNATIVE ${i + 1}:`,
+        `- Name: ${p.name}`,
+        `- Brand: ${p.brand}`,
+        `- Category: ${p.category}`,
+        `- Key ingredients: ${p.keyIngredients.join(', ')}`,
+        `- Concerns: ${(p.concerns ?? []).join(', ')}`,
+      ].join('\n'));
+    });
+    if (page.overlapIngredients.length > 0) {
+      sections.push(`SHARED INGREDIENTS: ${page.overlapIngredients.join(', ')}`);
+    }
+  } else if (page.mode === 'review_summary') {
+    const p = page.product;
+    sections.push([
+      'PRODUCT:',
+      `- Name: ${p.name}`,
+      `- Brand: ${p.brand}`,
+      `- Category: ${p.category}`,
+    ].join('\n'));
+    const reviewLines = page.reviews.slice(0, 10).map((r, i) =>
+      `  ${i + 1}. Rating: ${r.rating}/5 | Skin: ${r.skinType} | Concerns: ${r.concerns.join(', ')} | Duration: ${r.usageDurationWeeks}wk${r.pros?.length ? ` | Pros: ${r.pros.join(', ')}` : ''}${r.cons?.length ? ` | Cons: ${r.cons.join(', ')}` : ''}`
+    );
+    sections.push(['REVIEWS:', ...reviewLines].join('\n'));
+  } else if (page.mode === 'natural_discovery') {
+    sections.push(`SEARCH QUERY: "${page.query}"`);
+    if (page.scoredResults.length > 0) {
+      const resultLines = page.scoredResults.slice(0, 10).map(sr =>
+        `  - ${sr.product.name} (${sr.product.brand}) — score: ${sr.score} — reasons: ${sr.topReasons.join(', ')}`
+      );
+      sections.push(['RANKED RESULTS:', ...resultLines].join('\n'));
+    }
+  } else if (page.mode === 'rewrite_explanation') {
+    sections.push(`TARGET LEVEL: ${page.targetLevel}`);
+    sections.push(`ORIGINAL TEXT:\n${page.originalText}`);
+    if (page.product) {
+      sections.push([
+        'PRODUCT CONTEXT:',
+        `- Name: ${page.product.name}`,
+        `- Key ingredients: ${page.product.keyIngredients.join(', ')}`,
+      ].join('\n'));
+    }
   }
 
   // Pre-computed evidence
@@ -322,6 +435,36 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
       `- [${c.severity}] ${c.ingredients.join(' + ')}: ${c.message}`
     );
     sections.push(['INGREDIENT CONFLICTS:', ...conflicts].join('\n'));
+  }
+
+  if (evidence.reviewSummaryEvidence) {
+    const rse = evidence.reviewSummaryEvidence;
+    const sentParts = [
+      `positive: ${rse.sentimentBreakdown.positive}`,
+      `mixed: ${rse.sentimentBreakdown.mixed}`,
+      `negative: ${rse.sentimentBreakdown.negative}`,
+    ];
+    sections.push([
+      'REVIEW SUMMARY EVIDENCE:',
+      `- Total reviews: ${rse.totalReviews}`,
+      `- Average rating: ${rse.averageRating.toFixed(1)}/5`,
+      `- Sentiment: ${sentParts.join(', ')}`,
+      rse.topPros.length > 0 ? `- Top positives: ${rse.topPros.join('; ')}` : '',
+      rse.topCons.length > 0 ? `- Top concerns: ${rse.topCons.join('; ')}` : '',
+      `- Average usage: ${rse.averageUsageWeeks} weeks`,
+      `- Skin types represented: ${Object.entries(rse.skinTypeDistribution).map(([k, v]) => `${k}(${v})`).join(', ')}`,
+    ].filter(Boolean).join('\n'));
+  }
+
+  if (evidence.alternativesEvidence) {
+    const ae = evidence.alternativesEvidence;
+    sections.push([
+      'ALTERNATIVES EVIDENCE:',
+      `- Source product: ${ae.sourceProductName}`,
+      ae.sharedIngredients.length > 0 ? `- Shared ingredients: ${ae.sharedIngredients.join(', ')}` : '',
+      ae.sharedConcerns.length > 0 ? `- Shared concerns: ${ae.sharedConcerns.join(', ')}` : '',
+      `- Same category: ${ae.categoryMatch ? 'yes' : 'no'}`,
+    ].filter(Boolean).join('\n'));
   }
 
   return sections.length > 0 ? sections.join('\n\n') : '';
@@ -415,6 +558,11 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'comparison': return 1536;
     case 'routine_builder': return 1024;
     case 'survey_results': return 1024;
+    case 'explain_product': return 1024;
+    case 'find_alternatives': return 1024;
+    case 'review_summary': return 1024;
+    case 'natural_discovery': return 768;
+    case 'rewrite_explanation': return 1024;
     default: return 1024;
   }
 }
@@ -452,6 +600,11 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     nutrition: 500,
     chat: 3000,
     survey_results: 800,
+    explain_product: 800,
+    find_alternatives: 700,
+    review_summary: 700,
+    natural_discovery: 500,
+    rewrite_explanation: 1000,
   };
 
   const limit = maxChars[mode] ?? 1000;

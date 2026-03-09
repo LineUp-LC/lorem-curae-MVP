@@ -1,4 +1,4 @@
-import { productData } from '../../../mocks/products';
+import { getProductById, productCatalog } from '../../../lib/data/products';
 import { useNavigate } from 'react-router-dom';
 
 interface SimilarProductsProps {
@@ -9,12 +9,12 @@ interface SimilarProductsProps {
 
 const SimilarProducts = ({ productId, onAddToComparison, selectedForComparison }: SimilarProductsProps) => {
   const navigate = useNavigate();
-  const currentProduct = productData.find(p => p.id === productId);
-  
+  const currentProduct = getProductById(productId);
+
   if (!currentProduct) return null;
 
   // Find similar products based on category and concerns
-  const similarProducts = productData
+  const similarProducts = productCatalog
     .filter(p => 
       p.id !== productId && 
       (p.category === currentProduct.category || 

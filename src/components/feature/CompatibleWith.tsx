@@ -1,5 +1,5 @@
 import { useNavigate, Link } from 'react-router-dom';
-import { productData } from '../../mocks/products';
+import { getProductById } from '../../lib/data/products';
 import { getEffectiveConcerns, getEffectiveSkinType, getEffectivePreferences } from '../../lib/utils/sessionState';
 import { matchesConcern, matchesIngredient } from '../../lib/utils/matching';
 import { findCompatibleProducts } from '../../lib/utils/productSimilarity';
@@ -11,7 +11,7 @@ interface CompatibleWithProps {
 
 const CompatibleWith = ({ productId }: CompatibleWithProps) => {
   const navigate = useNavigate();
-  const currentProduct = productData.find(p => p.id === productId);
+  const currentProduct = getProductById(productId);
   const userConcerns = getEffectiveConcerns();
   const userSkinType = getEffectiveSkinType();
   const userPreferences = getEffectivePreferences();

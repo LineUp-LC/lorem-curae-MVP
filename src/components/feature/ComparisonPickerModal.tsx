@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { productData } from '../../mocks/products';
+import { productCatalog, getProductById } from '../../lib/data/products';
 import type { Product, ActiveIngredient } from '../../types/product';
+import NeuralBloomIcon from '../icons/NeuralBloomIcon';
 import { matchesConcern, matchesIngredient } from '../../lib/utils/matching';
 import ConcentrationRow from '../ui/ConcentrationRow';
 import { normalizeSkinTypes, isSkinTypeMatch, isAllMetadata, getMetadataDisplayLabel } from '../../lib/utils/productMetadata';
@@ -30,6 +31,8 @@ interface ComparisonPickerModalProps {
   currentlyViewingProduct?: Product; // Product being viewed on PDP - shown at top
   preSelectedProducts?: Product[]; // Products already selected (for discover page)
   showSelectionView?: boolean; // Whether to show selection view (default: true)
+  /** Callback fired whenever the internal selection changes — keeps parent in sync */
+  onSelectionChange?: (products: Product[]) => void;
 }
 
 export default function ComparisonPickerModal({
@@ -40,6 +43,7 @@ export default function ComparisonPickerModal({
   currentlyViewingProduct,
   preSelectedProducts,
   showSelectionView = true,
+  onSelectionChange,
 }: ComparisonPickerModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<Product[]>(() => {
@@ -53,7 +57,7 @@ export default function ComparisonPickerModal({
     }
     // Otherwise use initial product ID
     if (initialProductId) {
-      const product = productData.find(p => p.id === initialProductId);
+      const product = getProductById(initialProductId);
       return product ? [product] : [];
     }
     return [];
@@ -78,9 +82,9 @@ export default function ComparisonPickerModal({
 
   // Filter products based on search query
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return productData;
+    if (!searchQuery.trim()) return productCatalog;
     const query = searchQuery.toLowerCase();
-    return productData.filter(
+    return productCatalog.filter(
       (product) =>
         product.name.toLowerCase().includes(query) ||
         product.brand.toLowerCase().includes(query) ||
@@ -93,21 +97,28 @@ export default function ComparisonPickerModal({
 
   const handleToggleProduct = (product: Product) => {
     if (isSelected(product.id)) {
-      setSelectedProducts(prev => prev.filter(p => p.id !== product.id));
+      const next = selectedProducts.filter(p => p.id !== product.id);
+      setSelectedProducts(next);
+      onSelectionChange?.(next);
     } else if (selectedProducts.length < 3) {
-      setSelectedProducts(prev => [...prev, product]);
+      const next = [...selectedProducts, product];
+      setSelectedProducts(next);
+      onSelectionChange?.(next);
     }
   };
 
   const handleRemoveProduct = (productId: number) => {
-    setSelectedProducts(prev => prev.filter(p => p.id !== productId));
-    if (selectedProducts.length <= 2) {
+    const next = selectedProducts.filter(p => p.id !== productId);
+    setSelectedProducts(next);
+    onSelectionChange?.(next);
+    if (next.length <= 1) {
       setShowComparison(false);
     }
   };
 
   const handleClearSelection = () => {
     setSelectedProducts([]);
+    onSelectionChange?.([]);
     setShowComparison(false);
   };
 
@@ -142,8 +153,9 @@ export default function ComparisonPickerModal({
     return calculateComparisonMetrics(selectedProducts);
   }, [selectedProducts]);
 
-  // Get user preferences from profile/session/localStorage fallback chain
+  // Get user preferences + skin type from profile/session/localStorage fallback chain
   const userPrefs = useMemo(() => getEffectivePreferences(), []);
+  const userSkinType = getEffectiveSkinType();
 
   // Recently viewed products
   const { items: recentlyViewedItems } = useRecentlyViewed();
@@ -521,6 +533,193 @@ export default function ComparisonPickerModal({
                   </span>
                 </div>
               </div>
+
+              {/* Structured Comparison Insight */}
+              {selectedProducts.length >= 2 && (() => {
+                // All concerns (union) with shared flag
+                const allConcernsMap = new Map<string, number>();
+                for (const p of selectedProducts) {
+                  for (const c of p.concerns ?? []) {
+                    allConcernsMap.set(c, (allConcernsMap.get(c) ?? 0) + 1);
+                  }
+                }
+                const allConcerns = Array.from(allConcernsMap.entries());
+                const isSharedConcern = (c: string) => (allConcernsMap.get(c) ?? 0) >= selectedProducts.length;
+
+                // Shared + unique ingredients
+                const allIngredientsMap = new Map<string, number>();
+                for (const p of selectedProducts) {
+                  for (const k of p.keyIngredients) {
+                    allIngredientsMap.set(k, (allIngredientsMap.get(k) ?? 0) + 1);
+                  }
+                }
+                const sharedIngredients = Array.from(allIngredientsMap.entries()).filter(([, count]) => count >= selectedProducts.length).map(([k]) => k);
+                const uniqueIngredients = new Map<number, string[]>();
+                for (const p of selectedProducts) {
+                  const unique = p.keyIngredients.filter(k => (allIngredientsMap.get(k) ?? 0) < selectedProducts.length);
+                  if (unique.length > 0) uniqueIngredients.set(p.id, unique);
+                }
+
+                // Compatible skin types (intersection via normalize) + user highlighting
+                const sharedSkinTypes = selectedProducts.reduce<string[]>(
+                  (acc, p, i) => {
+                    const normalized = normalizeSkinTypes(p.skinTypes);
+                    return i === 0 ? normalized : acc.filter(st => normalized.some(n => n === st));
+                  },
+                  [],
+                );
+
+                // Price range
+                const prices = selectedProducts.filter(p => hasValidPrice(p)).map(p => p.price);
+                const avgPrice = prices.length > 0 ? prices.reduce((s, v) => s + v, 0) / prices.length : 0;
+                // Ratings
+                const avgRating = selectedProducts.reduce((s, p) => s + p.rating, 0) / selectedProducts.length;
+                // Summary badges
+                const bestValueId = comparisonMetrics.bestValueProductId;
+                const highestRatedProduct = selectedProducts.reduce((best, p) => p.rating > best.rating ? p : best);
+                const mostReviewedProduct = selectedProducts.reduce((best, p) => p.reviewCount > best.reviewCount ? p : best);
+
+                return (
+                  <div className="mt-4 bg-cream/30 border border-blush/40 rounded-xl p-3">
+                    <div className="flex items-center gap-2 mb-3">
+                      <div className="w-5 h-5 bg-primary/10 rounded-full flex items-center justify-center">
+                        <NeuralBloomIcon size={10} className="text-primary" />
+                      </div>
+                      <span className="text-[10px] font-semibold text-deep uppercase tracking-wide">Comparison overview</span>
+                    </div>
+
+                    {/* TOP SECTION — Key metrics, no icons */}
+                    <div className="space-y-1 mb-3">
+                      {bestValueId && (
+                        <p className="text-xs text-deep">
+                          <span className="font-semibold">Best Value:</span>{' '}
+                          {selectedProducts.find(p => p.id === bestValueId)?.brand} — {selectedProducts.find(p => p.id === bestValueId)?.name}
+                        </p>
+                      )}
+                      <p className="text-xs text-deep">
+                        <span className="font-semibold">Highest Rated:</span>{' '}
+                        {highestRatedProduct.brand} — {highestRatedProduct.name}
+                      </p>
+                      {mostReviewedProduct.reviewCount > 0 && (
+                        <p className="text-xs text-deep">
+                          <span className="font-semibold">Most Reviewed:</span>{' '}
+                          {mostReviewedProduct.brand} ({mostReviewedProduct.reviewCount})
+                        </p>
+                      )}
+                    </div>
+
+                    {/* SECOND SECTION — Price + Rating grid */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      {prices.length > 0 && (
+                        <div className="bg-cream/50 rounded-lg p-2">
+                          <span className="text-[10px] font-medium text-warm-gray block mb-0.5">Price Range</span>
+                          <span className="text-sm font-semibold text-deep">
+                            ${highlights.lowestPrice?.toFixed(2)} – ${highlights.highestPrice?.toFixed(2)}
+                          </span>
+                          <span className="text-[10px] text-warm-gray block">Avg ${avgPrice.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="bg-cream/50 rounded-lg p-2">
+                        <span className="text-[10px] font-medium text-warm-gray block mb-0.5">Ratings</span>
+                        <span className="text-sm font-semibold text-deep">{highlights.highestRating?.toFixed(1)} highest</span>
+                        <span className="text-[10px] text-warm-gray block">Avg {avgRating.toFixed(1)}</span>
+                      </div>
+                    </div>
+
+                    {/* THIRD SECTION — Detailed categories */}
+                    <div className="space-y-2.5 text-xs text-deep">
+                      {/* Addresses — all concerns, shared ones highlighted */}
+                      {allConcerns.length > 0 && (
+                        <div>
+                          <span className="text-[10px] font-medium text-warm-gray uppercase tracking-wide">Addresses</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {allConcerns.map(([c]) => (
+                              <span
+                                key={c}
+                                className={`px-2 py-0.5 text-[10px] font-medium rounded-full capitalize ${
+                                  isSharedConcern(c)
+                                    ? 'bg-primary/10 text-primary'
+                                    : 'bg-cream/60 text-warm-gray border border-blush/30'
+                                }`}
+                              >
+                                {isSharedConcern(c) && <i className="ri-check-line mr-0.5 text-[9px]" />}
+                                {c}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Key Ingredients — shared + unique per product */}
+                      {(sharedIngredients.length > 0 || uniqueIngredients.size > 0) && (
+                        <div>
+                          <span className="text-[10px] font-medium text-warm-gray uppercase tracking-wide">Key Ingredients</span>
+                          {sharedIngredients.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {sharedIngredients.map(ing => (
+                                <span key={ing} className="px-2 py-0.5 bg-sage/15 text-sage text-[10px] font-medium rounded-full">
+                                  <i className="ri-check-line mr-0.5 text-[9px]" />{ing}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          {Array.from(uniqueIngredients.entries()).map(([prodId, ings]) => {
+                            const prod = selectedProducts.find(p => p.id === prodId);
+                            return (
+                              <div key={prodId} className="mt-1">
+                                <span className="text-[10px] text-warm-gray">{prod?.brand} only:</span>
+                                <div className="flex flex-wrap gap-1 mt-0.5">
+                                  {ings.map(ing => (
+                                    <span key={ing} className="px-2 py-0.5 bg-cream/60 text-warm-gray text-[10px] font-medium rounded-full border border-blush/30">{ing}</span>
+                                  ))}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
+                      {/* Compatible Skin Types — highlight user's type */}
+                      {sharedSkinTypes.length > 0 && (
+                        <div>
+                          <span className="text-[10px] font-medium text-warm-gray uppercase tracking-wide">Skin Types</span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {sharedSkinTypes.map(st => {
+                              const label = isAllMetadata(st) ? getMetadataDisplayLabel(st, 'skinTypes') : st;
+                              const isUserType = userSkinType && isSkinTypeMatch(st, userSkinType);
+                              return (
+                                <span
+                                  key={st}
+                                  className={`px-2 py-0.5 text-[10px] font-medium rounded-full ${
+                                    isUserType
+                                      ? 'bg-primary/15 text-primary border border-primary/30'
+                                      : 'bg-blush/20 text-deep'
+                                  }`}
+                                >
+                                  {isUserType && <i className="ri-check-line mr-0.5 text-[9px]" />}
+                                  {label}
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Reviews — per-product counts */}
+                      <div>
+                        <span className="text-[10px] font-medium text-warm-gray uppercase tracking-wide">Reviews</span>
+                        <div className="flex flex-wrap gap-2 mt-1">
+                          {selectedProducts.map(p => (
+                            <span key={p.id} className="text-[10px] text-deep">
+                              <span className="font-medium">{p.brand}:</span> {p.reviewCount} reviews ({p.rating.toFixed(1)})
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           ) : (
             /* Selection View */
@@ -628,7 +827,7 @@ export default function ComparisonPickerModal({
                       .map((item) => {
                         const selected = isSelected(item.id);
                         const disabled = !selected && selectedProducts.length >= 3;
-                        const fullProduct = productData.find(p => p.id === item.id);
+                        const fullProduct = getProductById(item.id);
                         return (
                           <div
                             key={item.id}

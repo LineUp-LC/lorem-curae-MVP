@@ -676,6 +676,10 @@ export {
   type NutritionFood,
   type Retailer as AIRetailer,
   type RoutineStep as AIRoutineStep,
+  type ReviewForSummary,
+  type ReviewSummaryEvidence,
+  type AlternativesEvidence,
+  type ExplanationLevel,
 } from './surfaceContext';
 
 // System Prompt Builder
@@ -693,3 +697,28 @@ export {
   type AIInsightError,
   type AIInsightResult,
 } from './surfaceClient';
+
+// Discovery Assistant (AI-Assisted Discovery & Explanation)
+export {
+  buildExplainProductContext,
+  buildFindAlternativesContext,
+  computeReviewSummaryEvidence,
+  buildReviewSummaryContext,
+  buildNaturalDiscoveryContext,
+  buildRewriteContext,
+  type ExplainProductInput,
+  type FindAlternativesInput,
+  type FindAlternativesResult,
+  type ReviewSummaryInput as DiscoveryReviewInput,
+  type NaturalDiscoveryInput,
+  type RewriteExplanationInput,
+} from './discoveryAssistant';
+
+// Discovery Client (thin API wrappers)
+export {
+  explainProductForUser,
+  findAlternativesForUser,
+  summarizeReviewsForUser,
+  discoverWithAI,
+  rewriteExplanation,
+} from './discoveryClient';

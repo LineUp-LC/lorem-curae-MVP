@@ -154,6 +154,77 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
     return parts.length > 0 ? parts.join(' ') : undefined;
   }
 
+  // Explain-product fallback: assemble from product data + evidence
+  if (ctx.mode === 'explain_product' && ctx.page.mode === 'explain_product') {
+    const p = ctx.page.product;
+    const skinType = ctx.user.skinType;
+    parts.push(`${p.brand} ${p.name} is a ${p.category} featuring ${p.keyIngredients.slice(0, 3).join(', ')}.`);
+    if (skinType && p.skinTypes.some(st => st.toLowerCase() === skinType.toLowerCase() || st.toLowerCase() === 'all')) {
+      parts.push(`It is suitable for ${skinType} skin.`);
+    }
+    if (evidence.concernAlignment) {
+      const { matched } = evidence.concernAlignment;
+      if (matched.length > 0) {
+        parts.push(`This product addresses ${matched.join(' and ')}, which aligns with your skin concerns.`);
+      }
+    }
+    if (evidence.safetyAssessment && evidence.safetyAssessment.warnings.length > 0) {
+      parts.push(`${evidence.safetyAssessment.warnings[0].label}: ${evidence.safetyAssessment.warnings[0].detail}`);
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Find-alternatives fallback: list shared ingredients/concerns
+  if (ctx.mode === 'find_alternatives' && ctx.page.mode === 'find_alternatives') {
+    const ae = evidence.alternativesEvidence;
+    if (ae) {
+      parts.push(`Looking at alternatives to ${ae.sourceProductName}.`);
+      if (ae.sharedIngredients.length > 0) {
+        parts.push(`These alternatives share key ingredients: ${ae.sharedIngredients.join(', ')}.`);
+      }
+      if (ae.sharedConcerns.length > 0) {
+        parts.push(`They also target ${ae.sharedConcerns.join(' and ')}.`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Review-summary fallback: format review evidence as text
+  if (ctx.mode === 'review_summary' && ctx.page.mode === 'review_summary') {
+    const rse = evidence.reviewSummaryEvidence;
+    if (rse && rse.totalReviews > 0) {
+      parts.push(`Based on ${rse.totalReviews} reviews, this product has an average rating of ${rse.averageRating.toFixed(1)} out of 5.`);
+      if (rse.sentimentBreakdown.positive > 0) {
+        parts.push(`${rse.sentimentBreakdown.positive} reviewers rated it positively.`);
+      }
+      if (rse.topPros.length > 0) {
+        parts.push(`Commonly noted positives: ${rse.topPros.join(', ')}.`);
+      }
+      if (rse.topCons.length > 0) {
+        parts.push(`Some reviewers noted: ${rse.topCons.join(', ')}.`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Natural-discovery fallback: format top scoring factors
+  if (ctx.mode === 'natural_discovery' && ctx.page.mode === 'natural_discovery') {
+    const results = ctx.page.scoredResults;
+    if (results.length > 0) {
+      const top = results[0];
+      parts.push(`Top result: ${top.product.name} by ${top.product.brand}.`);
+      if (top.topReasons.length > 0) {
+        parts.push(`Ranked highly because: ${top.topReasons.join(', ')}.`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Rewrite-explanation has no fallback — requires AI
+  if (ctx.mode === 'rewrite_explanation') {
+    return undefined;
+  }
+
   if (evidence.environmentFit?.explanation) {
     let explanation = evidence.environmentFit.explanation;
     // For product_detail, strip reviewer sentence — review cards shown separately

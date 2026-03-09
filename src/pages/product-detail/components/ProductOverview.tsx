@@ -1,4 +1,4 @@
-import { productData } from '../../../mocks/products';
+import { getProductById } from '../../../lib/data/products';
 import { getEffectiveConcerns } from '../../../lib/utils/sessionState';
 import { matchesIngredient } from '../../../lib/utils/matching';
 import IngredientLink from '../../../components/feature/IngredientLink';
@@ -8,7 +8,7 @@ interface ProductOverviewProps {
 }
 
 export default function ProductOverview({ productId }: ProductOverviewProps) {
-  const productFromData = productData.find(p => p.id === productId);
+  const productFromData = getProductById(productId);
   const userConcerns = getEffectiveConcerns();
 
   // Calculate price per mL

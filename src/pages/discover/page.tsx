@@ -101,6 +101,7 @@ const DiscoverPage = () => {
           preSelectedProducts={selectedProducts.length > 0 ? selectedProducts : undefined}
           userConcerns={normalizedConcerns}
           showSelectionView={true}
+          onSelectionChange={setSelectedProducts}
         />
       )}
 

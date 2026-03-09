@@ -7,7 +7,7 @@
  * All search results follow a consistent shape and link to canonical routes.
  */
 
-import { productData } from '../../mocks/products'
+import { productCatalog } from '../data/products'
 
 export interface SearchResult {
   id: number | string
@@ -55,8 +55,8 @@ const pageRegistry: { id: string; title: string; description: string; link: stri
 export function buildSearchIndex(): SearchResult[] {
   const results: SearchResult[] = []
 
-  // Products — dynamically built from productData
-  for (const product of productData) {
+  // Products — dynamically built from productCatalog
+  for (const product of productCatalog) {
     results.push({
       id: product.id,
       title: product.name,

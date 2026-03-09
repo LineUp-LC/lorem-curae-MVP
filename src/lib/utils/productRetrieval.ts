@@ -1,7 +1,7 @@
 // Product retrieval engine for AI recommendations
 // Matches products from catalog based on user profile, concerns, and preferences
 
-import { productData } from '../../mocks/products';
+import { productCatalog } from '../data/products';
 import type { Product } from '../../types/product';
 
 export interface UserSkinProfile {
@@ -155,7 +155,7 @@ export function retrieveProducts(
   const { category, limit = 4, minScore = 10 } = options || {};
 
   // Score all products
-  const scoredProducts: RetrievedProduct[] = productData
+  const scoredProducts: RetrievedProduct[] = productCatalog
     .map((product) => {
       const { score, reasons } = calculateRelevanceScore(product, profile, category);
       return {
@@ -215,7 +215,7 @@ export function searchByIngredient(
 ): RetrievedProduct[] {
   const normalizedIngredient = ingredient.toLowerCase();
 
-  const matchingProducts = productData.filter((product) =>
+  const matchingProducts = productCatalog.filter((product) =>
     product.keyIngredients?.some((ing) =>
       ing.toLowerCase().includes(normalizedIngredient)
     ) ||

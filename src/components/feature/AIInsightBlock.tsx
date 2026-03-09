@@ -10,6 +10,9 @@ import { useState, useEffect, useCallback } from 'react';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
 import type { AISurfaceContext, AIMode } from '../../lib/ai/surfaceContext';
 import type { AIInsightResult } from '../../lib/ai/surfaceClient';
+import NeuralBloomIcon from '../icons/NeuralBloomIcon';
+import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
+import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveSensitivity } from '../../lib/utils/sessionState';
 
 // ---------------------------------------------------------------------------
 // Props
@@ -128,6 +131,23 @@ export default function AIInsightBlock({
   const isProductDetail = context.mode === 'product_detail';
   const isPersonalized = !!context.user.skinType;
 
+  // Build highlight profile from session state, with product name exclusions
+  const excludeNames: string[] = [];
+  if ('product' in context.page && context.page.product) {
+    excludeNames.push(context.page.product.name, context.page.product.brand);
+  }
+  if ('products' in context.page && Array.isArray(context.page.products)) {
+    for (const p of context.page.products) {
+      excludeNames.push(p.name, p.brand);
+    }
+  }
+  const hlProfile = {
+    skinType: getEffectiveSkinType(),
+    concerns: getEffectiveConcerns(),
+    sensitivity: getEffectiveSensitivity(),
+    excludeNames,
+  };
+
   // Product detail mode: bullet points, color highlighting, no extras
   if (isProductDetail && !compact) {
     const bullets = insightText
@@ -147,7 +167,7 @@ export default function AIInsightBlock({
       >
         <div className="flex items-center gap-2 mb-2.5">
           <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
-            <i className="ri-sparkling-line text-xs text-primary" />
+            <NeuralBloomIcon size={12} className="text-primary" />
           </div>
           <span className="text-xs font-semibold text-deep">
             Why this product fits
@@ -165,7 +185,7 @@ export default function AIInsightBlock({
               <span className={`text-sm leading-relaxed ${
                 isPersonalized ? 'text-deep' : 'text-warm-gray'
               }`}>
-                {bullet}
+                {highlightRelevantKeywords(bullet, hlProfile)}
               </span>
             </li>
           ))}
@@ -183,7 +203,7 @@ export default function AIInsightBlock({
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <div className={`${compact ? 'w-5 h-5' : 'w-6 h-6'} bg-blush/30 rounded-full flex items-center justify-center`}>
-          <i className={`ri-sparkling-line ${compact ? 'text-[10px]' : 'text-xs'} text-primary`} />
+          <NeuralBloomIcon size={compact ? 10 : 12} className="text-primary" />
         </div>
         <span className={`${compact ? 'text-[10px]' : 'text-xs'} font-medium text-warm-gray`}>
           {getModeLabel(context.mode)}
@@ -195,7 +215,7 @@ export default function AIInsightBlock({
 
       {/* Insight text */}
       <p className={`${compact ? 'text-xs' : 'text-sm'} text-deep leading-relaxed`}>
-        {insightText}
+        {highlightRelevantKeywords(insightText, hlProfile)}
       </p>
 
       {/* Environment badges */}

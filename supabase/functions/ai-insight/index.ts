@@ -37,6 +37,11 @@ const MODE_MAX_TOKENS: Record<string, number> = {
   nutrition: 1024,
   survey_results: 1024,
   chat: 4096, // Fallback — chat mode should use ai-chat function
+  explain_product: 1024,
+  find_alternatives: 1024,
+  review_summary: 1024,
+  natural_discovery: 768,
+  rewrite_explanation: 1024,
 };
 
 // Supported non-chat modes
@@ -49,6 +54,11 @@ const SUPPORTED_MODES = [
   'marketplace',
   'nutrition',
   'survey_results',
+  'explain_product',
+  'find_alternatives',
+  'review_summary',
+  'natural_discovery',
+  'rewrite_explanation',
 ];
 
 // ---------------------------------------------------------------------------

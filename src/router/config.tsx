@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { RouteObject } from 'react-router-dom';
 import AppLayout from '../components/feature/AppLayout';
+import RequireAuth from '../components/feature/RequireAuth';
 
 // Lazy load components
 const AuthCallbackPage = lazy(() => import('../pages/auth/callback/page'));
@@ -72,6 +73,7 @@ const ContactPage = lazy(() => import('../pages/contact/page'));
 const FAQPage = lazy(() => import('../pages/faq/page'));
 const AccessibilityPage = lazy(() => import('../pages/accessibility/page'));
 const CommunityGuidelinesPage = lazy(() => import('../pages/community-guidelines/page'));
+const AdminProductsPage = lazy(() => import('../pages/admin/products/page'));
 
 const routes: RouteObject[] = [
   // — No-layout routes (auth, creator dashboards, etc.) —
@@ -88,6 +90,8 @@ const routes: RouteObject[] = [
   { path: '/creator/audience', element: <CreatorAudiencePage /> },
   { path: '/affiliate-redirect/:id', element: <AffiliateRedirectPage /> },
   { path: '/data-anonymization', element: <DataAnonymizationPage /> },
+  { path: '/admin/products', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
+  { path: '/admin/products/:id', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
 
   // — Layout routes (Navbar + Footer persist across navigation) —
   {

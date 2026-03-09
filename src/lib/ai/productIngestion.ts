@@ -5,7 +5,7 @@
  * Run this on app initialization or when products are updated.
  */
 
-import { productData } from '../../mocks/products';
+import { productCatalog } from '../data/products';
 import type { Product } from '../../types/product';
 import { generateProductEmbedding } from './embeddings';
 import { vectorStore, type VectorDocument } from './vectorStore';
@@ -75,7 +75,7 @@ export async function ingestProducts(): Promise<{
     console.log('[ProductIngestion] Starting product ingestion...');
 
     // Convert all products to vector documents
-    const documents = productData.map(productToVectorDocument);
+    const documents = productCatalog.map(productToVectorDocument);
 
     // Upsert all documents into the vector store
     await vectorStore.upsertMany(documents);
@@ -148,7 +148,7 @@ export async function getIngestionStatus(): Promise<{
   return {
     isIngested: documentCount > 0,
     documentCount,
-    catalogCount: productData.length,
+    catalogCount: productCatalog.length,
   };
 }
 

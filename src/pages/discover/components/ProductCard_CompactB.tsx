@@ -66,10 +66,27 @@ export default function ProductCard_CompactB({
   onProductClick,
   onToggleSave,
   onAddToCompare,
+  matchTier,
+  matchReasons,
 }: ProductCardProps) {
   const isMaxReached = compareCount >= 3 && !isSelected;
   const userSkinType = getEffectiveSkinType();
   const userPrefs = getEffectivePreferences();
+
+  // Determine highlight state: only from tier badge (no generic isRecommended fallback)
+  const isHighlighted = matchTier === 'excellent' || matchTier === 'great';
+
+  // Tier badge config (only show for excellent/great/good — skip fair)
+  const tierBadge = matchTier && matchTier !== 'fair'
+    ? {
+        label: matchTier === 'excellent' ? 'Excellent Match'
+          : matchTier === 'great' ? 'Great Match'
+          : 'Good Match',
+        bg: matchTier === 'excellent' ? 'bg-primary'
+          : matchTier === 'great' ? 'bg-sage'
+          : 'bg-warm-gray',
+      }
+    : null;
 
   return (
     <div
@@ -77,17 +94,33 @@ export default function ProductCard_CompactB({
       className={`
         bg-white rounded-2xl overflow-hidden transition-[transform,box-shadow] duration-300 group cursor-pointer relative hover:-translate-y-1 transform-gpu
         ${
-          isRecommended
+          isHighlighted
             ? 'ring-2 ring-primary ring-offset-2 shadow-[0_0_12px_2px_rgba(142,163,153,0.25)]'
             : 'shadow-md hover:shadow-xl border border-blush'
         }
       `}
     >
-      {isRecommended && (
-        <span className="absolute top-3 left-3 bg-primary text-white text-xs px-2 py-1 rounded-full shadow z-10">
-          Best Match
-        </span>
-      )}
+      {tierBadge ? (
+        <div className="absolute top-3 left-3 z-10 group/badge">
+          <span className={`${tierBadge.bg} text-white text-xs px-2 py-1 rounded-full shadow inline-block`}>
+            {tierBadge.label}
+          </span>
+          {matchReasons && matchReasons.length > 0 && (
+            <div className="hidden group-hover/badge:block absolute top-full left-0 mt-1.5 bg-deep text-white text-xs rounded-lg px-3 py-2 shadow-lg z-20 min-w-[180px] max-w-[220px]">
+              <p className="font-medium mb-1">Why this product?</p>
+              <ul className="space-y-0.5">
+                {matchReasons.map((reason, i) => (
+                  <li key={i} className="flex items-start gap-1">
+                    <i className="ri-check-line flex-shrink-0 mt-0.5"></i>
+                    <span>{reason}</span>
+                  </li>
+                ))}
+              </ul>
+              <div className="absolute -top-1.5 left-4 w-2.5 h-2.5 bg-deep rotate-45"></div>
+            </div>
+          )}
+        </div>
+      ) : null}
 
       {/* Compare Highlight Tooltip */}
       {highlightCompare && (

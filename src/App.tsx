@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./router";
 import { I18nextProvider } from "react-i18next";
@@ -7,8 +8,15 @@ import { AuthProvider } from "./lib/auth/AuthContext";
 import LastVisitedPageRestorer from "./components/feature/LastVisitedPageRestorer";
 import PersistenceDebugPanel from "./components/feature/PersistenceDebugPanel";
 import ScrollToTop from "./components/feature/ScrollToTop";
+import { initProductCatalog } from "./lib/data/products";
 
 function App() {
+  // Preload product catalog from Supabase (fire-and-forget)
+  // Mock data is available instantly; Supabase data replaces it when ready
+  useEffect(() => {
+    initProductCatalog();
+  }, []);
+
   return (
     <PasswordGate>
       <AuthProvider>

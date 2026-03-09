@@ -24,15 +24,17 @@ import { useDocumentTitle } from '../../lib/utils/useDocumentTitle';
 import { generateEnvironmentFitExplanation } from '../../lib/utils/environmentFit';
 import { aggregateReviewerEvidence } from '../../lib/utils/reviewerEvidence';
 import { useAuth } from '../../lib/auth/AuthContext';
-import { productData } from '../../mocks/products';
+import { getProductById, productCatalog } from '../../lib/data/products';
 import { getReviewsForProduct } from '../../mocks/reviews';
+import AIExplainPanel from '../../components/feature/AIExplainPanel';
+import AIReviewSummary from '../../components/feature/AIReviewSummary';
 
 export default function ProductDetailPage() {
   // URL params
   const { id: paramId } = useParams();
   const [searchParams] = useSearchParams();
   const productId = parseInt(paramId || searchParams.get('id') || '2');
-  const productFromMock = productData.find(p => p.id === productId);
+  const productFromMock = getProductById(productId);
 
   const [selectedImage, setSelectedImage] = useState(0);
   const [activeTab, setActiveTab] = useLocalStorageState<string>(
@@ -642,6 +644,20 @@ export default function ProductDetailPage() {
                 ) : null;
               })()}
 
+              {/* AI Explain Panel */}
+              {productFromMock && (
+                <div className="mb-4">
+                  <AIExplainPanel
+                    product={productFromMock}
+                    environment={env}
+                    evidence={{
+                      environmentFit: envFit ? { explanation: envFit.explanation, disclaimer: envFit.disclaimer } : undefined,
+                      reviewerEvidence: reviewerEvidence ? { count: reviewerEvidence.matchCount, detail: reviewerEvidence.detail } : undefined,
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Location Explanation Modal */}
               {showLocationModal && env && seasonalModalContent && (
                 <EnvironmentFitModal
@@ -910,8 +926,17 @@ export default function ProductDetailPage() {
               </div>
             )}
             {activeTab === 'reviews' && (
-              <div className="bg-white rounded-2xl p-8">
-                <ProductReviews productId={product.id} product={productFromMock || undefined} env={env} season={env?.season} />
+              <div className="space-y-4">
+                {productFromMock && (
+                  <AIReviewSummary
+                    product={productFromMock}
+                    reviews={getReviewsForProduct(productFromMock.id)}
+                    environment={env}
+                  />
+                )}
+                <div className="bg-white rounded-2xl p-8">
+                  <ProductReviews productId={product.id} product={productFromMock || undefined} env={env} season={env?.season} />
+                </div>
               </div>
             )}
           </div>

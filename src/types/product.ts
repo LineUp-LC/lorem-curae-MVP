@@ -30,6 +30,8 @@ import type { ProductCategory } from '../lib/utils/categoryRegistry';
 
 export interface Product {
   id: number;
+  /** URL-safe slug for routing (e.g., 'brightening-vitamin-c-serum') */
+  slug?: string;
   name: string;
   brand: string;
   category: ProductCategory;

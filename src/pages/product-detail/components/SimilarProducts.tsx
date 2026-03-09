@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { productData } from '../../../mocks/products';
+import { getProductById, getProductsByIds } from '../../../lib/data/products';
 import { useNavigate, Link } from 'react-router-dom';
 import ComparisonPickerModal from '../../../components/feature/ComparisonPickerModal';
 import type { Product } from '../../../types/product';
@@ -13,7 +13,7 @@ interface SimilarProductsProps {
 
 const SimilarProducts = ({ productId }: SimilarProductsProps) => {
   const navigate = useNavigate();
-  const currentProduct = productData.find(p => p.id === productId);
+  const currentProduct = getProductById(productId);
   const [selectedForComparison, setSelectedForComparison] = useState<number[]>([]);
   const [showComparisonModal, setShowComparisonModal] = useState(false);
 
@@ -67,7 +67,7 @@ const SimilarProducts = ({ productId }: SimilarProductsProps) => {
 
   // Get selected products for the modal
   const getSelectedProducts = (): Product[] => {
-    return productData.filter(p => selectedForComparison.includes(p.id));
+    return getProductsByIds(selectedForComparison);
   };
 
   if (!currentProduct) return null;

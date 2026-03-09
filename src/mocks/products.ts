@@ -3,6 +3,7 @@ import type { Product } from '../types/product';
 export const productData: Product[] = [
   {
     id: 1,
+    slug: 'gentle-hydrating-cleanser',
     name: 'Gentle Hydrating Cleanser',
     brand: 'Pure Essence',
     category: 'cleanser',
@@ -27,6 +28,7 @@ export const productData: Product[] = [
   },
   {
     id: 2,
+    slug: 'brightening-vitamin-c-serum',
     name: 'Brightening Vitamin C Serum',
     brand: 'Glow Naturals',
     category: 'serum',
@@ -51,6 +53,7 @@ export const productData: Product[] = [
   },
   {
     id: 3,
+    slug: 'barrier-repair-moisturizer',
     name: 'Barrier Repair Moisturizer',
     brand: 'Skin Harmony',
     category: 'moisturizer',
@@ -75,6 +78,7 @@ export const productData: Product[] = [
   },
   {
     id: 4,
+    slug: 'clear-skin-salicylic-acid-treatment',
     name: 'Clear Skin Salicylic Acid Treatment',
     brand: 'Clarity Labs',
     category: 'treatment',
@@ -99,6 +103,7 @@ export const productData: Product[] = [
   },
   {
     id: 5,
+    slug: 'mineral-sunscreen-spf-50',
     name: 'Mineral Sunscreen SPF 50',
     brand: 'Sun Shield',
     category: 'sunscreen',
@@ -123,6 +128,7 @@ export const productData: Product[] = [
   },
   {
     id: 6,
+    slug: 'retinol-night-renewal-serum',
     name: 'Retinol Night Renewal Serum',
     brand: 'Youth Restore',
     category: 'serum',
@@ -147,6 +153,7 @@ export const productData: Product[] = [
   },
   {
     id: 7,
+    slug: 'hydrating-clay-mask',
     name: 'Hydrating Clay Mask',
     brand: 'Earth Glow',
     category: 'mask',
@@ -171,6 +178,7 @@ export const productData: Product[] = [
   },
   {
     id: 8,
+    slug: 'niacinamide-pore-refining-serum',
     name: 'Niacinamide Pore Refining Serum',
     brand: 'Pore Perfect',
     category: 'serum',
@@ -195,6 +203,7 @@ export const productData: Product[] = [
   },
   {
     id: 9,
+    slug: 'soothing-centella-cream',
     name: 'Soothing Centella Cream',
     brand: 'Calm Skin Co.',
     category: 'moisturizer',
@@ -219,6 +228,7 @@ export const productData: Product[] = [
   },
   {
     id: 10,
+    slug: 'exfoliating-aha-bha-toner',
     name: 'Exfoliating AHA/BHA Toner',
     brand: 'Glow Labs',
     category: 'treatment',
@@ -243,6 +253,7 @@ export const productData: Product[] = [
   },
   {
     id: 11,
+    slug: 'peptide-eye-cream',
     name: 'Peptide Eye Cream',
     brand: 'Youth Restore',
     category: 'treatment',
@@ -267,6 +278,7 @@ export const productData: Product[] = [
   },
   {
     id: 12,
+    slug: 'hydrating-gel-cleanser',
     name: 'Hydrating Gel Cleanser',
     brand: 'Fresh Start',
     category: 'cleanser',

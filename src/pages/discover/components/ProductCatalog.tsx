@@ -1,17 +1,19 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
-import { productData } from '../../../mocks/products';
+import { productCatalog } from '../../../lib/data/products';
 import { productMatchesUserConcerns } from '../../../lib/utils/matching';
-import { getEffectiveSkinType } from '../../../lib/utils/sessionState';
+import { getEffectiveSkinType, getEffectivePreferences } from '../../../lib/utils/sessionState';
 import { normalizeSkinTypes, isSkinTypeMatch } from '../../../lib/utils/productMetadata';
 import type { Product } from '../../../types/product';
+import type { DiscoveryScore } from '../../../lib/discovery/types';
+import { scoreProduct, hasProfileData } from '../../../lib/discovery/scoringEngine';
+import { deriveIngredientLinks, buildIngredientOptions } from '../../../lib/discovery/ingredientLinks';
 import { useSavedProducts } from '../../../lib/utils/favoritesState';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import Dropdown from '../../../components/ui/Dropdown';
 import { classifyTimeOfDay } from '../../../lib/utils/classifyTimeOfDay';
 import { PRODUCT_CATEGORIES } from '../../../lib/utils/categoryRegistry';
-import AIInsightBlock from '../../../components/feature/AIInsightBlock';
-import { buildAIContext } from '../../../lib/ai/surfaceContext';
+import AIDiscoveryBar from '../../../components/feature/AIDiscoveryBar';
 import ProductCard_CompactB from './ProductCard_CompactB';
 
 /**
@@ -83,8 +85,13 @@ export default function ProductCatalog({
     'discover_filter_time_of_day',
     'all'
   );
+  const [selectedIngredients, setSelectedIngredients] = useLocalStorageState<string[]>(
+    'discover_filter_ingredients',
+    []
+  );
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
+  const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
 
   // Save notification state
   const [saveNotification, setSaveNotification] = useState<{ show: boolean; productName: string; isAdding: boolean }>({ show: false, productName: '', isAdding: true });
@@ -144,13 +151,29 @@ export default function ProductCatalog({
     }
   }, [searchParams]);
 
-  const products = productData;
+  const products = productCatalog;
+
+  // Ingredient links derived from product keyIngredients (deterministic, no Supabase needed)
+  const ingredientLinks = useMemo(() => deriveIngredientLinks(products), [products]);
+  const ingredientOptions = useMemo(
+    () => buildIngredientOptions(products, ingredientLinks),
+    [products, ingredientLinks],
+  );
 
   // Determine the active skin type filter:
   // If user completed survey, auto-filter by their profile skin type;
   // otherwise use the dropdown selection.
   const effectiveSkinType = getEffectiveSkinType();
   const activeSkinTypeFilter = effectiveSkinType || selectedSkinType;
+
+  // Profile flag — used to gate "Best Match" sort option for guests
+  const hasProfile = !!(effectiveSkinType || safeUserConcerns.length > 0);
+
+  // Sort guard: guests cannot use "relevance"; profiled users default to it
+  useEffect(() => {
+    if (sortBy === 'relevance' && !hasProfile) setSortBy('rating');
+    if (sortBy === 'rating' && hasProfile) setSortBy('relevance');
+  }, [hasProfile]);
 
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
@@ -173,9 +196,16 @@ export default function ProductCatalog({
         timeOfDay === 'all' ||
         productTimeOfDay.includes(timeOfDay as 'am' | 'pm');
 
-      return matchesCategory && matchesSearch && matchesSkinType && matchesTimeOfDay;
+      // Ingredient filter: product must contain at least one selected slug (OR logic)
+      const matchesIngredientFilter =
+        selectedIngredients.length === 0 ||
+        (ingredientLinks.get(product.id) ?? []).some(slug =>
+          selectedIngredients.includes(slug),
+        );
+
+      return matchesCategory && matchesSearch && matchesSkinType && matchesTimeOfDay && matchesIngredientFilter;
     });
-  }, [products, selectedCategory, searchQuery, activeSkinTypeFilter, timeOfDay]);
+  }, [products, selectedCategory, searchQuery, activeSkinTypeFilter, timeOfDay, selectedIngredients, ingredientLinks]);
 
   // Concern matching using the matching utility with synonym support
   const matchedProducts = useMemo(() => {
@@ -192,20 +222,47 @@ export default function ProductCatalog({
     );
   }, [filteredProducts, matchedProducts]);
 
-  // Final sorting (price, rating, saved)
+  // Discovery scoring map — computed when sorting by "Best Match" with profile data
+  const scoredMap = useMemo(() => {
+    if (sortBy !== 'relevance') return null;
+    const profile = {
+      skinType: effectiveSkinType,
+      concerns: safeUserConcerns,
+      preferences: getEffectivePreferences(),
+    };
+    if (!hasProfileData(profile)) return null;
+
+    const map = new Map<number, DiscoveryScore>();
+    for (const product of filteredProducts) {
+      map.set(product.id, scoreProduct(product, profile));
+    }
+    return map;
+  }, [filteredProducts, sortBy, effectiveSkinType, safeUserConcerns]);
+
+  // Final sorting (price, rating, saved, relevance)
   const sortProducts = (productList: Product[]) => {
     return [...productList].sort((a, b) => {
       switch (sortBy) {
+        case 'relevance': {
+          if (scoredMap) {
+            const scoreA = scoredMap.get(a.id)?.total ?? 0;
+            const scoreB = scoredMap.get(b.id)?.total ?? 0;
+            if (scoreA !== scoreB) return scoreB - scoreA;
+          }
+          // Fallback / tiebreaker: rating
+          return b.rating - a.rating;
+        }
         case 'price-low':
           return a.price - b.price;
         case 'price-high':
           return b.price - a.price;
-        case 'favorites':
+        case 'favorites': {
           // Saved first, then by rating
           const aSaved = isSaved(a.id) ? 1 : 0;
           const bSaved = isSaved(b.id) ? 1 : 0;
           if (bSaved !== aSaved) return bSaved - aSaved;
           return b.rating - a.rating;
+        }
         case 'rating':
         default:
           return b.rating - a.rating;
@@ -215,27 +272,15 @@ export default function ProductCatalog({
 
   const sortedMatchedProducts = useMemo(
     () => sortProducts(matchedProducts),
-    [matchedProducts, sortBy]
+    [matchedProducts, sortBy, scoredMap]
   );
 
   const sortedOtherProducts = useMemo(
     () => sortProducts(otherProducts),
-    [otherProducts, sortBy]
+    [otherProducts, sortBy, scoredMap]
   );
 
-  // AI search insight — only active when the user has typed a search query
-  const searchAIContext = useMemo(() => {
-    if (!searchQuery.trim()) return null;
-    const allResults = [...sortedMatchedProducts, ...sortedOtherProducts];
-    if (allResults.length === 0) return null;
-    return buildAIContext('search', {
-      page: {
-        mode: 'search',
-        query: searchQuery,
-        results: allResults.slice(0, 10),
-      },
-    });
-  }, [searchQuery, sortedMatchedProducts, sortedOtherProducts]);
+  // AI discovery context is now self-managed by AIDiscoveryBar
 
   // Check if product is in compare list (using safe list)
   const isInCompareList = (productId: number) => {
@@ -270,9 +315,10 @@ export default function ProductCatalog({
   };
 
   // Render a single product card
-  const renderProductCard = (product: Product, highlightCompare = false) => {
-    const isRecommended = isProductRecommended(product);
+  const renderProductCard = (product: Product, highlightCompare = false, showMatchScore = false) => {
+    const isRecommended = hasProfile && isProductRecommended(product);
     const isSelected = isInCompareList(product.id);
+    const score = hasProfile && showMatchScore ? scoredMap?.get(product.id) : undefined;
 
     return (
       <ProductCard_CompactB
@@ -284,6 +330,8 @@ export default function ProductCatalog({
         isProductSaved={isSaved(product.id)}
         compareCount={safeCompareList.length}
         safeUserConcerns={safeUserConcerns}
+        matchTier={score?.tier}
+        matchReasons={score?.topReasons}
         onProductClick={(id: number) => navigate(`/product-detail?id=${id}`)}
         onToggleSave={(e: React.MouseEvent) => {
           e.stopPropagation();
@@ -318,27 +366,14 @@ export default function ProductCatalog({
         </p>
       </div>
 
-      {/* Search Bar */}
-      <div className="mb-6 sm:mb-8">
-        <div className="relative max-w-2xl mx-auto">
-          <label htmlFor="discover-search" className="sr-only">
-            Search products
-          </label>
-
-          <i className="ri-search-line absolute left-4 top-1/2 -translate-y-1/2 text-xl text-warm-gray/60"></i>
-
-          <input
-            id="discover-search"
-            name="search"
-            type="text"
-            placeholder="Search products, brands, or ingredients..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoComplete="off"
-            className="w-full pl-12 pr-4 py-3 sm:py-4 rounded-full border-2 border-blush focus:border-primary focus:outline-none text-sm transition-all"
-          />
-        </div>
-      </div>
+      {/* Search Bar with AI Discovery */}
+      <AIDiscoveryBar
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        products={products}
+        userConcerns={safeUserConcerns}
+        className="mb-6 sm:mb-8"
+      />
 
       {/* Category Toggle + Dropdown */}
       <div className="relative mb-4 sm:mb-6">
@@ -391,6 +426,76 @@ export default function ProductCatalog({
           </div>
         </div>
       </div>
+
+      {/* Ingredient Filter Toggle */}
+      {ingredientOptions.length > 0 && (
+        <div className="relative mb-4 sm:mb-6">
+          <button
+            onClick={() => setIsIngredientsOpen(!isIngredientsOpen)}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-xl border border-blush hover:border-primary/30 transition-colors cursor-pointer shadow-sm"
+          >
+            <i className="ri-flask-line text-xs text-primary"></i>
+            <span className="text-xs font-medium text-deep">
+              Ingredients{selectedIngredients.length > 0 ? ` (${selectedIngredients.length})` : ''}
+            </span>
+            <i className={`ri-arrow-${isIngredientsOpen ? 'up' : 'down'}-s-line text-sm text-warm-gray`}></i>
+          </button>
+
+          {/* Backdrop */}
+          {isIngredientsOpen && (
+            <div
+              className="fixed inset-0 z-30"
+              onClick={() => setIsIngredientsOpen(false)}
+            />
+          )}
+
+          {/* Dropdown panel (multi-select) */}
+          <div className={`
+            absolute left-0 top-full mt-1.5 z-40 bg-white rounded-xl border border-blush/30 shadow-lg shadow-warm-gray/10 p-2.5 w-full sm:w-auto sm:max-w-md
+            transition-all duration-200 origin-top
+            ${isIngredientsOpen
+              ? 'opacity-100 scale-100 translate-y-0'
+              : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'
+            }
+          `}>
+            <div className="flex flex-wrap gap-1.5">
+              {ingredientOptions.map((option) => {
+                const isActive = selectedIngredients.includes(option.slug);
+                return (
+                  <button
+                    key={option.slug}
+                    onClick={() => {
+                      setSelectedIngredients(
+                        isActive
+                          ? selectedIngredients.filter((s: string) => s !== option.slug)
+                          : [...selectedIngredients, option.slug]
+                      );
+                    }}
+                    aria-pressed={isActive}
+                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full font-medium text-xs transition-all whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'bg-primary text-white shadow-sm'
+                        : 'bg-white text-warm-gray border border-blush hover:border-primary-300'
+                    }`}
+                  >
+                    {isActive && <i className="ri-check-line text-xs"></i>}
+                    <span>{option.label}</span>
+                    <span className={`text-xs ${isActive ? 'text-white/70' : 'text-warm-gray/50'}`}>({option.productCount})</span>
+                  </button>
+                );
+              })}
+            </div>
+            {selectedIngredients.length > 0 && (
+              <button
+                onClick={() => setSelectedIngredients([])}
+                className="mt-2 text-xs text-warm-gray hover:text-deep transition-colors cursor-pointer"
+              >
+                Clear ingredient filter
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="mb-6 sm:mb-8">
@@ -480,6 +585,7 @@ export default function ProductCatalog({
                   onFilterChange('sortBy', value)
                 }}
                 options={[
+                  ...(hasProfile ? [{ value: 'relevance', label: 'Best Match' }] : []),
                   { value: 'rating', label: 'Highest Rated' },
                   { value: 'price-low', label: 'Price: Low to High' },
                   { value: 'price-high', label: 'Price: High to Low' },
@@ -491,17 +597,19 @@ export default function ProductCatalog({
             </div>
 
             {/* Reset Filters */}
-            {(selectedCategory !== 'all' || timeOfDay !== 'all' || sortBy !== 'rating' || searchQuery !== '' || (!effectiveSkinType && selectedSkinType !== 'all')) && (
+            {(selectedCategory !== 'all' || timeOfDay !== 'all' || sortBy !== (hasProfile ? 'relevance' : 'rating') || searchQuery !== '' || selectedIngredients.length > 0 || (!effectiveSkinType && selectedSkinType !== 'all')) && (
               <button
                 onClick={() => {
+                  const defaultSort = hasProfile ? 'relevance' : 'rating';
                   setSelectedCategory('all');
                   setTimeOfDay('all');
-                  setSortBy('rating');
+                  setSortBy(defaultSort);
                   setSearchQuery('');
+                  setSelectedIngredients([]);
                   if (!effectiveSkinType) setSelectedSkinType('all');
                   onFilterChange('category', 'all');
                   onFilterChange('timeOfDay', 'all');
-                  onFilterChange('sortBy', 'rating');
+                  onFilterChange('sortBy', defaultSort);
                   onFilterChange('skinType', 'all');
                 }}
                 className="flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium text-warm-gray hover:text-deep transition-colors cursor-pointer whitespace-nowrap"
@@ -528,7 +636,7 @@ export default function ProductCatalog({
             {sortedMatchedProducts.length + sortedOtherProducts.length}
           </span>{' '}
           products
-          {safeUserConcerns.length > 0 && sortedMatchedProducts.length > 0 && (
+          {hasProfile && safeUserConcerns.length > 0 && sortedMatchedProducts.length > 0 && (
             <span className="text-primary ml-2">
               ({sortedMatchedProducts.length} suggestions based on your skin profile)
             </span>
@@ -536,15 +644,8 @@ export default function ProductCatalog({
         </p>
       </div>
 
-      {/* AI Search Insight */}
-      {searchAIContext && (
-        <div className="mb-6">
-          <AIInsightBlock context={searchAIContext} compact />
-        </div>
-      )}
-
-      {/* Recommended for You Section */}
-      {sortedMatchedProducts.length > 0 && (
+      {/* Recommended for You Section — only for authenticated users with profile */}
+      {hasProfile && sortedMatchedProducts.length > 0 && (
         <section className="mb-8 sm:mb-10">
           <div className="flex items-center gap-2 xs:gap-3 mb-4 flex-wrap">
             <h2 className="text-lg xs:text-xl font-semibold text-primary-700">Recommended for You</h2>
@@ -553,7 +654,7 @@ export default function ProductCatalog({
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 xs:gap-4 sm:gap-6">
             {sortedMatchedProducts.map((product, idx) => (
               <div key={product.id} ref={idx === 0 ? firstProductRef : undefined}>
-                {renderProductCard(product, idx === 0 && showCompareHighlight)}
+                {renderProductCard(product, idx === 0 && showCompareHighlight, true)}
               </div>
             ))}
           </div>
@@ -561,7 +662,7 @@ export default function ProductCatalog({
       )}
 
       {/* Divider between recommended and other products */}
-      {sortedMatchedProducts.length > 0 && sortedOtherProducts.length > 0 && (
+      {hasProfile && sortedMatchedProducts.length > 0 && sortedOtherProducts.length > 0 && (
         <div className="border-t border-blush my-8 sm:my-10 pt-6">
           <h2 className="text-lg xs:text-xl font-semibold text-warm-gray mb-4">More Products</h2>
         </div>
@@ -575,7 +676,7 @@ export default function ProductCatalog({
       >
         {sortedOtherProducts.map((product, idx) => (
           <div key={product.id} ref={sortedMatchedProducts.length === 0 && idx === 0 ? firstProductRef : undefined}>
-            {renderProductCard(product, sortedMatchedProducts.length === 0 && idx === 0 && showCompareHighlight)}
+            {renderProductCard(product, sortedMatchedProducts.length === 0 && idx === 0 && showCompareHighlight, false)}
           </div>
         ))}
       </div>
@@ -590,10 +691,12 @@ export default function ProductCatalog({
           <p className="text-warm-gray mb-6">Try adjusting your filters or search query</p>
           <button
             onClick={() => {
+              const defaultSort = hasProfile ? 'relevance' : 'rating';
               setSelectedCategory('all');
               setSearchQuery('');
               setTimeOfDay('all');
-              setSortBy('rating');
+              setSortBy(defaultSort);
+              setSelectedIngredients([]);
               if (!effectiveSkinType) setSelectedSkinType('all');
             }}
             className="px-6 py-3 bg-primary text-white rounded-full font-semibold hover:bg-dark transition-all whitespace-nowrap cursor-pointer"

@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { productData } from '../../../mocks/products';
+import { getProductsByIds } from '../../../lib/data/products';
 import { useNavigate } from 'react-router-dom';
 import {
   getEffectiveSkinType,
@@ -20,7 +20,7 @@ const ProductComparison = ({
   onRemove,
 }: ProductComparisonProps) => {
   const navigate = useNavigate();
-  const products = productData.filter((p) => productIds.includes(p.id));
+  const products = getProductsByIds(productIds);
 
   // Get user profile from sessionState (unified source of truth)
   const userProfile = {

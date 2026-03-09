@@ -1,0 +1,373 @@
+/**
+ * Supabase Product Admin Operations
+ *
+ * All mutation functions for the admin product management UI.
+ * Separated from supabaseProducts.ts to keep the public read-only module clean.
+ */
+
+import { supabase } from '../supabase-browser';
+import type { SupabaseProductRow } from './supabaseProducts';
+import type { ActiveIngredient } from '../../types/product';
+
+// ─── Types ───────────────────────────────────────────────────
+
+export type ProductStatus = 'draft' | 'published' | 'archived';
+
+export interface AdminProductListItem {
+  id: string;
+  legacy_id: number | null;
+  slug: string;
+  name: string;
+  brand: string;
+  category: string;
+  status: string;
+  price: number;
+  image: string;
+  updated_at: string;
+  in_stock: boolean;
+}
+
+export interface ProductFormData {
+  name: string;
+  slug: string;
+  brand: string;
+  category: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
+  image: string;
+  description: string;
+  skinTypes: string[];
+  concerns: string[];
+  keyIngredients: string[];
+  inStock: boolean;
+  source: string;
+  sizeValue: number | null;
+  sizeUnit: string | null;
+  activeIngredients: ActiveIngredient[];
+  preferences: Record<string, boolean>;
+  timeOfDay: string[];
+  texture: string | null;
+  formulation: string | null;
+}
+
+export interface ProductVersion {
+  id: string;
+  version_number: number;
+  changed_by: string;
+  change_reason: string | null;
+  snapshot: Record<string, unknown>;
+  created_at: string;
+}
+
+// ─── Helpers ─────────────────────────────────────────────────
+
+function formDataToRow(data: ProductFormData) {
+  return {
+    slug: data.slug,
+    name: data.name,
+    brand: data.brand,
+    category: data.category,
+    price: data.price,
+    rating: data.rating,
+    review_count: data.reviewCount,
+    image: data.image,
+    description: data.description,
+    skin_types: data.skinTypes,
+    concerns: data.concerns,
+    key_ingredients: data.keyIngredients,
+    in_stock: data.inStock,
+    source: data.source || 'discovery',
+    size_value: data.sizeValue,
+    size_unit: data.sizeUnit,
+    active_ingredients: data.activeIngredients,
+    preferences: data.preferences,
+    time_of_day: data.timeOfDay,
+    texture: data.texture,
+    formulation: data.formulation,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+// ─── Read ────────────────────────────────────────────────────
+
+export async function fetchAllProducts(filters?: {
+  status?: ProductStatus | 'all';
+  category?: string;
+  search?: string;
+}): Promise<AdminProductListItem[]> {
+  try {
+    let query = supabase
+      .from('products')
+      .select('id, legacy_id, slug, name, brand, category, status, price, image, updated_at, in_stock')
+      .order('updated_at', { ascending: false });
+
+    if (filters?.status && filters.status !== 'all') {
+      query = query.eq('status', filters.status);
+    }
+    if (filters?.category && filters.category !== 'all') {
+      query = query.eq('category', filters.category);
+    }
+    if (filters?.search) {
+      query = query.or(`name.ilike.%${filters.search}%,brand.ilike.%${filters.search}%`);
+    }
+
+    const { data, error } = await query;
+
+    if (error) {
+      console.error('[adminProducts] fetchAll failed:', error.message);
+      return [];
+    }
+
+    return (data ?? []) as AdminProductListItem[];
+  } catch (err) {
+    console.error('[adminProducts] fetchAll error:', err);
+    return [];
+  }
+}
+
+export async function fetchProductForEdit(id: string): Promise<SupabaseProductRow | null> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      console.error('[adminProducts] fetchForEdit failed:', error.message);
+      return null;
+    }
+
+    return data as unknown as SupabaseProductRow;
+  } catch (err) {
+    console.error('[adminProducts] fetchForEdit error:', err);
+    return null;
+  }
+}
+
+// ─── Write ───────────────────────────────────────────────────
+
+export async function createProduct(
+  data: ProductFormData,
+): Promise<{ id: string } | { error: string }> {
+  try {
+    const row = {
+      ...formDataToRow(data),
+      status: 'draft',
+    };
+
+    const { data: result, error } = await supabase
+      .from('products')
+      .insert(row)
+      .select('id')
+      .single();
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    // Create initial version snapshot
+    await createVersionSnapshot(result.id, row, 'admin', 'Initial creation');
+
+    return { id: result.id };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+}
+
+export async function updateProduct(
+  id: string,
+  data: ProductFormData,
+  changeReason?: string,
+): Promise<{ success: boolean } | { error: string }> {
+  try {
+    // Fetch current state for snapshot before overwriting
+    const current = await fetchProductForEdit(id);
+    if (current) {
+      await createVersionSnapshot(
+        id,
+        current as unknown as Record<string, unknown>,
+        'admin',
+        changeReason || 'Product updated',
+      );
+    }
+
+    const row = formDataToRow(data);
+
+    const { error } = await supabase
+      .from('products')
+      .update(row)
+      .eq('id', id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+}
+
+export async function updateProductStatus(
+  id: string,
+  newStatus: ProductStatus,
+): Promise<{ success: boolean } | { error: string }> {
+  try {
+    // Snapshot before status change
+    const current = await fetchProductForEdit(id);
+    if (current) {
+      await createVersionSnapshot(
+        id,
+        current as unknown as Record<string, unknown>,
+        'admin',
+        `Status changed to ${newStatus}`,
+      );
+    }
+
+    const { error } = await supabase
+      .from('products')
+      .update({ status: newStatus, updated_at: new Date().toISOString() })
+      .eq('id', id);
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Unknown error' };
+  }
+}
+
+// ─── Version History ─────────────────────────────────────────
+
+export async function createVersionSnapshot(
+  productId: string,
+  snapshot: Record<string, unknown>,
+  changedBy: string,
+  reason?: string,
+): Promise<void> {
+  try {
+    // Get next version number
+    const { data: versions } = await supabase
+      .from('product_versions')
+      .select('version_number')
+      .eq('product_id', productId)
+      .order('version_number', { ascending: false })
+      .limit(1);
+
+    const nextVersion = versions && versions.length > 0
+      ? (versions[0].version_number as number) + 1
+      : 1;
+
+    await supabase.from('product_versions').insert({
+      product_id: productId,
+      version_number: nextVersion,
+      changed_by: changedBy,
+      change_reason: reason ?? null,
+      snapshot,
+    });
+  } catch (err) {
+    console.error('[adminProducts] createVersionSnapshot error:', err);
+  }
+}
+
+export async function fetchVersionHistory(
+  productId: string,
+): Promise<ProductVersion[]> {
+  try {
+    const { data, error } = await supabase
+      .from('product_versions')
+      .select('*')
+      .eq('product_id', productId)
+      .order('version_number', { ascending: false });
+
+    if (error) {
+      console.error('[adminProducts] fetchVersionHistory failed:', error.message);
+      return [];
+    }
+
+    return (data ?? []) as ProductVersion[];
+  } catch (err) {
+    console.error('[adminProducts] fetchVersionHistory error:', err);
+    return [];
+  }
+}
+
+// ─── Ingredient Links ────────────────────────────────────────
+
+export async function syncIngredientLinks(
+  productId: string,
+  slugs: string[],
+): Promise<void> {
+  try {
+    // Delete all existing links
+    await supabase
+      .from('product_ingredient_links')
+      .delete()
+      .eq('product_id', productId);
+
+    // Insert new links
+    if (slugs.length > 0) {
+      const rows = slugs.map(slug => ({
+        product_id: productId,
+        ingredient_slug: slug,
+      }));
+
+      await supabase.from('product_ingredient_links').insert(rows);
+    }
+  } catch (err) {
+    console.error('[adminProducts] syncIngredientLinks error:', err);
+  }
+}
+
+export async function fetchIngredientLinks(
+  productId: string,
+): Promise<string[]> {
+  try {
+    const { data, error } = await supabase
+      .from('product_ingredient_links')
+      .select('ingredient_slug')
+      .eq('product_id', productId);
+
+    if (error) {
+      console.error('[adminProducts] fetchIngredientLinks failed:', error.message);
+      return [];
+    }
+
+    return (data ?? []).map(row => row.ingredient_slug);
+  } catch (err) {
+    console.error('[adminProducts] fetchIngredientLinks error:', err);
+    return [];
+  }
+}
+
+// ─── Image Upload ────────────────────────────────────────────
+
+export async function uploadProductImage(
+  file: File,
+  productId: string,
+): Promise<string | { error: string }> {
+  try {
+    const ext = file.name.split('.').pop() ?? 'jpg';
+    const path = `products/${productId}/${Date.now()}.${ext}`;
+
+    const { error } = await supabase.storage
+      .from('product-images')
+      .upload(path, file, { upsert: true });
+
+    if (error) {
+      return { error: error.message };
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('product-images')
+      .getPublicUrl(path);
+
+    return urlData.publicUrl;
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : 'Upload failed' };
+  }
+}

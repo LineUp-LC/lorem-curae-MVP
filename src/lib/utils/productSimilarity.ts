@@ -1,7 +1,7 @@
 // Intelligent product similarity scoring and ingredient compatibility
 // Used by SimilarProducts and CompatibleWith components on product detail pages
 
-import { productData } from '../../mocks/products';
+import { productCatalog } from '../data/products';
 import type { Product } from '../../types/product';
 import { matchesConcern, matchesIngredient } from './matching';
 import { checkCompatibility } from '../ai/ingredientIntelligence';
@@ -39,7 +39,7 @@ export function scoreSimilarProducts(
 ): ScoredProduct[] {
   const scored: ScoredProduct[] = [];
 
-  for (const product of productData) {
+  for (const product of productCatalog) {
     if (product.id === currentProduct.id) continue;
 
     let score = 0;
@@ -163,7 +163,7 @@ export function findCompatibleProducts(
 
   const candidates: CompatibleProduct[] = [];
 
-  for (const product of productData) {
+  for (const product of productCatalog) {
     if (product.id === currentProduct.id) continue;
     // Prefer complementary categories (different from current)
     if (product.category === currentProduct.category) continue;

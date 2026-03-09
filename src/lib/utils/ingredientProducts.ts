@@ -6,42 +6,13 @@
  */
 
 import type { Product } from '../../types/product'
-import { productData } from '../../mocks/products'
+import { productCatalog } from '../data/products'
 import { isSkinTypeMatch } from './productMetadata'
 import { productMatchesUserConcerns } from './matching'
+import { SLUG_TO_NAME, getIngredientSlug } from './ingredientSlug'
 
-/**
- * Ingredient slug-to-name map.
- * Maps normalized slugs to the display names used in product keyIngredients/activeIngredients.
- */
-const SLUG_TO_NAME: Record<string, string[]> = {
-  'hyaluronic-acid': ['hyaluronic acid'],
-  'niacinamide': ['niacinamide'],
-  'retinol': ['retinol'],
-  'vitamin-c': ['vitamin c', 'ascorbic acid', 'l-ascorbic acid'],
-  'ceramides': ['ceramides', 'ceramide'],
-  'peptides': ['peptides', 'peptide'],
-  'centella-asiatica': ['centella asiatica', 'centella', 'cica'],
-  'salicylic-acid': ['salicylic acid'],
-  'glycolic-acid': ['glycolic acid'],
-}
-
-/**
- * Resolve a display ingredient name (INCI or common) to a canonical slug.
- * Strips parenthetical text, lowercases, and fuzzy-matches against SLUG_TO_NAME.
- * Returns the slug string or null if no match exists.
- */
-export function getIngredientSlug(name: string): string | null {
-  const normalized = name.replace(/\s*\(.*?\)\s*/g, '').trim().toLowerCase()
-  if (!normalized) return null
-
-  for (const [slug, variations] of Object.entries(SLUG_TO_NAME)) {
-    if (variations.some(v => normalized.includes(v) || v.includes(normalized))) {
-      return slug
-    }
-  }
-  return null
-}
+// Re-export for consumers that import from this module
+export { getIngredientSlug }
 
 /**
  * Check if a product contains an ingredient by slug.
@@ -66,7 +37,7 @@ function productContainsIngredient(product: Product, ingredientSlug: string): bo
  * Get all products that contain a given ingredient.
  */
 export function getProductsForIngredient(ingredientSlug: string): Product[] {
-  return productData.filter(p => productContainsIngredient(p, ingredientSlug))
+  return productCatalog.filter(p => productContainsIngredient(p, ingredientSlug))
 }
 
 /**

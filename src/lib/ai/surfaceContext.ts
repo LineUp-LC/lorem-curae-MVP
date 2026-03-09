@@ -17,7 +17,7 @@ import type {
 } from '../utils/environmentFit';
 import type { SafetyResult } from '../utils/productSafety';
 import type { IngredientKnowledge } from './knowledgeBase';
-import type { ConversationMessage, ConversationMemory } from './types';
+import type { ConversationMessage, ConversationMemory, ExplanationLevel } from './types';
 import type { SavedProduct } from '../utils/favoritesState';
 import {
   getEffectiveSkinType,
@@ -45,7 +45,12 @@ export type AIMode =
   | 'marketplace'
   | 'nutrition'
   | 'chat'
-  | 'survey_results';
+  | 'survey_results'
+  | 'explain_product'
+  | 'find_alternatives'
+  | 'review_summary'
+  | 'natural_discovery'
+  | 'rewrite_explanation';
 
 // ============================================================================
 // USER PROFILE
@@ -84,7 +89,12 @@ export type PageContext =
   | { mode: 'marketplace'; products: Product[]; retailers: Retailer[] }
   | { mode: 'nutrition'; foods: NutritionFood[]; userConcerns: string[] }
   | { mode: 'chat'; conversationHistory: ConversationMessage[] }
-  | { mode: 'survey_results'; surveyAnswers: Record<string, unknown>; generatedProfile: AIUserProfile };
+  | { mode: 'survey_results'; surveyAnswers: Record<string, unknown>; generatedProfile: AIUserProfile }
+  | { mode: 'explain_product'; product: Product; question?: string }
+  | { mode: 'find_alternatives'; sourceProduct: Product; alternatives: Product[]; overlapIngredients: string[] }
+  | { mode: 'review_summary'; product: Product; reviews: ReviewForSummary[] }
+  | { mode: 'natural_discovery'; query: string; scoredResults: { product: Product; score: number; topReasons: string[] }[] }
+  | { mode: 'rewrite_explanation'; originalText: string; targetLevel: ExplanationLevel; product?: Product };
 
 /**
  * Lightweight retailer shape for AI context serialization.
@@ -108,6 +118,19 @@ export interface NutritionFood {
   skinBenefits?: string[];
 }
 
+/**
+ * Lightweight review shape for review summary mode.
+ */
+export interface ReviewForSummary {
+  rating: number;
+  skinType: string;
+  concerns: string[];
+  content: string;
+  pros?: string[];
+  cons?: string[];
+  usageDurationWeeks: number;
+}
+
 // ============================================================================
 // EVIDENCE BUNDLE
 // ============================================================================
@@ -128,6 +151,31 @@ export interface EvidenceBundle {
   ingredientConflicts?: IngredientConflict[];
   concernAlignment?: { matched: string[]; unmatched: string[] };
   safetyAssessment?: SafetyResult;
+  reviewSummaryEvidence?: ReviewSummaryEvidence;
+  alternativesEvidence?: AlternativesEvidence;
+}
+
+/**
+ * Pre-computed review summary statistics for the review_summary mode.
+ */
+export interface ReviewSummaryEvidence {
+  totalReviews: number;
+  averageRating: number;
+  sentimentBreakdown: { positive: number; mixed: number; negative: number };
+  topPros: string[];
+  topCons: string[];
+  averageUsageWeeks: number;
+  skinTypeDistribution: Record<string, number>;
+}
+
+/**
+ * Pre-computed alternatives evidence for the find_alternatives mode.
+ */
+export interface AlternativesEvidence {
+  sourceProductName: string;
+  sharedIngredients: string[];
+  sharedConcerns: string[];
+  categoryMatch: boolean;
 }
 
 // ============================================================================
@@ -297,6 +345,18 @@ export function buildAIContext(
       const allConcerns = page.products.flatMap(p => p.concerns ?? []);
       const unique = [...new Set(allConcerns)];
       evidence.concernAlignment = computeConcernAlignment(user.concerns, unique);
+    } else if (page.mode === 'explain_product' && user.concerns.length > 0) {
+      evidence.concernAlignment = computeConcernAlignment(
+        user.concerns,
+        page.product.concerns ?? [],
+      );
+    } else if (page.mode === 'find_alternatives' && user.concerns.length > 0) {
+      const allConcerns = [
+        ...(page.sourceProduct.concerns ?? []),
+        ...page.alternatives.flatMap(p => p.concerns ?? []),
+      ];
+      const unique = [...new Set(allConcerns)];
+      evidence.concernAlignment = computeConcernAlignment(user.concerns, unique);
     }
   }
 
@@ -337,6 +397,11 @@ export function generateContextCacheKey(ctx: AISurfaceContext): string {
   else if (page.mode === 'ingredient_detail') pageId += `:${page.ingredient.name}`;
   else if (page.mode === 'comparison') pageId += `:${page.products.map(p => p.id).sort().join(',')}`;
   else if (page.mode === 'search') pageId += `:${page.query}`;
+  else if (page.mode === 'explain_product') pageId += `:${page.product.id}:${page.question ?? 'default'}`;
+  else if (page.mode === 'find_alternatives') pageId += `:${page.sourceProduct.id}`;
+  else if (page.mode === 'review_summary') pageId += `:${page.product.id}`;
+  else if (page.mode === 'natural_discovery') pageId += `:${page.query}`;
+  else if (page.mode === 'rewrite_explanation') pageId += `:${page.targetLevel}`;
 
   return `ai-insight:${pageId}:${profileHash}:${envHash}`;
 }
@@ -363,3 +428,4 @@ export function serializeContextForAPI(ctx: AISurfaceContext): Record<string, un
 // Re-export evidence types for consumer convenience
 export type { ReviewerEnvironmentInsight, ScoredReviewEntry, EnvironmentFitExplanation };
 export type { SafetyResult };
+export type { ExplanationLevel };

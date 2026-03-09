@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { productData } from '../../../mocks/products';
+import { getProductById } from '../../../lib/data/products';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
@@ -23,7 +23,7 @@ const ProductOverview = ({
   const { user } = useAuth();
   const { env } = useEnvironmentContext();
 
-  const product = productData.find((p) => p.id === productId);
+  const product = getProductById(productId);
 
   if (!product) return null;
 
