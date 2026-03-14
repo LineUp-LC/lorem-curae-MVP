@@ -1,0 +1,957 @@
+Category,Subcategory,Item,Description,Status,Priority
+Core Pages & Flows,Home,Page shell and layout,,Unassigned,None
+Core Pages & Flows,Home,HeroSection with primary CTA,,Unassigned,None
+Core Pages & Flows,Home,WhyWeExistSection (mission statement),,Unassigned,None
+Core Pages & Flows,Home,WhyThisMattersSection (problem/solution),,Unassigned,None
+Core Pages & Flows,Home,ConnectedSystemSection (ecosystem overview),,Unassigned,None
+Core Pages & Flows,Home,DifferentiationSection (key differentiators),,Unassigned,None
+Core Pages & Flows,Home,IngredientIntelligence section,,Unassigned,None
+Core Pages & Flows,Home,IngredientCarousel (ingredient showcase),,Unassigned,None
+Core Pages & Flows,Home,EducationHub (educational content),,Unassigned,None
+Core Pages & Flows,Home,PersonalizedAIGuidance (AI preview),,Unassigned,None
+Core Pages & Flows,Home,ProductComparison showcase,,Unassigned,None
+Core Pages & Flows,Home,QuizCTA (skin survey call-to-action),,Unassigned,None
+Core Pages & Flows,Home,MarketplaceSection (marketplace promotion),,Unassigned,None
+Core Pages & Flows,Home,RewardsSection (points/rewards),,Unassigned,None
+Core Pages & Flows,Home,RoutineTracker preview,,Unassigned,None
+Core Pages & Flows,Home,TestimonialSection (user testimonials),,Unassigned,None
+Core Pages & Flows,Home,TrustBanner (trust/safety messaging),,Unassigned,None
+Core Pages & Flows,Home,CommunityStories (community highlights),,Unassigned,None
+Core Pages & Flows,Home,SmartProductSearch preview,,Unassigned,None
+Core Pages & Flows,Home,YourJourneySection (journey framing),,Unassigned,None
+Core Pages & Flows,Home,Scroll-triggered animation orchestration,,Unassigned,None
+Core Pages & Flows,Home,Section lazy-loading / viewport gating,,Unassigned,None
+Core Pages & Flows,Home,Personalized hero variant based on returning-user state,,Unassigned,None
+Core Pages & Flows,Home,Deep-link anchors for each section (e.g. /#rewards),,Unassigned,None
+Core Pages & Flows,Discover,ProductCatalog grid with pagination or infinite scroll,,Unassigned,None
+Core Pages & Flows,Discover,Multi-dimension filter panel (category skin type concerns price brand preferences),,Unassigned,None
+Core Pages & Flows,Discover,Sort controls (relevance price low/high rating newest),,Unassigned,None
+Core Pages & Flows,Discover,Personalized Recommended for You ranking,,Unassigned,None
+Core Pages & Flows,Discover,Search integration (keyword ingredient concern),,Unassigned,None
+Core Pages & Flows,Discover,QuizFlow inline quiz for guided discovery,,Unassigned,None
+Core Pages & Flows,Discover,ResultsDisplay for quiz-driven recommendations,,Unassigned,None
+Core Pages & Flows,Discover,Product card with match badge safety badge save button,,Unassigned,None
+Core Pages & Flows,Discover,Comparison picker (select up to 3 products),,Unassigned,None
+Core Pages & Flows,Discover,ComparisonPickerModal with side-by-side metrics,,Unassigned,None
+Core Pages & Flows,Discover,Empty state when no products match filters,,Unassigned,None
+Core Pages & Flows,Discover,Loading skeleton for catalog,,Unassigned,None
+Core Pages & Flows,Discover,URL-driven filter state (query params for shareable links),,Unassigned,None
+Core Pages & Flows,Discover,Category quick-filter chips,,Unassigned,None
+Core Pages & Flows,Discover,Recently Viewed sidebar or section,,Unassigned,None
+Core Pages & Flows,Discover,Guest vs. authenticated personalization fallback,,Unassigned,None
+Core Pages & Flows,Product Detail,ProductOverview (hero image gallery name brand price range rating),,Unassigned,None
+Core Pages & Flows,Product Detail,Image gallery with thumbnail navigation,,Unassigned,None
+Core Pages & Flows,Product Detail,Key ingredients list with match highlighting,,Unassigned,None
+Core Pages & Flows,Product Detail,Skin type suitability indicator,,Unassigned,None
+Core Pages & Flows,Product Detail,Concern match badges,,Unassigned,None
+Core Pages & Flows,Product Detail,Preference match badges (vegan cruelty-free etc.),,Unassigned,None
+Core Pages & Flows,Product Detail,Location Fit Block (environment-aware: UV climate season),,Unassigned,None
+Core Pages & Flows,Product Detail,Location Explanation Modal,,Unassigned,None
+Core Pages & Flows,Product Detail,Safety badge (safe / caution / not-recommended),,Unassigned,None
+Core Pages & Flows,Product Detail,CompatibleWith section (complementary products),,Unassigned,None
+Core Pages & Flows,Product Detail,PurchaseOptions (retailer comparison table),,Unassigned,None
+Core Pages & Flows,Product Detail,Retailer trust scores with explanation tooltip,,Unassigned,None
+Core Pages & Flows,Product Detail,About Pricing tooltip,,Unassigned,None
+Core Pages & Flows,Product Detail,Price range across retailers,,Unassigned,None
+Core Pages & Flows,Product Detail,SimilarProducts section,,Unassigned,None
+Core Pages & Flows,Product Detail,ProductReviews section with similarity-based reviewer matching,,Unassigned,None
+Core Pages & Flows,Product Detail,Comparison picker integration,,Unassigned,None
+Core Pages & Flows,Product Detail,Save/unsave product,,Unassigned,None
+Core Pages & Flows,Product Detail,Recently viewed tracking,,Unassigned,None
+Core Pages & Flows,Product Detail,Tab navigation (overview reviews purchase),,Unassigned,None
+Core Pages & Flows,Product Detail,Share product (URL copy social),,Unassigned,None
+Core Pages & Flows,Product Detail,Breadcrumb navigation,,Unassigned,None
+Core Pages & Flows,Product Search Detail,ProductOverview with environment block,,Unassigned,None
+Core Pages & Flows,Product Search Detail,Skin type match,,Unassigned,None
+Core Pages & Flows,Product Search Detail,Concern match,,Unassigned,None
+Core Pages & Flows,Product Search Detail,Environment data (gated by source: mock hidden partial/live shown),,Unassigned,None
+Core Pages & Flows,Product Search Detail,PurchaseOptions with canonical pricing tooltip,,Unassigned,None
+Core Pages & Flows,Product Search Detail,Add to comparison,,Unassigned,None
+Core Pages & Flows,Product Search Detail,View reviews link,,Unassigned,None
+Core Pages & Flows,Ingredients,IngredientLibrary browse/search with category filters,,Unassigned,None
+Core Pages & Flows,Ingredients,Ingredient cards with safety icon concern tags,,Unassigned,None
+Core Pages & Flows,Ingredients,IngredientDetail view with full breakdown,,Unassigned,None
+Core Pages & Flows,Ingredients,Ingredient safety explanation,,Unassigned,None
+Core Pages & Flows,Ingredients,Ingredient-to-product matching (products containing this ingredient),,Unassigned,None
+Core Pages & Flows,Ingredients,Personalized ingredient highlights (user concern matches),,Unassigned,None
+Core Pages & Flows,Ingredients,Ingredient conflict warnings,,Unassigned,None
+Core Pages & Flows,Ingredients,Concentration information where available,,Unassigned,None
+Core Pages & Flows,Ingredients,ExplainWhyDropdown for safety ratings,,Unassigned,None
+Core Pages & Flows,Ingredients,URL-driven detail view (?id=slug),,Unassigned,None
+Core Pages & Flows,Ingredients,Empty state for no results,,Unassigned,None
+Core Pages & Flows,Ingredients,Alphabet / first-letter filter,,Unassigned,None
+Core Pages & Flows,Routines,RoutineBuilder (step-by-step editor),,Unassigned,None
+Core Pages & Flows,Routines,AM/PM time-of-day classification,,Unassigned,None
+Core Pages & Flows,Routines,Drag-and-drop step reordering,,Unassigned,None
+Core Pages & Flows,Routines,ProductPickerModal (browse & add products to steps),,Unassigned,None
+Core Pages & Flows,Routines,CustomStepModal (create non-product step),,Unassigned,None
+Core Pages & Flows,Routines,ConflictDetection engine (ingredient conflicts),,Unassigned,None
+Core Pages & Flows,Routines,ConflictDetectionPopup modal,,Unassigned,None
+Core Pages & Flows,Routines,AIAssistant (AI-powered routine suggestions),,Unassigned,None
+Core Pages & Flows,Routines,NotesSection (per-routine notes with photo attachments),,Unassigned,None
+Core Pages & Flows,Routines,RoutineTutorial (first-time onboarding),,Unassigned,None
+Core Pages & Flows,Routines,Version history (VersionHistoryModal),,Unassigned,None
+Core Pages & Flows,Routines,Version diff (step-by-step comparison),,Unassigned,None
+Core Pages & Flows,Routines,Version revert,,Unassigned,None
+Core Pages & Flows,Routines,TimelineTab (activity timeline),,Unassigned,None
+Core Pages & Flows,Routines,InsightsPanel (automated routine insights),,Unassigned,None
+Core Pages & Flows,Routines,Completion tracking (AM/PM daily checkboxes),,Unassigned,None
+Core Pages & Flows,Routines,Streak computation,,Unassigned,None
+Core Pages & Flows,Routines,Save to localStorage (guest) + Supabase (auth),,Unassigned,None
+Core Pages & Flows,Routines,Routine analytics event logging,,Unassigned,None
+Core Pages & Flows,Routines List,Saved routines listing,,Unassigned,None
+Core Pages & Flows,Routines List,RoutineListTutorial (first-time guidance),,Unassigned,None
+Core Pages & Flows,Routines List,Per-routine actions (view edit delete duplicate),,Unassigned,None
+Core Pages & Flows,Routines List,NotesSection integration,,Unassigned,None
+Core Pages & Flows,Routines List,VersionHistoryModal integration,,Unassigned,None
+Core Pages & Flows,Routines List,TimelineTab integration,,Unassigned,None
+Core Pages & Flows,Routines List,Routine count badge,,Unassigned,None
+Core Pages & Flows,Routines List,Empty state for no routines,,Unassigned,None
+Core Pages & Flows,Routines List,Sort by recency name time-of-day,,Unassigned,None
+Core Pages & Flows,Routines List,Filter by AM/PM/both,,Unassigned,None
+Core Pages & Flows,Skin Survey,QuizFlow (multi-step wizard),,Unassigned,None
+Core Pages & Flows,Skin Survey,Skin type assessment,,Unassigned,None
+Core Pages & Flows,Skin Survey,Concern selection,,Unassigned,None
+Core Pages & Flows,Skin Survey,Sensitivity evaluation,,Unassigned,None
+Core Pages & Flows,Skin Survey,Complexion / Fitzpatrick type,,Unassigned,None
+Core Pages & Flows,Skin Survey,Lifestyle factors,,Unassigned,None
+Core Pages & Flows,Skin Survey,Product preferences (vegan fragrance-free etc.),,Unassigned,None
+Core Pages & Flows,Skin Survey,Budget range,,Unassigned,None
+Core Pages & Flows,Skin Survey,AuthPrompt (login/signup prompt mid-survey),,Unassigned,None
+Core Pages & Flows,Skin Survey,Progress indicator,,Unassigned,None
+Core Pages & Flows,Skin Survey,Results page (SurveyResultsPage),,Unassigned,None
+Core Pages & Flows,Skin Survey,Personalized product recommendations on results,,Unassigned,None
+Core Pages & Flows,Skin Survey,Save to sessionState + localStorage + Supabase profile,,Unassigned,None
+Core Pages & Flows,Skin Survey,Resume incomplete survey,,Unassigned,None
+Core Pages & Flows,Skin Survey,Retake survey flow,,Unassigned,None
+Core Pages & Flows,Skin Survey,Guest survey to account merge on signup,,Unassigned,None
+Core Pages & Flows,My Skin,Editable skin type,,Unassigned,None
+Core Pages & Flows,My Skin,Editable concerns list,,Unassigned,None
+Core Pages & Flows,My Skin,Editable allergens,,Unassigned,None
+Core Pages & Flows,My Skin,Editable preferences,,Unassigned,None
+Core Pages & Flows,My Skin,Save to Supabase profile + sessionState,,Unassigned,None
+Core Pages & Flows,My Skin,Sync with skin survey data,,Unassigned,None
+Core Pages & Flows,My Skin,Empty state for incomplete profile,,Unassigned,None
+Core Pages & Flows,My Skin,Link to retake survey,,Unassigned,None
+Core Pages & Flows,Account,Account overview dashboard,,Unassigned,None
+Core Pages & Flows,Account,Saved products list with filtering/sorting,,Unassigned,None
+Core Pages & Flows,Account,Recent purchases,,Unassigned,None
+Core Pages & Flows,Account,Bio editing,,Unassigned,None
+Core Pages & Flows,Account,Points display (PointsDisplay component),,Unassigned,None
+Core Pages & Flows,Account,Tier progress bar,,Unassigned,None
+Core Pages & Flows,Account,Transaction history link,,Unassigned,None
+Core Pages & Flows,Account,Quick links to settings routines badges,,Unassigned,None
+Core Pages & Flows,Account,Guest vs. authenticated state,,Unassigned,None
+Core Pages & Flows,Settings,Profile tab (bio display name avatar),,Unassigned,None
+Core Pages & Flows,Settings,Account tab (email password change),,Unassigned,None
+Core Pages & Flows,Settings,Notifications tab (email product reminders community updates),,Unassigned,None
+Core Pages & Flows,Settings,Privacy tab (profile visibility show routines),,Unassigned,None
+Core Pages & Flows,Settings,Preferences tab (language theme),,Unassigned,None
+Core Pages & Flows,Settings,Location tab (city state zip country geolocation manual lat/lon clear privacy note),,Unassigned,None
+Core Pages & Flows,Settings,Display name change with cooldown logic,,Unassigned,None
+Core Pages & Flows,Settings,Password change modal with current password verification,,Unassigned,None
+Core Pages & Flows,Settings,Tab navigation via URL query param (?tab=location),,Unassigned,None
+Core Pages & Flows,Settings,Save confirmation toast,,Unassigned,None
+Core Pages & Flows,Settings,Supabase profile sync,,Unassigned,None
+Core Pages & Flows,Cart,Cart items list,,Unassigned,None
+Core Pages & Flows,Cart,Quantity adjustment,,Unassigned,None
+Core Pages & Flows,Cart,Remove item,,Unassigned,None
+Core Pages & Flows,Cart,Price subtotal / total,,Unassigned,None
+Core Pages & Flows,Cart,Checkout flow,,Unassigned,None
+Core Pages & Flows,Cart,Empty cart state,,Unassigned,None
+Core Pages & Flows,Cart,Persist cart across sessions (localStorage),,Unassigned,None
+Core Pages & Flows,AI Chat,Chat interface (message input conversation thread),,Unassigned,None
+Core Pages & Flows,AI Chat,AI response rendering (markdown product links),,Unassigned,None
+Core Pages & Flows,AI Chat,Conversation history (multi-turn memory),,Unassigned,None
+Core Pages & Flows,AI Chat,Context-aware from user profile (skin type concerns saved products),,Unassigned,None
+Core Pages & Flows,AI Chat,Product recommendations with marketplace links,,Unassigned,None
+Core Pages & Flows,AI Chat,Routine suggestions,,Unassigned,None
+Core Pages & Flows,AI Chat,Ingredient analysis,,Unassigned,None
+Core Pages & Flows,AI Chat,Navigation intent detection,,Unassigned,None
+Core Pages & Flows,AI Chat,Tone settings (casual professional educational),,Unassigned,None
+Core Pages & Flows,AI Chat,Detail level settings (brief detailed comprehensive),,Unassigned,None
+Core Pages & Flows,AI Chat,Loading state during AI response,,Unassigned,None
+Core Pages & Flows,AI Chat,Error state for API failure,,Unassigned,None
+Core Pages & Flows,AI Chat,NeuralBloomIcon branding,,Unassigned,None
+Core Pages & Flows,AI Chat,Clear conversation,,Unassigned,None
+Core Pages & Flows,Nutrition,FoodLibrary (browse foods),,Unassigned,None
+Core Pages & Flows,Nutrition,FoodDetailModal (nutrition facts skin-relevant nutrients),,Unassigned,None
+Core Pages & Flows,Nutrition,MealPlanner (plan meals by date/time),,Unassigned,None
+Core Pages & Flows,Nutrition,NutrientTracker (daily intake analytics),,Unassigned,None
+Core Pages & Flows,Nutrition,Skin-relevant nutrient highlighting,,Unassigned,None
+Core Pages & Flows,Nutrition,Dietary restriction handling,,Unassigned,None
+Core Pages & Flows,Nutrition,Meal saving,,Unassigned,None
+Core Pages & Flows,Nutrition,Daily intake logging,,Unassigned,None
+Core Pages & Flows,Nutrition,Nutrient goal setting,,Unassigned,None
+Core Pages & Flows,Nutrition,Tab navigation (library planner tracker),,Unassigned,None
+Core Pages & Flows,Nutrition,Supabase persistence (meal_plans nutrient_goals daily_nutrient_intake),,Unassigned,None
+Core Pages & Flows,Nutrition,Disclaimer: educational not medical advice,,Unassigned,None
+Core Pages & Flows,Services,Services directory landing,,Unassigned,None
+Core Pages & Flows,Services,ServicesSearchPage (search & filter),,Unassigned,None
+Core Pages & Flows,Services,ServiceDetailPage (service info provider pricing),,Unassigned,None
+Core Pages & Flows,Services,ServicesComparePage (compare multiple services),,Unassigned,None
+Core Pages & Flows,Services,ServicesBookingPage (booking form),,Unassigned,None
+Core Pages & Flows,Services,ServicesBookingSuccessPage (confirmation),,Unassigned,None
+Core Pages & Flows,Services,Service ratings and reviews,,Unassigned,None
+Core Pages & Flows,Services,Provider trust indicators,,Unassigned,None
+Core Pages & Flows,Services,Booking calendar/scheduling,,Unassigned,None
+Core Pages & Flows,Services,Mock service data,,Unassigned,None
+Core Pages & Flows,Marketplace,Marketplace landing (featured products categories),,Unassigned,None
+Core Pages & Flows,Marketplace,MarketplaceAllPage (full product listing),,Unassigned,None
+Core Pages & Flows,Marketplace,MarketplaceProductDetailPage (product detail with checkout),,Unassigned,None
+Core Pages & Flows,Marketplace,MarketplaceSuccessPage (purchase confirmation),,Unassigned,None
+Core Pages & Flows,Marketplace,Subscription tier discount display,,Unassigned,None
+Core Pages & Flows,Marketplace,Creator storefront links,,Unassigned,None
+Core Pages & Flows,Marketplace,Trust score display,,Unassigned,None
+Core Pages & Flows,Marketplace,Category browsing,,Unassigned,None
+Core Pages & Flows,Marketplace,Search within marketplace,,Unassigned,None
+Core Pages & Flows,Marketplace,Stripe Checkout integration,,Unassigned,None
+Core Pages & Flows,Marketplace,Transaction tracking,,Unassigned,None
+Core Pages & Flows,Community,Community feed (posts from joined communities),,Unassigned,None
+Core Pages & Flows,Community,Community discover (browse communities),,Unassigned,None
+Core Pages & Flows,Community,My Communities tab,,Unassigned,None
+Core Pages & Flows,Community,CommunityCreatePage (create new community),,Unassigned,None
+Core Pages & Flows,Community,Community detail / feed view,,Unassigned,None
+Core Pages & Flows,Community,Post creation (text images),,Unassigned,None
+Core Pages & Flows,Community,Post likes and comments,,Unassigned,None
+Core Pages & Flows,Community,Community membership (join/leave),,Unassigned,None
+Core Pages & Flows,Community,Community moderation indicators,,Unassigned,None
+Core Pages & Flows,Community,Member count display,,Unassigned,None
+Core Pages & Flows,Community,Empty states for each tab,,Unassigned,None
+Core Pages & Flows,Community,Loading states,,Unassigned,None
+Core Pages & Flows,Seller & Creator,SellerOnboardingPage (become a seller),,Unassigned,None
+Core Pages & Flows,Seller & Creator,SellerDashboardPage (seller overview),,Unassigned,None
+Core Pages & Flows,Seller & Creator,SellerApplicationStatusPage (check application),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorOnboardingPage (creator program),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorDashboardPage (creator workspace),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorProductsPage (manage products),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorPatchTestsPage (manage patch tests),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatePatchTestPage (create new patch test),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorAudiencePage (audience analytics),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorAnalyticsPage (analytics dashboard),,Unassigned,None
+Core Pages & Flows,Seller & Creator,CreatorStorefrontPage (storefront customization),,Unassigned,None
+Core Pages & Flows,Seller & Creator,Stripe Connect onboarding integration,,Unassigned,None
+Core Pages & Flows,Seller & Creator,Stripe dashboard link,,Unassigned,None
+Core Pages & Flows,Storefront,StorefrontDetailPage (public storefront view),,Unassigned,None
+Core Pages & Flows,Storefront,StorefrontProductDetailsPage (storefront product detail),,Unassigned,None
+Core Pages & Flows,Storefront,StorefrontJoinPage (join storefront program),,Unassigned,None
+Core Pages & Flows,Storefront,StorefrontRegisterPage (register as storefront with Stripe),,Unassigned,None
+Core Pages & Flows,Affiliate,AffiliateDashboardPage (earnings clicks conversions),,Unassigned,None
+Core Pages & Flows,Affiliate,AffiliateRedirectPage (click tracking + redirect),,Unassigned,None
+Core Pages & Flows,Affiliate,Affiliate link generation,,Unassigned,None
+Core Pages & Flows,Affiliate,Commission tracking,,Unassigned,None
+Core Pages & Flows,Affiliate,Cashback display,,Unassigned,None
+Core Pages & Flows,Reviews,RetailerReviewsPage (retailer trust scores + reviews),,Unassigned,None
+Core Pages & Flows,Reviews,ReviewsProductsPage (aggregated product reviews),,Unassigned,None
+Core Pages & Flows,Reviews,Reviewer similarity scoring and badges,,Unassigned,None
+Core Pages & Flows,Reviews,Aspect ratings (shipping service packaging),,Unassigned,None
+Core Pages & Flows,Reviews,Helpful/report actions,,Unassigned,None
+Core Pages & Flows,Reviews,Sort and filter reviews,,Unassigned,None
+Core Pages & Flows,Reviews,ExplainWhyDropdown for similarity,,Unassigned,None
+Core Pages & Flows,Badges,Achievement/badge display,,Unassigned,None
+Core Pages & Flows,Badges,Badge categories,,Unassigned,None
+Core Pages & Flows,Badges,Earn conditions per badge,,Unassigned,None
+Core Pages & Flows,Badges,Progress toward next badge,,Unassigned,None
+Core Pages & Flows,Badges,Badge notifications,,Unassigned,None
+Core Pages & Flows,Subscription,SubscriptionPage (tier selection),,Unassigned,None
+Core Pages & Flows,Subscription,PremiumPackagesPage (premium feature listing),,Unassigned,None
+Core Pages & Flows,Subscription,Tier comparison table,,Unassigned,None
+Core Pages & Flows,Subscription,Stripe subscription checkout,,Unassigned,None
+Core Pages & Flows,Subscription,Current tier display,,Unassigned,None
+Core Pages & Flows,Subscription,Upgrade/downgrade flow,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,AboutPage,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,ContactPage (with Supabase form submission),,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,PrivacyPage,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,FAQPage,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,AccessibilityPage,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,CommunityGuidelinesPage,,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,DataImpactPage (data transparency),,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,DataAnonymizationPage (data deletion),,Unassigned,None
+Core Pages & Flows,Static & Legal Pages,IngredientPatchTestPage (patch test guide),,Unassigned,None
+Core Pages & Flows,Waitlist / Early Access,WaitlistLandingPage (preview site),,Unassigned,None
+Core Pages & Flows,Waitlist / Early Access,MarketplaceWaitlistPage (marketplace preview),,Unassigned,None
+Core Pages & Flows,Waitlist / Early Access,Password-gated access (password-check Edge Function),,Unassigned,None
+Core Pages & Flows,Error Pages,NotFoundPage (404 catch-all),,Unassigned,None
+Authentication & User Identity,Auth Flows,Email/password signup,,Unassigned,None
+Authentication & User Identity,Auth Flows,Email/password login,,Unassigned,None
+Authentication & User Identity,Auth Flows,OAuth redirect handling (callback page),,Unassigned,None
+Authentication & User Identity,Auth Flows,Forgot password (email-based recovery),,Unassigned,None
+Authentication & User Identity,Auth Flows,Reset password (token-based reset),,Unassigned,None
+Authentication & User Identity,Auth Flows,HCaptcha bot prevention on login/signup,,Unassigned,None
+Authentication & User Identity,Auth Flows,Auto-redirect after login (return to previous page),,Unassigned,None
+Authentication & User Identity,Auth Flows,Session persistence across tabs/refresh,,Unassigned,None
+Authentication & User Identity,Session Management,Supabase Auth session (JWT + refresh token),,Unassigned,None
+Authentication & User Identity,Session Management,Auth state context (AuthContext),,Unassigned,None
+Authentication & User Identity,Session Management,Profile loading on auth state change,,Unassigned,None
+Authentication & User Identity,Session Management,Guest-to-authenticated state transition,,Unassigned,None
+Authentication & User Identity,Session Management,Session expiry handling,,Unassigned,None
+Authentication & User Identity,Session Management,Auto-refresh token logic,,Unassigned,None
+Authentication & User Identity,Auth Logic,AuthContext provider (user profile loading refreshProfile),,Unassigned,None
+Authentication & User Identity,Auth Logic,signUp function (create auth user + profile),,Unassigned,None
+Authentication & User Identity,Auth Logic,signIn function,,Unassigned,None
+Authentication & User Identity,Auth Logic,signOut function,,Unassigned,None
+Authentication & User Identity,Auth Logic,Profile sync to sessionState on auth change,,Unassigned,None
+Authentication & User Identity,Auth Logic,Routine count hydration on login,,Unassigned,None
+Authentication & User Identity,Auth Logic,Survey completion flag sync,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge survey answers from localStorage,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge saved products (dedupe by ID),,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge routines (INSERT into user_routines),,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge search history,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge viewed products,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Merge location data,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,Clear guest localStorage after merge,,Unassigned,None
+Authentication & User Identity,Guest-to-Account Data Merge,MergeResult reporting,,Unassigned,None
+Authentication & User Identity,Profile Management,Create profile on signup (with guest data),,Unassigned,None
+Authentication & User Identity,Profile Management,Load profile from Supabase,,Unassigned,None
+Authentication & User Identity,Profile Management,Update profile fields (bio name avatar skin_type concerns preferences),,Unassigned,None
+Authentication & User Identity,Profile Management,Delete profile (data anonymization),,Unassigned,None
+Authentication & User Identity,Profile Management,Profile hydration cascade: Supabase to sessionState to localStorage,,Unassigned,None
+Authentication & User Identity,Profile Management,Display name change with cooldown (30-day 2 free changes),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Multi-step quiz wizard,,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Skin type question (oily dry combination normal sensitive),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Primary concerns selection (acne aging hyperpigmentation texture etc.),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Sensitivity level,,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Complexion / Fitzpatrick type (I-VI),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Allergen identification,,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Lifestyle factors (sleep stress diet water exercise environment),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Product preferences (vegan cruelty-free fragrance-free etc.),,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Budget range,,Unassigned,None
+Skin Survey & Profile System,Survey Flow,Age range (optional),,Unassigned,None
+Skin Survey & Profile System,Survey State Management,Save answers to localStorage (skinSurveyData) during quiz,,Unassigned,None
+Skin Survey & Profile System,Survey State Management,Save to sessionState on completion,,Unassigned,None
+Skin Survey & Profile System,Survey State Management,Save to Supabase profile on login/signup,,Unassigned,None
+Skin Survey & Profile System,Survey State Management,Resume incomplete survey,,Unassigned,None
+Skin Survey & Profile System,Survey State Management,Retake survey (clear and restart),,Unassigned,None
+Skin Survey & Profile System,Survey State Management,survey_completed flag on profile,,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Skin type (canonical: oily dry combination normal sensitive),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Primary concerns (array),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Sensitivity level,,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Complexion / Fitzpatrick type,,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Allergens (array),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Lifestyle factors (object),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Product preferences (object: vegan crueltyFree fragranceFree etc.),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Budget range,,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Age range,,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Sex at birth (for hormonal context),,Unassigned,None
+Skin Survey & Profile System,Profile Data Model,Acne type / scarring type (if applicable),,Unassigned,None
+Skin Survey & Profile System,Personalization Fallback Hierarchy,Supabase profile (canonical source for auth users),,Unassigned,None
+Skin Survey & Profile System,Personalization Fallback Hierarchy,Session state (tempSkinType tempConcerns from in-session actions),,Unassigned,None
+Skin Survey & Profile System,Personalization Fallback Hierarchy,localStorage skinSurveyData (guest persistence),,Unassigned,None
+Skin Survey & Profile System,Personalization Fallback Hierarchy,Graceful degradation (no personalization no crash),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectiveSkinType(),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectiveConcerns(),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectivePreferences(),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectiveComplexion(),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectiveSensitivity(),,Unassigned,None
+Skin Survey & Profile System,Effective Getters,getEffectiveLifestyle(),,Unassigned,None
+Routines,Routine Builder,Step-by-step routine creation,,Unassigned,None
+Routines,Routine Builder,AM/PM/both time-of-day assignment,,Unassigned,None
+Routines,Routine Builder,Product picker (browse and add from catalog),,Unassigned,None
+Routines,Routine Builder,Custom step creation (non-product steps),,Unassigned,None
+Routines,Routine Builder,Step reordering (drag-and-drop),,Unassigned,None
+Routines,Routine Builder,Step removal,,Unassigned,None
+Routines,Routine Builder,Step editing,,Unassigned,None
+Routines,Routine Builder,Routine naming,,Unassigned,None
+Routines,Routine Builder,Routine description,,Unassigned,None
+Routines,Conflict Detection,Ingredient conflict engine (retinol + AHAs etc.),,Unassigned,None
+Routines,Conflict Detection,Conflict popup with explanation,,Unassigned,None
+Routines,Conflict Detection,Conflict severity levels,,Unassigned,None
+Routines,Conflict Detection,Resolution suggestions,,Unassigned,None
+Routines,AI Assistant,AI-powered routine suggestions,,Unassigned,None
+Routines,AI Assistant,Step recommendations based on profile,,Unassigned,None
+Routines,AI Assistant,Product alternatives,,Unassigned,None
+Routines,AI Assistant,Ordering optimization,,Unassigned,None
+Routines,Notes & Photos,Per-routine notes (text),,Unassigned,None
+Routines,Notes & Photos,Photo attachments (Supabase Storage: routine-photos bucket),,Unassigned,None
+Routines,Notes & Photos,Notes timeline,,Unassigned,None
+Routines,Version Control,Automatic version snapshot on save,,Unassigned,None
+Routines,Version Control,Version history list,,Unassigned,None
+Routines,Version Control,Version diff (step-by-step changes),,Unassigned,None
+Routines,Version Control,Version revert,,Unassigned,None
+Routines,Version Control,Change summary per version,,Unassigned,None
+Routines,Version Control,Version labeling,,Unassigned,None
+Routines,Completion Tracking,Daily AM/PM completion checkboxes,,Unassigned,None
+Routines,Completion Tracking,Completion rate calculation,,Unassigned,None
+Routines,Completion Tracking,Streak computation (current longest active),,Unassigned,None
+Routines,Completion Tracking,Completion persistence (localStorage),,Unassigned,None
+Routines,Analytics & Insights,Usage event logging (created updated deleted viewed),,Unassigned,None
+Routines,Analytics & Insights,Automated insights generation (consistency conflicts progress),,Unassigned,None
+Routines,Analytics & Insights,Insight severity levels,,Unassigned,None
+Routines,Analytics & Insights,Activity timeline (versions + notes + usage combined),,Unassigned,None
+Routines,Routine Persistence,localStorage for guest users,,Unassigned,None
+Routines,Routine Persistence,Supabase user_routines table for auth users,,Unassigned,None
+Routines,Routine Persistence,Merge on signup (guest to account),,Unassigned,None
+Routines,Routine Persistence,Routine count tracking,,Unassigned,None
+Routines,Routine Persistence,Active/inactive toggle,,Unassigned,None
+Routines,Routine Resume,Track last step time filter unfinished status,,Unassigned,None
+Routines,Routine Resume,Resume from where user left off,,Unassigned,None
+Products & Ingredients,Product Data Model,Canonical Product type (src/types/product.ts),,Unassigned,None
+Products & Ingredients,Product Data Model,Fields: id name brand category price rating reviewCount image description skinTypes concerns keyIngredients inStock source size activeIngredients timeOfDay preferences,,Unassigned,None
+Products & Ingredients,Product Data Model,ActiveIngredient sub-type (name concentration unit isKeyActive),,Unassigned,None
+Products & Ingredients,Product Data Model,ProductCategory union type (14 categories),,Unassigned,None
+Products & Ingredients,Product Data Model,ProductSource (marketplace discovery),,Unassigned,None
+Products & Ingredients,Product Data Model,ProductSize (value unit),,Unassigned,None
+Products & Ingredients,Product Categories (Registry),Cleanser Toner Serum Essence Moisturizer Sunscreen Treatment Eye Care Lip Care Mask Exfoliator Oil Mist Tool,,Unassigned,None
+Products & Ingredients,Product Categories (Registry),getCategoryLabel() and getCategoryIcon() helpers,,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,scoreSimilarProducts() — weighted scoring (category concerns skin type ingredients preferences ratings),,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,findCompatibleProducts() — compatibility levels,,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,Concern matching with synonym mapping (matchesConcern),,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,Ingredient matching (matchesIngredient),,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,isProductRecommended() — boolean helper,,Unassigned,None
+Products & Ingredients,Product Matching & Similarity,productMatchesUserConcerns() — array matching,,Unassigned,None
+Products & Ingredients,Product Safety,assessProductSafety() — returns safe/caution/not-recommended,,Unassigned,None
+Products & Ingredients,Product Safety,Allergen checking against user profile,,Unassigned,None
+Products & Ingredients,Product Safety,Skin-type compatibility,,Unassigned,None
+Products & Ingredients,Product Safety,Contraindication detection,,Unassigned,None
+Products & Ingredients,Product Safety,Pregnancy safety flags,,Unassigned,None
+Products & Ingredients,Product Metrics,Price per milliliter (PPML) calculation,,Unassigned,None
+Products & Ingredients,Product Metrics,Concentration analysis,,Unassigned,None
+Products & Ingredients,Product Metrics,Best/worst value comparison,,Unassigned,None
+Products & Ingredients,Product Metrics,Highest concentration per ingredient,,Unassigned,None
+Products & Ingredients,Product Metrics,convertToMl() calculatePPML() formatPPML(),,Unassigned,None
+Products & Ingredients,Product Metadata,Skin type normalization (normalizeSkinTypes),,Unassigned,None
+Products & Ingredients,Product Metadata,isSkinTypeMatch(),,Unassigned,None
+Products & Ingredients,Product Metadata,"All skin type wildcard",,Unassigned,None
+Products & Ingredients,Time of Day Classification,classifyTimeOfDay() — returns am pm or am/pm,,Unassigned,None
+Products & Ingredients,Time of Day Classification,AM_INGREDIENTS PM_INGREDIENTS lists,,Unassigned,None
+Products & Ingredients,Time of Day Classification,AM_KEYWORDS PM_KEYWORDS lists,,Unassigned,None
+Products & Ingredients,Time of Day Classification,3-layer logic: keywords to ingredients to category defaults to fallback,,Unassigned,None
+Products & Ingredients,Ingredient Data,Ingredient category registry (hydration brightening antiaging soothing exfoliation),,Unassigned,None
+Products & Ingredients,Ingredient Data,Ingredient-to-product matching (getProductsForIngredient),,Unassigned,None
+Products & Ingredients,Ingredient Data,Slug-to-name normalization map,,Unassigned,None
+Products & Ingredients,Ingredient Data,Ingredient encyclopedia (in AI knowledge base),,Unassigned,None
+Products & Ingredients,Ingredient Data,Pregnancy-unsafe ingredient list,,Unassigned,None
+Products & Ingredients,Ingredient Data,Advanced ingredient list,,Unassigned,None
+Products & Ingredients,Search Index,Unified search index builder (products + ingredients + pages),,Unassigned,None
+Products & Ingredients,Search Index,SearchResult shape (link category description),,Unassigned,None
+Products & Ingredients,Search Index,Category filter,,Unassigned,None
+Products & Ingredients,Search Index,First-letter matching,,Unassigned,None
+Products & Ingredients,Search Index,9 canonical ingredients,,Unassigned,None
+Products & Ingredients,Search Index,6 page entries,,Unassigned,None
+Products & Ingredients,Mock Data,products.ts — full product database with all schema fields,,Unassigned,None
+Products & Ingredients,Mock Data,Scales to Supabase when real data available,,Unassigned,None
+Reviews & Community,Product Reviews,Review display with reviewer info,,Unassigned,None
+Reviews & Community,Product Reviews,Similarity scoring (user-to-reviewer matching),,Unassigned,None
+Reviews & Community,Product Reviews,Similarity tiers (Full >=70 Strong >=50 Partial >=30 Related >=15 None <15),,Unassigned,None
+Reviews & Community,Product Reviews,Similarity badge with tier info,,Unassigned,None
+Reviews & Community,Product Reviews,Match breakdown (skin type concerns complexion sensitivity lifestyle age),,Unassigned,None
+Reviews & Community,Product Reviews,Helpful/report actions,,Unassigned,None
+Reviews & Community,Product Reviews,Review sorting (most similar newest highest rated),,Unassigned,None
+Reviews & Community,Product Reviews,Review filtering,,Unassigned,None
+Reviews & Community,Product Reviews,ExplainWhyDropdown for similarity explanation,,Unassigned,None
+Reviews & Community,Product Reviews,Aspect ratings,,Unassigned,None
+Reviews & Community,Product Reviews,Review count display,,Unassigned,None
+Reviews & Community,Product Reviews,Star rating display,,Unassigned,None
+Reviews & Community,Reviewer Similarity Engine,calculateSimilarityWeight() — weighted scoring,,Unassigned,None
+Reviews & Community,Reviewer Similarity Engine,Weights: skin type (40) concern (15 each) complexion (10) sensitivity (10) lifestyle (5) age (5),,Unassigned,None
+Reviews & Community,Reviewer Similarity Engine,getTierBadgeInfo() — tier name color icon,,Unassigned,None
+Reviews & Community,Reviewer Similarity Engine,isComplexionMatch() — Fitzpatrick proximity check,,Unassigned,None
+Reviews & Community,Retailer Reviews,Retailer trust score display,,Unassigned,None
+Reviews & Community,Retailer Reviews,Trust score explanation,,Unassigned,None
+Reviews & Community,Retailer Reviews,Retailer-level aspect ratings (shipping service packaging authenticity),,Unassigned,None
+Reviews & Community,Retailer Reviews,Retailer comparison,,Unassigned,None
+Reviews & Community,Retailer Reviews,Sort by trust score price delivery,,Unassigned,None
+Reviews & Community,Retailer Reviews,Filter by features,,Unassigned,None
+Reviews & Community,Community Features,Community creation,,Unassigned,None
+Reviews & Community,Community Features,Community membership (join/leave),,Unassigned,None
+Reviews & Community,Community Features,Community feed (posts),,Unassigned,None
+Reviews & Community,Community Features,Post creation (text + images),,Unassigned,None
+Reviews & Community,Community Features,Post interactions (likes comments),,Unassigned,None
+Reviews & Community,Community Features,Community discovery,,Unassigned,None
+Reviews & Community,Community Features,My communities list,,Unassigned,None
+Reviews & Community,Community Features,Member count,,Unassigned,None
+Reviews & Community,Community Features,Community moderation framework,,Unassigned,None
+Reviews & Community,Community Features,Content reporting,,Unassigned,None
+Reviews & Community,Progress Sharing,Skin journey updates,,Unassigned,None
+Reviews & Community,Progress Sharing,Progress photos (with privacy controls),,Unassigned,None
+Reviews & Community,Progress Sharing,Optional sharing (never pressured),,Unassigned,None
+Reviews & Community,Progress Sharing,Progress framing (neutral non-comparative),,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Product grid with category browsing,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Search within marketplace,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Filter by category price rating,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Sort by relevance price newest,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Creator storefront attribution,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Listing,Trust score per seller,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Detail,Full product information,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Detail,Creator storefront link,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Detail,Stripe Checkout Buy Now button,,Unassigned,None
+Marketplace & Commerce,Marketplace Product Detail,Subscription tier discount display (10% Plus 20% Premium),,Unassigned,None
+Marketplace & Commerce,Marketplace Product Detail,Transaction tracking,,Unassigned,None
+Marketplace & Commerce,Checkout Flow,create-marketplace-checkout Edge Function,,Unassigned,None
+Marketplace & Commerce,Checkout Flow,Stripe Checkout Session creation,,Unassigned,None
+Marketplace & Commerce,Checkout Flow,Platform fee calculation (10%),,Unassigned,None
+Marketplace & Commerce,Checkout Flow,Creator payout calculation (90%),,Unassigned,None
+Marketplace & Commerce,Checkout Flow,Subscription discount application,,Unassigned,None
+Marketplace & Commerce,Checkout Flow,marketplace_transactions record (pending to completed),,Unassigned,None
+Marketplace & Commerce,Checkout Flow,MarketplaceSuccessPage (confirmation),,Unassigned,None
+Marketplace & Commerce,Payment Webhook,marketplace-payment-webhook Edge Function,,Unassigned,None
+Marketplace & Commerce,Payment Webhook,Stripe signature verification,,Unassigned,None
+Marketplace & Commerce,Payment Webhook,checkout.session.completed handler,,Unassigned,None
+Marketplace & Commerce,Payment Webhook,payment_intent.succeeded handler,,Unassigned,None
+Marketplace & Commerce,Payment Webhook,payment_intent.payment_failed handler,,Unassigned,None
+Marketplace & Commerce,Payment Webhook,transfer.created handler (creator payout),,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,subscription_plans table,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Free / Plus / Premium tiers,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,create-subscription-checkout Edge Function,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Stripe subscription checkout,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Stripe customer creation/reuse,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Stripe price/product creation,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Tier-based marketplace discounts,,Unassigned,None
+Marketplace & Commerce,Subscription / Tiers,Tier display in UI,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),create-connect-account Edge Function,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),Express account creation,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),Onboarding link generation,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),check-connect-status Edge Function,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),Account verification (charges_enabled payouts_enabled),,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),create-connect-dashboard-link Edge Function,,Unassigned,None
+Marketplace & Commerce,Stripe Connect (Sellers),stripe_connected_accounts table,,Unassigned,None
+Marketplace & Commerce,Affiliate System,affiliate_partners table (tracking codes commission rates),,Unassigned,None
+Marketplace & Commerce,Affiliate System,affiliate_clicks table (click tracking),,Unassigned,None
+Marketplace & Commerce,Affiliate System,affiliate_transactions table (conversions cashback),,Unassigned,None
+Marketplace & Commerce,Affiliate System,affiliate-conversion Edge Function (click to transaction),,Unassigned,None
+Marketplace & Commerce,Affiliate System,affiliate-webhook Edge Function (external partner integration),,Unassigned,None
+Marketplace & Commerce,Affiliate System,AffiliateRedirectPage (click tracking + redirect),,Unassigned,None
+Marketplace & Commerce,Affiliate System,AffiliateDashboardPage (earnings display),,Unassigned,None
+Marketplace & Commerce,Affiliate System,Cashback calculation (purchase_amount x commission_rate),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,curae_points table (user balance),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,points_transactions table (ledger),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,Point actions: signup (100) survey (50) review (25) community post (15) routine created (30) routine logged (5) purchase (1/$) referral (200) ingredient search (10) profile complete (75) monthly active (50),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,Tier thresholds: Bronze (0) Silver (500) Gold (2000) Platinum (5000),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,PointsDisplay component (tier balance progress),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,PointsEarnedNotification (toast),,Unassigned,None
+Marketplace & Commerce,Rewards / Points,Point redemption,,Unassigned,None
+Marketplace & Commerce,Rewards / Points,Transaction history,,Unassigned,None
+Marketplace & Commerce,Cart,Cart state management (cartState),,Unassigned,None
+Marketplace & Commerce,Cart,Add/remove/update quantity,,Unassigned,None
+Marketplace & Commerce,Cart,Cart count badge,,Unassigned,None
+Marketplace & Commerce,Cart,Persist across sessions (localStorage),,Unassigned,None
+Marketplace & Commerce,Cart,Checkout integration,,Unassigned,None
+AI Systems,Chat Client,callAIChatAPI() — Supabase Edge Function caller,,Unassigned,None
+AI Systems,Chat Client,getClientContext() — gathers saved products recently viewed categories searches,,Unassigned,None
+AI Systems,Chat Client,Conversation history management,,Unassigned,None
+AI Systems,Chat Client,Settings: tone detail level response style custom instructions,,Unassigned,None
+AI Systems,AI Chat Edge Function,Anthropic Claude API integration (claude-3-5-sonnet),,Unassigned,None
+AI Systems,AI Chat Edge Function,System prompt with skincare domain knowledge,,Unassigned,None
+AI Systems,AI Chat Edge Function,User profile context injection,,Unassigned,None
+AI Systems,AI Chat Edge Function,Routine notes context,,Unassigned,None
+AI Systems,AI Chat Edge Function,Product recommendation logic,,Unassigned,None
+AI Systems,AI Chat Edge Function,Ingredient intelligence,,Unassigned,None
+AI Systems,AI Chat Edge Function,Routine building guidance,,Unassigned,None
+AI Systems,AI Chat Edge Function,Safety guardrails (no medical claims),,Unassigned,None
+AI Systems,AI Chat Edge Function,Domain restriction (skincare only),,Unassigned,None
+AI Systems,AI Chat Edge Function,Tone enforcement (calm premium educational),,Unassigned,None
+AI Systems,Conversation Memory,ConversationMemory class,,Unassigned,None
+AI Systems,Conversation Memory,Memory categories: skin profile product preferences budget experience level ingredient preferences routine preferences goals product history,,Unassigned,None
+AI Systems,Conversation Memory,Confidence levels: explicit inferred,,Unassigned,None
+AI Systems,Conversation Memory,Memory persistence,,Unassigned,None
+AI Systems,Intelligence Modules,embeddings.ts — vector embeddings for semantic search,,Unassigned,None
+AI Systems,Intelligence Modules,vectorStore.ts — vector database management,,Unassigned,None
+AI Systems,Intelligence Modules,retrievalPipeline.ts — RAG pipeline,,Unassigned,None
+AI Systems,Intelligence Modules,productIngestion.ts — product data vectorization,,Unassigned,None
+AI Systems,Intelligence Modules,chatRetrieval.ts — retrieval for chat context,,Unassigned,None
+AI Systems,Intelligence Modules,knowledgeBase.ts — ingredient encyclopedia,,Unassigned,None
+AI Systems,Intelligence Modules,routineBuilder.ts — AI-assisted routine building,,Unassigned,None
+AI Systems,Intelligence Modules,ingredientIntelligence.ts — ingredient safety & compatibility,,Unassigned,None
+AI Systems,Intelligence Modules,concernIntelligence.ts — concern-specific reasoning,,Unassigned,None
+AI Systems,Intelligence Modules,skinProfileIntelligence.ts — skin type analysis,,Unassigned,None
+AI Systems,Intelligence Modules,searchRetrievalIntelligence.ts — search query understanding,,Unassigned,None
+AI Systems,Intelligence Modules,communicationIntelligence.ts — tone detection & response style,,Unassigned,None
+AI Systems,Intelligence Modules,errorHandlingIntelligence.ts — error detection & recovery,,Unassigned,None
+AI Systems,Intelligence Modules,workflowIntelligence.ts — workflow detection & management,,Unassigned,None
+AI Systems,Intelligence Modules,shoppingIntelligence.ts — product filtering & comparison,,Unassigned,None
+AI Systems,Intelligence Modules,routineOptimizationIntelligence.ts — routine conflict/ordering,,Unassigned,None
+AI Systems,Intelligence Modules,intentClassificationIntelligence.ts — user intent detection,,Unassigned,None
+AI Systems,Intelligence Modules,responseFormattingIntelligence.ts — response structure,,Unassigned,None
+AI Systems,Intelligence Modules,reasoningChainIntelligence.ts — multi-step reasoning,,Unassigned,None
+AI Systems,Intelligence Modules,modeSwitchingIntelligence.ts — context switching,,Unassigned,None
+AI Systems,Intelligence Modules,dataValidationIntelligence.ts — input validation,,Unassigned,None
+AI Systems,Intelligence Modules,productIntelligence.ts — product-specific knowledge,,Unassigned,None
+AI Systems,Intelligence Modules,behavioralIntelligence.ts — user behavior analysis,,Unassigned,None
+AI Systems,Intelligence Modules,navigationIntelligence.ts — route recommendation,,Unassigned,None
+AI Systems,Intelligence Modules,index.ts — module exports,,Unassigned,None
+AI Systems,Adaptive AI (Legacy),AdaptiveAIEngine,,Unassigned,None
+AI Systems,Adaptive AI (Legacy),Topic detection (routine products ingredients skin-analysis concerns),,Unassigned,None
+AI Systems,Adaptive AI (Legacy),Intent detection (information learning recommendation troubleshooting comparison),,Unassigned,None
+AI Systems,Adaptive AI (Legacy),Contextual response generation,,Unassigned,None
+AI Systems,Product Retrieval (Legacy),retrieveProducts() — relevance scoring,,Unassigned,None
+AI Systems,Product Retrieval (Legacy),retrieveByCategory(),,Unassigned,None
+AI Systems,Product Retrieval (Legacy),retrieveRoutineProducts(),,Unassigned,None
+AI Systems,Product Retrieval (Legacy),searchByIngredient(),,Unassigned,None
+AI Systems,Product Retrieval (Legacy),Budget range filtering (budget mid premium),,Unassigned,None
+AI Systems,Product Retrieval (Legacy),formatProductForResponse() formatRecommendations(),,Unassigned,None
+AI Systems,AI Personalization Integration,Profile-aware recommendations,,Unassigned,None
+AI Systems,AI Personalization Integration,Saved product context,,Unassigned,None
+AI Systems,AI Personalization Integration,Recently viewed context,,Unassigned,None
+AI Systems,AI Personalization Integration,Frequent category context,,Unassigned,None
+AI Systems,AI Personalization Integration,Search history context,,Unassigned,None
+AI Systems,AI Personalization Integration,Routine notes context,,Unassigned,None
+AI Systems,AI Personalization Integration,Concern-to-ingredient mapping,,Unassigned,None
+AI Systems,AI Personalization Integration,Conflict-aware suggestions,,Unassigned,None
+Shared Components,Layout Components,AppLayout (root wrapper: Navbar + Outlet + Footer),,Unassigned,None
+Shared Components,Layout Components,PageWrapper (page styling safe area brand CSS),,Unassigned,None
+Shared Components,Layout Components,Navbar (mobile menu search cart profile dropdown scroll-based styling),,Unassigned,None
+Shared Components,Layout Components,Footer (links newsletter motion effects),,Unassigned,None
+Shared Components,Feature Components,ProfileDropdown (guest/auth states badges quick stats sign out),,Unassigned,None
+Shared Components,Feature Components,SearchOverlay (product/ingredient/page search recently viewed keyboard navigation),,Unassigned,None
+Shared Components,Feature Components,ComparisonPickerModal (select up to 3 products side-by-side metrics PPML),,Unassigned,None
+Shared Components,Feature Components,RetailerComparisonModal (3-column grid price breakdown trust score),,Unassigned,None
+Shared Components,Feature Components,CompatibleWith (4-column product grid compatibility badges),,Unassigned,None
+Shared Components,Feature Components,SafetyBadge (not-recommended / caution compact & expanded tooltip),,Unassigned,None
+Shared Components,Feature Components,PointsDisplay (tier balance progress bar benefits),,Unassigned,None
+Shared Components,Feature Components,PointsEarnedNotification (auto-dismiss toast),,Unassigned,None
+Shared Components,Feature Components,Toast (notification with auto-dismiss),,Unassigned,None
+Shared Components,Feature Components,ScrollToTop (scroll restoration on route change),,Unassigned,None
+Shared Components,Feature Components,LastVisitedPageRestorer (session continuity),,Unassigned,None
+Shared Components,Feature Components,PersistenceDebugPanel (dev-only localStorage viewer),,Unassigned,None
+Shared Components,UI Components,Dropdown (accessible select alternative),,Unassigned,None
+Shared Components,UI Components,Skeleton / SkeletonCard / SkeletonText (loading placeholders),,Unassigned,None
+Shared Components,UI Components,ConcentrationRow (ingredient concentration display),,Unassigned,None
+Shared Components,Shared Components,ExplainWhyDropdown (expandable explanation),,Unassigned,None
+Shared Components,Icon Components,NeuralBloomIcon (Curae AI brand symbol),,Unassigned,None
+Database & Backend,Database Tables — Core,auth.users (Supabase Auth built-in),,Unassigned,None
+Database & Backend,Database Tables — Core,users_profiles (profiles subscription tier skin data preferences),,Unassigned,None
+Database & Backend,Database Tables — Routines,user_routines (routine data with JSONB steps),,Unassigned,None
+Database & Backend,Database Tables — Routines,routine_versions (version history snapshots),,Unassigned,None
+Database & Backend,Database Tables — Routines,routine_usage_events (analytics events),,Unassigned,None
+Database & Backend,Database Tables — Routines,routine_notes (per-routine notes),,Unassigned,None
+Database & Backend,Database Tables — Routines,routine-photos (Supabase Storage bucket),,Unassigned,None
+Database & Backend,Database Tables — Marketplace,marketplace_products (seller products),,Unassigned,None
+Database & Backend,Database Tables — Marketplace,marketplace_storefronts (seller storefronts),,Unassigned,None
+Database & Backend,Database Tables — Marketplace,marketplace_transactions (purchase records),,Unassigned,None
+Database & Backend,Database Tables — Marketplace,stripe_connected_accounts (seller Stripe accounts),,Unassigned,None
+Database & Backend,Database Tables — Marketplace,subscription_plans (tier definitions),,Unassigned,None
+Database & Backend,Database Tables — Affiliate,affiliate_partners (partner configs),,Unassigned,None
+Database & Backend,Database Tables — Affiliate,affiliate_clicks (click tracking),,Unassigned,None
+Database & Backend,Database Tables — Affiliate,affiliate_transactions (conversion records),,Unassigned,None
+Database & Backend,Database Tables — Rewards,curae_points (user balance),,Unassigned,None
+Database & Backend,Database Tables — Rewards,points_transactions (ledger),,Unassigned,None
+Database & Backend,Database Tables — Community,communities (user-created communities),,Unassigned,None
+Database & Backend,Database Tables — Community,community_members (membership),,Unassigned,None
+Database & Backend,Database Tables — Community,community_posts (posts),,Unassigned,None
+Database & Backend,Database Tables — Data Impact,data_impact_contributions (opt-in tracking),,Unassigned,None
+Database & Backend,Database Tables — Data Impact,anonymized_data_points (anonymized behavior data),,Unassigned,None
+Database & Backend,Database Tables — Nutrition,meal_plans,,Unassigned,None
+Database & Backend,Database Tables — Nutrition,nutrient_goals,,Unassigned,None
+Database & Backend,Database Tables — Nutrition,daily_nutrient_intake,,Unassigned,None
+Database & Backend,Database Tables — Nutrition,nutrition_foods,,Unassigned,None
+Database & Backend,Database Tables — Nutrition,saved_meals,,Unassigned,None
+Database & Backend,Database Tables — Other,creator_waitlist (seller applications),,Unassigned,None
+Database & Backend,Database Tables — Other,avatars (avatar images),,Unassigned,None
+Database & Backend,SQL Migrations,user_routines table creation,,Unassigned,None
+Database & Backend,SQL Migrations,routine_usage_events table creation,,Unassigned,None
+Database & Backend,SQL Migrations,creator_waitlist table creation,,Unassigned,None
+Database & Backend,SQL Migrations,routine_versions table creation,,Unassigned,None
+Database & Backend,SQL Migrations,users_profiles survey_completed column,,Unassigned,None
+Database & Backend,SQL Migrations,Missing migrations for 22 application tables (need supabase db pull),,Unassigned,None
+Database & Backend,RLS Policies,user_routines: SELECT INSERT UPDATE DELETE scoped to auth.uid(),,Unassigned,None
+Database & Backend,RLS Policies,routine_versions: SELECT INSERT scoped to auth.uid(),,Unassigned,None
+Database & Backend,RLS Policies,routine_usage_events: SELECT INSERT scoped to auth.uid(),,Unassigned,None
+Database & Backend,RLS Policies,creator_waitlist: SELECT INSERT scoped to auth.uid(),,Unassigned,None
+Database & Backend,RLS Policies,users_profiles: RLS policies (need verification),,Unassigned,None
+Database & Backend,RLS Policies,Missing RLS for marketplace affiliate community nutrition tables,,Unassigned,None
+Database & Backend,Edge Functions,affiliate-conversion (click to transaction),,Unassigned,None
+Database & Backend,Edge Functions,affiliate-webhook (external partner webhook),,Unassigned,None
+Database & Backend,Edge Functions,ai-chat (Claude AI skincare assistant),,Unassigned,None
+Database & Backend,Edge Functions,check-connect-status (Stripe Connect status),,Unassigned,None
+Database & Backend,Edge Functions,create-connect-account (Stripe Connect onboarding),,Unassigned,None
+Database & Backend,Edge Functions,create-connect-dashboard-link (seller dashboard link),,Unassigned,None
+Database & Backend,Edge Functions,create-marketplace-checkout (Stripe Checkout for marketplace),,Unassigned,None
+Database & Backend,Edge Functions,create-subscription-checkout (Stripe subscription checkout),,Unassigned,None
+Database & Backend,Edge Functions,data-anonymization (anonymize user data for research),,Unassigned,None
+Database & Backend,Edge Functions,marketplace-payment-webhook (Stripe payment webhook),,Unassigned,None
+Database & Backend,Edge Functions,geocode-location (server-side geocoding),,Unassigned,None
+Database & Backend,Edge Functions,get-uv-index (server-side UV lookup),,Unassigned,None
+Database & Backend,Edge Functions,password-check (early-access password validation),,Unassigned,None
+Database & Backend,External API Integrations,Anthropic Claude (AI chat),,Unassigned,None
+Database & Backend,External API Integrations,Stripe (payments subscriptions Connect),,Unassigned,None
+Database & Backend,External API Integrations,OpenCage (geocoding),,Unassigned,None
+Database & Backend,External API Integrations,OpenUV (UV index),,Unassigned,None
+Database & Backend,Supabase Clients,supabase-browser.ts (frontend client with persistence + auto-refresh),,Unassigned,None
+Database & Backend,Supabase Clients,supabase.ts (types profile CRUD operations),,Unassigned,None
+State Management,Observable State Managers,sessionState (user interactions preferences personalization context),,Unassigned,None
+State Management,Observable State Managers,cartState (cart items quantities),,Unassigned,None
+State Management,Observable State Managers,savedProductsState / favoritesState (saved products with Supabase sync),,Unassigned,None
+State Management,Observable State Managers,recentlyViewedState (recently viewed products max 10),,Unassigned,None
+State Management,Observable State Managers,locationState (user location with lat/lon hemisphere),,Unassigned,None
+State Management,Observable State Managers,routineCompletionState (daily completion tracking),,Unassigned,None
+State Management,Observable State Managers,routineProgressState (routine builder resume),,Unassigned,None
+State Management,Personalization Engine,personalizationEngine.ts (rule-based recommendations),,Unassigned,None
+State Management,Personalization Engine,generateProductRecommendations(),,Unassigned,None
+State Management,Personalization Engine,generateAIResponse(),,Unassigned,None
+State Management,Personalization Engine,analyzeProgress(),,Unassigned,None
+State Management,Personalization Engine,generateRoutineSuggestions(),,Unassigned,None
+State Management,Personalization Engine,compareProducts(),,Unassigned,None
+State Management,Personalization Engine,Daily logs (skin condition 1-5 mood product usage),,Unassigned,None
+State Management,Matching Utilities,matching.ts (concern synonym mapping ingredient matching),,Unassigned,None
+State Management,Matching Utilities,reviewSimilarity.ts (user-to-reviewer matching),,Unassigned,None
+State Management,Matching Utilities,productSimilarity.ts (product-to-user matching),,Unassigned,None
+State Management,Matching Utilities,productSafety.ts (safety assessment),,Unassigned,None
+State Management,Hooks,useLocalStorageState<T>() (generic localStorage hook),,Unassigned,None
+State Management,Hooks,useDocumentTitle() (page title management),,Unassigned,None
+State Management,Hooks,useUserLocation() (location state hook),,Unassigned,None
+State Management,Hooks,useEnvironmentContext() (environment data hook),,Unassigned,None
+State Management,Hooks,useCartCount() useCartItems(),,Unassigned,None
+State Management,Hooks,useSavedProducts() useSavedProductStatus(),,Unassigned,None
+State Management,Hooks,useRecentlyViewed(),,Unassigned,None
+State Management,Hooks,useRoutineCompletion(),,Unassigned,None
+State Management,Hooks,useRoutineProgress(),,Unassigned,None
+State Management,Hooks,useSessionState(),,Unassigned,None
+State Management,Hooks,useAuth(),,Unassigned,None
+State Management,Environment Context,EnvironmentContext type (location UV climate season source),,Unassigned,None
+State Management,Environment Context,buildEnvironmentContext() (pipeline orchestrator),,Unassigned,None
+State Management,Environment Context,inferClimate() (Koppen-like classification),,Unassigned,None
+State Management,Environment Context,inferSeason() (hemisphere + date),,Unassigned,None
+State Management,Environment Context,inferHemisphere() (lat to hemisphere),,Unassigned,None
+State Management,Environment Context,getUvIndex() (Edge Function caller),,Unassigned,None
+State Management,Environment Context,useEnvironmentContext() (React hook),,Unassigned,None
+State Management,Persistence Layers,localStorage (guest state: cart saved products survey routines location session),,Unassigned,None
+State Management,Persistence Layers,Supabase (auth state: profile routines versions events points),,Unassigned,None
+State Management,Persistence Layers,Session memory (in-memory during session via sessionState),,Unassigned,None
+Error & Empty States,Page-Level Error States,Product not found (product detail with invalid ID),,Unassigned,None
+Error & Empty States,Page-Level Error States,Route not found (404 NotFoundPage),,Unassigned,None
+Error & Empty States,Page-Level Error States,Auth required (redirect to login),,Unassigned,None
+Error & Empty States,Page-Level Error States,Profile loading error,,Unassigned,None
+Error & Empty States,Page-Level Error States,Network failure fallback,,Unassigned,None
+Error & Empty States,Component-Level Empty States,No products match filters (Discover),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No saved products (Account),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No routines (Routines List),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No reviews (Product Detail reviews tab),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No communities joined (Community),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No posts in community feed,,Unassigned,None
+Error & Empty States,Component-Level Empty States,No meal plans (Nutrition),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No search results (SearchOverlay),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No badges earned (Badges),,Unassigned,None
+Error & Empty States,Component-Level Empty States,No transaction history (Points),,Unassigned,None
+Error & Empty States,Component-Level Empty States,Empty cart,,Unassigned,None
+Error & Empty States,Form Error States,Login failed (invalid credentials),,Unassigned,None
+Error & Empty States,Form Error States,Signup failed (email taken weak password),,Unassigned,None
+Error & Empty States,Form Error States,Password reset failed (invalid token),,Unassigned,None
+Error & Empty States,Form Error States,Profile save failed,,Unassigned,None
+Error & Empty States,Form Error States,Location save failed,,Unassigned,None
+Error & Empty States,Form Error States,Routine save failed,,Unassigned,None
+Error & Empty States,Form Error States,Contact form submission failed,,Unassigned,None
+Error & Empty States,Form Error States,Geolocation permission denied,,Unassigned,None
+Error & Empty States,API Error States,Supabase Edge Function failure (graceful fallback),,Unassigned,None
+Error & Empty States,API Error States,AI chat API failure (error message to user),,Unassigned,None
+Error & Empty States,API Error States,Stripe checkout failure,,Unassigned,None
+Error & Empty States,API Error States,UV index API failure (latitude-based estimation fallback),,Unassigned,None
+Error & Empty States,API Error States,Geocoding API failure (fallback lookup table),,Unassigned,None
+Error & Empty States,Loading States,Page-level Suspense fallback (spinner),,Unassigned,None
+Error & Empty States,Loading States,Skeleton loaders (SkeletonCard SkeletonText),,Unassigned,None
+Error & Empty States,Loading States,Button loading states (spinner + disabled),,Unassigned,None
+Error & Empty States,Loading States,Toast notifications for async operations,,Unassigned,None
+Image & Asset Loading,Product Images,Main product image,,Unassigned,None
+Image & Asset Loading,Product Images,Image gallery with thumbnails,,Unassigned,None
+Image & Asset Loading,Product Images,Fallback for missing images,,Unassigned,None
+Image & Asset Loading,Product Images,Lazy loading for off-screen images,,Unassigned,None
+Image & Asset Loading,User Avatars,Profile avatar display,,Unassigned,None
+Image & Asset Loading,User Avatars,Avatar upload,,Unassigned,None
+Image & Asset Loading,User Avatars,Fallback avatar (initials or default),,Unassigned,None
+Image & Asset Loading,User Avatars,Supabase Storage for avatar files,,Unassigned,None
+Image & Asset Loading,Routine Photos,Photo attachment in notes,,Unassigned,None
+Image & Asset Loading,Routine Photos,Supabase Storage: routine-photos bucket,,Unassigned,None
+Image & Asset Loading,Routine Photos,Image preview,,Unassigned,None
+Image & Asset Loading,Routine Photos,Upload progress indicator,,Unassigned,None
+Image & Asset Loading,Brand Assets,Logo,,Unassigned,None
+Image & Asset Loading,Brand Assets,NeuralBloomIcon (AI brand mark),,Unassigned,None
+Image & Asset Loading,Brand Assets,Placeholder product SVG,,Unassigned,None
+Image & Asset Loading,Brand Assets,Retailer logos (via placeholder URLs),,Unassigned,None
+Image & Asset Loading,External Images,Unsplash product photography,,Unassigned,None
+Image & Asset Loading,External Images,Community post images,,Unassigned,None
+Image & Asset Loading,External Images,Marketplace product images,,Unassigned,None
+Performance & Loading,Code Splitting,All 73 pages lazy-loaded via React.lazy(),,Unassigned,None
+Performance & Loading,Code Splitting,Suspense fallback with loading spinner,,Unassigned,None
+Performance & Loading,Code Splitting,Route-based code splitting,,Unassigned,None
+Performance & Loading,State Performance,Observable pattern with selective listeners (only re-render subscribers),,Unassigned,None
+Performance & Loading,State Performance,localStorage reads cached in memory,,Unassigned,None
+Performance & Loading,State Performance,Debounced writes where applicable,,Unassigned,None
+Performance & Loading,Build Optimization,Vite production build,,Unassigned,None
+Performance & Loading,Build Optimization,Tree-shaking,,Unassigned,None
+Performance & Loading,Build Optimization,Chunk size warnings (>500kB index chunk),,Unassigned,None
+Performance & Loading,Build Optimization,Manual chunks consideration for large dependencies,,Unassigned,None
+Performance & Loading,API Performance,Promise.all for parallel async calls (UV + climate + season),,Unassigned,None
+Performance & Loading,API Performance,Cached environment context (re-fetch only on location change),,Unassigned,None
+Performance & Loading,API Performance,Supabase connection reuse,,Unassigned,None
+Mobile Responsiveness,Layout,Mobile-first responsive design,,Unassigned,None
+Mobile Responsiveness,Layout,PageWrapper safe area support,,Unassigned,None
+Mobile Responsiveness,Layout,Responsive grid layouts (grid-cols-1 to sm:grid-cols-2 to lg:grid-cols-4),,Unassigned,None
+Mobile Responsiveness,Layout,Max-width containers (max-w-7xl),,Unassigned,None
+Mobile Responsiveness,Navigation,Mobile hamburger menu (Navbar),,Unassigned,None
+Mobile Responsiveness,Navigation,Bottom-safe-area spacing,,Unassigned,None
+Mobile Responsiveness,Navigation,Touch-friendly button sizes,,Unassigned,None
+Mobile Responsiveness,Navigation,Scroll-based navbar styling,,Unassigned,None
+Mobile Responsiveness,Components,Responsive product grids,,Unassigned,None
+Mobile Responsiveness,Components,Collapsible sections on mobile,,Unassigned,None
+Mobile Responsiveness,Components,Full-width modals on small screens,,Unassigned,None
+Mobile Responsiveness,Components,Touch-friendly comparison picker,,Unassigned,None
+Mobile Responsiveness,Components,Responsive settings tab layout,,Unassigned,None
+Mobile Responsiveness,Typography,Responsive font scaling (text-3xl md:text-4xl),,Unassigned,None
+Mobile Responsiveness,Typography,Readable line lengths on all screens,,Unassigned,None
+Mobile Responsiveness,Typography,Proper text wrapping (no overflow),,Unassigned,None
+Accessibility,Keyboard Navigation,Escape key to close modals,,Unassigned,None
+Accessibility,Keyboard Navigation,Focus management in modals,,Unassigned,None
+Accessibility,Keyboard Navigation,focus-visible ring styling,,Unassigned,None
+Accessibility,Keyboard Navigation,Keyboard-navigable search overlay,,Unassigned,None
+Accessibility,Keyboard Navigation,Tab order for form controls,,Unassigned,None
+Accessibility,ARIA,aria-label on icon-only buttons,,Unassigned,None
+Accessibility,ARIA,aria-expanded on collapsible sections,,Unassigned,None
+Accessibility,ARIA,Role attributes on interactive elements,,Unassigned,None
+Accessibility,ARIA,Screen reader support for dynamic content,,Unassigned,None
+Accessibility,Visual,WCAG AA contrast compliance,,Unassigned,None
+Accessibility,Visual,Reduced motion support (motion-safe: prefix),,Unassigned,None
+Accessibility,Visual,Sufficient touch targets (min 44px),,Unassigned,None
+Accessibility,Visual,Focus indicators,,Unassigned,None
+Accessibility,Content,Alt text on images,,Unassigned,None
+Accessibility,Content,Accessible form labels,,Unassigned,None
+Accessibility,Content,Error messages linked to fields,,Unassigned,None
+Accessibility,Content,Accessible dropdown alternative (Dropdown component),,Unassigned,None
+Accessibility,Accessibility Statement,Dedicated /accessibility page,,Unassigned,None
+Accessibility,Accessibility Statement,WCAG compliance level,,Unassigned,None
+Accessibility,Accessibility Statement,Known limitations,,Unassigned,None
+Accessibility,Accessibility Statement,Contact for accessibility issues,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Terracotta (#C4704D) — primary,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Cream (#FDF8F5) — background,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Deep (#2D2A26) — text,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Sage (#7A8B7A) — accent,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Warm Gray (#6B635A) — secondary text,,Unassigned,None
+Branding & Visual Identity,Brand Colors (Tailwind Tokens),Blush — border / divider,,Unassigned,None
+Branding & Visual Identity,Typography,Headings: Cormorant Garamond (serif),,Unassigned,None
+Branding & Visual Identity,Typography,Body: DM Sans (sans-serif),,Unassigned,None
+Branding & Visual Identity,Typography,Consistent font-weight usage,,Unassigned,None
+Branding & Visual Identity,Typography,No additional font families,,Unassigned,None
+Branding & Visual Identity,Motion System,Soft slow premium motion,,Unassigned,None
+Branding & Visual Identity,Motion System,No bounce/spring/playful motion,,Unassigned,None
+Branding & Visual Identity,Motion System,cubic-bezier curves from motionVariants.ts,,Unassigned,None
+Branding & Visual Identity,Motion System,Framer Motion for scroll-triggered animations,,Unassigned,None
+Branding & Visual Identity,Motion System,motion-safe: reduced motion fallbacks,,Unassigned,None
+Branding & Visual Identity,Motion System,Duration tokens (fast normal slow),,Unassigned,None
+Branding & Visual Identity,Motion System,Easing tokens (natural gentle),,Unassigned,None
+Branding & Visual Identity,Component Patterns,Rounded corners (rounded-xl rounded-2xl),,Unassigned,None
+Branding & Visual Identity,Component Patterns,Soft shadows,,Unassigned,None
+Branding & Visual Identity,Component Patterns,Cream/white card backgrounds,,Unassigned,None
+Branding & Visual Identity,Component Patterns,Primary color CTAs,,Unassigned,None
+Branding & Visual Identity,Component Patterns,Border-blush dividers,,Unassigned,None
+Branding & Visual Identity,Component Patterns,Icon system (Remix Icon: ri-*),,Unassigned,None
+Branding & Visual Identity,Brand Tone,Calm premium educational supportive,,Unassigned,None
+Branding & Visual Identity,Brand Tone,Science-rooted never salesy,,Unassigned,None
+Branding & Visual Identity,Brand Tone,No exclamation marks unless requested,,Unassigned,None
+Branding & Visual Identity,Brand Tone,No hype language,,Unassigned,None
+Branding & Visual Identity,Brand Tone,No urgency/scarcity language,,Unassigned,None
+Routing & Navigation,Router Configuration,React Router v7,,Unassigned,None
+Routing & Navigation,Router Configuration,Two layout groups: no-layout (auth creator dashboard) and AppLayout (all public pages),,Unassigned,None
+Routing & Navigation,Router Configuration,All routes lazy-loaded with Suspense,,Unassigned,None
+Routing & Navigation,Router Configuration,Catch-all 404 route,,Unassigned,None
+Routing & Navigation,Navigation Components,Navbar with route links,,Unassigned,None
+Routing & Navigation,Navigation Components,Footer with section links,,Unassigned,None
+Routing & Navigation,Navigation Components,Breadcrumb navigation (product detail),,Unassigned,None
+Routing & Navigation,Navigation Components,Tab navigation (settings account nutrition community),,Unassigned,None
+Routing & Navigation,Navigation Components,URL query param navigation (?tab= ?id=),,Unassigned,None
+Routing & Navigation,Route State,URL params for product IDs (/product-detail/:id),,Unassigned,None
+Routing & Navigation,Route State,Search params for filters and tabs,,Unassigned,None
+Routing & Navigation,Route State,ScrollToTop on route change,,Unassigned,None
+Routing & Navigation,Route State,LastVisitedPageRestorer for session continuity,,Unassigned,None
+Routing & Navigation,Deep Linking,Settings tab deep link (/settings?tab=location),,Unassigned,None
+Routing & Navigation,Deep Linking,Product detail by ID (/product-detail/5),,Unassigned,None
+Routing & Navigation,Deep Linking,Marketplace product by ID (/marketplace/product/:id),,Unassigned,None
+Routing & Navigation,Deep Linking,Service by ID (/services/:id),,Unassigned,None
+Routing & Navigation,Deep Linking,Storefront by ID (/storefront/:id),,Unassigned,None
+Routing & Navigation,Deep Linking,Community post links,,Unassigned,None
+Routing & Navigation,Navigation Analytics,sessionState.navigateTo() — track page navigation,,Unassigned,None
+Routing & Navigation,Navigation Analytics,sessionState.trackInteraction() — track user interactions,,Unassigned,None
+Routing & Navigation,Navigation Analytics,Recently viewed products on navigation,,Unassigned,None
+Internationalization,i18n Setup,i18next configuration,,Unassigned,None
+Internationalization,i18n Setup,Language detection (browser),,Unassigned,None
+Internationalization,i18n Setup,Fallback language: English,,Unassigned,None
+Internationalization,Supported Languages,English (en),,Unassigned,None
+Internationalization,Supported Languages,Spanish (es),,Unassigned,None
+Internationalization,Supported Languages,French (fr),,Unassigned,None
+Internationalization,Translation Resources,Common translation keys per language,,Unassigned,None
+Internationalization,Translation Resources,Language switcher in Settings to Preferences,,Unassigned,None
+Internationalization,Translation Resources,Language persistence (localStorage + Supabase),,Unassigned,None
+Data Impact & Privacy,Data Impact,DataImpactPage (transparency dashboard),,Unassigned,None
+Data Impact & Privacy,Data Impact,Opt-in data contribution program,,Unassigned,None
+Data Impact & Privacy,Data Impact,data_impact_contributions table,,Unassigned,None
+Data Impact & Privacy,Data Impact,Contribution count tracking,,Unassigned,None
+Data Impact & Privacy,Data Impact,Impact score,,Unassigned,None
+Data Impact & Privacy,Data Anonymization,data-anonymization Edge Function,,Unassigned,None
+Data Impact & Privacy,Data Anonymization,Process user data (anonymize patterns),,Unassigned,None
+Data Impact & Privacy,Data Anonymization,Generate anonymized insights (aggregated),,Unassigned,None
+Data Impact & Privacy,Data Anonymization,Generate research datasets,,Unassigned,None
+Data Impact & Privacy,Data Anonymization,anonymized_data_points table,,Unassigned,None
+Data Impact & Privacy,Data Anonymization,User segment classification (tier + account age),,Unassigned,None
+Data Impact & Privacy,Data Anonymization,No PII in output,,Unassigned,None
+Data Impact & Privacy,Data Deletion,DataAnonymizationPage (user-facing deletion),,Unassigned,None
+Data Impact & Privacy,Data Deletion,deleteUserProfile() function,,Unassigned,None
+Data Impact & Privacy,Data Deletion,Full account deletion flow,,Unassigned,None
+Data Impact & Privacy,Data Deletion,Confirmation steps,,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Profile visibility toggle (Settings to Privacy),,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Show routines toggle,,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Location data consent (explicit opt-in for geolocation),,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Location clear functionality,,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Privacy policy page,,Unassigned,None
+Data Impact & Privacy,Privacy Controls,Privacy note on location settings,,Unassigned,None
+Environment & Location Personalization,Location Data,UserLocation type (city state zip region country lat lon timezone hemisphere),,Unassigned,None
+Environment & Location Personalization,Location Data,LocationStateManager (localStorage persistence),,Unassigned,None
+Environment & Location Personalization,Location Data,useUserLocation() hook,,Unassigned,None
+Environment & Location Personalization,Location Data,Supabase profile sync (preferences.location),,Unassigned,None
+Environment & Location Personalization,Environment Context,EnvironmentContext type (location uvIndex uvBand climate season source),,Unassigned,None
+Environment & Location Personalization,Environment Context,Source modes: mock (no location) partial (text only) live (full coords),,Unassigned,None
+Environment & Location Personalization,Environment Context,buildEnvironmentContext() pipeline,,Unassigned,None
+Environment & Location Personalization,Environment Context,useEnvironmentContext() React hook,,Unassigned,None
+Environment & Location Personalization,Inference Engines,inferClimate() — Koppen-like lat/lon classification,,Unassigned,None
+Environment & Location Personalization,Inference Engines,inferSeason() — hemisphere + date,,Unassigned,None
+Environment & Location Personalization,Inference Engines,inferHemisphere() — lat to northern/southern,,Unassigned,None
+Environment & Location Personalization,Inference Engines,estimateUvFromLatitude() — fallback UV estimation,,Unassigned,None
+Environment & Location Personalization,Edge Functions,get-uv-index (OpenUV API wrapper with latitude fallback),,Unassigned,None
+Environment & Location Personalization,Edge Functions,geocode-location (OpenCage API wrapper with city fallback table),,Unassigned,None
+Environment & Location Personalization,Settings UI,Location tab with city/state/zip/country inputs,,Unassigned,None
+Environment & Location Personalization,Settings UI,"Use my current location button (browser geolocation)",,Unassigned,None
+Environment & Location Personalization,Settings UI,Advanced lat/lon manual input (collapsible),,Unassigned,None
+Environment & Location Personalization,Settings UI,"Clear my location button",,Unassigned,None
+Environment & Location Personalization,Settings UI,Privacy note,,Unassigned,None
+Environment & Location Personalization,Settings UI,Geocoding on save (text to coords),,Unassigned,None
+Environment & Location Personalization,Settings UI,Save to localStorage + Supabase,,Unassigned,None
+Environment & Location Personalization,UI Consumption,Product detail: Location Fit Block (live/partial shown mock hidden),,Unassigned,None
+Environment & Location Personalization,UI Consumption,Product search detail: Environment block (live/partial shown mock hidden),,Unassigned,None
+Environment & Location Personalization,UI Consumption,Source-aware copy (personalized / partially personalized / default data),,Unassigned,None
+Environment & Location Personalization,UI Consumption,Location explanation modal,,Unassigned,None
+Environment & Location Personalization,Governance (CLAUDE.md),Never claim personalization when source === mock,,Unassigned,None
+Environment & Location Personalization,Governance (CLAUDE.md),All UV/climate/season must use useEnvironmentContext(),,Unassigned,None
+Environment & Location Personalization,Governance (CLAUDE.md),No hard-coded environment values in components,,Unassigned,None
+Environment & Location Personalization,Governance (CLAUDE.md),No direct external API calls from frontend,,Unassigned,None
+Environment & Location Personalization,Governance (CLAUDE.md),Geolocation only on explicit user action,,Unassigned,None
+Testing & QA,Type Safety,TypeScript strict mode,,Unassigned,None
+Testing & QA,Type Safety,npx tsc --noEmit verification,,Unassigned,None
+Testing & QA,Type Safety,Canonical types in src/types/,,Unassigned,None
+Testing & QA,Build Verification,npx vite build verification,,Unassigned,None
+Testing & QA,Build Verification,Chunk size monitoring,,Unassigned,None
+Testing & QA,Build Verification,Zero-error builds,,Unassigned,None
+Testing & QA,QA Execution Mode (CLAUDE.md),Post-implementation QA checklist,,Unassigned,None
+Testing & QA,QA Execution Mode (CLAUDE.md),PASS/FAIL per item,,Unassigned,None
+Testing & QA,QA Execution Mode (CLAUDE.md),Category-specific checklists (reviews comparison metadata filters personalization shared components),,Unassigned,None
+Testing & QA,QA Execution Mode (CLAUDE.md),Ship readiness assessment,,Unassigned,None
+Testing & QA,Cross-Surface Consistency (CLAUDE.md),Duplicate detection across pages,,Unassigned,None
+Testing & QA,Cross-Surface Consistency (CLAUDE.md),Canonical version identification,,Unassigned,None
+Testing & QA,Cross-Surface Consistency (CLAUDE.md),Alignment enforcement,,Unassigned,None
+Testing & QA,Future-Proofing (CLAUDE.md),Scales to real production data,,Unassigned,None
+Testing & QA,Future-Proofing (CLAUDE.md),Reusable classification utilities,,Unassigned,None
+Testing & QA,Future-Proofing (CLAUDE.md),No mock-specific logic,,Unassigned,None
+Testing & QA,Future-Proofing (CLAUDE.md),Shared utilities instead of inline logic,,Unassigned,None
+Testing & QA,Future-Proofing (CLAUDE.md),Entity registry compliance,,Unassigned,None
+Security,Authentication Security,HCaptcha on login/signup,,Unassigned,None
+Security,Authentication Security,JWT-based session management,,Unassigned,None
+Security,Authentication Security,Auto-refresh tokens,,Unassigned,None
+Security,Authentication Security,Password validation,,Unassigned,None
+Security,Database Security,RLS on all user-scoped tables,,Unassigned,None
+Security,Database Security,Service role only for webhooks + analytics,,Unassigned,None
+Security,Database Security,No service role key in frontend,,Unassigned,None
+Security,API Security,All external APIs called server-side only (Edge Functions),,Unassigned,None
+Security,API Security,Stripe webhook signature verification,,Unassigned,None
+Security,API Security,Environment variables for API keys,,Unassigned,None
+Security,API Security,No API keys in frontend code,,Unassigned,None
+Security,Content Security,No user-generated HTML rendering (XSS prevention),,Unassigned,None
+Security,Content Security,Input validation on forms,,Unassigned,None
+Security,Content Security,Rate limiting (via Supabase/Stripe),,Unassigned,None
+Security,Password-Gated Access,password-check Edge Function,,Unassigned,None
+Security,Password-Gated Access,Early-access page protection,,Unassigned,None
+Security,Password-Gated Access,Token-based session after password entry,,Unassigned,None
