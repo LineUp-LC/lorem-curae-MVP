@@ -10,3 +10,5 @@ dist/
 # Build artifacts
 *.zip
 pnpm-lock.yaml
+
+nul
