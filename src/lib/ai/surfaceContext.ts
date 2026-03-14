@@ -50,7 +50,10 @@ export type AIMode =
   | 'find_alternatives'
   | 'review_summary'
   | 'natural_discovery'
-  | 'rewrite_explanation';
+  | 'rewrite_explanation'
+  | 'guided_comparison'
+  | 'guided_routine_build'
+  | 'guided_routine_explain';
 
 // ============================================================================
 // USER PROFILE
@@ -94,7 +97,10 @@ export type PageContext =
   | { mode: 'find_alternatives'; sourceProduct: Product; alternatives: Product[]; overlapIngredients: string[] }
   | { mode: 'review_summary'; product: Product; reviews: ReviewForSummary[] }
   | { mode: 'natural_discovery'; query: string; scoredResults: { product: Product; score: number; topReasons: string[] }[] }
-  | { mode: 'rewrite_explanation'; originalText: string; targetLevel: ExplanationLevel; product?: Product };
+  | { mode: 'rewrite_explanation'; originalText: string; targetLevel: ExplanationLevel; product?: Product }
+  | { mode: 'guided_comparison'; products: Product[]; conversationTurns: ConversationMessage[] }
+  | { mode: 'guided_routine_build'; routineSteps: { category: string; product?: Product }[]; timing: 'am' | 'pm' | 'both'; conversationTurns: ConversationMessage[] }
+  | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] };
 
 /**
  * Lightweight retailer shape for AI context serialization.
@@ -402,6 +408,9 @@ export function generateContextCacheKey(ctx: AISurfaceContext): string {
   else if (page.mode === 'review_summary') pageId += `:${page.product.id}`;
   else if (page.mode === 'natural_discovery') pageId += `:${page.query}`;
   else if (page.mode === 'rewrite_explanation') pageId += `:${page.targetLevel}`;
+  else if (page.mode === 'guided_comparison') pageId += `:${page.products.map(p => p.id).sort().join(',')}`;
+  else if (page.mode === 'guided_routine_build') pageId += `:${page.timing}:${page.routineSteps.length}`;
+  else if (page.mode === 'guided_routine_explain') pageId += `:${page.products.map(p => p.id).sort().join(',')}:${page.toneLevel}`;
 
   return `ai-insight:${pageId}:${profileHash}:${envHash}`;
 }

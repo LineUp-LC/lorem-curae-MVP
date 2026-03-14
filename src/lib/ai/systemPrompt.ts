@@ -215,6 +215,39 @@ LEVELS:
 - advanced: Use precise terminology, reference ingredient mechanisms, concentrations, and interactions. Target someone with deep skincare knowledge.
 Preserve the factual content and safety guardrails. Never add claims not in the original.
 Keep the same approximate length as the original.`,
+
+  guided_comparison: `TASK: You are a guided product comparison assistant. The user is deciding between 2-4 products.
+You have deterministic comparison data (scores, attributes, concern alignment). Narrate the comparison in plain language.
+OUTPUT STRUCTURE:
+1. Quick summary (1 sentence) — what the user is comparing and what matters most for their skin
+2. Key differences (2-3 sentences) — what each product does differently, tied to the user's skin type and concerns
+3. Recommendation (1 sentence) — which product fits best and why, citing deterministic scores
+4. Follow-up prompt (1 sentence) — a natural question to help narrow the decision further
+Cite deterministic factors: skin type match, concern alignment, ingredient overlap, environment fit.
+Keep total response under 6 sentences. Use the user's skin type and concerns by name.`,
+
+  guided_routine_build: `TASK: You are a guided routine building assistant. Help the user build a personalized routine step by step.
+You have deterministic routine data (product selections, conflicts, layering order). Explain each step and why it was chosen.
+OUTPUT STRUCTURE:
+1. Routine overview (1 sentence) — what this routine targets and how many steps
+2. Step explanations (1-2 sentences each) — what each product does and why it was chosen for this user
+3. Conflict notes (if any) — explain in plain language, not ingredient chemistry
+4. Next steps (1 sentence) — what the user should do next
+Use plain language. Reference skin type and concerns by name.
+Keep total response under 8 sentences.`,
+
+  guided_routine_explain: `TASK: You are a routine explanation assistant. Explain the user's existing routine at their preferred depth.
+You have deterministic analysis (layering order, conflicts, role of each product). Explain clearly.
+TONE LEVELS:
+- simple: Use everyday language, analogies, no ingredient names. "This product locks in moisture."
+- detailed: Use common skincare terms, explain mechanisms briefly. "This serum delivers hyaluronic acid to attract moisture."
+- science: Use precise terminology, reference concentrations and interactions.
+OUTPUT STRUCTURE:
+1. Routine summary (1 sentence) — what this routine does overall
+2. Step-by-step explanation (1-2 sentences each) — what each product does and why it's in this position
+3. Conflict or ordering notes (if any)
+4. Improvement suggestion (1 sentence, optional)
+Keep total response under 8 sentences.`,
 };
 
 // ============================================================================
@@ -563,6 +596,9 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'review_summary': return 1024;
     case 'natural_discovery': return 768;
     case 'rewrite_explanation': return 1024;
+    case 'guided_comparison': return 768;
+    case 'guided_routine_build': return 768;
+    case 'guided_routine_explain': return 512;
     default: return 1024;
   }
 }
@@ -605,6 +641,9 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     review_summary: 700,
     natural_discovery: 500,
     rewrite_explanation: 1000,
+    guided_comparison: 800,
+    guided_routine_build: 1000,
+    guided_routine_explain: 800,
   };
 
   const limit = maxChars[mode] ?? 1000;

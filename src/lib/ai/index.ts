@@ -722,3 +722,49 @@ export {
   discoverWithAI,
   rewriteExplanation,
 } from './discoveryClient';
+
+// Guided Conversation State
+export {
+  createGuidedConversation,
+  addTurn,
+  getRecentTurns,
+  updateAccumulatedContext,
+  completeConversation,
+  abandonConversation,
+  saveGuidedConversation,
+  loadGuidedConversation,
+  loadActiveConversation,
+  clearGuidedConversation,
+  clearAllGuidedConversations,
+  type GuidedAssistantMode,
+  type ConversationTurn,
+  type GuidedConversationState,
+  type GuidedAccumulatedContext,
+} from './conversationState';
+
+// Guided Assistant (context builders + follow-up generator)
+export {
+  buildHelpMeChooseContext,
+  buildRoutineAssistantContext,
+  buildExplainRoutineContext,
+  generateFollowUpQuestion,
+  type HelpMeChooseInput,
+  type HelpMeChooseResult,
+  type DeterministicComparison,
+  type ComparisonAttribute,
+  type BuildRoutineInput,
+  type BuildRoutineResult,
+  type ExplainRoutineInput,
+  type ExplainRoutineResult,
+  type RoutineStepAnalysis,
+} from './guidedAssistant';
+
+// Guided Client (thin API wrappers for guided modes)
+export {
+  helpMeChoose,
+  buildMeARoutine,
+  explainMyRoutine,
+  type HelpMeChooseResponse,
+  type BuildMeARoutineResponse,
+  type ExplainMyRoutineResponse,
+} from './guidedClient';

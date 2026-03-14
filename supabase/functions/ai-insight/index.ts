@@ -43,6 +43,9 @@ const MODE_MAX_TOKENS: Record<string, number> = {
   review_summary: 512,
   natural_discovery: 384,
   rewrite_explanation: 512,
+  guided_comparison: 768,
+  guided_routine_build: 768,
+  guided_routine_explain: 512,
 };
 
 // Supported non-chat modes
@@ -60,6 +63,9 @@ const SUPPORTED_MODES = [
   'review_summary',
   'natural_discovery',
   'rewrite_explanation',
+  'guided_comparison',
+  'guided_routine_build',
+  'guided_routine_explain',
 ];
 
 // ---------------------------------------------------------------------------

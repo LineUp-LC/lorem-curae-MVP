@@ -226,6 +226,58 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
     return parts.length > 0 ? parts.join(' ') : undefined;
   }
 
+  // Guided comparison fallback: summarise deterministic recommendation
+  if (ctx.mode === 'guided_comparison' && ctx.page.mode === 'guided_comparison') {
+    const products = ctx.page.products;
+    if (products.length > 0) {
+      parts.push(`Comparing ${products.map(p => p.name).join(' and ')}.`);
+      if (evidence.concernAlignment) {
+        const { matched } = evidence.concernAlignment;
+        if (matched.length > 0) {
+          parts.push(`These products address ${matched.join(' and ')}, which aligns with your skin concerns.`);
+        }
+      }
+      const skinType = ctx.user.skinType;
+      if (skinType) {
+        parts.push(`Results are tailored for ${skinType} skin.`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Guided routine build fallback: summarise selected steps
+  if (ctx.mode === 'guided_routine_build' && ctx.page.mode === 'guided_routine_build') {
+    const steps = ctx.page.routineSteps;
+    const filledSteps = steps.filter(s => s.product);
+    const timing = ctx.page.timing === 'both' ? 'morning and evening' : ctx.page.timing === 'am' ? 'morning' : 'evening';
+    if (filledSteps.length > 0) {
+      parts.push(`Your ${timing} routine includes ${filledSteps.length} product${filledSteps.length > 1 ? 's' : ''}.`);
+      const productNames = filledSteps.slice(0, 3).map(s => s.product!.name).join(', ');
+      parts.push(`Key products: ${productNames}.`);
+    } else {
+      parts.push(`Building a ${timing} routine based on your profile.`);
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
+  // Guided routine explain fallback: list steps with roles
+  if (ctx.mode === 'guided_routine_explain' && ctx.page.mode === 'guided_routine_explain') {
+    const products = ctx.page.products;
+    const timing = ctx.page.timing === 'am' ? 'morning' : 'evening';
+    if (products.length > 0) {
+      parts.push(`Your ${timing} routine has ${products.length} step${products.length > 1 ? 's' : ''}.`);
+      const productNames = products.slice(0, 3).map(p => p.name).join(', ');
+      parts.push(`Products: ${productNames}.`);
+      if (evidence.concernAlignment) {
+        const { matched } = evidence.concernAlignment;
+        if (matched.length > 0) {
+          parts.push(`This routine addresses ${matched.join(' and ')}.`);
+        }
+      }
+    }
+    return parts.length > 0 ? parts.join(' ') : undefined;
+  }
+
   // Rewrite-explanation has no fallback — requires AI
   if (ctx.mode === 'rewrite_explanation') {
     return undefined;

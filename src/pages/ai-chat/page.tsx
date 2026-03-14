@@ -20,6 +20,8 @@ import {
   type UserInteractionHistory,
   type NavigationIntent,
 } from '../../lib/ai';
+import GuidedAssistantPanel from '../../components/feature/GuidedAssistantPanel';
+import type { GuidedAssistantMode } from '../../lib/ai/conversationState';
 
 // Local interface for AI chat user profile (different from Supabase UserProfile)
 interface AIChatUserProfile {

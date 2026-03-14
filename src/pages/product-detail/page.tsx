@@ -28,6 +28,8 @@ import { getProductById, productCatalog } from '../../lib/data/products';
 import { getReviewsForProduct } from '../../mocks/reviews';
 import AIExplainPanel from '../../components/feature/AIExplainPanel';
 import AIReviewSummary from '../../components/feature/AIReviewSummary';
+import GuidedAssistantPanel from '../../components/feature/GuidedAssistantPanel';
+import type { GuidedAssistantMode } from '../../lib/ai/conversationState';
 
 export default function ProductDetailPage() {
   // URL params
@@ -45,6 +47,7 @@ export default function ProductDetailPage() {
   const [selectedRetailerIds, setSelectedRetailerIds] = useState<number[]>([]);
   const [showComparison, setShowComparison] = useState(false);
   const [showComparisonPicker, setShowComparisonPicker] = useState(false);
+  const [guidedMode, setGuidedMode] = useState<GuidedAssistantMode | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showInciList, setShowInciList] = useState(false);
   const [expandedIngredientCats, setExpandedIngredientCats] = useState<Set<string>>(new Set(['Active Ingredients']));
@@ -715,6 +718,14 @@ export default function ProductDetailPage() {
                 >
                   <i className="ri-scales-line"></i>
                 </button>
+                <button
+                  onClick={() => setGuidedMode('help_me_choose')}
+                  className="bg-white hover:bg-cream text-primary font-medium py-2 px-4 rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 text-sm border border-primary"
+                  title="Help me choose"
+                >
+                  <i className="ri-question-line"></i>
+                  Help me choose
+                </button>
               </div>
             </div>
           </div>
@@ -954,6 +965,15 @@ export default function ProductDetailPage() {
         initialProductId={product.id}
         userConcerns={userConcerns}
       />
+
+      {/* Guided Assistant Panel */}
+      {guidedMode && (
+        <GuidedAssistantPanel
+          mode={guidedMode}
+          initialProductIds={[product.id]}
+          onClose={() => setGuidedMode(null)}
+        />
+      )}
 
       {/* Floating AI Product Guide */}
       {productFromMock && env && (
