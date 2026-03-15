@@ -87,9 +87,6 @@ const DiscoverPage = () => {
           compareList={selectedProducts}
           setCompareList={setSelectedProducts}
           onOpenComparison={handleOpenComparison}
-          onStartQuiz={() => {}}
-          onProductClick={(id) => console.log('Product clicked:', id)}
-          onSaveProduct={(id) => console.log('Product saved:', id)}
           onFilterChange={(type, value) => console.log('Filter changed:', type, value)}
         />
       </main>

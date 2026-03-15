@@ -40,9 +40,6 @@ interface ProductCatalogProps {
   compareList?: Product[];
   setCompareList?: React.Dispatch<React.SetStateAction<Product[]>>;
   onOpenComparison: () => void;
-  onStartQuiz: () => void;
-  onProductClick: (productId: number) => void;
-  onSaveProduct: (productId: number) => void;
   onFilterChange: (filterType: string, value: any) => void;
 }
 
@@ -51,9 +48,6 @@ export default function ProductCatalog({
   compareList,
   setCompareList,
   onOpenComparison,
-  onStartQuiz,
-  onProductClick,
-  onSaveProduct,
   onFilterChange,
 }: ProductCatalogProps) {
   const navigate = useNavigate();
