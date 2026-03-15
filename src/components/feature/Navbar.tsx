@@ -26,14 +26,12 @@ import { useAuth } from '../../lib/auth/AuthContext';
  * - After scroll: Cream background, dark icons/logo
  */
 
-const navLinks = [
-  { name: 'Home', path: '/' },
-  { name: 'Skin Survey', path: '/skin-survey' },
+const navLinks: { name: string; path: string; comingSoon?: boolean }[] = [
   { name: 'Discover', path: '/discover' },
   { name: 'Ingredients', path: '/ingredients' },
-  { name: 'Marketplace', path: '/marketplace', comingSoon: true },
-  { name: 'Nutrire', path: '/community', comingSoon: true },
-  { name: 'About', path: '/about' },
+  { name: 'Routines', path: '/routines' },
+  { name: 'AI Chat', path: '/ai-chat' },
+  { name: 'Account', path: '/account' },
 ];
 
 const Navbar = () => {

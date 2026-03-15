@@ -8,6 +8,7 @@ import { saveRoutineToSupabase, getLocalRoutines, saveLocalRoutines, hydrateRout
 import { useAuth } from '../../lib/auth/AuthContext';
 import { logRoutineUsage } from '../../lib/utils/routineAnalytics';
 import { createVersionSnapshot } from '../../lib/utils/routineVersioning';
+import { useSavedProducts } from '../../lib/utils/favoritesState';
 
 export default function RoutinesPage() {
   const { user } = useAuth();
@@ -24,10 +25,10 @@ export default function RoutinesPage() {
     'My Skincare Routine'
   );
 
+  const { savedProducts, removeSavedProduct } = useSavedProducts();
   const [isEditingName, setIsEditingName] = useState(false);
   const [showBrowsePopup, setShowBrowsePopup] = useState(false);
   const [showSavedProductsPopup, setShowSavedProductsPopup] = useState(false);
-  const [savedProducts, setSavedProducts] = useState<any[]>([]);
   const [showTutorial, setShowTutorial] = useState(false);
 
   // Check if tutorial should show on first visit
@@ -56,9 +57,6 @@ export default function RoutinesPage() {
       });
     }
 
-    // Load saved products
-    const products = JSON.parse(localStorage.getItem('savedProducts') || '[]');
-    setSavedProducts(products);
   }, [searchParams]);
 
   const handleSaveRoutineName = () => {
@@ -76,9 +74,7 @@ export default function RoutinesPage() {
   };
 
   const handleRemoveSavedProduct = (productId: number) => {
-    const updated = savedProducts.filter((p: any) => p.id !== productId);
-    setSavedProducts(updated);
-    localStorage.setItem('savedProducts', JSON.stringify(updated));
+    removeSavedProduct(productId);
   };
 
   const handleAddStep = (step: any) => {

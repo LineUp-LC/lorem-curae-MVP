@@ -297,7 +297,7 @@ export default function GuidedAssistantPanel({
     if (onNavigateToProduct) {
       onNavigateToProduct(productId);
     } else {
-      navigate(`/product/${productId}`);
+      navigate(`/product-detail/${productId}`);
     }
     onClose();
   }, [navigate, onClose, onNavigateToProduct]);

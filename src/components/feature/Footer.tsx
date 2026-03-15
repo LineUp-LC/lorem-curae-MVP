@@ -20,8 +20,7 @@ import {
  *
  * Footer Sections:
  * - Explore: Discover, Ingredients, Routines, Curae AI
- * - Community: Nutrire, Indie Market, Product Reviews, Retailer Reviews
- * - Support: FAQ, Contact Us, Accessibility
+ * - Support: Contact Us, FAQ, Accessibility, Data Deletion
  * - Company: About, Privacy, Guidelines
  * - Newsletter: Email signup
  */
@@ -68,15 +67,11 @@ const supportLinks = [
   { name: 'Contact Us', path: '/contact' },
   { name: 'FAQ', path: '/faq' },
   { name: 'Accessibility', path: '/accessibility' },
+  { name: 'Data Deletion', path: '/data-anonymization' },
 ];
 
-// Community items with their proper routes
-const communityLinks = [
-  { name: 'Nutrire', path: '/community', comingSoon: true },
-  { name: 'Indie Market', path: '/marketplace', comingSoon: true },
-  { name: 'Product Reviews', path: '/reviews-products' },
-  { name: 'Retailer Reviews', path: '/retailer-reviews' },
-];
+// DEFERRED: Community links removed (community, marketplace, reviews-products, retailer-reviews)
+// See Notion "Deferred Work Tracker" to restore when trigger conditions are met
 
 // Company items with their proper routes
 const companyLinks = [
@@ -97,7 +92,7 @@ export default function Footer() {
         
         .lc-footer-grid {
           display: grid;
-          grid-template-columns: 2fr repeat(5, 1fr);
+          grid-template-columns: 2fr repeat(4, 1fr);
           gap: 3rem;
           max-width: 1200px;
           margin: 0 auto 3rem;
@@ -350,25 +345,6 @@ export default function Footer() {
                 <motion.div whileHover={linkHover}>
                   <Link to={item.path} className="lc-footer-link">
                     {item.name}
-                  </Link>
-                </motion.div>
-              </li>
-            ))}
-          </ul>
-        </motion.div>
-
-        {/* Community Column */}
-        <motion.div className="lc-footer-column" variants={columnVariants}>
-          <h4>Community</h4>
-          <ul>
-            {communityLinks.map((item) => (
-              <li key={item.name}>
-                <motion.div whileHover={linkHover}>
-                  <Link to={item.path} className="lc-footer-link">
-                    {item.name}
-                    {item.comingSoon && (
-                      <span className="lc-footer-coming-soon">Coming Soon</span>
-                    )}
                   </Link>
                 </motion.div>
               </li>

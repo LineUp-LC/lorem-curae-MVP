@@ -29,6 +29,7 @@ import { getReviewsForProduct } from '../../mocks/reviews';
 import AIExplainPanel from '../../components/feature/AIExplainPanel';
 import AIReviewSummary from '../../components/feature/AIReviewSummary';
 import GuidedAssistantPanel from '../../components/feature/GuidedAssistantPanel';
+import RoutinePickerModal from '../../components/feature/RoutinePickerModal';
 import type { GuidedAssistantMode } from '../../lib/ai/conversationState';
 
 export default function ProductDetailPage() {
@@ -51,6 +52,7 @@ export default function ProductDetailPage() {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showInciList, setShowInciList] = useState(false);
   const [expandedIngredientCats, setExpandedIngredientCats] = useState<Set<string>>(new Set(['Active Ingredients']));
+  const [showRoutinePicker, setShowRoutinePicker] = useState(false);
 
   // Saved products state
   const { isSaved, toggleSaved } = useSavedProducts();
@@ -412,6 +414,17 @@ export default function ProductDetailPage() {
           <div>
             <p className="font-medium">{saveNotification.isAdding ? 'Saved to Products' : 'Removed from Saved'}</p>
             <p className="text-sm text-white/80">{product.name}</p>
+            {saveNotification.isAdding && (
+              <button
+                onClick={() => {
+                  setSaveNotification({ show: false, isAdding: true });
+                  setShowRoutinePicker(true);
+                }}
+                className="text-xs underline text-white/70 hover:text-white mt-1 cursor-pointer"
+              >
+                Add to Routine?
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -703,6 +716,13 @@ export default function ProductDetailPage() {
                 >
                   <i className={`${isSaved(product.id) ? 'ri-bookmark-fill' : 'ri-bookmark-line'}`}></i>
                   {isSaved(product.id) ? 'Saved' : 'Save Product'}
+                </button>
+                <button
+                  onClick={() => setShowRoutinePicker(true)}
+                  className="bg-white hover:bg-cream text-primary font-medium py-2 px-4 rounded-full transition-colors whitespace-nowrap inline-flex items-center gap-1.5 text-sm border border-primary"
+                >
+                  <i className="ri-add-circle-line"></i>
+                  Add to Routine
                 </button>
                 <button
                   onClick={scrollToReviews}
@@ -1002,6 +1022,19 @@ export default function ProductDetailPage() {
           }}
         />
       )}
+
+      {/* Routine Picker Modal */}
+      <RoutinePickerModal
+        isOpen={showRoutinePicker}
+        onClose={() => setShowRoutinePicker(false)}
+        product={{
+          id: product.id,
+          name: product.name,
+          brand: product.brand,
+          image: product.images?.[0],
+          category: product.category,
+        }}
+      />
 
     </div>
   );

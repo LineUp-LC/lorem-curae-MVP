@@ -1,3 +1,6 @@
+// Phase 1: Deferred links removed (profile/customize, my-skin, nutrition, subscription, badges)
+// See Notion "Deferred Work Tracker" to restore when trigger conditions are met
+
 import { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/lib/auth/AuthContext';
@@ -50,19 +53,10 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const subscriptionTier = profile?.subscription_tier || 'free';
   const isPaidSubscriber = subscriptionTier === 'plus' || subscriptionTier === 'premium';
 
-  // Badges from profile preferences (or empty if none)
-  const badges: Array<{ id: number; name: string; icon: string; color: string; iconColor: string; description: string }> =
-    (profile?.preferences as any)?.badges || [];
-
   const handleSignOut = async () => {
     await signOut();
     onClose();
     navigate('/auth/login');
-  };
-
-  const handleBadgeClick = (badgeId: number) => {
-    onClose();
-    navigate(`/badges?selected=${badgeId}`);
   };
 
   return (
@@ -129,11 +123,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
         {user && (
           <div className="p-4 border-b border-[#E8D4CC]/30 overflow-visible bg-gradient-to-b from-[#FDF8F5] to-white">
             <div className="flex items-center space-x-3 mb-3">
-              <Link
-                to="/profile/customize"
-                className="relative group cursor-pointer"
-                onClick={onClose}
-              >
+              <div className="relative">
                 <div className="w-11 h-11 rounded-lg overflow-hidden bg-[#FDF8F5] ring-2 ring-[#E8A888]/30">
                   {(profile?.preferences as any)?.avatar_url ? (
                     <img
@@ -147,10 +137,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
                     </div>
                   )}
                 </div>
-                <div className="absolute inset-0 bg-[#2D2A26]/40 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center">
-                  <i className="ri-camera-line text-white text-xs"></i>
-                </div>
-              </Link>
+              </div>
 
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -185,45 +172,11 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
               </div>
             </div>
 
-            {/* Badges */}
-            <div className="mb-3 overflow-visible">
-              <p className="text-[10px] text-[#6B635A] mb-1.5 uppercase tracking-wider font-medium">Badges</p>
-              {badges.length > 0 ? (
-                <div className="flex items-center gap-1.5 overflow-visible">
-                  {badges.map((badge) => (
-                    <div
-                      key={badge.id}
-                      onClick={() => handleBadgeClick(badge.id)}
-                      className={`relative w-8 h-8 flex items-center justify-center rounded-md ${badge.color} group cursor-pointer hover:scale-110 transition-transform overflow-visible`}
-                      title={badge.name}
-                    >
-                      <i className={`${badge.icon} text-sm ${badge.iconColor}`}></i>
-                      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-[9999] w-max hidden sm:block">
-                        <div className="bg-[#2D2A26] text-white text-[10px] rounded-lg px-2 py-1.5 shadow-xl max-w-[160px] whitespace-normal">
-                          <p className="font-semibold mb-0.5">{badge.name}</p>
-                          <p className="text-[#E8D4CC]">{badge.description}</p>
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-1">
-                            <div className="border-4 border-transparent border-t-[#2D2A26]"></div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-[10px] text-[#6B635A]/60 italic">No badges yet</p>
-              )}
-            </div>
-
             {/* Quick Stats */}
             <div className="flex items-center justify-between pt-3 border-t border-[#E8D4CC]/30">
               <div className="text-center">
                 <p className="text-sm font-semibold text-[#2D2A26]">{routineCount > 0 ? routineCount : '—'}</p>
                 <p className="text-[10px] text-[#6B635A]">Routines</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm font-semibold text-[#7A8B7A]">{badges.length}</p>
-                <p className="text-[10px] text-[#6B635A]">Badges</p>
               </div>
               <Link
                 to="/skin-survey-account"
@@ -255,21 +208,6 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
           </Link>
 
           <Link
-            to="/my-skin"
-            className="lc-dropdown-link flex items-center px-4 py-2 hover:bg-[#FDF8F5] transition-colors cursor-pointer group"
-            onClick={onClose}
-          >
-            <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
-              <i className="ri-heart-pulse-line text-sm"></i>
-            </div>
-            <div className="ml-2.5 flex-1">
-              <p className="text-xs font-medium text-[#2D2A26]">My Skin</p>
-              <p className="text-[10px] text-[#6B635A]">Profile & progress</p>
-            </div>
-            <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
-          </Link>
-
-          <Link
             to="/routines-list"
             className="lc-dropdown-link flex items-center px-4 py-2 hover:bg-[#FDF8F5] transition-colors cursor-pointer group"
             onClick={onClose}
@@ -280,21 +218,6 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             <div className="ml-2.5 flex-1">
               <p className="text-xs font-medium text-[#2D2A26]">Routines</p>
               <p className="text-[10px] text-[#6B635A]">Routine tracking</p>
-            </div>
-            <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
-          </Link>
-
-          <Link
-            to="/nutrition"
-            className="lc-dropdown-link flex items-center px-4 py-2 hover:bg-[#FDF8F5] transition-colors cursor-pointer group"
-            onClick={onClose}
-          >
-            <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
-              <i className="ri-leaf-line text-sm"></i>
-            </div>
-            <div className="ml-2.5 flex-1">
-              <p className="text-xs font-medium text-[#2D2A26]">Nutrition <span className="text-[9px] font-semibold text-[#C4704D] ml-1">Coming Soon</span></p>
-              <p className="text-[10px] text-[#6B635A]">Diet & wellness</p>
             </div>
             <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
           </Link>
@@ -314,20 +237,6 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
           </Link>
 
-          <Link
-            to="/subscription"
-            className="lc-dropdown-link flex items-center px-4 py-2 hover:bg-[#FDF8F5] transition-colors cursor-pointer group"
-            onClick={onClose}
-          >
-            <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
-              <i className="ri-vip-crown-line text-sm"></i>
-            </div>
-            <div className="ml-2.5 flex-1">
-              <p className="text-xs font-medium text-[#2D2A26]">Plan</p>
-              <p className="text-[10px] text-[#6B635A]">Subscription</p>
-            </div>
-            <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
-          </Link>
           </div>
         )}
 

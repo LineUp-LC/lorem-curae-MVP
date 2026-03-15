@@ -40,7 +40,7 @@ const ProductComparison = ({
   }, [products.map(p => p.id).join(',')]);
 
   const handleNavigate = (id: number) => {
-    navigate(`/product/${id}`);
+    navigate(`/product-detail/${id}`);
     onClose();
   };
 
