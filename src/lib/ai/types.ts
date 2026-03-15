@@ -92,6 +92,7 @@ export interface AIChatSettings {
  */
 export interface AIChatRequest {
   message: string;
+  systemPrompt?: string;
   conversationHistory?: ConversationMessage[];
   settings?: AIChatSettings;
   /** Client-side user context (saved products, recently viewed, etc.) */
