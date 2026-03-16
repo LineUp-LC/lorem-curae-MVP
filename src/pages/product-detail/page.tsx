@@ -28,6 +28,7 @@ import { getProductById, productCatalog } from '../../lib/data/products';
 import { getReviewsForProduct } from '../../mocks/reviews';
 import AIExplainPanel from '../../components/feature/AIExplainPanel';
 import AIReviewSummary from '../../components/feature/AIReviewSummary';
+import ReviewsList from '../../components/feature/ReviewsList';
 import GuidedAssistantPanel from '../../components/feature/GuidedAssistantPanel';
 import RoutinePickerModal from '../../components/feature/RoutinePickerModal';
 import type { GuidedAssistantMode } from '../../lib/ai/conversationState';
@@ -958,6 +959,10 @@ export default function ProductDetailPage() {
             )}
             {activeTab === 'reviews' && (
               <div className="space-y-4">
+                {/* User review form + Supabase reviews */}
+                <div className="bg-white rounded-2xl p-8">
+                  <ReviewsList productId={product.id} />
+                </div>
                 {productFromMock && (
                   <AIReviewSummary
                     product={productFromMock}
