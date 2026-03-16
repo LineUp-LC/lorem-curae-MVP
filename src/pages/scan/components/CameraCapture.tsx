@@ -63,9 +63,18 @@ export default function CameraCapture({ onCapture, disabled }: CameraCaptureProp
       return;
     }
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' },
-      });
+      let stream: MediaStream;
+      try {
+        // Try rear camera first (mobile/tablets)
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'environment' },
+        });
+      } catch {
+        // Fall back to any available camera (desktop webcams)
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: true,
+        });
+      }
       streamRef.current = stream;
       setWebcamActive(true);
       setWebcamError(null);
@@ -73,7 +82,7 @@ export default function CameraCapture({ onCapture, disabled }: CameraCaptureProp
       const msg =
         err instanceof DOMException && err.name === 'NotAllowedError'
           ? 'Camera permission denied. Please allow camera access and try again.'
-          : 'Could not access camera. Try uploading a photo instead.';
+          : `Could not access camera${err instanceof Error ? ` (${err.name})` : ''}. Try uploading a photo instead.`;
       setWebcamError(msg);
     }
   }, []);
