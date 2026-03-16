@@ -629,7 +629,7 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
   // Length check per mode
   const maxChars: Partial<Record<AIMode, number>> = {
     product_detail: 600,
-    ingredient_detail: 500,
+    ingredient_detail: 1500,
     routine_builder: 800,
     search: 400,
     comparison: 700,

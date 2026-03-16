@@ -74,7 +74,7 @@ const StarRating = ({ rating, size = 'text-lg', showNumeric = false, onClick }: 
 
 const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
   const { env } = useEnvironmentContext();
-  const { user: authUser } = useAuth();
+  const { user: authUser, profile } = useAuth();
   const isGuest = !authUser;
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showSimilarProfileReviews, setShowSimilarProfileReviews] = useState(false);
@@ -453,7 +453,9 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
       },
       environment: env,
     });
-  }, [ingredientId, ingredient?.name, env?.season, env?.uvBand, authUser?.id, userProfile?.skinType]);
+  }, [ingredientId, ingredient?.name, env?.season, env?.uvBand, authUser?.id, userProfile?.skinType, profile?.skin_type]);
+
+  const hasProfile = !!userProfile?.skinType || !!profile?.skin_type;
 
   // Ingredient-specific community reviews keyed by slug
   const ingredientReviewData: Record<string, Review[]> = {
@@ -587,11 +589,19 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* AI Ingredient Insight */}
+            {/* AI Ingredient Insight — Phase 3 AI WHY */}
             {aiContext && (
               <div>
-                <AIInsightBlock context={aiContext} compact />
-                {isGuest && (
+                {hasProfile && (
+                  <div className="flex items-center gap-2.5 mb-3">
+                    <div className="w-7 h-7 bg-primary/15 rounded-full flex items-center justify-center">
+                      <i className="ri-dna-line text-sm text-primary"></i>
+                    </div>
+                    <h2 className="font-serif text-lg font-semibold text-deep">For Your Skin</h2>
+                  </div>
+                )}
+                <AIInsightBlock context={aiContext} compact={!hasProfile} />
+                {isGuest && !hasProfile && (
                   <p className="text-[10px] text-warm-gray/50 mt-1.5 flex items-center gap-1 px-3">
                     <i className="ri-information-line text-[10px]" />
                     Based on general guidance.

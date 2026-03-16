@@ -137,7 +137,10 @@ export default function AIInsightBlock({
 
   const isCached = result?.success && result.cached;
   const isProductDetail = context.mode === 'product_detail';
+  const isIngredientDetail = context.mode === 'ingredient_detail';
   const isPersonalized = !!context.user.skinType;
+
+  console.log('[AI Insight] Context user profile:', JSON.stringify({ skinType: context.user.skinType, concerns: context.user.concerns }));
 
   // Build highlight profile from session state, with product name exclusions
   const excludeNames: string[] = [];
@@ -157,7 +160,7 @@ export default function AIInsightBlock({
   };
 
   // Product detail mode: bullet points, color highlighting, no extras
-  if (isProductDetail && !compact) {
+  if ((isProductDetail || (isIngredientDetail && isPersonalized)) && !compact) {
     const bullets = insightText
       .split(/(?<=\.)\s+/)
       .map(s => s.trim())
@@ -171,14 +174,14 @@ export default function AIInsightBlock({
             : 'bg-cream/30 border border-blush/40'
         }`}
         role="complementary"
-        aria-label="Why this product fits"
+        aria-label={isProductDetail ? "Why this product fits" : "For your skin"}
       >
         <div className="flex items-center gap-2 mb-2.5">
           <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center">
             <NeuralBloomIcon size={12} className="text-primary" />
           </div>
           <span className="text-xs font-semibold text-deep">
-            Why this product fits
+            {isProductDetail ? 'Why this product fits' : 'For your skin'}
           </span>
           {isCached && (
             <span className="text-[9px] text-warm-gray/50 ml-auto">cached</span>
