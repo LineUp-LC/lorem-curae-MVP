@@ -374,6 +374,15 @@ const Navbar = () => {
               <i className="ri-search-line text-xl"></i>
             </button>
 
+            {/* Scan Button */}
+            <Link
+              to="/scan"
+              className="lc-nav-icon-btn text-[#2D2A26] hover:bg-[#C4704D]/10"
+              aria-label="Scan product"
+            >
+              <i className="ri-camera-line text-xl"></i>
+            </Link>
+
             {/* Cart Button */}
             <Link
               to="/cart"
@@ -443,6 +452,16 @@ const Navbar = () => {
                 </Link>
               );
             })}
+            <Link
+              to="/scan"
+              className={`lc-mobile-link motion-safe:animate-enter-right ${location.pathname === '/scan' ? 'lc-mobile-link-active' : ''}`}
+              style={{ animationDelay: `${Math.min(navLinks.length * 50, 250)}ms` }}
+              onClick={() => setShowMobileMenu(false)}
+              aria-current={location.pathname === '/scan' ? 'page' : undefined}
+            >
+              <i className="ri-camera-line mr-2"></i>
+              Scan Product
+            </Link>
           </div>
         </nav>
       )}

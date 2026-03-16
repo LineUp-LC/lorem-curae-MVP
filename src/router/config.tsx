@@ -27,6 +27,7 @@ const SkinSurveyPage = lazy(() => import('../pages/skin-survey/page'));
 const SkinSurveyAccountPage = lazy(() => import('../pages/skin-survey-account/page'));
 const SurveyResultsPage = lazy(() => import('../pages/skin-survey/results/page'));
 const CartPage = lazy(() => import('../pages/cart/page'));
+const ScanPage = lazy(() => import('../pages/scan/page'));
 const PrivacyPage = lazy(() => import('../pages/privacy/page'));
 const ContactPage = lazy(() => import('../pages/contact/page'));
 const FAQPage = lazy(() => import('../pages/faq/page'));
@@ -138,6 +139,8 @@ const routes: RouteObject[] = [
       { path: '/skin-survey-account', element: <SkinSurveyAccountPage /> },
       { path: '/skin-survey/results', element: <SurveyResultsPage /> },
       { path: '/cart', element: <CartPage /> },
+      // ── Phase 4 Active ──
+      { path: '/scan', element: <ScanPage /> },
       { path: '/privacy', element: <PrivacyPage /> },
       { path: '/contact', element: <ContactPage /> },
       { path: '/faq', element: <FAQPage /> },

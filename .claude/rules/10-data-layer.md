@@ -32,12 +32,13 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Edge Functions (Deno Runtime)
 
-15 Edge Functions in `supabase/functions/`. These run on Deno — NOT part of Vite/tsc build.
+16 Edge Functions in `supabase/functions/`. These run on Deno — NOT part of Vite/tsc build.
 
 | Function | Domain |
 |----------|--------|
 | ai-insight | AI — Claude Sonnet 4.5 proxy |
 | ai-chat | AI — conversational chat |
+| product-scan | AI — Claude Vision product identification |
 | get-uv-index | Environment — UV API wrapper |
 | geocode-location | Environment — geocoding wrapper |
 | ingest-retailer-feed | Data — retailer pricing ingestion |
