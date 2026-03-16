@@ -62,18 +62,32 @@ export default function CameraCapture({ onCapture, disabled }: CameraCaptureProp
       setWebcamError('Camera not supported in this browser');
       return;
     }
+
+    setWebcamError(null);
+
+    // Ensure any previous stream is fully released
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+      await new Promise(r => setTimeout(r, 300));
+    }
+
     try {
       let stream: MediaStream;
       try {
-        // Try rear camera first (mobile/tablets)
         stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: 'environment' },
         });
-      } catch {
-        // Fall back to any available camera (desktop webcams)
-        stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
+      } catch (innerErr) {
+        // Only retry on wrong camera type — not AbortError, NotAllowedError, etc.
+        if (
+          innerErr instanceof DOMException &&
+          (innerErr.name === 'OverconstrainedError' || innerErr.name === 'NotFoundError')
+        ) {
+          stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        } else {
+          throw innerErr;
+        }
       }
       streamRef.current = stream;
       setWebcamActive(true);
@@ -82,7 +96,9 @@ export default function CameraCapture({ onCapture, disabled }: CameraCaptureProp
       const msg =
         err instanceof DOMException && err.name === 'NotAllowedError'
           ? 'Camera permission denied. Please allow camera access and try again.'
-          : `Could not access camera${err instanceof Error ? ` (${err.name})` : ''}. Try uploading a photo instead.`;
+          : err instanceof DOMException && err.name === 'AbortError'
+            ? 'Camera was interrupted. Please try again.'
+            : `Could not access camera${err instanceof Error ? ` (${err.name})` : ''}. Try uploading a photo instead.`;
       setWebcamError(msg);
     }
   }, []);
