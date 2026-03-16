@@ -161,7 +161,9 @@ export default function AIInsightBlock({
 
   // Product detail mode: bullet points, color highlighting, no extras
   if ((isProductDetail || (isIngredientDetail && isPersonalized)) && !compact) {
-    const bullets = insightText
+    // Strip markdown headers — Claude sometimes returns # prefixed lines
+    const cleanedText = insightText.replace(/^#{1,3}\s+.*\n?/gm, '').trim();
+    const bullets = cleanedText
       .split(/(?<=\.)\s+/)
       .map(s => s.trim())
       .filter(s => s.length > 0);

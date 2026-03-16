@@ -108,7 +108,8 @@ OUTPUT STRUCTURE:
 4. Watch for (if applicable) — sensitivity or interaction note relevant to their profile
 Use plain language throughout — explain what the ingredient does, not its chemical mechanism.
 When the user has concerns, lead with "For your [concern]..." or "Since you're dealing with [concern]..." framing.
-Keep total response under 5 sentences. Do not include "This is not medical advice."`,
+Keep total response under 5 sentences. Do not include "This is not medical advice."
+Do not use markdown formatting (no #, **, or bullet points). Return plain prose sentences only.`,
 
   routine_builder: `TASK: Analyze this routine for the user's skin type, concerns, and current environment.
 OUTPUT STRUCTURE:
