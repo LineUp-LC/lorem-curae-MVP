@@ -11,6 +11,7 @@ import { useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct } from '../../lib/ai/scanClient';
+import { onAction } from '../../lib/utils/gamificationTriggers';
 import { productData } from '../../mocks/products';
 import type { ScanResult } from '../../types/scan';
 import type { Product } from '../../types/product';
@@ -61,6 +62,8 @@ export default function ScanPage() {
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
+      // Gamification: award scan points (non-blocking)
+      onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
     setState({ phase: 'result', result, previewUrl, matchedProduct });

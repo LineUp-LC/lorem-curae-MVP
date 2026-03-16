@@ -9,6 +9,7 @@ import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
 import { useAuth } from '../../lib/auth/AuthContext';
+import { getPointsAccount } from '../../lib/utils/curaePoints';
 
 /**
  * Navbar Component - MOBILE OPTIMIZED
@@ -40,8 +41,9 @@ const Navbar = () => {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [isNavHovered, setIsNavHovered] = useState(false);
   const cartCount = useCartCount();
-  const { profile } = useAuth();
+  const { user, profile } = useAuth();
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [pointsBalance, setPointsBalance] = useState<number | null>(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -51,6 +53,14 @@ const Navbar = () => {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Load points balance for authenticated users
+  useEffect(() => {
+    if (!user?.id) { setPointsBalance(null); return; }
+    getPointsAccount(user.id).then(acct => {
+      setPointsBalance(acct?.points_balance ?? null);
+    }).catch(() => {});
+  }, [user?.id]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -366,6 +376,18 @@ const Navbar = () => {
 
           {/* Right Side Icons */}
           <div className="lc-nav-icons">
+            {/* Points mini-display (authenticated users only) */}
+            {pointsBalance !== null && (
+              <Link
+                to="/rewards"
+                className="hidden sm:flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#C4704D]/10 hover:bg-[#C4704D]/20 transition-colors text-[#C4704D] text-xs font-medium"
+                aria-label={`${pointsBalance} Curae Points`}
+              >
+                <i className="ri-coin-line text-sm"></i>
+                <span>{pointsBalance.toLocaleString()}</span>
+              </Link>
+            )}
+
             <button
               onClick={() => setIsSearchOpen(true)}
               className="lc-nav-icon-btn text-[#2D2A26] hover:bg-[#C4704D]/10"
@@ -461,6 +483,16 @@ const Navbar = () => {
             >
               <i className="ri-camera-line mr-2"></i>
               Scan Product
+            </Link>
+            <Link
+              to="/rewards"
+              className={`lc-mobile-link motion-safe:animate-enter-right ${location.pathname === '/rewards' ? 'lc-mobile-link-active' : ''}`}
+              style={{ animationDelay: `${Math.min((navLinks.length + 1) * 50, 300)}ms` }}
+              onClick={() => setShowMobileMenu(false)}
+              aria-current={location.pathname === '/rewards' ? 'page' : undefined}
+            >
+              <i className="ri-gift-line mr-2"></i>
+              Rewards
             </Link>
           </div>
         </nav>

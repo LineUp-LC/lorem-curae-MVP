@@ -237,6 +237,21 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
             <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
           </Link>
 
+          <Link
+            to="/rewards"
+            className="lc-dropdown-link flex items-center px-4 py-2 hover:bg-[#FDF8F5] transition-colors cursor-pointer group"
+            onClick={onClose}
+          >
+            <div className="lc-dropdown-icon w-7 h-7 flex items-center justify-center bg-[#FDF8F5] text-[#6B635A] rounded-md transition-colors">
+              <i className="ri-gift-line text-sm"></i>
+            </div>
+            <div className="ml-2.5 flex-1">
+              <p className="text-xs font-medium text-[#2D2A26]">Rewards</p>
+              <p className="text-[10px] text-[#6B635A]">Points & badges</p>
+            </div>
+            <i className="lc-dropdown-arrow ri-arrow-right-s-line text-[#6B635A]/50 text-xs transition-all"></i>
+          </Link>
+
           </div>
         )}
 

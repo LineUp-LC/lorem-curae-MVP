@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { supabase } from '@/lib/supabase-browser';
 import { sessionState } from '@/lib/utils/sessionState';
+import { onAction } from '@/lib/utils/gamificationTriggers';
 import QuizFlow from './components/QuizFlow';
 import AuthPrompt from './components/AuthPrompt';
 
@@ -90,6 +91,9 @@ const SkinSurveyPage = () => {
     // Save to localStorage as fallback
     localStorage.setItem('skinSurveyData', JSON.stringify(data));
     localStorage.setItem('survey_completed', 'true');
+
+    // Gamification: award survey completion (once-ever, non-blocking)
+    onAction(user?.id, 'SKIN_SURVEY').catch(() => {});
 
     // Sync to sessionState for immediate use
     if (data.skinType?.[0]) {

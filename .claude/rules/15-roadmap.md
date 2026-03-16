@@ -1,7 +1,7 @@
 ---
 scope: "Feature tiers (MoSCoW), priority enforcement, complexity proportionality, table stakes vs differentiators"
 authority: primary
-last_synced: "2026-03-14"
+last_synced: "2026-03-15"
 related: ["13-domain-features.md"]
 ---
 
@@ -14,9 +14,9 @@ related: ["13-domain-features.md"]
 | Tier | Features | Implementation Depth |
 |------|----------|---------------------|
 | **MVP (Must-Have)** | Product/service comparison, smart search with retailer trust scoring, personalized filtering, ingredient transparency + education, routine management, self-tracking, basic AI interaction, nutrition management, situational guidance | Production-grade. Fully functional, integrated, tested. No shortcuts. |
-| **Growth (Should-Have)** | Progress tracking & feedback, marketplace (basic), patch tests, advanced AI (adaptive), community features | Extensible architecture. Build for scale, ship incrementally. |
+| **Growth (Should-Have)** | Progress tracking & feedback, marketplace (basic), patch tests, advanced AI (adaptive), community features, gamification v1 (points economy, streaks, badges, rewards dashboard) | Extensible architecture. Build for scale, ship incrementally. |
 | **Scale (Could-Have)** | AR (skin analysis, try-ons), product creation (creator tools), creator ecosystem, immersive experiences | Interface definitions and architectural placeholders only. Do not build until Growth is stable. |
-| **Won't-Have (For Now)** | Complex gamification, advanced wellness integrations beyond core nutrition | Do not build, do not suggest, do not architect. |
+| **Won't-Have (For Now)** | Advanced wellness integrations beyond core nutrition | Do not build, do not suggest, do not architect. |
 
 ---
 

@@ -11,15 +11,15 @@ related: ["01-workflow.md", "03-frontend.md", "13-domain-features.md"]
 
 ## Active Routes (Phase 1 Hub)
 
-- 23 active routes defined in src/router/config.tsx (includes Phase 4 `/scan`)
+- 25 active routes defined in src/router/config.tsx (includes Phase 4 `/scan` + Phase 5 `/rewards`, `/badges` redirect)
 - All other routes are commented out with: `// DEFERRED: Phase [X] — see Notion "Deferred Work Tracker" for trigger condition`
 - Do NOT uncomment deferred routes without checking the Notion Deferred Work Tracker for the trigger condition
 - Do NOT add new routes without confirming they belong to the current phase
 
 ## Navigation Components
 
-- Navbar (`src/components/feature/Navbar.tsx`): 5 nav links + scan icon button — Discover, Ingredients, Routines, AI Chat, Account + camera icon (scan)
-- ProfileDropdown (`src/components/feature/ProfileDropdown.tsx`): links to /account, /routines-list, /ai-chat, /settings, /skin-survey-account, sign out
+- Navbar (`src/components/feature/Navbar.tsx`): 5 nav links + scan icon + rewards link — Discover, Ingredients, Routines, AI Chat, Account + camera icon (scan) + Rewards (mobile menu) + points badge (desktop, auth only)
+- ProfileDropdown (`src/components/feature/ProfileDropdown.tsx`): links to /account, /routines-list, /ai-chat, /rewards, /settings, /skin-survey-account, sign out
 - Footer (`src/components/feature/Footer.tsx`): 4 columns — Explore, Support, Company, Newsletter + Social
 - Any new nav link must point to an active (non-deferred) route
 

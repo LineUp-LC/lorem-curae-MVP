@@ -2,9 +2,11 @@ import { useEffect, useState } from 'react';
 import ProductCatalog from './components/ProductCatalog';
 import ComparisonPickerModal from '../../components/feature/ComparisonPickerModal';
 import { sessionState, getEffectiveConcerns } from '../../lib/utils/sessionState';
+import { onAction } from '../../lib/utils/gamificationTriggers';
 import type { Product } from '../../types/product';
 import { normalizeUserConcern } from '../../lib/utils/matching';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
+import { supabase } from '../../lib/supabase-browser';
 
 /**
  * DiscoverPage Component
@@ -68,6 +70,10 @@ const DiscoverPage = () => {
 
   const handleOpenComparison = () => {
     setShowComparison(true);
+    // Gamification: award first comparison (once-ever via onAction, non-blocking)
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) onAction(data.user.id, 'FIRST_COMPARISON').catch(() => {});
+    });
   };
 
   const handleCloseComparison = () => {

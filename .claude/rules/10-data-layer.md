@@ -65,7 +65,7 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Database Migrations
 
-8 migrations in `supabase/migrations/`:
+9 migrations in `supabase/migrations/`:
 
 | Migration | Purpose |
 |-----------|---------|
@@ -77,6 +77,7 @@ related: ["09-security.md", "11-testing.md"]
 | `20260306000000_create_retailer_pricing_tables` | Retailer pricing |
 | `20260308000000_create_products_table` | Product catalog |
 | `20260309000000_add_admin_rls_policies` | Admin RLS policies |
+| `20260316000000_create_gamification_tables` | Points economy, transactions, badges |
 
 ### Migration Rules
 - Never apply automatically

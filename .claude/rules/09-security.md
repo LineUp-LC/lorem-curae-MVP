@@ -12,8 +12,8 @@ related: ["04-state-management.md", "08-commerce.md", "10-data-layer.md"]
 ## Environment Variables
 
 ### Frontend (Vite)
-- `VITE_PUBLIC_SUPABASE_URL` — Supabase project URL
-- `VITE_PUBLIC_SUPABASE_ANON_KEY` — Supabase anonymous key
+- `VITE_SUPABASE_URL` — Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` — Supabase anonymous key
 - Referenced in `src/lib/supabase.ts` — throws if missing
 
 ### Build-Time Constants (vite.config.ts)
@@ -25,7 +25,7 @@ related: ["04-state-management.md", "08-commerce.md", "10-data-layer.md"]
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - `SITE_PASSWORD`
-- `ANTHROPIC_API_KEY` (for ai-insight function)
+- `ANTHROPIC_API_KEY` (for ai-insight and ai-chat functions)
 
 ### Rules
 - NEVER hardcode secrets in source code

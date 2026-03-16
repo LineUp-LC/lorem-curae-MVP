@@ -1,4 +1,5 @@
 import type { SavedRoutine } from './routineState';
+import type { StreakMilestone } from '@/types/gamification';
 
 // -----------------------------
 // Types
@@ -139,4 +140,43 @@ export function getStreakSummary(streaks: ProductStreak[]) {
   const needsAttention = streaks.filter(s => s.currentStreak === 0 && s.longestStreak > 3);
 
   return { activeCount: active.length, longestCurrent: longest, needsAttention };
+}
+
+const STREAK_MILESTONES_KEY = 'gamification_streak_milestones';
+
+const MILESTONE_THRESHOLDS: StreakMilestone[] = [
+  { days: 7, action: 'STREAK_7_DAY', label: '7-day streak' },
+  { days: 30, action: 'STREAK_30_DAY', label: '30-day streak' },
+];
+
+export function checkStreakMilestones(streaks: ProductStreak[]): StreakMilestone[] {
+  let awarded: string[];
+  try {
+    const saved = localStorage.getItem(STREAK_MILESTONES_KEY);
+    awarded = saved ? JSON.parse(saved) : [];
+  } catch {
+    awarded = [];
+  }
+
+  const awardedSet = new Set(awarded);
+  const newMilestones: StreakMilestone[] = [];
+
+  const longestCurrent = streaks.reduce((max, s) => Math.max(max, s.currentStreak), 0);
+
+  for (const milestone of MILESTONE_THRESHOLDS) {
+    if (longestCurrent >= milestone.days && !awardedSet.has(milestone.action)) {
+      newMilestones.push(milestone);
+      awardedSet.add(milestone.action);
+    }
+  }
+
+  if (newMilestones.length > 0) {
+    try {
+      localStorage.setItem(STREAK_MILESTONES_KEY, JSON.stringify(Array.from(awardedSet)));
+    } catch {
+      // Silent fail
+    }
+  }
+
+  return newMilestones;
 }

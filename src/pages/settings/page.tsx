@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase-browser';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { updateUserProfile } from '../../lib/supabase';
 import { useUserLocation } from '../../lib/utils/locationState';
+import { onAction } from '../../lib/utils/gamificationTriggers';
 
 const SettingsPage = () => {
   const { i18n } = useTranslation();
@@ -450,6 +451,7 @@ const SettingsPage = () => {
       }
 
       setToastMessage('Profile saved');
+      onAction(user.id, 'PROFILE_COMPLETE').catch(() => {});
     } catch (error) {
       console.error('Error saving profile:', error);
       setToastMessage('Failed to save profile');

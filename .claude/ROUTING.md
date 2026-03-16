@@ -198,6 +198,18 @@ last_synced: "2026-03-14"
 | Scan UX state machine (idle/captured/processing/result/error) | `rules/17-camera-scan.md` |
 | Barcode / UPC scanning (future) | `rules/17-camera-scan.md` |
 
+## Gamification
+
+| Query Pattern | File |
+|---------------|------|
+| Points economy / POINTS_ACTIONS / tier thresholds | `rules/18-gamification.md` |
+| Badge definitions / badge unlock logic | `rules/18-gamification.md` |
+| Streak milestones / routine streaks | `rules/18-gamification.md` |
+| Gamification triggers / onAction dispatcher | `rules/18-gamification.md` |
+| Rewards dashboard / /rewards route | `rules/18-gamification.md` |
+| Adding new points actions or badges | `rules/18-gamification.md` |
+| Gamification database tables (curae_points, points_transactions, user_badges) | `rules/18-gamification.md` |
+
 ## Roadmap & Priority
 
 | Query Pattern | File |

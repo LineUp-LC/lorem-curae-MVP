@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
 import Dropdown from '../../components/ui/Dropdown';
 import { sessionState, getEffectiveSkinType, getEffectiveConcerns, getEffectivePreferences } from '../../lib/utils/sessionState';
+import { onAction } from '../../lib/utils/gamificationTriggers';
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-browser';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
@@ -883,6 +884,11 @@ const AIChatPage = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsTyping(true);
     sessionState.trackInteraction('input', 'ai-chat-message', { message: inputMessage });
+
+    // Gamification: award AI chat points (once per session, non-blocking)
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user?.id) onAction(data.user.id, 'AI_CHAT').catch(() => {});
+    });
 
     const currentInput = inputMessage;
     setInputMessage('');

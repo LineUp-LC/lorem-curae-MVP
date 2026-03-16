@@ -28,6 +28,7 @@ const SkinSurveyAccountPage = lazy(() => import('../pages/skin-survey-account/pa
 const SurveyResultsPage = lazy(() => import('../pages/skin-survey/results/page'));
 const CartPage = lazy(() => import('../pages/cart/page'));
 const ScanPage = lazy(() => import('../pages/scan/page'));
+const RewardsPage = lazy(() => import('../pages/rewards/page'));
 const PrivacyPage = lazy(() => import('../pages/privacy/page'));
 const ContactPage = lazy(() => import('../pages/contact/page'));
 const FAQPage = lazy(() => import('../pages/faq/page'));
@@ -56,7 +57,7 @@ const AdminProductsPage = lazy(() => import('../pages/admin/products/page'));
 // DEFERRED: Phase 5 — Reviews (standalone)
 // const RetailerReviewsPage = lazy(() => import('../pages/retailer-reviews/page'));
 // const ReviewsProductsPage = lazy(() => import('../pages/reviews-products/page'));
-// DEFERRED: Phase 5 — Badges
+// Badges page exists but /badges now redirects to /rewards
 // const BadgesPage = lazy(() => import('../pages/badges/page'));
 // DEFERRED: Phase 5 — Subscription/Premium
 // const SubscriptionPage = lazy(() => import('../pages/subscription/page'));
@@ -141,6 +142,9 @@ const routes: RouteObject[] = [
       { path: '/cart', element: <CartPage /> },
       // ── Phase 4 Active ──
       { path: '/scan', element: <ScanPage /> },
+      // ── Phase 5 Active ──
+      { path: '/rewards', element: <RewardsPage /> },
+      { path: '/badges', element: <Navigate to="/rewards" replace /> },
       { path: '/privacy', element: <PrivacyPage /> },
       { path: '/contact', element: <ContactPage /> },
       { path: '/faq', element: <FAQPage /> },
@@ -167,8 +171,7 @@ const routes: RouteObject[] = [
       // DEFERRED: Phase 5 — Reviews (standalone) — see Notion "Deferred Work Tracker" for trigger condition
       // { path: '/retailer-reviews', element: <RetailerReviewsPage /> },
       // { path: '/reviews-products', element: <ReviewsProductsPage /> },
-      // DEFERRED: Phase 5 — Badges — see Notion "Deferred Work Tracker" for trigger condition
-      // { path: '/badges', element: <BadgesPage /> },
+      // /badges now redirected to /rewards above (Phase 5 active)
       // DEFERRED: Phase 5 — Subscription/Premium — see Notion "Deferred Work Tracker" for trigger condition
       // { path: '/subscription', element: <SubscriptionPage /> },
       // { path: '/premium-packages', element: <PremiumPackagesPage /> },
