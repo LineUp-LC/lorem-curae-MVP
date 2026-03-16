@@ -13,6 +13,7 @@ import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 import Dropdown from '../../../components/ui/Dropdown';
 import { classifyTimeOfDay } from '../../../lib/utils/classifyTimeOfDay';
 import { PRODUCT_CATEGORIES } from '../../../lib/utils/categoryRegistry';
+import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
 import AIDiscoveryBar from '../../../components/feature/AIDiscoveryBar';
 import ProductCard_CompactB from './ProductCard_CompactB';
 
@@ -39,9 +40,6 @@ interface ProductCatalogProps {
   compareList?: Product[];
   setCompareList?: React.Dispatch<React.SetStateAction<Product[]>>;
   onOpenComparison: () => void;
-  onStartQuiz: () => void;
-  onProductClick: (productId: number) => void;
-  onSaveProduct: (productId: number) => void;
   onFilterChange: (filterType: string, value: any) => void;
 }
 
@@ -50,9 +48,6 @@ export default function ProductCatalog({
   compareList,
   setCompareList,
   onOpenComparison,
-  onStartQuiz,
-  onProductClick,
-  onSaveProduct,
   onFilterChange,
 }: ProductCatalogProps) {
   const navigate = useNavigate();
@@ -94,7 +89,9 @@ export default function ProductCatalog({
   const [isIngredientsOpen, setIsIngredientsOpen] = useState(false);
 
   // Save notification state
-  const [saveNotification, setSaveNotification] = useState<{ show: boolean; productName: string; isAdding: boolean }>({ show: false, productName: '', isAdding: true });
+  const [saveNotification, setSaveNotification] = useState<{ show: boolean; productName: string; isAdding: boolean; productData?: any }>({ show: false, productName: '', isAdding: true });
+  const [showRoutinePicker, setShowRoutinePicker] = useState(false);
+  const [routinePickerProduct, setRoutinePickerProduct] = useState<any>(null);
 
   // Safe fallback for compareList to prevent undefined errors
   const safeCompareList = compareList ?? [];
@@ -356,8 +353,13 @@ export default function ProductCatalog({
             category: product.category,
             skinTypes: product.skinTypes,
           });
-          setSaveNotification({ show: true, productName: product.name, isAdding: !wasAlreadySaved });
-          setTimeout(() => setSaveNotification({ show: false, productName: '', isAdding: true }), 3000);
+          setSaveNotification({
+            show: true,
+            productName: product.name,
+            isAdding: !wasAlreadySaved,
+            productData: !wasAlreadySaved ? { id: product.id, name: product.name, brand: product.brand, image: product.image, category: product.category } : undefined,
+          });
+          setTimeout(() => setSaveNotification({ show: false, productName: '', isAdding: true }), 4000);
         }}
         onAddToCompare={(e: React.MouseEvent) => handleAddToCompare(product, e)}
       />
@@ -864,8 +866,32 @@ export default function ProductCatalog({
           <div>
             <p className="font-medium">{saveNotification.isAdding ? 'Product Saved' : 'Product Removed'}</p>
             <p className="text-sm text-white/80">{saveNotification.productName}</p>
+            {saveNotification.isAdding && saveNotification.productData && (
+              <button
+                onClick={() => {
+                  setRoutinePickerProduct(saveNotification.productData);
+                  setSaveNotification({ show: false, productName: '', isAdding: true });
+                  setShowRoutinePicker(true);
+                }}
+                className="text-xs underline text-white/70 hover:text-white mt-1 cursor-pointer"
+              >
+                Add to Routine?
+              </button>
+            )}
           </div>
         </div>
+      )}
+
+      {/* Routine Picker Modal */}
+      {showRoutinePicker && routinePickerProduct && (
+        <RoutinePickerModal
+          isOpen={showRoutinePicker}
+          onClose={() => {
+            setShowRoutinePicker(false);
+            setRoutinePickerProduct(null);
+          }}
+          product={routinePickerProduct}
+        />
       )}
     </div>
   );

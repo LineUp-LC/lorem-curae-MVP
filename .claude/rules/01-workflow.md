@@ -162,3 +162,35 @@ This repository uses two governance layers:
 - Engineering requests → follow CLAUDE.md + rules/
 - Product-facing requests → load and follow CLAUDE_PRODUCT.md
 - Never mix the two roles
+
+---
+
+## Continuous Governance Scaling
+
+Every completed task must trigger a governance self-check. This is not optional.
+
+### Rule Creation
+- If a new pattern spans 2+ files or will be reused, create a rule in `.claude/rules/XX-<domain>.md` using the next sequential number
+- Use the same frontmatter format: scope, authority, last_synced, related
+- After creating a rule:
+  1. Add it to the Rule Index table in `.claude/CLAUDE.md`
+  2. Add query-pattern rows to `.claude/ROUTING.md`
+- Before creating: check if an existing rule already covers it — extend rather than duplicate
+
+### Memory.md Updates
+- Every completed phase/feature gets a dated entry following the Phase 1 format in Memory.md: date, files modified, verification results, deferred items
+- New debugging insights: `[symptom] → [root cause] → [fix]`
+- Observations seen once → "Observations" section. Promote to "Confirmed Patterns" after 2+ occurrences (error graduation per `14-consistency.md`)
+
+### Error Graduation Loop
+- Bug encountered once → log in Memory.md Observations
+- Same issue encountered twice → promote to Confirmed Patterns
+- Pattern affects future work → create or extend a rule in `.claude/rules/`
+
+### Self-Check (run mentally after every task)
+1. Did I create a pattern that should be a rule?
+2. Did I solve a problem that should be a skill?
+3. Did I update Memory.md with the outcome?
+4. Did I update CLAUDE.md and ROUTING.md if I created new governance files?
+
+If the answer to any of these is yes and the corresponding file wasn't created/updated, the task is NOT complete.

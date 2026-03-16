@@ -5,7 +5,6 @@ import ConnectedSystemSection from './components/ConnectedSystemSection';
 import DifferentiationSection from './components/DifferentiationSection';
 import IngredientSection from './components/IngredientSection';
 import TestimonialSection from './components/TestimonialSection';
-import MarketplaceSection from './components/MarketplaceSection';
 import QuizCTA from './components/QuizCTA';
 
 /**
@@ -39,7 +38,6 @@ const HomePage = () => {
         <DifferentiationSection />
         <IngredientSection />
         <TestimonialSection />
-        <MarketplaceSection />
         <QuizCTA />
       </main>
     </div>

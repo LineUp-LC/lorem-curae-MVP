@@ -20,7 +20,7 @@ export default function SkinSurveyAccountPage() {
       try {
         const parsed = JSON.parse(existingData);
         // Check if survey has meaningful data (at least skin type selected)
-        if (parsed.skinType && parsed.skinType.length > 0) {
+        if ((parsed.skinTypes && parsed.skinTypes.length > 0) || (parsed.skinType && parsed.skinType.length > 0)) {
           setShowRedoPrompt(true);
         }
       } catch (e) {

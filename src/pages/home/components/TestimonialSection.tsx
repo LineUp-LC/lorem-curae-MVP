@@ -101,7 +101,6 @@ const testimonials = [
 
 // Platform highlights - verifiable counts only
 const stats: Array<{ number?: number; suffix?: string; label: string; decimals?: number; text?: string }> = [
-  { text: 'Coming Soon', label: 'Marketplace' },
   { number: 10, suffix: '+', label: 'Ingredients Simplified', decimals: 0 },
 ];
 

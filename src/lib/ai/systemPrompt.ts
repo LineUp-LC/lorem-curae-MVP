@@ -100,14 +100,15 @@ OUTPUT STRUCTURE:
 Use plain language — no ingredient names unless explaining what they do. No clinical terms.
 Keep total response under 4 sentences. Do not include "This is not medical advice."`,
 
-  ingredient_detail: `TASK: Explain this ingredient in plain language for this user's skin and environment.
+  ingredient_detail: `TASK: Explain this ingredient in plain language, personalized for this user's skin concerns and environment.
 OUTPUT STRUCTURE:
 1. What it does for your skin (1 sentence) — explain the benefit in everyday terms, not mechanism names
-2. Why it matters for you right now (1 sentence) — tie to the user's skin type, concerns, or current environment
-3. How to use it (1 sentence) — practical, specific to their routine context
+2. Why this matters for YOUR concerns (1-2 sentences) — name the user's specific concerns (e.g. "dryness", "dark spots") and explain how this ingredient helps with each. If multiple concerns match, address each briefly. If no concerns match, explain the general benefit for their skin type.
+3. How to use it (1 sentence) — practical, specific to their routine context and environment
 4. Watch for (if applicable) — sensitivity or interaction note relevant to their profile
 Use plain language throughout — explain what the ingredient does, not its chemical mechanism.
-Keep total response under 4 sentences. Do not include "This is not medical advice."`,
+When the user has concerns, lead with "For your [concern]..." or "Since you're dealing with [concern]..." framing.
+Keep total response under 5 sentences. Do not include "This is not medical advice."`,
 
   routine_builder: `TASK: Analyze this routine for the user's skin type, concerns, and current environment.
 OUTPUT STRUCTURE:

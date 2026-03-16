@@ -122,6 +122,15 @@ export default function ProductCard_CompactB({
         </div>
       ) : null}
 
+      {/* Inline top match reason (visible without hover) */}
+      {matchReasons && matchReasons.length > 0 && tierBadge && (
+        <div className="absolute top-12 left-3 z-10">
+          <span className="text-[11px] italic text-white/90 drop-shadow-sm line-clamp-1 max-w-[calc(100%-24px)]">
+            {matchReasons[0]}
+          </span>
+        </div>
+      )}
+
       {/* Compare Highlight Tooltip */}
       {highlightCompare && (
         <div className="absolute top-3 right-3 z-10">
@@ -267,29 +276,44 @@ export default function ProductCard_CompactB({
           </div>
         )}
 
-        {/* Price + Compare */}
+        {/* Price + Save + Compare */}
         <div className="flex items-center justify-between pt-2 border-t border-blush">
           <div>
             <span className="text-base xs:text-lg font-bold text-deep">
               ${(product.price * 0.9).toFixed(2)} - ${(product.price * 1.1).toFixed(2)}
             </span>
           </div>
-          <button
-            onClick={(e) => { e.stopPropagation(); if (!isMaxReached) onAddToCompare(e); }}
-            disabled={isMaxReached}
-            className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
-              isSelected
-                ? 'bg-primary text-white cursor-pointer'
-                : isMaxReached
-                ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
-                : 'bg-cream text-warm-gray hover:bg-light/30 hover:text-primary cursor-pointer'
-            }`}
-            title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
-            aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
-            aria-pressed={isSelected}
-          >
-            {isSelected ? <i className="ri-check-line text-base"></i> : <i className="ri-scales-line text-base"></i>}
-          </button>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={(e) => { e.stopPropagation(); onToggleSave(e); }}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
+                isProductSaved
+                  ? 'bg-primary text-white cursor-pointer'
+                  : 'bg-cream text-warm-gray hover:bg-light/30 hover:text-primary cursor-pointer'
+              }`}
+              title={isProductSaved ? 'Remove from saved' : 'Save product'}
+              aria-label={isProductSaved ? `Remove ${product.name} from saved` : `Save ${product.name}`}
+              aria-pressed={isProductSaved}
+            >
+              <i className={`${isProductSaved ? 'ri-bookmark-fill' : 'ri-bookmark-line'} text-base`}></i>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); if (!isMaxReached) onAddToCompare(e); }}
+              disabled={isMaxReached}
+              className={`w-8 h-8 flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
+                isSelected
+                  ? 'bg-primary text-white cursor-pointer'
+                  : isMaxReached
+                  ? 'bg-gray-100 text-gray-300 cursor-not-allowed'
+                  : 'bg-cream text-warm-gray hover:bg-light/30 hover:text-primary cursor-pointer'
+              }`}
+              title={isSelected ? 'Remove from comparison' : isMaxReached ? 'Maximum 3 products' : 'Add to comparison'}
+              aria-label={isSelected ? `Remove ${product.name} from comparison` : isMaxReached ? 'Maximum 3 products reached' : `Add ${product.name} to comparison`}
+              aria-pressed={isSelected}
+            >
+              {isSelected ? <i className="ri-check-line text-base"></i> : <i className="ri-scales-line text-base"></i>}
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -7,9 +7,12 @@
 import { supabase } from '../supabase-browser';
 import { savedProductsState } from '../utils/favoritesState';
 import { recentlyViewedState } from '../utils/recentlyViewedState';
+import { buildAIContext } from './surfaceContext';
+import { buildSystemPrompt } from './systemPrompt';
 import type {
   AIChatRequest,
   AIChatErrorResponse,
+  ConversationMessage,
   ProductReference,
 } from './types';
 
@@ -88,6 +91,17 @@ export function getClientContext(): AIChatRequest['clientContext'] {
 }
 
 /**
+ * Build the system prompt for the chat surface using the shared AI pipeline.
+ */
+function buildChatSystemPrompt(conversationHistory: ConversationMessage[] = []): string {
+  const ctx = buildAIContext('chat', {
+    page: { mode: 'chat', conversationHistory },
+    evidence: {},
+  });
+  return buildSystemPrompt(ctx);
+}
+
+/**
  * Call the AI chat edge function with Claude-powered responses
  */
 export async function callAIChatAPI(
@@ -106,10 +120,14 @@ export async function callAIChatAPI(
       headers['Authorization'] = `Bearer ${session.access_token}`;
     }
 
+    // Build system prompt from the shared AI pipeline
+    const systemPrompt = buildChatSystemPrompt(request.conversationHistory);
+
     // Merge client context into request
     const clientContext = getClientContext();
     const requestWithContext: AIChatRequest = {
       ...request,
+      systemPrompt,
       clientContext: {
         ...clientContext,
         ...request.clientContext, // Allow override
@@ -128,6 +146,12 @@ export async function callAIChatAPI(
       const errorMessage = data.error || 'API request failed';
       console.error('[AIChatClient] API error:', errorMessage);
       return { success: false, error: errorMessage };
+    }
+
+    // Validate response structure
+    if (typeof data.response !== 'string' || data.response.trim().length === 0) {
+      console.error('[AIChatClient] Invalid response format:', data);
+      return { success: false, error: 'Received empty or invalid response from AI' };
     }
 
     return {

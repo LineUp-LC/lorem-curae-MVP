@@ -50,7 +50,7 @@ const IngredientLibrary = ({ onSelectIngredient }: IngredientLibraryProps) => {
 
       setUserProfile({
         concerns: uniqueConcerns,
-        skinType: surveyData.skinType?.[0] || '',
+        skinType: surveyData.skinTypes?.[0] || surveyData.skinType?.[0] || '',
         allergens: surveyData.allergens || [],
         preferences: surveyData.preferences || [],
         acneType: surveyData.acneType || [],

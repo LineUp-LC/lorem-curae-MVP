@@ -74,7 +74,7 @@ function collectGuestData(): GuestData {
     const skinSurveyData = localStorage.getItem('skinSurveyData')
     if (skinSurveyData && !data.skinType) {
       const parsed = JSON.parse(skinSurveyData)
-      data.skinType = data.skinType || parsed.skinType?.[0]
+      data.skinType = data.skinType || parsed.skinTypes?.[0] || parsed.skinType?.[0]
       data.concerns = data.concerns?.length ? data.concerns : parsed.concerns
     }
 

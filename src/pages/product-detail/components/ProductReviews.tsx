@@ -465,17 +465,26 @@ const ProductReviews = ({ productId, product, env, season }: ProductReviewsProps
           </p>
         ) : null}
 
-        {/* Review Cards */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-          {featuredReviews.map((review) => {
-            const similarityBadge = 'matchTier' in review
-              ? getTierBadgeInfo(review.matchTier, review.similarityScore)
-              : null;
+        {/* Review Cards — split into "People Like You" + "All Reviews" */}
+        {(() => {
+          const hasProfile = !!(skinType || concerns.length > 0);
+          const highSimReviews = hasProfile
+            ? personalizedReviews.filter(r => r.similarityScore >= 50).slice(0, 3)
+            : [];
+          const highSimIds = new Set(highSimReviews.map(r => r.id));
+          const remainingReviews = highSimReviews.length > 0
+            ? featuredReviews.filter(r => !highSimIds.has(r.id))
+            : featuredReviews;
 
-            const isFullMatch = 'matchTier' in review && review.matchTier === 'full';
+          const renderCard = (review: Review & { similarityScore?: number; matchTier?: string }, showMatchDetails?: boolean) => {
+            const simResult = calculateSimilarityWeight(
+              { skinType: review.skinType, skinConcerns: review.skinConcerns, complexion: review.complexion, lifestyle: review.lifestyle, age: review.age },
+              { skinType: userSkinProfile.skinType, primaryConcerns: userSkinProfile.primaryConcerns, complexion: userSkinProfile.complexion, sensitivity: '', lifestyle: userSkinProfile.lifestyle, age: userSkinProfile.age }
+            );
+            const badge = simResult.matchTier !== 'none' ? getTierBadgeInfo(simResult.matchTier, simResult.score) : null;
 
             return (
-              <div key={review.id} className={`rounded-xl p-4 border ${isFullMatch ? 'bg-light/20 border-primary-300' : 'bg-white border-blush/40'}`}>
+              <>
                 {/* Review Header */}
                 <div className="flex items-start gap-3 mb-3">
                   <button
@@ -500,16 +509,26 @@ const ProductReviews = ({ productId, product, env, season }: ProductReviewsProps
                       {review.verified && (
                         <i className="ri-shield-check-fill text-[10px] text-warm-gray" title="Verified buyer"></i>
                       )}
-                      {similarityBadge && (
+                      {badge && (
                         <button
                           onClick={() => setMatchPopupReview(review)}
-                          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 ${similarityBadge.color} text-[9px] font-medium rounded-full hover:opacity-80 transition-opacity cursor-pointer`}
+                          className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 ${badge.color} text-[9px] font-medium rounded-full hover:opacity-80 transition-opacity cursor-pointer`}
                         >
-                          <i className={`${similarityBadge.icon} text-[9px]`}></i>
-                          {similarityBadge.label}
+                          <i className={`${badge.icon} text-[9px]`}></i>
+                          {badge.label}
                         </button>
                       )}
                     </div>
+                    {/* Match detail tags (visible for high-similarity reviews) */}
+                    {showMatchDetails && simResult.matchDetails.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-1">
+                        {simResult.matchDetails.map((detail, i) => (
+                          <span key={i} className="text-[9px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded">
+                            {detail}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                     <div className="flex items-center gap-1.5">
                       <div className="flex items-center">
                         {Array.from({ length: 5 }, (_, i) => (
@@ -615,10 +634,51 @@ const ProductReviews = ({ productId, product, env, season }: ProductReviewsProps
                     <i className="ri-arrow-right-s-line text-xs"></i>
                   </Link>
                 </div>
-              </div>
+              </>
             );
-          })}
-        </div>
+          };
+
+          return (
+            <>
+              {/* "People Like You" section */}
+              {highSimReviews.length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-3">
+                    <i className="ri-user-heart-line text-primary"></i>
+                    <h3 className="text-sm font-semibold text-deep">Reviews from Similar Skin Types</h3>
+                    <span className="text-[10px] text-warm-gray bg-cream px-2 py-0.5 rounded-full">{highSimReviews.length}</span>
+                  </div>
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {highSimReviews.map((review) => (
+                      <div key={review.id} className="rounded-xl p-4 border bg-light/10 border-primary-200">
+                        {renderCard(review, true)}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* "All Reviews" header (only when split exists) */}
+              {highSimReviews.length > 0 && remainingReviews.length > 0 && (
+                <div className="flex items-center gap-2 mb-3">
+                  <h3 className="text-sm font-semibold text-deep">All Reviews</h3>
+                </div>
+              )}
+
+              {/* Remaining / all review cards */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
+                {remainingReviews.map((review) => {
+                  const isFullMatch = 'matchTier' in review && review.matchTier === 'full';
+                  return (
+                    <div key={review.id} className={`rounded-xl p-4 border ${isFullMatch ? 'bg-light/20 border-primary-300' : 'bg-white border-blush/40'}`}>
+                      {renderCard(review)}
+                    </div>
+                  );
+                })}
+              </div>
+            </>
+          );
+        })()}
 
         {/* Call to Action */}
         <div className="text-center">

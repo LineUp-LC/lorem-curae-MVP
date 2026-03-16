@@ -37,6 +37,9 @@ No test runner configured. No test files exist.
 | 13 | `rules/13-domain-features.md` | Community, creator, nutrition, AR, discovery, future-proofing |
 | 14 | `rules/14-consistency.md` | Duplicate detection, propagation, audits, error graduation, file governance |
 | 15 | `rules/15-roadmap.md` | Feature tiers (MoSCoW), priority enforcement |
+| 16 | `rules/16-routing.md` | Active routes, deferred route governance, navigation components |
+| 17 | `rules/17-camera-scan.md` | Scan page, product-scan Edge Function, image pipeline, Claude Vision |
+| 18 | `rules/18-gamification.md` | Points economy, badges, streaks, triggers, rewards dashboard |
 
 > Full query-pattern routing: `.claude/ROUTING.md`
 

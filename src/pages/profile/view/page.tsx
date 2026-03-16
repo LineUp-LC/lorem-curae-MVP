@@ -94,7 +94,7 @@ export default function ProfileViewPage() {
   const avatarUrl = (profile?.preferences as any)?.avatar_url;
 
   // Get favorites from preferences
-  const favorites: any[] = profile?.preferences?.favorites || [];
+  const favorites: any[] = profile?.preferences?.savedProducts || [];
 
   // Loading state
   if (loading) {

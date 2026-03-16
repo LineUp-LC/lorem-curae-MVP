@@ -7,6 +7,7 @@ import Toast from '../../components/feature/Toast';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 import Dropdown from '../../components/ui/Dropdown';
 import { useAuth } from '../../lib/auth/AuthContext';
+import RoutinePickerModal from '../../components/feature/RoutinePickerModal';
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const AccountPage = () => {
   // Saved products
   const { savedProducts, removeSavedProduct } = useSavedProducts();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [routinePickerProduct, setRoutinePickerProduct] = useState<any>(null);
 
   // Sorting preference (persisted)
   const [savedProductsSort, setSavedProductsSort] = useLocalStorageState<string>('account_saved_products_sort', 'recent');
@@ -498,18 +500,31 @@ const AccountPage = () => {
                       )}
                     </Link>
 
-                    {/* Remove Link */}
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        removeSavedProduct(product.id);
-                      }}
-                      className="mt-2 text-xs underline cursor-pointer transition-colors hover:opacity-100"
-                      style={{ color: 'rgba(45, 42, 38, 0.7)' }}
-                      aria-label={`Remove ${product.name} from saved products`}
-                    >
-                      Remove
-                    </button>
+                    {/* Product Actions */}
+                    <div className="flex items-center gap-3 mt-2">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setRoutinePickerProduct(product);
+                        }}
+                        className="text-xs underline cursor-pointer transition-colors hover:opacity-100"
+                        style={{ color: '#C4704D' }}
+                        aria-label={`Add ${product.name} to a routine`}
+                      >
+                        Add to Routine
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeSavedProduct(product.id);
+                        }}
+                        className="text-xs underline cursor-pointer transition-colors hover:opacity-100"
+                        style={{ color: 'rgba(45, 42, 38, 0.7)' }}
+                        aria-label={`Remove ${product.name} from saved products`}
+                      >
+                        Remove
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -585,6 +600,21 @@ const AccountPage = () => {
         )}
 
       </main>
+
+      {/* Routine Picker Modal */}
+      {routinePickerProduct && (
+        <RoutinePickerModal
+          isOpen={!!routinePickerProduct}
+          onClose={() => setRoutinePickerProduct(null)}
+          product={{
+            id: routinePickerProduct.id,
+            name: routinePickerProduct.name,
+            brand: routinePickerProduct.brand,
+            image: routinePickerProduct.image,
+            category: routinePickerProduct.category,
+          }}
+        />
+      )}
 
     </div>
   );

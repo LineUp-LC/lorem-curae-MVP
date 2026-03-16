@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
 import { needsPeriodicVerification, initializeVerification } from '../../../lib/auth/periodicVerification';
+import { onAction } from '../../../lib/utils/gamificationTriggers';
 
 const AuthCallbackPage = () => {
   const navigate = useNavigate();
@@ -23,6 +24,8 @@ const AuthCallbackPage = () => {
       const userEmail = currentSession?.user?.email;
       if (userId) {
         initializeVerification(userId);
+        // Gamification: award signup points (once-ever, non-blocking)
+        onAction(userId, 'SIGNUP').catch(() => {});
         if (needsPeriodicVerification(userId) && userEmail) {
           return `/auth/verify-email?type=periodic&email=${encodeURIComponent(userEmail)}`;
         }

@@ -8,6 +8,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabase-browser';
+import { onAction } from './gamificationTriggers';
 
 export interface SavedProduct {
   id: number;
@@ -66,6 +67,14 @@ class SavedProductsStateManager {
       if (this.onAddCallback) {
         this.onAddCallback(product.name);
       }
+      // Gamification: award save points (non-blocking)
+      supabase.auth.getUser().then(({ data }) => {
+        if (data?.user?.id) {
+          onAction(data.user.id, 'PRODUCT_SAVED', {
+            totalSavedProducts: this.getSavedProducts().length,
+          }).catch(() => {});
+        }
+      });
       // Sync to Supabase (async, non-blocking)
       this.syncToSupabase();
     }

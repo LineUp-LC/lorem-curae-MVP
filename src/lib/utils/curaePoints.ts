@@ -27,12 +27,18 @@ export const POINTS_ACTIONS = {
   PRODUCT_REVIEW: { points: 25, description: 'Wrote a product review' },
   COMMUNITY_POST: { points: 15, description: 'Created a community post' },
   ROUTINE_CREATED: { points: 30, description: 'Created a skincare routine' },
-  ROUTINE_LOGGED: { points: 5, description: 'Logged daily routine' },
+  ROUTINE_LOGGED: { points: 10, description: 'Logged daily routine' },
   PRODUCT_PURCHASE: { points: 1, description: 'Points per dollar spent' }, // 1 point per $1
   REFERRAL: { points: 200, description: 'Referred a friend who signed up' },
   INGREDIENT_SEARCH: { points: 10, description: 'Researched an ingredient' },
   PROFILE_COMPLETE: { points: 75, description: 'Completed profile information' },
   MONTHLY_ACTIVE: { points: 50, description: 'Active user bonus' },
+  PRODUCT_SCAN: { points: 15, description: 'Scanned a product' },
+  PRODUCT_SAVED: { points: 5, description: 'Saved a product to collection' },
+  AI_CHAT: { points: 5, description: 'Started an AI chat session' },
+  STREAK_7_DAY: { points: 50, description: '7-day routine streak bonus' },
+  STREAK_30_DAY: { points: 200, description: '30-day routine streak bonus' },
+  FIRST_COMPARISON: { points: 20, description: 'Compared products for the first time' },
 };
 
 // Tier thresholds
@@ -79,7 +85,7 @@ export const getPointsAccount = async (userId: string): Promise<CuraePointsAccou
     const { data, error } = await supabase
       .from('curae_points')
       .select('*')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .single();
 
     if (error) {
@@ -127,7 +133,7 @@ export const awardPoints = async (
         tier: newTier,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', userId);
+      .eq('user_id', userId);
 
     if (updateError) throw updateError;
 
@@ -173,7 +179,7 @@ export const redeemPoints = async (
         points_balance: newBalance,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', userId);
+      .eq('user_id', userId);
 
     if (updateError) throw updateError;
 
@@ -206,7 +212,7 @@ export const getTransactionHistory = async (
     const { data, error } = await supabase
       .from('points_transactions')
       .select('*')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(limit);
 

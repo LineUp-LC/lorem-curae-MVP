@@ -84,9 +84,7 @@ const competitors = [
       'Community-reviewed retailers',
       'Product and retailer comparison tools',
       'Science-backed guidance',
-      'A supportive community',
       'A personal AI skincare assistant that walks the journey with you',
-      'Verified marketplace products (coming soon)',
     ],
     isUs: true
   },

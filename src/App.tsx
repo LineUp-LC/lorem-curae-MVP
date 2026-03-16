@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AppRoutes } from "./router";
 import { I18nextProvider } from "react-i18next";
@@ -9,13 +9,35 @@ import LastVisitedPageRestorer from "./components/feature/LastVisitedPageRestore
 import PersistenceDebugPanel from "./components/feature/PersistenceDebugPanel";
 import ScrollToTop from "./components/feature/ScrollToTop";
 import { initProductCatalog } from "./lib/data/products";
+import PointsEarnedToast from "./components/feature/PointsEarnedToast";
+
+interface ToastData {
+  points: number;
+  description: string;
+  badgeName?: string;
+}
 
 function App() {
-  // Preload product catalog from Supabase (fire-and-forget)
-  // Mock data is available instantly; Supabase data replaces it when ready
+  const [toast, setToast] = useState<ToastData | null>(null);
+
+  const handleGamificationEvent = useCallback((e: Event) => {
+    const detail = (e as CustomEvent).detail;
+    if (!detail) return;
+    setToast({
+      points: detail.pointsAwarded ?? 0,
+      description: detail.description ?? '',
+      badgeName: detail.badgesUnlocked?.[0],
+    });
+  }, []);
+
   useEffect(() => {
     initProductCatalog();
   }, []);
+
+  useEffect(() => {
+    window.addEventListener('curae:gamification', handleGamificationEvent);
+    return () => window.removeEventListener('curae:gamification', handleGamificationEvent);
+  }, [handleGamificationEvent]);
 
   return (
     <PasswordGate>
@@ -26,6 +48,14 @@ function App() {
             <LastVisitedPageRestorer />
             <PersistenceDebugPanel />
             <AppRoutes />
+            {toast && (
+              <PointsEarnedToast
+                points={toast.points}
+                description={toast.description}
+                badgeName={toast.badgeName}
+                onClose={() => setToast(null)}
+              />
+            )}
           </BrowserRouter>
         </I18nextProvider>
       </AuthProvider>

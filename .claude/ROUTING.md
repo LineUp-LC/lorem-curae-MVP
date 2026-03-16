@@ -129,7 +129,7 @@ last_synced: "2026-03-14"
 |---------------|------|
 | Supabase client configuration | `rules/10-data-layer.md` |
 | Data access module registry | `rules/10-data-layer.md` |
-| Edge Function registry (all 15) | `rules/10-data-layer.md` |
+| Edge Function registry (all 16) | `rules/10-data-layer.md` |
 | Edge Function development rules | `rules/10-data-layer.md` |
 | Database migration registry (all 8) | `rules/10-data-layer.md` |
 | Migration safety rules | `rules/10-data-layer.md` |
@@ -177,6 +177,38 @@ last_synced: "2026-03-14"
 | Full-site audit protocol | `rules/14-consistency.md` |
 | Error graduation system (observation → pattern → rule) | `rules/14-consistency.md` |
 | File governance (500-line limit, 100-file limit) | `rules/14-consistency.md` |
+
+## Routing
+
+| Query Pattern | File |
+|---------------|------|
+| Active route registry / route config | `rules/16-routing.md` |
+| Navigation components (Navbar, Footer, ProfileDropdown) | `rules/16-routing.md` |
+| Deferred route governance / uncommenting routes | `rules/16-routing.md` |
+| Adding new routes / catch-all behavior | `rules/16-routing.md` |
+
+## Camera Scan
+
+| Query Pattern | File |
+|---------------|------|
+| Camera scan page / product scanner | `rules/17-camera-scan.md` |
+| Image compression / resize pipeline | `rules/17-camera-scan.md` |
+| product-scan Edge Function / Claude Vision | `rules/17-camera-scan.md` |
+| Scan result types / ScanResult / ScanResponse | `rules/17-camera-scan.md` |
+| Scan UX state machine (idle/captured/processing/result/error) | `rules/17-camera-scan.md` |
+| Barcode / UPC scanning (future) | `rules/17-camera-scan.md` |
+
+## Gamification
+
+| Query Pattern | File |
+|---------------|------|
+| Points economy / POINTS_ACTIONS / tier thresholds | `rules/18-gamification.md` |
+| Badge definitions / badge unlock logic | `rules/18-gamification.md` |
+| Streak milestones / routine streaks | `rules/18-gamification.md` |
+| Gamification triggers / onAction dispatcher | `rules/18-gamification.md` |
+| Rewards dashboard / /rewards route | `rules/18-gamification.md` |
+| Adding new points actions or badges | `rules/18-gamification.md` |
+| Gamification database tables (curae_points, points_transactions, user_badges) | `rules/18-gamification.md` |
 
 ## Roadmap & Priority
 

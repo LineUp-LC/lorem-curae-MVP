@@ -400,7 +400,10 @@ export function getEffectiveSkinType(): string | undefined {
     const surveyData = localStorage.getItem('skinSurveyData');
     if (surveyData) {
       const parsed = JSON.parse(surveyData);
-      return parsed.skinType?.[0] || undefined;
+      // Handle both key names: QuizFlow saves `skinType`, results page saves `skinTypes`
+      const skinTypeArr = parsed.skinTypes || parsed.skinType;
+      if (Array.isArray(skinTypeArr)) return skinTypeArr[0] || undefined;
+      if (typeof skinTypeArr === 'string') return skinTypeArr || undefined;
     }
   } catch (e) {
     console.error('Failed to parse skinSurveyData:', e);

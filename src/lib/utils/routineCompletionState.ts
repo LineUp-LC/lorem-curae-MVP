@@ -6,6 +6,9 @@
  */
 
 import { useState, useEffect } from 'react';
+import { onAction } from './gamificationTriggers';
+import { computeStreaks, checkStreakMilestones, getAllCompletionHistory } from './routineStreaks';
+import { supabase } from '../supabase-browser';
 
 interface RoutineCompletion {
   routineId: string;
@@ -64,6 +67,28 @@ class RoutineCompletionStateManager {
     });
 
     this.saveCompletions(all);
+
+    // Gamification: award routine logged points + check streak milestones (non-blocking)
+    supabase.auth.getUser().then(({ data }) => {
+      if (!data?.user?.id) return;
+      const userId = data.user.id;
+      onAction(userId, 'ROUTINE_LOGGED').catch(() => {});
+      // Check streak milestones after a short delay to let storage settle
+      setTimeout(() => {
+        try {
+          const routinesRaw = localStorage.getItem('savedRoutines');
+          const routines = routinesRaw ? JSON.parse(routinesRaw) : [];
+          const history = getAllCompletionHistory();
+          const streaks = computeStreaks(routines, history);
+          const milestones = checkStreakMilestones(streaks);
+          for (const m of milestones) {
+            onAction(userId, m.action).catch(() => {});
+          }
+        } catch {
+          // Silent fail — streaks are non-critical
+        }
+      }, 100);
+    });
   }
 
   // Undo completion for today
