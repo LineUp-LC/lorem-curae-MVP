@@ -136,7 +136,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
     if (savedSurvey) {
       const surveyData = JSON.parse(savedSurvey);
       setUserProfile({
-        skinType: surveyData.skinType?.[0] || '',
+        skinType: surveyData.skinTypes?.[0] || surveyData.skinType?.[0] || '',
         concerns: surveyData.concerns || [],
         fitzpatrickType: surveyData.fitzpatrickType?.[0] || '',
       });
@@ -453,7 +453,7 @@ const IngredientDetail = ({ ingredientId, onBack }: IngredientDetailProps) => {
       },
       environment: env,
     });
-  }, [ingredientId, ingredient?.name, env?.season, env?.uvBand]);
+  }, [ingredientId, ingredient?.name, env?.season, env?.uvBand, authUser?.id, userProfile?.skinType]);
 
   // Ingredient-specific community reviews keyed by slug
   const ingredientReviewData: Record<string, Review[]> = {
