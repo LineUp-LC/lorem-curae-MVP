@@ -122,6 +122,15 @@ export default function ProductCard_CompactB({
         </div>
       ) : null}
 
+      {/* Inline top match reason (visible without hover) */}
+      {matchReasons && matchReasons.length > 0 && tierBadge && (
+        <div className="absolute top-12 left-3 z-10">
+          <span className="text-[11px] italic text-white/90 drop-shadow-sm line-clamp-1 max-w-[calc(100%-24px)]">
+            {matchReasons[0]}
+          </span>
+        </div>
+      )}
+
       {/* Compare Highlight Tooltip */}
       {highlightCompare && (
         <div className="absolute top-3 right-3 z-10">

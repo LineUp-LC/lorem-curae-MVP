@@ -563,6 +563,20 @@ export default function ProductDetailPage() {
                 );
               })()}
 
+              {/* AI Explain Panel — "Why This Works for You" */}
+              {productFromMock && (
+                <div className="mb-4">
+                  <AIExplainPanel
+                    product={productFromMock}
+                    environment={env}
+                    evidence={{
+                      environmentFit: envFit ? { explanation: envFit.explanation, disclaimer: envFit.disclaimer } : undefined,
+                      reviewerEvidence: reviewerEvidence ? { count: reviewerEvidence.matchCount, detail: reviewerEvidence.detail } : undefined,
+                    }}
+                  />
+                </div>
+              )}
+
               {/* Preferences */}
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-deep mb-2">Preferences</h3>
@@ -659,20 +673,6 @@ export default function ProductDetailPage() {
                   </div>
                 ) : null;
               })()}
-
-              {/* AI Explain Panel */}
-              {productFromMock && (
-                <div className="mb-4">
-                  <AIExplainPanel
-                    product={productFromMock}
-                    environment={env}
-                    evidence={{
-                      environmentFit: envFit ? { explanation: envFit.explanation, disclaimer: envFit.disclaimer } : undefined,
-                      reviewerEvidence: reviewerEvidence ? { count: reviewerEvidence.matchCount, detail: reviewerEvidence.detail } : undefined,
-                    }}
-                  />
-                </div>
-              )}
 
               {/* Location Explanation Modal */}
               {showLocationModal && env && seasonalModalContent && (
