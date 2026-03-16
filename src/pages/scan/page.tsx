@@ -118,7 +118,7 @@ export default function ScanPage() {
   }
 
   return (
-    <div className="min-h-[60vh] py-8 px-4">
+    <div className="min-h-screen bg-cream pt-24 pb-16 px-4">
       <div className="max-w-lg mx-auto">
         {/* Page header */}
         <div className="flex items-center gap-2.5 mb-8">
