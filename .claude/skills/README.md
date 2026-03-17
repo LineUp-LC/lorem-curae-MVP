@@ -12,6 +12,12 @@
 | Personalization Check | `personalization-check.md` | Modifying personalization, adding new personalized surface |
 | Content Pipeline | `content-pipeline.md` | Adding product/ingredient content or environment-fit copy |
 
+## Content & Creative Skills
+
+| Skill | File | Trigger |
+|-------|------|---------|
+| Thumbnail Genius | `thumbnail-genius.md` | `/thumbnail [topic]`, competitor screenshot uploads, CTR optimization |
+
 ## Marketing Skills (from market suite)
 
 | Skill | File | Trigger |
