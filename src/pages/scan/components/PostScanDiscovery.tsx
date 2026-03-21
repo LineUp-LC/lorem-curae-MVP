@@ -20,6 +20,7 @@ import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
 import ScanReviewPanel from './ScanReviewPanel';
+import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -169,7 +170,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const compatibilityBadge = (level: CompatibleProduct['compatibilityLevel'], productId: number, hasWhy: boolean) => {
     const badgeClasses = level === 'fully-compatible'
       ? 'bg-sage/15 text-sage'
-      : 'bg-yellow-500/15 text-yellow-700';
+      : 'bg-cream text-warm-gray border border-blush';
     const icon = level === 'fully-compatible' ? 'ri-check-double-line' : 'ri-alert-line';
     const label = level === 'fully-compatible' ? 'Compatible' : 'Use with care';
 
@@ -183,9 +184,13 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
           <button
             onClick={(e) => { e.preventDefault(); toggleWhy(productId); }}
             className="inline-flex items-center justify-center w-5 h-5 rounded-full text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors"
-            title="Why compatible"
           >
-            <i className="ri-sparkling-line text-[11px]" />
+            <span className="relative group">
+              <NeuralBloomIcon className="w-3.5 h-3.5 cursor-help" />
+              <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[10px] text-white bg-deep rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                AI Personalized Insight
+              </span>
+            </span>
           </button>
         )}
       </div>
@@ -285,7 +290,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
             {expandedWhyIds.has(product.id) && whyTexts[product.id] && (
               <div className="mx-4 mb-3 bg-cream/70 border border-blush/30 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-warm-gray leading-relaxed flex items-start gap-1.5">
-                  <i className="ri-sparkling-line text-primary/50 mt-0.5 flex-shrink-0" />
+                  <NeuralBloomIcon className="w-3.5 h-3.5 text-primary/50 mt-0.5 flex-shrink-0" />
                   {whyTexts[product.id]}
                 </p>
               </div>

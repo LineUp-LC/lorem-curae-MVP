@@ -29,6 +29,9 @@ import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { highlightRelevantKeywords } from '../../../lib/utils/highlightKeywords';
+import { matchesConcern } from '../../../lib/utils/matching';
+import { isComplexionMatch } from '../../../lib/utils/reviewSimilarity';
+import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 interface ScanReviewPanelProps {
   product: Product;
@@ -41,6 +44,10 @@ interface ScoredReview {
   content: string;
   skinType: string;
   concerns: string[];
+  complexion?: string;
+  sensitivity?: string;
+  lifestyle?: string[];
+  age: number;
   pros?: string[];
   cons?: string[];
   usageDurationWeeks: number;
@@ -56,7 +63,7 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
+  const [matchPopupReview, setMatchPopupReview] = useState<ScoredReview | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -164,6 +171,10 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
             content: r.content,
             skinType: r.skinType,
             concerns: r.skinConcerns,
+            complexion: r.complexion,
+            sensitivity: r.sensitivity,
+            lifestyle: r.lifestyle,
+            age: r.age || 25,
             pros: r.pros,
             cons: r.cons,
             usageDurationWeeks: r.usageDurationWeeks || 4,
@@ -255,7 +266,7 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
       {aiSummary && (
         <div className="mx-4 mt-3 bg-primary/5 border border-primary/10 rounded-xl px-3 py-2.5">
           <div className="flex items-start gap-1.5">
-            <i className="ri-sparkling-line text-primary/60 text-sm mt-0.5 flex-shrink-0" />
+            <NeuralBloomIcon className="w-3.5 h-3.5 text-primary/60 mt-0.5 flex-shrink-0" />
             <p className="text-[11px] text-deep leading-relaxed">
               {aiSummary}
             </p>
@@ -281,8 +292,8 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
         <div className="px-4 pb-4 space-y-2.5">
           {visibleReviews.map(review => {
             const badge = getTierBadgeInfo(review.matchTier, review.score);
-            const isMatchExpanded = expandedMatchId === review.id;
             const userSkinType = getEffectiveSkinType();
+            const userConcerns = getEffectiveConcerns();
 
             return (
               <div key={review.id} className="bg-cream/50 border border-blush/30 rounded-lg p-3">
@@ -306,8 +317,8 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
                         {review.userName}
                       </span>
                     </div>
-                    {/* Reviewer profile: skin type + concerns */}
-                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                    {/* Reviewer skin type + usage */}
+                    <div className="flex items-center gap-1.5 mt-0.5">
                       {review.skinType && (
                         <span className={`text-[10px] ${
                           userSkinType && review.skinType.toLowerCase() === userSkinType.toLowerCase()
@@ -317,19 +328,12 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
                           {review.skinType} skin
                         </span>
                       )}
-                      {review.concerns.length > 0 && (
-                        <>
-                          <span className="text-warm-gray/30 text-[10px]">·</span>
-                          <span className="text-[10px] text-warm-gray truncate">
-                            {review.concerns.slice(0, 2).join(', ')}
-                          </span>
-                        </>
-                      )}
+                      <span className="text-[10px] text-warm-gray">· {review.usageDurationWeeks}w use</span>
                     </div>
                   </div>
                   {badge && (
                     <button
-                      onClick={() => setExpandedMatchId(isMatchExpanded ? null : review.id)}
+                      onClick={() => setMatchPopupReview(review)}
                       className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium cursor-pointer hover:opacity-80 transition-opacity ${badge.color}`}
                     >
                       <i className={`${badge.icon} text-[9px]`} />
@@ -338,15 +342,19 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
                   )}
                 </div>
 
-                {/* Expandable match breakdown */}
-                {isMatchExpanded && review.matchDetails.length > 0 && (
-                  <div className="mt-1.5 flex flex-wrap gap-1">
-                    {review.matchDetails.map((detail, i) => (
+                {/* Concern pills — highlighted when matching user profile */}
+                {review.concerns.length > 0 && (
+                  <div className="flex flex-wrap gap-1 mt-1.5">
+                    {review.concerns.map((concern, idx) => (
                       <span
-                        key={i}
-                        className="text-[9px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded"
+                        key={idx}
+                        className={`px-2 py-0.5 text-[10px] rounded-full ${
+                          matchesConcern(concern, userConcerns)
+                            ? 'bg-light/30 text-primary-700 border border-primary-300 font-medium'
+                            : 'bg-cream text-warm-gray'
+                        }`}
                       >
-                        {detail}
+                        {concern}
                       </span>
                     ))}
                   </div>
@@ -372,7 +380,7 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
                       </div>
                     ) : null}
                     {review.cons?.length ? (
-                      <div className="flex items-center gap-0.5 text-[10px] text-yellow-700">
+                      <div className="flex items-center gap-0.5 text-[10px] text-warm-gray">
                         <i className="ri-thumb-down-line" />
                         {review.cons.slice(0, 2).join(', ')}
                       </div>
@@ -384,6 +392,88 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
           })}
         </div>
       )}
+
+      {/* Match Breakdown Modal — same pattern as ProductReviews */}
+      {matchPopupReview && (() => {
+        const r = matchPopupReview;
+        const userSkinType = getEffectiveSkinType() || '';
+        const userConcerns = getEffectiveConcerns();
+        const userComplexion = getEffectiveComplexion();
+        const userLifestyle = getEffectiveLifestyle();
+
+        const skinTypeMatch = r.skinType.toLowerCase() === userSkinType.toLowerCase();
+        let concernCount = 0;
+        r.concerns.forEach(rc => {
+          if (matchesConcern(rc, userConcerns)) concernCount++;
+        });
+        const complexionResult = isComplexionMatch(r.complexion || '', userComplexion);
+        const complexionMatch = complexionResult !== 'none';
+        const lifestyleMatch = !!(r.lifestyle && userLifestyle.length > 0 && r.lifestyle.some(l => userLifestyle.includes(l)));
+        const ageMatch = Math.abs(r.age - 25) <= 5;
+
+        const popupBadge = getTierBadgeInfo(r.matchTier, r.score);
+        const rows = [
+          { name: 'Skin Type', points: '+40', matched: skinTypeMatch, earned: skinTypeMatch ? 40 : 0, theirs: r.skinType, yours: userSkinType || '—' },
+          { name: 'Concerns', points: '+15/ea', matched: concernCount > 0, earned: concernCount * 15, theirs: r.concerns.slice(0, 2).join(', '), yours: userConcerns.slice(0, 2).join(', '), note: `${concernCount} matched` },
+          { name: 'Complexion', points: '+10', matched: complexionMatch, earned: complexionMatch ? 10 : 0, theirs: r.complexion || '—', yours: userComplexion || '—', note: complexionMatch ? (complexionResult === 'exact' ? 'exact' : '±1 tier') : undefined },
+          { name: 'Lifestyle', points: '+5', matched: lifestyleMatch, earned: lifestyleMatch ? 5 : 0, theirs: r.lifestyle?.slice(0, 1).join('') || '—', yours: userLifestyle.slice(0, 1).join('') || '—' },
+          { name: 'Age Range', points: '+5', matched: ageMatch, earned: ageMatch ? 5 : 0, theirs: `Age ${r.age}`, yours: 'Age 25', note: '±5 years' },
+        ];
+
+        return (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
+              <div className="p-5 border-b border-blush/30 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-deep">Match Breakdown</h3>
+                  <p className="text-xs text-warm-gray mt-0.5">{r.userName}&apos;s profile vs yours</p>
+                </div>
+                <button
+                  onClick={() => setMatchPopupReview(null)}
+                  aria-label="Close"
+                  className="w-8 h-8 flex items-center justify-center text-warm-gray hover:text-deep hover:bg-cream rounded-full transition-all cursor-pointer"
+                >
+                  <i className="ri-close-line text-xl" />
+                </button>
+              </div>
+              <div className="p-5">
+                {popupBadge && (
+                  <div className="flex justify-center mb-5">
+                    <span className={`flex items-center space-x-1.5 px-4 py-2 ${popupBadge.color} text-sm font-semibold rounded-full`}>
+                      <i className={popupBadge.icon} />
+                      <span>{popupBadge.label}</span>
+                    </span>
+                  </div>
+                )}
+                <div className="space-y-2">
+                  {rows.map((row, idx) => (
+                    <div key={idx} className={`flex items-center justify-between p-3 rounded-lg ${row.matched ? 'bg-light/20 border border-primary-200' : 'bg-cream/50'}`}>
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${row.matched ? 'bg-primary/20 text-primary-700' : 'bg-blush/30 text-warm-gray/40'}`}>
+                          <i className={row.matched ? 'ri-check-line text-sm' : 'ri-close-line text-sm'} />
+                        </div>
+                        <div>
+                          <p className={`text-sm font-medium ${row.matched ? 'text-deep' : 'text-warm-gray'}`}>{row.name}</p>
+                          <p className="text-[11px] text-warm-gray/70">
+                            {row.theirs} vs {row.yours}{row.note ? ` · ${row.note}` : ''}
+                          </p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-semibold ${row.matched ? 'text-primary-700' : 'text-warm-gray/40'}`}>
+                        +{row.earned}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 pt-4 border-t border-blush/30 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-deep">Total Score</span>
+                  <span className="text-lg font-bold text-primary">{Math.min(r.score, 100)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 }

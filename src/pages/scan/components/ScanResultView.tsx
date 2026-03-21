@@ -16,6 +16,7 @@ import { savedProductsState } from '../../../lib/utils/favoritesState';
 import { onAction } from '../../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
+import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 interface ScanResultViewProps {
   result: ScanResult;
@@ -31,8 +32,8 @@ interface ScanResultViewProps {
 function SafetyBadge({ tier }: { tier: ParsedIngredient['safetyTier'] }) {
   const config = {
     safe: { label: 'Safe', classes: 'bg-sage/15 text-sage', icon: 'ri-shield-check-line' },
-    caution: { label: 'Caution', classes: 'bg-yellow-500/15 text-yellow-700', icon: 'ri-alert-line' },
-    avoid: { label: 'Avoid', classes: 'bg-red-500/15 text-red-700', icon: 'ri-close-circle-line' },
+    caution: { label: 'Caution', classes: 'bg-cream text-warm-gray border border-blush', icon: 'ri-alert-line' },
+    avoid: { label: 'Avoid', classes: 'bg-cream text-deep border border-primary/30', icon: 'ri-close-circle-line' },
   }[tier];
 
   return (
@@ -48,7 +49,7 @@ function SafetyBadge({ tier }: { tier: ParsedIngredient['safetyTier'] }) {
 // ---------------------------------------------------------------------------
 
 function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] }) {
-  const [viewState, setViewState] = useState<'collapsed' | 'preview' | 'expanded'>('collapsed');
+  const [viewState, setViewState] = useState<'collapsed' | 'preview' | 'expanded'>('preview');
   const [expandedCautions, setExpandedCautions] = useState<Set<number>>(new Set());
 
   if (ingredients.length === 0) return null;
@@ -99,10 +100,14 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
                       {hasCaution && (
                         <button
                           onClick={() => toggleCaution(i)}
-                          className="inline-flex items-center gap-0.5 text-[10px] text-primary/50 hover:text-primary transition-colors"
-                          title="AI safety explanation"
+                          className="inline-flex items-center gap-0.5 text-primary/50 hover:text-primary transition-colors"
                         >
-                          <i className="ri-sparkling-line text-[10px]" />
+                          <span className="relative group">
+                            <NeuralBloomIcon className="w-3.5 h-3.5 cursor-help" />
+                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[10px] text-white bg-deep rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              AI Safety Analysis
+                            </span>
+                          </span>
                           <i className={`ri-arrow-${isCautionOpen ? 'up' : 'down'}-s-line text-[9px]`} />
                         </button>
                       )}
@@ -121,13 +126,13 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
                   {hasCaution && isCautionOpen && (
                     <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
                       ing.safetyTier === 'avoid'
-                        ? 'bg-red-50 border-red-200'
-                        : 'bg-yellow-50 border-yellow-200'
+                        ? 'bg-cream border-primary/30'
+                        : 'bg-cream border-blush'
                     }`}>
                       <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
-                        ing.safetyTier === 'avoid' ? 'text-red-800' : 'text-yellow-800'
+                        ing.safetyTier === 'avoid' ? 'text-deep' : 'text-warm-gray'
                       }`}>
-                        <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line' : 'ri-alert-line'} text-[11px] mt-0.5 flex-shrink-0`} />
+                        <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line text-primary' : 'ri-alert-line text-primary/60'} text-[11px] mt-0.5 flex-shrink-0`} />
                         <span>{ing.cautionReason}</span>
                       </p>
                     </div>
