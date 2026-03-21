@@ -76,18 +76,21 @@ For each ingredient, add a "relevance" field: a short phrase explaining how it r
   }
 
   return `You are a skincare product analyzer for Lorem Curae. You receive a photo of a skincare product and must:
-1. Identify the product against our catalog
+1. Identify the product — brand name, product name, and category
 2. Parse the full ingredient list visible on the product label
-
-Our product catalog:
-${CATALOG_TEXT}
+3. Optionally match against our internal catalog (most products will NOT be in it — that is expected)
 
 IDENTIFICATION INSTRUCTIONS:
 1. Read the product name, brand, and any visible text on the packaging.
-2. If the product matches one in our catalog, set match: true and productId.
-3. If the product does NOT match any catalog product, set match: false and include whatever product details you can detect.
-4. Be conservative — only mark match: true if you are reasonably confident.
-5. Confidence: "high" if brand and product name are clearly visible and match, "medium" if partially visible, "low" if guessing from packaging alone.
+2. If you can see ANY text on the product packaging — even partial brand names, partial product names, or ingredient lists — report what you can see. Do not return null for detectedProduct or detectedBrand unless you literally cannot read any text.
+3. Common skincare brands to look for: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy. If you recognize any of these brands or similar ones, always include the brand name.
+4. If the image is blurry or partially obscured, still attempt identification with confidence: "low". A low-confidence result with a brand name is more useful than null.
+5. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible or inferred from context, "low" if guessing from partial text or packaging shape alone.
+
+CATALOG MATCHING (optional bonus):
+Our internal product catalog:
+${CATALOG_TEXT}
+If the identified product matches one in our catalog, set match: true and include the productId. Most real-world products will NOT be in this catalog — set match: false and still provide full identification and ingredients.
 
 INGREDIENT PARSING INSTRUCTIONS:
 1. Read every ingredient visible on the product label (usually in the ingredients list / INCI list).

@@ -1,7 +1,7 @@
 ---
 scope: "Camera scan page, product-scan Edge Function, scanClient, image pipeline, post-scan discovery"
 authority: primary
-last_synced: "2026-03-18"
+last_synced: "2026-03-21"
 related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-layer.md", "13-domain-features.md"]
 ---
 
@@ -22,7 +22,7 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 | Page | `src/pages/scan/page.tsx` | Main scan page (state machine + history) |
 | CameraCapture | `src/pages/scan/components/CameraCapture.tsx` | File input + webcam + barcode mode (BarcodeDetector API) |
 | ScanProcessing | `src/pages/scan/components/ScanProcessing.tsx` | Loading state |
-| ScanResultView | `src/pages/scan/components/ScanResultView.tsx` | Match/no-match + ingredient breakdown + shelf/routine |
+| ScanResultView | `src/pages/scan/components/ScanResultView.tsx` | Unified result view (catalog match + any-product identification) |
 | PostScanDiscovery | `src/pages/scan/components/PostScanDiscovery.tsx` | Compatible products with AI WHY + category filters |
 | ScanReviewPanel | `src/pages/scan/components/ScanReviewPanel.tsx` | Profile-filtered reviews + AI summary |
 | ScanHistory | `src/pages/scan/components/ScanHistory.tsx` | Horizontal scroll of past scan thumbnails |
@@ -150,6 +150,30 @@ When `upc` is present, Vision is skipped and the catalog is searched by UPC dire
 - Edge Function `PRODUCT_CATALOG` has placeholder `upc` field on each product
 - UPC lookup returns match (if found) or no-match with UPC displayed
 - `ScanResult.upc` field present when scanned via barcode mode
+
+---
+
+## Scan Result Behavior
+
+The scanner works with ANY real product — catalog matching is a bonus, not a requirement.
+
+### Result tiers
+
+| Condition | UI Behavior |
+|-----------|-------------|
+| Catalog match (`match: true`) | "Product Identified" + rich card with rating/reviews + "View Product Details" link + ingredients + shelf/routine |
+| Non-catalog product identified (`match: false`, `detectedProduct` present) | "Product Identified" + rich card with brand/name/category + confidence badge + ingredients + shelf/routine |
+| Low-confidence blank (`confidence: 'low'`, no product/brand detected) | "Could Not Identify" + retry tips (lighting, closer, brand visible) |
+| UPC not recognized | "UPC Not Recognized" + UPC displayed |
+
+### Key rules
+
+- Both catalog and non-catalog results show the SAME rich card layout (image, brand, name, category, CTAs)
+- The ONLY difference: catalog matches get a "View Product Details" link; non-catalog products don't
+- Ingredient breakdown renders for ALL results with `ingredients.length > 0`
+- "Add to Shelf" and "Add to Routine" work for both matched and non-matched products
+- Gamification points awarded for ANY successful identification (not just catalog matches)
+- Edge Function prompt prioritizes identification over catalog matching — common brands listed as hints
 
 ---
 

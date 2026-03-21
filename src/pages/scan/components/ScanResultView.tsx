@@ -261,98 +261,153 @@ export default function ScanResultView({
     );
   }
 
-  // No match
+  // No catalog match — product may still be fully identified
+  const isIdentified = !!(result.detectedProduct || result.detectedBrand);
+  const isLowConfidenceBlank = result.confidence === 'low' && !result.detectedProduct && !result.detectedBrand;
+
   return (
     <div className="flex flex-col items-center gap-5">
-      {/* Info header */}
-      <div className="w-14 h-14 bg-cream rounded-full flex items-center justify-center">
-        <i className="ri-search-eye-line text-2xl text-warm-gray" />
-      </div>
+      {/* Header — success when identified, guidance when not */}
+      {isIdentified ? (
+        <>
+          <div className="w-14 h-14 bg-sage/15 rounded-full flex items-center justify-center">
+            <i className="ri-check-line text-2xl text-sage" />
+          </div>
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-serif font-semibold text-deep">
+              Product Identified
+            </h2>
+            <p className="text-xs text-warm-gray capitalize">
+              {result.confidence} confidence
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="w-14 h-14 bg-cream rounded-full flex items-center justify-center">
+            <i className="ri-search-eye-line text-2xl text-warm-gray" />
+          </div>
+          <div className="text-center space-y-1">
+            <h2 className="text-lg font-serif font-semibold text-deep">
+              {result.upc ? 'UPC Not Recognized' : 'Could Not Identify'}
+            </h2>
+            <p className="text-sm text-warm-gray">
+              {result.upc
+                ? `UPC: ${result.upc}`
+                : 'Try a clearer photo of the product label'}
+            </p>
+          </div>
+        </>
+      )}
 
-      <div className="text-center space-y-1">
-        <h2 className="text-lg font-serif font-semibold text-deep">
-          Not in Our Catalog
-        </h2>
-        <p className="text-sm text-warm-gray">
-          {result.upc
-            ? `UPC: ${result.upc} — Not in our catalog`
-            : 'We couldn\'t find this product in our database'}
-        </p>
-      </div>
-
-      {/* Detected info card */}
-      {(result.detectedProduct || result.detectedBrand) && (
-        <div className="w-full max-w-sm bg-cream/50 border border-blush/30 rounded-xl p-4">
-          <p className="text-xs font-medium text-deep mb-2">We detected</p>
-          <div className="flex gap-3">
+      {/* Product card — same rich layout as catalog matches */}
+      {isIdentified && (
+        <div className="w-full max-w-sm bg-white rounded-2xl border border-blush shadow-md overflow-hidden">
+          <div className="flex gap-4 p-4">
             {previewUrl ? (
               <img
                 src={previewUrl}
                 alt="Scanned product"
-                className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
+                className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
               />
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-cream flex items-center justify-center flex-shrink-0">
+              <div className="w-20 h-20 rounded-xl bg-cream flex items-center justify-center flex-shrink-0">
                 <i className={`${result.upc ? 'ri-barcode-line' : 'ri-camera-line'} text-2xl text-primary/40`} />
               </div>
             )}
-            <div className="space-y-1">
+            <div className="flex-1 min-w-0">
               {result.detectedBrand && (
-                <p className="text-xs text-warm-gray">
-                  <span className="font-medium text-deep">{result.detectedBrand}</span>
+                <p className="text-xs font-semibold text-primary uppercase tracking-wide">
+                  {result.detectedBrand}
                 </p>
               )}
               {result.detectedProduct && (
-                <p className="text-sm font-medium text-deep">{result.detectedProduct}</p>
+                <h3 className="text-sm font-semibold text-deep line-clamp-2 mt-0.5">
+                  {result.detectedProduct}
+                </h3>
               )}
               {result.detectedCategory && (
-                <p className="text-xs text-warm-gray capitalize">{result.detectedCategory}</p>
+                <p className="text-xs text-warm-gray mt-1 capitalize">
+                  {result.detectedCategory}
+                </p>
               )}
               {result.upc && (
-                <p className="text-xs text-warm-gray font-mono">UPC: {result.upc}</p>
+                <p className="text-[10px] text-warm-gray/60 font-mono mt-1">
+                  UPC: {result.upc}
+                </p>
               )}
+              <div className="mt-1.5">
+                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                  result.confidence === 'high' ? 'bg-sage/15 text-sage' :
+                  result.confidence === 'medium' ? 'bg-yellow-500/15 text-yellow-700' :
+                  'bg-warm-gray/10 text-warm-gray'
+                }`}>
+                  <i className={`text-[10px] ${result.confidence === 'high' ? 'ri-shield-check-line' : 'ri-information-line'}`} />
+                  {result.confidence} confidence
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Shelf + routine for non-matched products */}
-          {shelfProduct && (
-            <div className="flex gap-2 mt-3 pt-3 border-t border-blush/30">
+          {/* CTAs */}
+          <div className="border-t border-blush px-4 py-3 space-y-2">
+            <div className="flex gap-2">
               <button
                 onClick={handleAddToShelf}
                 disabled={savedToShelf}
-                className={`flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium rounded-lg border transition-colors ${
+                className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-xl border transition-colors ${
                   savedToShelf
                     ? 'bg-sage/10 text-sage border-sage/30'
-                    : 'bg-white text-warm-gray border-blush hover:bg-blush/30'
+                    : 'bg-cream text-warm-gray border-blush hover:bg-blush/30'
                 }`}
               >
                 <i className={savedToShelf ? 'ri-check-line' : 'ri-bookmark-line'} />
-                {savedToShelf ? 'Saved' : 'Save'}
+                {savedToShelf ? 'Saved to Shelf' : 'Add to Shelf'}
               </button>
               <button
                 onClick={() => setRoutineModalOpen(true)}
-                className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium rounded-lg border border-blush bg-white text-warm-gray hover:bg-blush/30 transition-colors"
+                className="flex-1 flex items-center justify-center gap-1.5 py-2 text-xs font-medium rounded-xl border border-blush bg-cream text-warm-gray hover:bg-blush/30 transition-colors"
               >
                 <i className="ri-add-circle-line" />
-                Routine
+                Add to Routine
               </button>
             </div>
-          )}
+          </div>
         </div>
       )}
 
-      {/* Ingredient breakdown */}
+      {/* Ingredient breakdown — renders for ANY scan with ingredients */}
       {result.ingredients && result.ingredients.length > 0 && (
         <IngredientBreakdown ingredients={result.ingredients} />
       )}
 
-      {/* Browse similar */}
+      {/* Low-confidence retry hint */}
+      {isLowConfidenceBlank && (
+        <div className="bg-cream/50 border border-blush/30 rounded-xl p-4 max-w-xs">
+          <p className="text-xs font-medium text-deep mb-2">Tips for a better scan</p>
+          <ul className="space-y-1">
+            {[
+              'Hold the camera closer to the product label',
+              'Use good lighting — avoid shadows on the text',
+              'Make sure the brand name is visible',
+            ].map((tip, i) => (
+              <li key={i} className="flex items-start gap-1.5 text-xs text-warm-gray">
+                <i className="ri-lightbulb-line text-primary/50 mt-0.5 flex-shrink-0" />
+                {tip}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {/* Find compatible products */}
       <Link
         to={`/discover${result.detectedCategory ? `?category=${result.detectedCategory}` : ''}`}
         className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white text-sm font-medium rounded-xl hover:bg-dark transition-colors"
       >
         <i className="ri-compass-3-line" />
-        Browse Similar Products
+        Find Compatible Products
       </Link>
 
       {/* Scan another */}

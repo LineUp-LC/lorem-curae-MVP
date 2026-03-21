@@ -82,7 +82,10 @@ export default function ScanPage() {
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
-      // Gamification: award scan points (non-blocking)
+    }
+
+    // Gamification: award scan points for ANY successful identification (non-blocking)
+    if (result.detectedProduct || result.detectedBrand) {
       onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
@@ -137,6 +140,10 @@ export default function ScanPage() {
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
+    }
+
+    // Award scan points for any identification or UPC scan
+    if (result.detectedProduct || result.detectedBrand || result.upc) {
       onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
