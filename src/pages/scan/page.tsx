@@ -99,6 +99,7 @@ export default function ScanPage() {
     }
 
     setState({ phase: 'result', result, previewUrl, matchedProduct });
+    window.scrollTo(0, 0);
   }, [state, user?.id]);
 
   const handleRetake = useCallback(() => {
@@ -106,6 +107,7 @@ export default function ScanPage() {
       URL.revokeObjectURL(state.previewUrl);
     }
     setState({ phase: 'idle' });
+    window.scrollTo(0, 0);
   }, [state]);
 
   const handleScanAnother = useCallback(() => {
@@ -113,6 +115,7 @@ export default function ScanPage() {
       URL.revokeObjectURL(state.previewUrl);
     }
     setState({ phase: 'idle' });
+    window.scrollTo(0, 0);
   }, [state]);
 
   const handleHistorySelect = useCallback((entry: ScanHistoryEntry) => {
@@ -123,6 +126,7 @@ export default function ScanPage() {
     }
     // Use the thumbnail as the preview (it's a data URL, not a blob URL)
     setState({ phase: 'result', result, previewUrl: entry.thumbnail, matchedProduct });
+    window.scrollTo(0, 0);
   }, []);
 
   const handleBarcodeDetected = useCallback(async (upc: string) => {
@@ -148,6 +152,7 @@ export default function ScanPage() {
     }
 
     setState({ phase: 'result', result, previewUrl: '', matchedProduct });
+    window.scrollTo(0, 0);
   }, [user?.id]);
 
   const handleClearHistory = useCallback(() => {

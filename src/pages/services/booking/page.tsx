@@ -95,8 +95,8 @@ export default function BookingPage() {
   const [availableDates] = useState(generateDates());
 
   const handleNext = () => {
-    if (step === 1 && selectedTreatment) setStep(2);
-    else if (step === 2 && selectedEmployee) setStep(3);
+    if (step === 1 && selectedTreatment) { setStep(2); window.scrollTo(0, 0); }
+    else if (step === 2 && selectedEmployee) { setStep(3); window.scrollTo(0, 0); }
     else if (step === 3 && selectedDate && selectedTime) {
       // Complete booking - navigate to success page
       navigate(`/services/booking-success?serviceId=${id}`);
@@ -104,7 +104,7 @@ export default function BookingPage() {
   };
 
   const handleBack = () => {
-    if (step > 1) setStep(step - 1);
+    if (step > 1) { setStep(step - 1); window.scrollTo(0, 0); }
   };
 
   const isNextDisabled = () => {

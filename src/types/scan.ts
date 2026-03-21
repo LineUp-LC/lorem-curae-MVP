@@ -40,6 +40,8 @@ export interface ScanResult {
   ingredients?: ParsedIngredient[];
   /** Total number of ingredients detected */
   ingredientCount?: number;
+  /** True when the AI response hit the token limit and ingredients may be incomplete */
+  ingredientsTruncated?: boolean;
   /** UPC/EAN barcode (present when scanned via barcode mode) */
   upc?: string;
   /** ISO timestamp of when the scan was processed */

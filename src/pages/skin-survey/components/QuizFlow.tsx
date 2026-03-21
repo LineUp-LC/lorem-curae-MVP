@@ -1002,7 +1002,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => setCurrentStep(Math.max(1, getPrevStep()))}
+          onClick={() => { setCurrentStep(Math.max(1, getPrevStep())); window.scrollTo(0, 0); }}
           disabled={currentStep === 1}
           className={`inline-flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-colors cursor-pointer whitespace-nowrap ${
             currentStep === 1
@@ -1015,7 +1015,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
         </button>
 
         <button
-          onClick={() => setCurrentStep(getNextStep())}
+          onClick={() => { setCurrentStep(getNextStep()); window.scrollTo(0, 0); }}
           disabled={!canProceed()}
           className={`inline-flex items-center space-x-2 px-8 py-3 rounded-lg font-semibold transition-colors cursor-pointer whitespace-nowrap ${
             canProceed()

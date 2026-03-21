@@ -449,6 +449,7 @@ export default function CreatePatchTestPage() {
     if (canProceed() && currentStep < 5) {
       setCurrentStep((prev) => prev + 1);
       setError(null);
+      window.scrollTo(0, 0);
     }
   };
 
@@ -456,6 +457,7 @@ export default function CreatePatchTestPage() {
     if (currentStep > 1) {
       setCurrentStep((prev) => prev - 1);
       setError(null);
+      window.scrollTo(0, 0);
     }
   };
 

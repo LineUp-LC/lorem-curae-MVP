@@ -23,7 +23,7 @@ const corsHeaders = {
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
-const MAX_TOKENS = 4096;
+const MAX_TOKENS = 8192;
 
 // Maximum base64 payload size: ~5 MB decoded → ~6.7 MB base64
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
@@ -100,7 +100,10 @@ INGREDIENT PARSING INSTRUCTIONS:
    - safetyTier: "safe", "caution", or "avoid"
    - cautionReason: REQUIRED when safetyTier is "caution" or "avoid". A 2-4 sentence explanation of: (1) why this ingredient is flagged, (2) what skin types or conditions should be careful, and (3) what precautions to take. Example: "Glycolic Acid is an AHA exfoliant that can cause irritation, redness, and sun sensitivity, especially at higher concentrations. People with sensitive or rosacea-prone skin should start with low concentrations (5-8%) and use only 2-3 times per week. Always apply SPF the morning after using this ingredient. Avoid combining with retinol or other strong exfoliants."
 3. List ingredients in the order they appear on the label.
-4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.${profileContext}
+4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.
+5. Keep function descriptions SHORT — maximum 8 words per ingredient (e.g., "moisturizes and attracts water to skin").
+6. Keep cautionReason to exactly 2 sentences. Be concise.
+7. CRITICAL: You MUST list ALL ingredients on the label. Do not stop early. If the label has 35 ingredients, the JSON must have 35 entries. Completeness is more important than detail — if running low on space, shorten function/cautionReason text rather than dropping ingredients.${profileContext}
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 
@@ -142,6 +145,7 @@ interface ClaudeVisionResult {
   detectedCategory?: string | null;
   ingredients?: ParsedIngredientResult[];
   ingredientCount?: number;
+  ingredientsTruncated?: boolean;
 }
 
 // ---------------------------------------------------------------------------
@@ -261,6 +265,12 @@ async function callClaudeVision(
       } else {
         parsed.ingredients = [];
         parsed.ingredientCount = 0;
+      }
+
+      // Detect if Claude's response was truncated at the token limit
+      if (data.stop_reason === 'max_tokens') {
+        console.warn('[Product-Scan] Response hit max_tokens — ingredients may be truncated');
+        parsed.ingredientsTruncated = true;
       }
 
       return { success: true, result: parsed, tokensUsed };
@@ -408,6 +418,7 @@ serve(async (req: Request) => {
       detectedCategory: result.result.detectedCategory ?? undefined,
       ingredients: result.result.ingredients ?? [],
       ingredientCount: result.result.ingredientCount ?? 0,
+      ingredientsTruncated: result.result.ingredientsTruncated ?? false,
       timestamp: new Date().toISOString(),
     };
 

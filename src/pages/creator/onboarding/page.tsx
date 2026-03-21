@@ -110,6 +110,7 @@ export default function CreatorOnboardingPage() {
       }
 
       setCurrentStep(2);
+      window.scrollTo(0, 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred.');
     } finally {
@@ -154,6 +155,7 @@ export default function CreatorOnboardingPage() {
       }
 
       setCurrentStep(3);
+      window.scrollTo(0, 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred.');
     } finally {
@@ -195,6 +197,7 @@ export default function CreatorOnboardingPage() {
       }
 
       setCurrentStep(4);
+      window.scrollTo(0, 0);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred.');
     } finally {
@@ -387,7 +390,7 @@ export default function CreatorOnboardingPage() {
 
         <div className="flex gap-3 pt-2">
           <button
-            onClick={() => setCurrentStep(1)}
+            onClick={() => { setCurrentStep(1); window.scrollTo(0, 0); }}
             className="flex-1 py-3 px-6 border border-blush-300 text-deep font-medium rounded-lg hover:bg-blush-100 transition-colors"
           >
             Back
@@ -471,7 +474,7 @@ export default function CreatorOnboardingPage() {
 
         <div className="flex gap-3 pt-2">
           <button
-            onClick={() => setCurrentStep(2)}
+            onClick={() => { setCurrentStep(2); window.scrollTo(0, 0); }}
             className="flex-1 py-3 px-6 border border-blush-300 text-deep font-medium rounded-lg hover:bg-blush-100 transition-colors"
           >
             Back
@@ -577,7 +580,7 @@ export default function CreatorOnboardingPage() {
 
         <div className="flex gap-3 pt-2">
           <button
-            onClick={() => setCurrentStep(3)}
+            onClick={() => { setCurrentStep(3); window.scrollTo(0, 0); }}
             className="flex-1 py-3 px-6 border border-blush-300 text-deep font-medium rounded-lg hover:bg-blush-100 transition-colors"
           >
             Back

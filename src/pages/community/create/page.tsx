@@ -237,7 +237,7 @@ const CommunityCreatePage = () => {
 
               <div className="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => { setStep(2); window.scrollTo(0, 0); }}
                   disabled={!communityData.name || !communityData.description}
                   className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                 >
@@ -323,13 +323,13 @@ const CommunityCreatePage = () => {
 
               <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => setStep(1)}
+                  onClick={() => { setStep(1); window.scrollTo(0, 0); }}
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Back
                 </button>
                 <button
-                  onClick={() => setStep(3)}
+                  onClick={() => { setStep(3); window.scrollTo(0, 0); }}
                   disabled={!communityData.category}
                   className="px-8 py-3 bg-taupe text-white rounded-lg font-medium hover:bg-taupe-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap cursor-pointer"
                 >
@@ -413,7 +413,7 @@ const CommunityCreatePage = () => {
 
               <div className="flex items-center justify-between pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => setStep(2)}
+                  onClick={() => { setStep(2); window.scrollTo(0, 0); }}
                   className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors whitespace-nowrap cursor-pointer"
                 >
                   Back

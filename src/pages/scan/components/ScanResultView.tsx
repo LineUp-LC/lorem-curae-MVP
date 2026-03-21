@@ -48,7 +48,7 @@ function SafetyBadge({ tier }: { tier: ParsedIngredient['safetyTier'] }) {
 // Ingredient breakdown section
 // ---------------------------------------------------------------------------
 
-function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] }) {
+function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIngredient[]; truncated?: boolean }) {
   const [viewState, setViewState] = useState<'collapsed' | 'preview' | 'expanded'>('preview');
   const [expandedCautions, setExpandedCautions] = useState<Set<number>>(new Set());
 
@@ -159,6 +159,13 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
             >
               Show less
             </button>
+          )}
+
+          {truncated && (
+            <p className="text-[11px] text-warm-gray/60 mt-2 flex items-center gap-1">
+              <i className="ri-information-line" />
+              Some ingredients may not be shown — try scanning the ingredient list more closely
+            </p>
           )}
         </>
       )}
@@ -296,7 +303,7 @@ export default function ScanResultView({
 
         {/* Ingredient breakdown */}
         {result.ingredients && result.ingredients.length > 0 && (
-          <IngredientBreakdown ingredients={result.ingredients} />
+          <IngredientBreakdown ingredients={result.ingredients} truncated={result.ingredientsTruncated} />
         )}
 
         {/* Scan another */}

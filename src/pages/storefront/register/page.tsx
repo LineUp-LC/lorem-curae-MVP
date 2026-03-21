@@ -31,6 +31,7 @@ const StorefrontRegisterPage = () => {
     if (success === 'true') {
       checkStripeStatus();
       setCurrentStep(6);
+      window.scrollTo(0, 0);
     } else if (refresh === 'true') {
       setError('Stripe Connect setup was not completed. Please try again.');
     }
@@ -151,6 +152,7 @@ const StorefrontRegisterPage = () => {
   const handleNext = () => {
     if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
+      window.scrollTo(0, 0);
     } else {
       // Submit form
       navigate('/seller/dashboard');
@@ -160,6 +162,7 @@ const StorefrontRegisterPage = () => {
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
+      window.scrollTo(0, 0);
     }
   };
 

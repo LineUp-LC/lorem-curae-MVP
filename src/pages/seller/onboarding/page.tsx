@@ -47,12 +47,14 @@ export default function SellerOnboardingPage() {
   const handleNext = () => {
     if (currentStep < totalSteps) {
       setCurrentStep(prev => prev + 1);
+      window.scrollTo(0, 0);
     }
   };
 
   const handleBack = () => {
     if (currentStep > 1) {
       setCurrentStep(prev => prev - 1);
+      window.scrollTo(0, 0);
     }
   };
 

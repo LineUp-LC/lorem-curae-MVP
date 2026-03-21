@@ -15,7 +15,7 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient`, `ScanHistoryEntry` |
+| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient` (incl. `cautionReason`), `ScanHistoryEntry` |
 | Edge Function | `supabase/functions/product-scan/index.ts` | Claude Vision proxy — identification + ingredient parsing |
 | Client | `src/lib/ai/scanClient.ts` | Image compress + thumbnail + API caller |
 | Scan history | `src/lib/utils/scanHistory.ts` | localStorage persistence for past scans |
@@ -96,7 +96,8 @@ When `upc` is present, Vision is skipped and the catalog is searched by UPC dire
     "detectedBrand": "Pure Essence",
     "detectedCategory": "cleanser",
     "ingredients": [
-      { "name": "Hyaluronic Acid", "function": "attracts and retains moisture", "safetyTier": "safe", "relevance": "helps with dryness" }
+      { "name": "Hyaluronic Acid", "function": "attracts and retains moisture", "safetyTier": "safe", "relevance": "helps with dryness" },
+      { "name": "Glycolic Acid", "function": "exfoliates dead skin cells", "safetyTier": "caution", "cautionReason": "Can cause irritation and sun sensitivity. Start at low concentrations and always wear SPF." }
     ],
     "ingredientCount": 12,
     "timestamp": "2026-03-18T..."
@@ -105,7 +106,9 @@ When `upc` is present, Vision is skipped and the catalog is searched by UPC dire
 }
 ```
 
-**Auth:** Required. Returns 401 for unauthenticated requests. MAX_TOKENS: 2048.
+**Auth:** Required. Returns 401 for unauthenticated requests. MAX_TOKENS: 8192.
+
+When `stop_reason === 'max_tokens'`, the response sets `ingredientsTruncated: true` and the UI shows a hint to rescan.
 
 ---
 
@@ -162,7 +165,7 @@ The scanner works with ANY real product — catalog matching is a bonus, not a r
 | Condition | UI Behavior |
 |-----------|-------------|
 | Catalog match (`match: true`) | "Product Identified" + rich card with rating/reviews + "View Product Details" link + ingredients + shelf/routine |
-| Non-catalog product identified (`match: false`, `detectedProduct` present) | "Product Identified" + rich card with brand/name/category + confidence badge + ingredients + shelf/routine |
+| Non-catalog product identified (`match: false`, `detectedProduct` present) | "Product Identified" + rich card with brand/name/category + ingredients + shelf/routine |
 | Low-confidence blank (`confidence: 'low'`, no product/brand detected) | "Could Not Identify" + retry tips (lighting, closer, brand visible) |
 | UPC not recognized | "UPC Not Recognized" + UPC displayed |
 
@@ -174,6 +177,21 @@ The scanner works with ANY real product — catalog matching is a bonus, not a r
 - "Add to Shelf" and "Add to Routine" work for both matched and non-matched products
 - Gamification points awarded for ANY successful identification (not just catalog matches)
 - Edge Function prompt prioritizes identification over catalog matching — common brands listed as hints
+- Confidence level is stored in the API response but NOT shown in the UI (removed from both match and no-match views)
+- Ingredients with `safetyTier: "caution"` or `"avoid"` include a `cautionReason` field (2-4 sentences: why flagged, affected skin types, precautions)
+- cautionReason is COLLAPSIBLE per-ingredient: default collapsed, NeuralBloomIcon + chevron toggle next to safety badge
+- Hovering NeuralBloomIcon shows tooltip: "AI Safety Analysis" (ingredients) or "AI Personalized Insight" (compatible products)
+- UI renders expanded cautionReason in app palette: `bg-cream border-blush text-warm-gray` (caution), `bg-cream border-primary/30 text-deep` (avoid)
+- SafetyBadge colors: safe = sage, caution = `bg-cream text-warm-gray border-blush`, avoid = `bg-cream text-deep border-primary/30` — NO yellow/red
+- Safe ingredients show NO cautionReason block
+- Ingredient list uses 3-state collapse: default `'preview'` (top 5) → expanded (all) → collapsed (header only)
+- Header chevron toggles collapsed ↔ preview; "Show all" button goes preview → expanded; "Show less" goes expanded → preview
+- Compatible products (PostScanDiscovery) show AI WHY as collapsible toggle per-product via NeuralBloomIcon next to compatibility badge
+- "Use with Care" badge uses app palette (`bg-cream text-warm-gray border border-blush`) — NO yellow
+- Review content uses `highlightRelevantKeywords()` for profile-based keyword highlighting across scan + product detail surfaces
+- ScanReviewPanel reviewer concerns rendered as pills with `matchesConcern()` highlighting (same pattern as ProductReviews)
+- ScanReviewPanel match badge tap opens full Match Breakdown modal (same pattern as ProductReviews: fixed modal with backdrop, score rows, "theirs vs yours")
+- All AI icons in scan components use NeuralBloomIcon from `src/components/icons/NeuralBloomIcon.tsx` — never ri-sparkling-line
 
 ---
 
