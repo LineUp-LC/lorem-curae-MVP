@@ -16,6 +16,8 @@ export interface ParsedIngredient {
   function: string;
   /** Safety classification */
   safetyTier: IngredientSafetyTier;
+  /** Functional category assigned by Claude (e.g., "Hydration/Moisture", "Active Exfoliant", "Preservative") */
+  category: string;
   /** Personalized relevance note (present when user skin profile is available) */
   relevance?: string;
   /** Why this ingredient is flagged caution/avoid — risks, precautions, affected skin types */

@@ -15,7 +15,7 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient` (incl. `cautionReason`), `ScanHistoryEntry` |
+| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient` (incl. `category`, `cautionReason`), `ScanHistoryEntry` |
 | Edge Function | `supabase/functions/product-scan/index.ts` | Claude Vision proxy — identification + ingredient parsing |
 | Client | `src/lib/ai/scanClient.ts` | Image compress + thumbnail + API caller |
 | Scan history | `src/lib/utils/scanHistory.ts` | localStorage persistence for past scans |
@@ -96,8 +96,8 @@ When `upc` is present, Vision is skipped and the catalog is searched by UPC dire
     "detectedBrand": "Pure Essence",
     "detectedCategory": "cleanser",
     "ingredients": [
-      { "name": "Hyaluronic Acid", "function": "attracts and retains moisture", "safetyTier": "safe", "relevance": "helps with dryness" },
-      { "name": "Glycolic Acid", "function": "exfoliates dead skin cells", "safetyTier": "caution", "cautionReason": "Can cause irritation and sun sensitivity. Start at low concentrations and always wear SPF." }
+      { "name": "Hyaluronic Acid", "function": "attracts and retains moisture", "safetyTier": "safe", "category": "Hydration/Moisture", "relevance": "helps with dryness" },
+      { "name": "Glycolic Acid", "function": "exfoliates dead skin cells", "safetyTier": "caution", "category": "Active Exfoliant", "cautionReason": "Can cause irritation and sun sensitivity. Start at low concentrations and always wear SPF." }
     ],
     "ingredientCount": 12,
     "timestamp": "2026-03-18T..."
@@ -184,7 +184,10 @@ The scanner works with ANY real product — catalog matching is a bonus, not a r
 - UI renders expanded cautionReason in app palette: `bg-cream border-blush text-warm-gray` (caution), `bg-cream border-primary/30 text-deep` (avoid)
 - SafetyBadge colors: safe = sage, caution = `bg-cream text-warm-gray border-blush`, avoid = `bg-cream text-deep border-primary/30` — NO yellow/red
 - Safe ingredients show NO cautionReason block
-- Ingredient list uses 3-state collapse: default `'preview'` (top 5) → expanded (all) → collapsed (header only)
+- Ingredients are grouped by `category` field (assigned by Claude Vision): "Hydration/Moisture", "Active Exfoliant", "Soothing/Botanical", "Preservative", "Base/Solvent", etc. — free-text, not a fixed enum
+- Each category renders as a collapsible section with a pill header showing category name + ingredient count
+- Categories are independently toggleable (each can be collapsed/expanded)
+- 3-state collapse applies to the ENTIRE ingredient list: `collapsed` (header only) → `preview` (first 3 category groups + remaining as pills) → `expanded` (all categories)
 - Header chevron toggles collapsed ↔ preview; "Show all" button goes preview → expanded; "Show less" goes expanded → preview
 - Compatible products (PostScanDiscovery) show AI WHY as collapsible toggle per-product via NeuralBloomIcon next to compatibility badge
 - "Use with Care" badge uses app palette (`bg-cream text-warm-gray border border-blush`) — NO yellow

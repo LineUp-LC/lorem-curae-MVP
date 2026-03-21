@@ -7,7 +7,7 @@
  * 3. Shelf + routine integration buttons
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import type { ScanResult, ParsedIngredient } from '../../../types/scan';
 import type { Product } from '../../../types/product';
@@ -48,23 +48,109 @@ function SafetyBadge({ tier }: { tier: ParsedIngredient['safetyTier'] }) {
 // Ingredient breakdown section
 // ---------------------------------------------------------------------------
 
+function IngredientCard({
+  ing,
+  globalIdx,
+  expandedCautions,
+  toggleCaution,
+}: {
+  ing: ParsedIngredient;
+  globalIdx: number;
+  expandedCautions: Set<number>;
+  toggleCaution: (idx: number) => void;
+}) {
+  const hasCaution = !!(ing.cautionReason && (ing.safetyTier === 'caution' || ing.safetyTier === 'avoid'));
+  const isCautionOpen = expandedCautions.has(globalIdx);
+
+  return (
+    <div className="bg-cream/50 border border-blush/30 rounded-lg px-3 py-2">
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-xs font-medium text-deep leading-tight">
+          {ing.name}
+        </span>
+        <div className="flex items-center gap-1">
+          {hasCaution && (
+            <button
+              onClick={() => toggleCaution(globalIdx)}
+              className="inline-flex items-center gap-0.5 text-primary/50 hover:text-primary transition-colors"
+            >
+              <span className="relative group">
+                <NeuralBloomIcon className="w-3.5 h-3.5 cursor-help" />
+                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[10px] text-white bg-deep rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                  AI Safety Analysis
+                </span>
+              </span>
+              <i className={`ri-arrow-${isCautionOpen ? 'up' : 'down'}-s-line text-[9px]`} />
+            </button>
+          )}
+          <SafetyBadge tier={ing.safetyTier} />
+        </div>
+      </div>
+      <p className="text-[11px] text-warm-gray mt-0.5 leading-relaxed">
+        {ing.function}
+      </p>
+      {ing.relevance && (
+        <p className="text-[11px] text-primary/80 mt-0.5 flex items-start gap-1">
+          <i className="ri-user-heart-line text-[10px] mt-0.5 flex-shrink-0" />
+          {ing.relevance}
+        </p>
+      )}
+      {hasCaution && isCautionOpen && (
+        <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
+          ing.safetyTier === 'avoid'
+            ? 'bg-cream border-primary/30'
+            : 'bg-cream border-blush'
+        }`}>
+          <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
+            ing.safetyTier === 'avoid' ? 'text-deep' : 'text-warm-gray'
+          }`}>
+            <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line text-primary' : 'ri-alert-line text-primary/60'} text-[11px] mt-0.5 flex-shrink-0`} />
+            <span>{ing.cautionReason}</span>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIngredient[]; truncated?: boolean }) {
   const [viewState, setViewState] = useState<'collapsed' | 'preview' | 'expanded'>('preview');
   const [expandedCautions, setExpandedCautions] = useState<Set<number>>(new Set());
+  const [collapsedCategories, setCollapsedCategories] = useState<Set<string>>(new Set());
+
+  // Group ingredients by category, preserving label order within each group
+  const grouped = useMemo(() => {
+    const map = new Map<string, { ing: ParsedIngredient; globalIdx: number }[]>();
+    ingredients.forEach((ing, i) => {
+      const cat = ing.category || 'Other';
+      if (!map.has(cat)) map.set(cat, []);
+      map.get(cat)!.push({ ing, globalIdx: i });
+    });
+    return Array.from(map.entries());
+  }, [ingredients]);
 
   if (ingredients.length === 0) return null;
 
-  const previewCount = 5;
-  const hasMore = ingredients.length > previewCount;
-  const visible =
+  const PREVIEW_CATEGORY_COUNT = 3;
+  const hasMoreCategories = grouped.length > PREVIEW_CATEGORY_COUNT;
+
+  const visibleGroups =
     viewState === 'collapsed' ? [] :
-    viewState === 'preview' ? ingredients.slice(0, previewCount) :
-    ingredients;
+    viewState === 'preview' ? grouped.slice(0, PREVIEW_CATEGORY_COUNT) :
+    grouped;
 
   const toggleCaution = (idx: number) => {
     setExpandedCautions(prev => {
       const next = new Set(prev);
       if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
+
+  const toggleCategory = (cat: string) => {
+    setCollapsedCategories(prev => {
+      const next = new Set(prev);
+      if (next.has(cat)) next.delete(cat); else next.add(cat);
       return next;
     });
   };
@@ -84,59 +170,36 @@ function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIn
 
       {viewState !== 'collapsed' && (
         <>
-          <div className="space-y-2">
-            {visible.map((ing, i) => {
-              const hasCaution = !!(ing.cautionReason && (ing.safetyTier === 'caution' || ing.safetyTier === 'avoid'));
-              const isCautionOpen = expandedCautions.has(i);
-
+          <div className="space-y-3">
+            {visibleGroups.map(([category, items]) => {
+              const isCatCollapsed = collapsedCategories.has(category);
               return (
-                <div
-                  key={i}
-                  className="bg-cream/50 border border-blush/30 rounded-lg px-3 py-2"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <span className="text-xs font-medium text-deep leading-tight">
-                      {ing.name}
+                <div key={category}>
+                  <button
+                    onClick={() => toggleCategory(category)}
+                    className="flex items-center justify-between w-full mb-1.5"
+                  >
+                    <span className="inline-flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded-full bg-primary/10 text-[10px] font-semibold text-primary">
+                        {category}
+                      </span>
+                      <span className="text-[10px] text-warm-gray/60">
+                        ({items.length})
+                      </span>
                     </span>
-                    <div className="flex items-center gap-1">
-                      {hasCaution && (
-                        <button
-                          onClick={() => toggleCaution(i)}
-                          className="inline-flex items-center gap-0.5 text-primary/50 hover:text-primary transition-colors"
-                        >
-                          <span className="relative group">
-                            <NeuralBloomIcon className="w-3.5 h-3.5 cursor-help" />
-                            <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 text-[10px] text-white bg-deep rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                              AI Safety Analysis
-                            </span>
-                          </span>
-                          <i className={`ri-arrow-${isCautionOpen ? 'up' : 'down'}-s-line text-[9px]`} />
-                        </button>
-                      )}
-                      <SafetyBadge tier={ing.safetyTier} />
-                    </div>
-                  </div>
-                  <p className="text-[11px] text-warm-gray mt-0.5 leading-relaxed">
-                    {ing.function}
-                  </p>
-                  {ing.relevance && (
-                    <p className="text-[11px] text-primary/80 mt-0.5 flex items-start gap-1">
-                      <i className="ri-user-heart-line text-[10px] mt-0.5 flex-shrink-0" />
-                      {ing.relevance}
-                    </p>
-                  )}
-                  {hasCaution && isCautionOpen && (
-                    <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
-                      ing.safetyTier === 'avoid'
-                        ? 'bg-cream border-primary/30'
-                        : 'bg-cream border-blush'
-                    }`}>
-                      <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
-                        ing.safetyTier === 'avoid' ? 'text-deep' : 'text-warm-gray'
-                      }`}>
-                        <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line text-primary' : 'ri-alert-line text-primary/60'} text-[11px] mt-0.5 flex-shrink-0`} />
-                        <span>{ing.cautionReason}</span>
-                      </p>
+                    <i className={`ri-arrow-${isCatCollapsed ? 'down' : 'up'}-s-line text-warm-gray/40 text-xs`} />
+                  </button>
+                  {!isCatCollapsed && (
+                    <div className="space-y-1.5">
+                      {items.map(({ ing, globalIdx }) => (
+                        <IngredientCard
+                          key={globalIdx}
+                          ing={ing}
+                          globalIdx={globalIdx}
+                          expandedCautions={expandedCautions}
+                          toggleCaution={toggleCaution}
+                        />
+                      ))}
                     </div>
                   )}
                 </div>
@@ -144,15 +207,25 @@ function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIn
             })}
           </div>
 
-          {hasMore && viewState === 'preview' && (
-            <button
-              onClick={() => setViewState('expanded')}
-              className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
-            >
-              Show all {ingredients.length} ingredients
-            </button>
+          {/* Collapsed category summary in preview mode */}
+          {hasMoreCategories && viewState === 'preview' && (
+            <>
+              <div className="mt-2 flex flex-wrap gap-1">
+                {grouped.slice(PREVIEW_CATEGORY_COUNT).map(([cat, items]) => (
+                  <span key={cat} className="px-2 py-0.5 rounded-full bg-blush/40 text-[10px] text-warm-gray">
+                    {cat} ({items.length})
+                  </span>
+                ))}
+              </div>
+              <button
+                onClick={() => setViewState('expanded')}
+                className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
+              >
+                Show all {ingredients.length} ingredients
+              </button>
+            </>
           )}
-          {hasMore && viewState === 'expanded' && (
+          {hasMoreCategories && viewState === 'expanded' && (
             <button
               onClick={() => setViewState('preview')}
               className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
@@ -432,7 +505,7 @@ export default function ScanResultView({
 
       {/* Ingredient breakdown — renders for ANY scan with ingredients */}
       {result.ingredients && result.ingredients.length > 0 && (
-        <IngredientBreakdown ingredients={result.ingredients} />
+        <IngredientBreakdown ingredients={result.ingredients} truncated={result.ingredientsTruncated} />
       )}
 
       {/* Low-confidence retry hint */}
