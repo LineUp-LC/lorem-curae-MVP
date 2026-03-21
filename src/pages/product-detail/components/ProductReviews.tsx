@@ -12,6 +12,7 @@ import { buildReviewSummaryContext, formatReviewSummaryPrompt } from '../../../l
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { useAuth } from '../../../lib/auth/AuthContext';
+import { highlightRelevantKeywords } from '../../../lib/utils/highlightKeywords';
 import type { EnvironmentContext } from '../../../lib/environment/context';
 import type { Product } from '../../../types/product';
 
@@ -576,7 +577,12 @@ const ProductReviews = ({ productId, product, env, season }: ProductReviewsProps
                   </h4>
                 )}
                 <p className="text-xs text-warm-gray leading-relaxed mb-3 line-clamp-3">
-                  {review.content}
+                  {highlightRelevantKeywords(review.content, {
+                    skinType: skinType || undefined,
+                    concerns,
+                    sensitivity: '',
+                    excludeNames: product ? [product.name, product.brand] : [],
+                  })}
                 </p>
 
                 {/* Review Footer */}

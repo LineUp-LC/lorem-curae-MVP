@@ -27,6 +27,8 @@ import { getReviewsForProduct } from '@/mocks/reviews';
 import type { ProductReview } from '@/types/review';
 import type { MockReview } from '@/mocks/reviews';
 import ReviewForm from './ReviewForm';
+import { highlightRelevantKeywords } from '@/lib/utils/highlightKeywords';
+import { getEffectiveSensitivity } from '@/lib/utils/sessionState';
 
 interface ReviewsListProps {
   productId: number;
@@ -380,7 +382,11 @@ export default function ReviewsList({
           </h4>
         )}
         <p className="text-xs text-warm-gray leading-relaxed mb-2 line-clamp-4">
-          {review.content}
+          {highlightRelevantKeywords(review.content, {
+            skinType: skinType || undefined,
+            concerns,
+            sensitivity: getEffectiveSensitivity(),
+          })}
         </p>
 
         {/* Pros / Cons */}

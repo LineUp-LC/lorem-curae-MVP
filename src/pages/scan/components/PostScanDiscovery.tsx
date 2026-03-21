@@ -53,6 +53,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [whyTexts, setWhyTexts] = useState<Record<number, string>>({});
   const [whyLoading, setWhyLoading] = useState(false);
   const [expandedProductId, setExpandedProductId] = useState<number | null>(null);
+  const [expandedWhyIds, setExpandedWhyIds] = useState<Set<number>>(new Set());
   const [routineProduct, setRoutineProduct] = useState<CompatibleProduct | null>(null);
 
   const skinType = getEffectiveSkinType() ?? undefined;
@@ -157,20 +158,37 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
 
   if (allCompatible.length === 0) return null;
 
-  const compatibilityBadge = (level: CompatibleProduct['compatibilityLevel']) => {
-    if (level === 'fully-compatible') {
-      return (
-        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-sage/15 text-sage">
-          <i className="ri-check-double-line text-[10px]" />
-          Compatible
-        </span>
-      );
-    }
+  const toggleWhy = (productId: number) => {
+    setExpandedWhyIds(prev => {
+      const next = new Set(prev);
+      if (next.has(productId)) next.delete(productId); else next.add(productId);
+      return next;
+    });
+  };
+
+  const compatibilityBadge = (level: CompatibleProduct['compatibilityLevel'], productId: number, hasWhy: boolean) => {
+    const badgeClasses = level === 'fully-compatible'
+      ? 'bg-sage/15 text-sage'
+      : 'bg-yellow-500/15 text-yellow-700';
+    const icon = level === 'fully-compatible' ? 'ri-check-double-line' : 'ri-alert-line';
+    const label = level === 'fully-compatible' ? 'Compatible' : 'Use with care';
+
     return (
-      <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-yellow-500/15 text-yellow-700">
-        <i className="ri-alert-line text-[10px]" />
-        Use with care
-      </span>
+      <div className="flex items-center gap-1">
+        <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${badgeClasses}`}>
+          <i className={`${icon} text-[10px]`} />
+          {label}
+        </span>
+        {hasWhy && (
+          <button
+            onClick={(e) => { e.preventDefault(); toggleWhy(productId); }}
+            className="inline-flex items-center justify-center w-5 h-5 rounded-full text-primary/40 hover:text-primary hover:bg-primary/10 transition-colors"
+            title="Why compatible"
+          >
+            <i className="ri-sparkling-line text-[11px]" />
+          </button>
+        )}
+      </div>
     );
   };
 
@@ -234,7 +252,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
                       </h4>
                     </Link>
                   </div>
-                  {compatibilityBadge(product.compatibilityLevel)}
+                  {compatibilityBadge(product.compatibilityLevel, product.id, !!(whyTexts[product.id] || whyLoading))}
                 </div>
 
                 <div className="flex items-center gap-2 mt-1">
@@ -263,8 +281,8 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
               </div>
             </div>
 
-            {/* AI WHY tag */}
-            {whyTexts[product.id] && (
+            {/* AI WHY tag — collapsible */}
+            {expandedWhyIds.has(product.id) && whyTexts[product.id] && (
               <div className="mx-4 mb-3 bg-cream/70 border border-blush/30 rounded-lg px-3 py-2">
                 <p className="text-[11px] text-warm-gray leading-relaxed flex items-start gap-1.5">
                   <i className="ri-sparkling-line text-primary/50 mt-0.5 flex-shrink-0" />
@@ -272,7 +290,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
                 </p>
               </div>
             )}
-            {whyLoading && !whyTexts[product.id] && (
+            {expandedWhyIds.has(product.id) && whyLoading && !whyTexts[product.id] && (
               <div className="mx-4 mb-3 bg-cream/30 rounded-lg px-3 py-2">
                 <div className="h-3 bg-blush/40 rounded animate-pulse w-3/4" />
               </div>

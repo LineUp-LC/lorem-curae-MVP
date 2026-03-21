@@ -28,6 +28,7 @@ import {
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { useAuth } from '../../../lib/auth/AuthContext';
+import { highlightRelevantKeywords } from '../../../lib/utils/highlightKeywords';
 
 interface ScanReviewPanelProps {
   product: Product;
@@ -55,6 +56,7 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
+  const [expandedMatchId, setExpandedMatchId] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -279,37 +281,85 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
         <div className="px-4 pb-4 space-y-2.5">
           {visibleReviews.map(review => {
             const badge = getTierBadgeInfo(review.matchTier, review.score);
+            const isMatchExpanded = expandedMatchId === review.id;
+            const userSkinType = getEffectiveSkinType();
+
             return (
               <div key={review.id} className="bg-cream/50 border border-blush/30 rounded-lg p-3">
+                {/* Header row: stars + name + badge */}
                 <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-1.5">
-                    {/* Star rating */}
-                    <div className="flex items-center gap-0.5">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <i
-                          key={star}
-                          className={`text-[10px] ${
-                            star <= review.rating
-                              ? 'ri-star-fill text-amber-500'
-                              : 'ri-star-line text-blush'
-                          }`}
-                        />
-                      ))}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <i
+                            key={star}
+                            className={`text-[10px] ${
+                              star <= review.rating
+                                ? 'ri-star-fill text-amber-500'
+                                : 'ri-star-line text-blush'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-[10px] text-warm-gray truncate">
+                        {review.userName}
+                      </span>
                     </div>
-                    <span className="text-[10px] text-warm-gray">
-                      {review.userName}
-                    </span>
+                    {/* Reviewer profile: skin type + concerns */}
+                    <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                      {review.skinType && (
+                        <span className={`text-[10px] ${
+                          userSkinType && review.skinType.toLowerCase() === userSkinType.toLowerCase()
+                            ? 'text-primary font-medium'
+                            : 'text-warm-gray'
+                        }`}>
+                          {review.skinType} skin
+                        </span>
+                      )}
+                      {review.concerns.length > 0 && (
+                        <>
+                          <span className="text-warm-gray/30 text-[10px]">·</span>
+                          <span className="text-[10px] text-warm-gray truncate">
+                            {review.concerns.slice(0, 2).join(', ')}
+                          </span>
+                        </>
+                      )}
+                    </div>
                   </div>
                   {badge && (
-                    <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium ${badge.color}`}>
+                    <button
+                      onClick={() => setExpandedMatchId(isMatchExpanded ? null : review.id)}
+                      className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[9px] font-medium cursor-pointer hover:opacity-80 transition-opacity ${badge.color}`}
+                    >
                       <i className={`${badge.icon} text-[9px]`} />
                       {badge.label}
-                    </span>
+                    </button>
                   )}
                 </div>
 
+                {/* Expandable match breakdown */}
+                {isMatchExpanded && review.matchDetails.length > 0 && (
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {review.matchDetails.map((detail, i) => (
+                      <span
+                        key={i}
+                        className="text-[9px] text-primary/70 bg-primary/5 px-1.5 py-0.5 rounded"
+                      >
+                        {detail}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Review content with highlighting */}
                 <p className="text-[11px] text-warm-gray mt-1.5 leading-relaxed line-clamp-3">
-                  {review.content}
+                  {highlightRelevantKeywords(review.content, {
+                    skinType: getEffectiveSkinType(),
+                    concerns: getEffectiveConcerns(),
+                    sensitivity: getEffectiveSensitivity(),
+                    excludeNames: [product.name, product.brand],
+                  })}
                 </p>
 
                 {/* Pros/cons */}

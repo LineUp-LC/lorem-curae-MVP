@@ -48,71 +48,112 @@ function SafetyBadge({ tier }: { tier: ParsedIngredient['safetyTier'] }) {
 // ---------------------------------------------------------------------------
 
 function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] }) {
-  const [expanded, setExpanded] = useState(false);
-  const displayCount = expanded ? ingredients.length : 5;
-  const visible = ingredients.slice(0, displayCount);
+  const [viewState, setViewState] = useState<'collapsed' | 'preview' | 'expanded'>('collapsed');
+  const [expandedCautions, setExpandedCautions] = useState<Set<number>>(new Set());
 
   if (ingredients.length === 0) return null;
+
+  const visible =
+    viewState === 'collapsed' ? [] :
+    viewState === 'preview' ? ingredients.slice(0, 5) :
+    ingredients;
+
+  const toggleCaution = (idx: number) => {
+    setExpandedCautions(prev => {
+      const next = new Set(prev);
+      if (next.has(idx)) next.delete(idx); else next.add(idx);
+      return next;
+    });
+  };
 
   return (
     <div className="w-full max-w-sm mt-5">
       <button
-        onClick={() => setExpanded(!expanded)}
+        onClick={() => setViewState(prev => prev === 'collapsed' ? 'preview' : 'collapsed')}
         className="flex items-center justify-between w-full text-left mb-3"
       >
         <span className="text-sm font-serif font-semibold text-deep flex items-center gap-1.5">
           <i className="ri-flask-line text-primary/60" />
           Ingredient Breakdown ({ingredients.length})
         </span>
-        <i className={`ri-arrow-${expanded ? 'up' : 'down'}-s-line text-warm-gray`} />
+        <i className={`ri-arrow-${viewState !== 'collapsed' ? 'up' : 'down'}-s-line text-warm-gray`} />
       </button>
 
-      <div className="space-y-2">
-        {visible.map((ing, i) => (
-          <div
-            key={i}
-            className="bg-cream/50 border border-blush/30 rounded-lg px-3 py-2"
-          >
-            <div className="flex items-start justify-between gap-2">
-              <span className="text-xs font-medium text-deep leading-tight">
-                {ing.name}
-              </span>
-              <SafetyBadge tier={ing.safetyTier} />
-            </div>
-            <p className="text-[11px] text-warm-gray mt-0.5 leading-relaxed">
-              {ing.function}
-            </p>
-            {ing.relevance && (
-              <p className="text-[11px] text-primary/80 mt-0.5 flex items-start gap-1">
-                <i className="ri-user-heart-line text-[10px] mt-0.5 flex-shrink-0" />
-                {ing.relevance}
-              </p>
-            )}
-            {ing.cautionReason && (ing.safetyTier === 'caution' || ing.safetyTier === 'avoid') && (
-              <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
-                ing.safetyTier === 'avoid'
-                  ? 'bg-red-50 border-red-200'
-                  : 'bg-yellow-50 border-yellow-200'
-              }`}>
-                <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
-                  ing.safetyTier === 'avoid' ? 'text-red-800' : 'text-yellow-800'
-                }`}>
-                  <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line' : 'ri-alert-line'} text-[11px] mt-0.5 flex-shrink-0`} />
-                  <span>{ing.cautionReason}</span>
-                </p>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      {viewState !== 'collapsed' && (
+        <>
+          <div className="space-y-2">
+            {visible.map((ing, i) => {
+              const hasCaution = !!(ing.cautionReason && (ing.safetyTier === 'caution' || ing.safetyTier === 'avoid'));
+              const isCautionOpen = expandedCautions.has(i);
 
-      {ingredients.length > 5 && (
-        <button
-          onClick={() => setExpanded(!expanded)}
-          className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
-        >
-          {expanded ? 'Show less' : `Show all ${ingredients.length} ingredients`}
-        </button>
+              return (
+                <div
+                  key={i}
+                  className="bg-cream/50 border border-blush/30 rounded-lg px-3 py-2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="text-xs font-medium text-deep leading-tight">
+                      {ing.name}
+                    </span>
+                    <div className="flex items-center gap-1">
+                      {hasCaution && (
+                        <button
+                          onClick={() => toggleCaution(i)}
+                          className="inline-flex items-center gap-0.5 text-[10px] text-primary/50 hover:text-primary transition-colors"
+                          title="AI safety explanation"
+                        >
+                          <i className="ri-sparkling-line text-[10px]" />
+                          <i className={`ri-arrow-${isCautionOpen ? 'up' : 'down'}-s-line text-[9px]`} />
+                        </button>
+                      )}
+                      <SafetyBadge tier={ing.safetyTier} />
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-warm-gray mt-0.5 leading-relaxed">
+                    {ing.function}
+                  </p>
+                  {ing.relevance && (
+                    <p className="text-[11px] text-primary/80 mt-0.5 flex items-start gap-1">
+                      <i className="ri-user-heart-line text-[10px] mt-0.5 flex-shrink-0" />
+                      {ing.relevance}
+                    </p>
+                  )}
+                  {hasCaution && isCautionOpen && (
+                    <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
+                      ing.safetyTier === 'avoid'
+                        ? 'bg-red-50 border-red-200'
+                        : 'bg-yellow-50 border-yellow-200'
+                    }`}>
+                      <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
+                        ing.safetyTier === 'avoid' ? 'text-red-800' : 'text-yellow-800'
+                      }`}>
+                        <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line' : 'ri-alert-line'} text-[11px] mt-0.5 flex-shrink-0`} />
+                        <span>{ing.cautionReason}</span>
+                      </p>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {ingredients.length > 5 && viewState === 'preview' && (
+            <button
+              onClick={() => setViewState('expanded')}
+              className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
+            >
+              Show all {ingredients.length} ingredients
+            </button>
+          )}
+          {ingredients.length > 5 && viewState === 'expanded' && (
+            <button
+              onClick={() => setViewState('preview')}
+              className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
+            >
+              Show less
+            </button>
+          )}
+        </>
       )}
     </div>
   );
@@ -169,13 +210,10 @@ export default function ScanResultView({
           <i className="ri-check-line text-2xl text-sage" />
         </div>
 
-        <div className="text-center space-y-1">
+        <div className="text-center">
           <h2 className="text-lg font-serif font-semibold text-deep">
             Product Identified
           </h2>
-          <p className="text-xs text-warm-gray capitalize">
-            {result.confidence} confidence match
-          </p>
         </div>
 
         {/* Product card */}
@@ -287,13 +325,10 @@ export default function ScanResultView({
           <div className="w-14 h-14 bg-sage/15 rounded-full flex items-center justify-center">
             <i className="ri-check-line text-2xl text-sage" />
           </div>
-          <div className="text-center space-y-1">
+          <div className="text-center">
             <h2 className="text-lg font-serif font-semibold text-deep">
               Product Identified
             </h2>
-            <p className="text-xs text-warm-gray capitalize">
-              {result.confidence} confidence
-            </p>
           </div>
         </>
       ) : (
@@ -351,16 +386,6 @@ export default function ScanResultView({
                   UPC: {result.upc}
                 </p>
               )}
-              <div className="mt-1.5">
-                <span className={`inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                  result.confidence === 'high' ? 'bg-sage/15 text-sage' :
-                  result.confidence === 'medium' ? 'bg-yellow-500/15 text-yellow-700' :
-                  'bg-warm-gray/10 text-warm-gray'
-                }`}>
-                  <i className={`text-[10px] ${result.confidence === 'high' ? 'ri-shield-check-line' : 'ri-information-line'}`} />
-                  {result.confidence} confidence
-                </span>
-              </div>
             </div>
           </div>
 
