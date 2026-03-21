@@ -211,9 +211,31 @@ async function callClaudeVision(
     const tokensUsed =
       (data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0);
 
-    // Parse the JSON response
+    // Parse the JSON response — Claude sometimes wraps JSON in markdown fences
     try {
-      const parsed: ClaudeVisionResult = JSON.parse(textContent.text.trim());
+      let jsonText = textContent.text.trim();
+
+      // Strip markdown code fences (```json ... ``` or ``` ... ```)
+      const fenceMatch = jsonText.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (fenceMatch) {
+        jsonText = fenceMatch[1].trim();
+      }
+
+      // If response starts with non-JSON text, find the first {
+      if (!jsonText.startsWith('{') && !jsonText.startsWith('[')) {
+        const jsonStart = jsonText.indexOf('{');
+        if (jsonStart !== -1) {
+          jsonText = jsonText.substring(jsonStart);
+        }
+      }
+
+      // Strip trailing text after the JSON object closes
+      const lastBrace = jsonText.lastIndexOf('}');
+      if (lastBrace !== -1 && lastBrace < jsonText.length - 1) {
+        jsonText = jsonText.substring(0, lastBrace + 1);
+      }
+
+      const parsed: ClaudeVisionResult = JSON.parse(jsonText);
 
       // Validate productId is in catalog if match is true
       if (parsed.match && parsed.productId) {
@@ -240,7 +262,7 @@ async function callClaudeVision(
 
       return { success: true, result: parsed, tokensUsed };
     } catch {
-      console.error('[Product-Scan] Failed to parse Claude response as JSON:', textContent.text);
+      console.error('[Product-Scan] Failed to parse Claude response as JSON. Raw response (first 500 chars):', textContent.text.substring(0, 500));
       return { success: false, error: 'Failed to parse AI response' };
     }
   } catch (error) {
