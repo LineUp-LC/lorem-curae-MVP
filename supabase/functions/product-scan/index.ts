@@ -97,14 +97,15 @@ INGREDIENT PARSING INSTRUCTIONS:
 2. For each ingredient provide:
    - name: the ingredient name as written on the label
    - function: its primary skincare function in plain language (e.g., "moisturizes and attracts water to skin", "helps protect from sun damage", "gentle surfactant that cleanses skin")
-   - safetyTier: "safe" (generally well-tolerated by most skin types), "caution" (may cause irritation for sensitive skin or has concentration/usage limits), or "avoid" (known common irritant or restricted ingredient)
+   - safetyTier: "safe", "caution", or "avoid"
+   - cautionReason: REQUIRED when safetyTier is "caution" or "avoid". A 2-4 sentence explanation of: (1) why this ingredient is flagged, (2) what skin types or conditions should be careful, and (3) what precautions to take. Example: "Glycolic Acid is an AHA exfoliant that can cause irritation, redness, and sun sensitivity, especially at higher concentrations. People with sensitive or rosacea-prone skin should start with low concentrations (5-8%) and use only 2-3 times per week. Always apply SPF the morning after using this ingredient. Avoid combining with retinol or other strong exfoliants."
 3. List ingredients in the order they appear on the label.
 4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.${profileContext}
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 
 For a catalog match with ingredients:
-{"match":true,"productId":1,"confidence":"high","detectedProduct":"Gentle Hydrating Cleanser","detectedBrand":"Pure Essence","detectedCategory":"cleanser","ingredients":[{"name":"Water","function":"base solvent","safetyTier":"safe"},{"name":"Glycerin","function":"moisturizes skin","safetyTier":"safe"}],"ingredientCount":2}
+{"match":true,"productId":1,"confidence":"high","detectedProduct":"Gentle Hydrating Cleanser","detectedBrand":"Pure Essence","detectedCategory":"cleanser","ingredients":[{"name":"Water","function":"base solvent","safetyTier":"safe"},{"name":"Glycolic Acid","function":"exfoliates dead skin cells and improves texture","safetyTier":"caution","cautionReason":"Can cause irritation, redness, and increased sun sensitivity at higher concentrations. Those with sensitive or rosacea-prone skin should start at 5-8% and limit to 2-3 times per week. Always wear SPF the following morning and avoid layering with retinol."}],"ingredientCount":2}
 
 For no match with ingredients:
 {"match":false,"confidence":"medium","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum","ingredients":[{"name":"Niacinamide","function":"improves skin texture and tone","safetyTier":"safe"}],"ingredientCount":1}
@@ -129,6 +130,7 @@ interface ParsedIngredientResult {
   function: string;
   safetyTier: 'safe' | 'caution' | 'avoid';
   relevance?: string;
+  cautionReason?: string;
 }
 
 interface ClaudeVisionResult {
@@ -253,6 +255,7 @@ async function callClaudeVision(
           function: String(ing.function || ''),
           safetyTier: ['safe', 'caution', 'avoid'].includes(ing.safetyTier) ? ing.safetyTier : 'safe',
           ...(ing.relevance ? { relevance: String(ing.relevance) } : {}),
+          ...(ing.cautionReason ? { cautionReason: String(ing.cautionReason) } : {}),
         }));
         parsed.ingredientCount = parsed.ingredients.length;
       } else {

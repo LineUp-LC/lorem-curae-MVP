@@ -18,6 +18,8 @@ export interface ParsedIngredient {
   safetyTier: IngredientSafetyTier;
   /** Personalized relevance note (present when user skin profile is available) */
   relevance?: string;
+  /** Why this ingredient is flagged caution/avoid — risks, precautions, affected skin types */
+  cautionReason?: string;
 }
 
 /** Result of a product scan via Claude Vision */

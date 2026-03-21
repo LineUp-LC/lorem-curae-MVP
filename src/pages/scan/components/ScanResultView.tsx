@@ -88,6 +88,20 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
                 {ing.relevance}
               </p>
             )}
+            {ing.cautionReason && (ing.safetyTier === 'caution' || ing.safetyTier === 'avoid') && (
+              <div className={`mt-1.5 px-2 py-1.5 rounded-lg border ${
+                ing.safetyTier === 'avoid'
+                  ? 'bg-red-50 border-red-200'
+                  : 'bg-yellow-50 border-yellow-200'
+              }`}>
+                <p className={`text-[11px] leading-relaxed flex items-start gap-1 ${
+                  ing.safetyTier === 'avoid' ? 'text-red-800' : 'text-yellow-800'
+                }`}>
+                  <i className={`${ing.safetyTier === 'avoid' ? 'ri-close-circle-line' : 'ri-alert-line'} text-[11px] mt-0.5 flex-shrink-0`} />
+                  <span>{ing.cautionReason}</span>
+                </p>
+              </div>
+            )}
           </div>
         ))}
       </div>
