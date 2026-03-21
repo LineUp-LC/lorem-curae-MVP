@@ -250,6 +250,27 @@ OUTPUT STRUCTURE:
 3. Conflict or ordering notes (if any)
 4. Improvement suggestion (1 sentence, optional)
 Keep total response under 8 sentences.`,
+
+  curated_recommendation: `TASK: For each compatible product listed below, explain why it pairs well with the scanned product for this user.
+OUTPUT FORMAT:
+Return one line per product, starting with the product ID in square brackets:
+[1] This cleanser complements your scanned serum because it provides gentle hydration without disrupting active ingredients.
+[3] This moisturizer locks in the benefits of your scanned product while adding ceramides your skin needs.
+RULES:
+- Keep each explanation to 1-2 sentences.
+- Reference the user's skin type and concerns by name.
+- Explain the ingredient compatibility in plain language.
+- Never use clinical jargon — explain what products DO, not ingredient mechanisms.
+- Do not use markdown formatting. Return plain text lines only.`,
+
+  curated_review_summary: `TASK: Summarize reviews from people with similar skin profiles who used this product.
+OUTPUT STRUCTURE:
+1. Match summary (1 sentence) — "Among X reviewers with similar skin..." with a key statistic
+2. Common experience (1 sentence) — what most matching reviewers experienced, with timeframe if available
+3. Relevance note (1 sentence) — why this matters for the user's specific concerns
+SAFETY: Only reference data provided in the evidence. Never fabricate quotes, statistics, or reviewer details.
+Use conversational framing: "people with similar skin" not exact reviewer counts or percentages.
+Keep total response to exactly 3 sentences. Do not use markdown formatting.`,
 };
 
 // ============================================================================
@@ -428,6 +449,43 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
         `- Key ingredients: ${page.product.keyIngredients.join(', ')}`,
       ].join('\n'));
     }
+  } else if (page.mode === 'curated_recommendation') {
+    sections.push([
+      'SCANNED PRODUCT:',
+      `- Name: ${page.scannedProduct.name}`,
+      `- Brand: ${page.scannedProduct.brand}`,
+      `- Category: ${page.scannedProduct.category}`,
+      `- Key ingredients: ${page.scannedProduct.ingredients.slice(0, 10).join(', ')}`,
+    ].join('\n'));
+    page.compatibleProducts.forEach((p, i) => {
+      sections.push([
+        `COMPATIBLE PRODUCT ${i + 1}:`,
+        `- ID: ${p.id}`,
+        `- Name: ${p.name}`,
+        `- Brand: ${p.brand}`,
+        `- Category: ${p.category}`,
+        `- Key ingredients: ${p.keyIngredients.join(', ')}`,
+        `- Match reasons: ${p.matchReasons.join('; ')}`,
+      ].join('\n'));
+    });
+  } else if (page.mode === 'curated_review_summary') {
+    const p = page.product;
+    sections.push([
+      'PRODUCT:',
+      `- Name: ${p.name}`,
+      `- Brand: ${p.brand}`,
+      `- Category: ${p.category}`,
+    ].join('\n'));
+    sections.push([
+      'REVIEW MATCH STATS:',
+      `- Total matching reviewers: ${page.matchStats.totalMatching}`,
+      `- Average rating from matching reviewers: ${page.matchStats.avgRating.toFixed(1)}/5`,
+      `- Positive experience rate: ${page.matchStats.positivePercent}%`,
+    ].join('\n'));
+    const reviewLines = page.reviews.slice(0, 10).map((r, i) =>
+      `  ${i + 1}. Rating: ${r.rating}/5 | Skin: ${r.skinType} | Concerns: ${r.concerns.join(', ')} | Duration: ${r.usageDurationWeeks}wk${r.pros?.length ? ` | Pros: ${r.pros.join(', ')}` : ''}${r.cons?.length ? ` | Cons: ${r.cons.join(', ')}` : ''}`
+    );
+    sections.push(['MATCHING REVIEWS:', ...reviewLines].join('\n'));
   }
 
   // Pre-computed evidence
@@ -601,6 +659,8 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'guided_comparison': return 768;
     case 'guided_routine_build': return 768;
     case 'guided_routine_explain': return 512;
+    case 'curated_recommendation': return 1024;
+    case 'curated_review_summary': return 512;
     default: return 1024;
   }
 }
@@ -646,6 +706,8 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     guided_comparison: 800,
     guided_routine_build: 1000,
     guided_routine_explain: 800,
+    curated_recommendation: 1200,
+    curated_review_summary: 500,
   };
 
   const limit = maxChars[mode] ?? 1000;

@@ -1,24 +1,34 @@
 /**
- * Scan Page — Camera Scan MVP
+ * Scan Page — Full Vision (Scan → Discover → Understand → Build)
  *
  * Allows authenticated users to photograph a skincare product
- * and identify it via Claude Vision. Guest users see a login CTA.
+ * and identify it via Claude Vision. Includes:
+ * - Full ingredient parsing with safety badges
+ * - Compatible product discovery with AI WHY tags
+ * - Profile-filtered reviews with AI summary
+ * - Shelf, routine, and scan history integration
+ *
+ * Guest users see a login CTA.
  *
  * States: idle → captured → processing → result/error
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
-import { scanProduct } from '../../lib/ai/scanClient';
+import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
+import type { ScanClientError } from '../../lib/ai/scanClient';
 import { onAction } from '../../lib/utils/gamificationTriggers';
+import { getScanHistory, addScanHistoryEntry } from '../../lib/utils/scanHistory';
 import { productData } from '../../mocks/products';
-import type { ScanResult } from '../../types/scan';
+import type { ScanResult, ScanHistoryEntry } from '../../types/scan';
 import type { Product } from '../../types/product';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
 import CameraCapture from './components/CameraCapture';
 import ScanProcessing from './components/ScanProcessing';
 import ScanResultView from './components/ScanResultView';
+import ScanHistory from './components/ScanHistory';
+import PostScanDiscovery from './components/PostScanDiscovery';
 
 // ---------------------------------------------------------------------------
 // Page states
@@ -27,7 +37,7 @@ import ScanResultView from './components/ScanResultView';
 type ScanState =
   | { phase: 'idle' }
   | { phase: 'captured'; file: File; previewUrl: string }
-  | { phase: 'processing'; previewUrl: string }
+  | { phase: 'processing'; previewUrl: string; file?: File }
   | { phase: 'result'; result: ScanResult; previewUrl: string; matchedProduct?: Product }
   | { phase: 'error'; error: string; previewUrl: string };
 
@@ -38,6 +48,12 @@ type ScanState =
 export default function ScanPage() {
   const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState<ScanState>({ phase: 'idle' });
+  const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
+
+  // Load scan history on mount
+  useEffect(() => {
+    setHistory(getScanHistory());
+  }, []);
 
   const handleCapture = useCallback((file: File) => {
     const previewUrl = URL.createObjectURL(file);
@@ -48,12 +64,12 @@ export default function ScanPage() {
     if (state.phase !== 'captured') return;
 
     const { file, previewUrl } = state;
-    setState({ phase: 'processing', previewUrl });
+    setState({ phase: 'processing', previewUrl, file });
 
     const response = await scanProduct(file);
 
     if (!response.success) {
-      const errResponse = response as import('../../lib/ai/scanClient').ScanClientError;
+      const errResponse = response as ScanClientError;
       setState({ phase: 'error', error: errResponse.error, previewUrl });
       return;
     }
@@ -66,8 +82,17 @@ export default function ScanPage() {
       onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
+    // Save to scan history
+    try {
+      const thumbnail = await createScanThumbnail(file);
+      addScanHistoryEntry(result, thumbnail);
+      setHistory(getScanHistory());
+    } catch {
+      // Thumbnail failure is non-critical
+    }
+
     setState({ phase: 'result', result, previewUrl, matchedProduct });
-  }, [state]);
+  }, [state, user?.id]);
 
   const handleRetake = useCallback(() => {
     if (state.phase !== 'idle' && 'previewUrl' in state) {
@@ -82,6 +107,41 @@ export default function ScanPage() {
     }
     setState({ phase: 'idle' });
   }, [state]);
+
+  const handleHistorySelect = useCallback((entry: ScanHistoryEntry) => {
+    const result = entry.result;
+    let matchedProduct: Product | undefined;
+    if (result.match && result.productId) {
+      matchedProduct = productData.find(p => p.id === result.productId);
+    }
+    // Use the thumbnail as the preview (it's a data URL, not a blob URL)
+    setState({ phase: 'result', result, previewUrl: entry.thumbnail, matchedProduct });
+  }, []);
+
+  const handleBarcodeDetected = useCallback(async (upc: string) => {
+    setState({ phase: 'processing', previewUrl: '' });
+
+    const response = await scanByUpc(upc);
+
+    if (!response.success) {
+      const errResponse = response as ScanClientError;
+      setState({ phase: 'error', error: errResponse.error, previewUrl: '' });
+      return;
+    }
+
+    const result = response.result;
+    let matchedProduct: Product | undefined;
+    if (result.match && result.productId) {
+      matchedProduct = productData.find(p => p.id === result.productId);
+      onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
+    }
+
+    setState({ phase: 'result', result, previewUrl: '', matchedProduct });
+  }, [user?.id]);
+
+  const handleClearHistory = useCallback(() => {
+    setHistory([]);
+  }, []);
 
   // Auth loading
   if (authLoading) {
@@ -135,11 +195,20 @@ export default function ScanPage() {
           </div>
         </div>
 
+        {/* Scan History — visible when idle */}
+        {state.phase === 'idle' && history.length > 0 && (
+          <ScanHistory
+            entries={history}
+            onSelect={handleHistorySelect}
+            onClear={handleClearHistory}
+          />
+        )}
+
         {/* State-based content */}
         <div className="bg-white rounded-2xl border border-blush shadow-sm p-6">
           {/* Idle — show capture UI */}
           {state.phase === 'idle' && (
-            <CameraCapture onCapture={handleCapture} />
+            <CameraCapture onCapture={handleCapture} onBarcodeDetected={handleBarcodeDetected} />
           )}
 
           {/* Captured — show preview with identify/retake */}
@@ -229,6 +298,14 @@ export default function ScanPage() {
             </div>
           )}
         </div>
+
+        {/* Post-scan discovery — below the main card */}
+        {state.phase === 'result' && (
+          <PostScanDiscovery
+            scanResult={state.result}
+            matchedProduct={state.matchedProduct}
+          />
+        )}
       </div>
     </div>
   );

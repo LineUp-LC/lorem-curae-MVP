@@ -1,9 +1,24 @@
 /**
- * Camera Scan types for product identification via Claude Vision.
+ * Camera Scan types for product identification + ingredient parsing via Claude Vision.
  */
 
 /** Confidence level of AI product identification */
 export type ScanConfidence = 'high' | 'medium' | 'low';
+
+/** Safety tier for a parsed ingredient */
+export type IngredientSafetyTier = 'safe' | 'caution' | 'avoid';
+
+/** A single ingredient parsed from a product label by Claude Vision */
+export interface ParsedIngredient {
+  /** Ingredient name as it appears on the label */
+  name: string;
+  /** Primary skincare function in plain language */
+  function: string;
+  /** Safety classification */
+  safetyTier: IngredientSafetyTier;
+  /** Personalized relevance note (present when user skin profile is available) */
+  relevance?: string;
+}
 
 /** Result of a product scan via Claude Vision */
 export interface ScanResult {
@@ -19,16 +34,30 @@ export interface ScanResult {
   detectedBrand?: string;
   /** Detected product category */
   detectedCategory?: string;
+  /** Parsed ingredients from the product label */
+  ingredients?: ParsedIngredient[];
+  /** Total number of ingredients detected */
+  ingredientCount?: number;
+  /** UPC/EAN barcode (present when scanned via barcode mode) */
+  upc?: string;
   /** ISO timestamp of when the scan was processed */
   timestamp: string;
 }
 
 /** Request payload sent to the product-scan Edge Function */
 export interface ScanRequest {
-  /** Base64-encoded JPEG image (no data URL prefix) */
-  image: string;
+  /** Base64-encoded JPEG image (no data URL prefix) — required for photo mode */
+  image?: string;
   /** MIME type of the image */
-  mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+  mediaType?: 'image/jpeg' | 'image/png' | 'image/webp';
+  /** UPC/EAN barcode string — when present, skips Vision and does catalog lookup */
+  upc?: string;
+  /** Optional user skin profile for personalized ingredient relevance */
+  skinProfile?: {
+    skinType?: string;
+    concerns?: string[];
+    sensitivity?: string;
+  };
 }
 
 /** Response from the product-scan Edge Function */
@@ -41,4 +70,16 @@ export interface ScanResponse {
     tokensUsed?: number;
     timestamp: string;
   };
+}
+
+/** A persisted scan history entry (stored in localStorage) */
+export interface ScanHistoryEntry {
+  /** Unique identifier (timestamp-based) */
+  id: string;
+  /** The scan result data */
+  result: ScanResult;
+  /** Small base64 JPEG thumbnail for display (~5-10KB) */
+  thumbnail: string;
+  /** ISO timestamp */
+  timestamp: string;
 }

@@ -2,10 +2,16 @@
  * Scan Client — client-side caller for the product-scan Edge Function.
  *
  * Handles: image capture → resize → compress → base64 → API call → response.
+ * Also provides thumbnail generation for scan history persistence.
  * Guest users are blocked before any API call.
  */
 
 import { supabase } from '../supabase-browser';
+import {
+  getEffectiveSkinType,
+  getEffectiveConcerns,
+  getEffectiveSensitivity,
+} from '../utils/sessionState';
 import type { ScanResult, ScanResponse } from '../../types/scan';
 
 // ---------------------------------------------------------------------------
@@ -19,6 +25,12 @@ const MAX_IMAGE_DIMENSION = 1568;
 
 /** JPEG compression quality (0–1) */
 const JPEG_QUALITY = 0.75;
+
+/** Thumbnail size for scan history (longest edge) */
+const THUMBNAIL_SIZE = 80;
+
+/** Thumbnail JPEG quality */
+const THUMBNAIL_QUALITY = 0.5;
 
 // ---------------------------------------------------------------------------
 // Image processing pipeline
@@ -77,6 +89,29 @@ export async function compressImageToBase64(file: File | Blob): Promise<string> 
   return base64;
 }
 
+/**
+ * Create a small thumbnail data URL for scan history persistence.
+ * Returns a full data URL (with prefix) suitable for <img src>.
+ */
+export async function createScanThumbnail(file: File | Blob): Promise<string> {
+  const img = await loadImage(file);
+
+  const scale = THUMBNAIL_SIZE / Math.max(img.width, img.height);
+  const width = Math.round(img.width * scale);
+  const height = Math.round(img.height * scale);
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Canvas context unavailable');
+
+  ctx.drawImage(img, 0, 0, width, height);
+
+  return canvas.toDataURL('image/jpeg', THUMBNAIL_QUALITY);
+}
+
 // ---------------------------------------------------------------------------
 // API caller
 // ---------------------------------------------------------------------------
@@ -94,13 +129,50 @@ export interface ScanClientError {
 export type ScanClientResponse = ScanClientResult | ScanClientError;
 
 /**
+ * Look up a product by UPC/EAN barcode via the product-scan Edge Function.
+ * Skips image compression — sends only the barcode string.
+ */
+export async function scanByUpc(upc: string): Promise<ScanClientResponse> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    return { success: false, error: 'Sign in to scan products' };
+  }
+
+  try {
+    const response = await fetch(PRODUCT_SCAN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({ upc }),
+    });
+
+    const data: ScanResponse = await response.json();
+
+    if (!response.ok || !data.success || !data.result) {
+      return { success: false, error: data.error || 'UPC lookup failed' };
+    }
+
+    return { success: true, result: data.result };
+  } catch (error) {
+    console.error('[ScanClient] Error calling product-scan (UPC):', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error',
+    };
+  }
+}
+
+/**
  * Scan a product image via the product-scan Edge Function.
  *
  * Flow:
  * 1. Check auth (guest → error, no API call)
  * 2. Compress image to JPEG base64
- * 3. POST to product-scan Edge Function
- * 4. Return typed result
+ * 3. Build skin profile from session state
+ * 4. POST to product-scan Edge Function
+ * 5. Return typed result
  */
 export async function scanProduct(file: File | Blob): Promise<ScanClientResponse> {
   // 1. Auth check — guest users blocked
@@ -120,7 +192,13 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
     };
   }
 
-  // 3. Call Edge Function
+  // 3. Build skin profile for personalized ingredient relevance
+  const skinType = getEffectiveSkinType() ?? undefined;
+  const concerns = getEffectiveConcerns();
+  const sensitivity = getEffectiveSensitivity() ?? undefined;
+  const hasSkinProfile = skinType || concerns.length > 0;
+
+  // 4. Call Edge Function
   try {
     const response = await fetch(PRODUCT_SCAN_URL, {
       method: 'POST',
@@ -131,6 +209,7 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
       body: JSON.stringify({
         image: base64,
         mediaType: 'image/jpeg',
+        ...(hasSkinProfile ? { skinProfile: { skinType, concerns, sensitivity } } : {}),
       }),
     });
 

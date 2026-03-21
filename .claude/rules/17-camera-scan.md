@@ -1,13 +1,13 @@
 ---
-scope: "Camera scan page, product-scan Edge Function, scanClient, image pipeline"
+scope: "Camera scan page, product-scan Edge Function, scanClient, image pipeline, post-scan discovery"
 authority: primary
-last_synced: "2026-03-15"
-related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-features.md"]
+last_synced: "2026-03-18"
+related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-layer.md", "13-domain-features.md"]
 ---
 
 # Camera Scan Rules
 
-> Trigger: read this file when modifying `/scan`, `product-scan` Edge Function, `scanClient.ts`, or image processing
+> Trigger: read this file when modifying `/scan`, `product-scan` Edge Function, `scanClient.ts`, image processing, or post-scan discovery
 
 ---
 
@@ -15,13 +15,28 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 
 | Component | Path | Purpose |
 |-----------|------|---------|
-| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse` |
-| Edge Function | `supabase/functions/product-scan/index.ts` | Claude Vision proxy |
-| Client | `src/lib/ai/scanClient.ts` | Image compress + API caller |
-| Page | `src/pages/scan/page.tsx` | Main scan page (state machine) |
-| CameraCapture | `src/pages/scan/components/CameraCapture.tsx` | File input + tips |
+| Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient`, `ScanHistoryEntry` |
+| Edge Function | `supabase/functions/product-scan/index.ts` | Claude Vision proxy — identification + ingredient parsing |
+| Client | `src/lib/ai/scanClient.ts` | Image compress + thumbnail + API caller |
+| Scan history | `src/lib/utils/scanHistory.ts` | localStorage persistence for past scans |
+| Page | `src/pages/scan/page.tsx` | Main scan page (state machine + history) |
+| CameraCapture | `src/pages/scan/components/CameraCapture.tsx` | File input + webcam + barcode mode (BarcodeDetector API) |
 | ScanProcessing | `src/pages/scan/components/ScanProcessing.tsx` | Loading state |
-| ScanResultView | `src/pages/scan/components/ScanResultView.tsx` | Match/no-match result |
+| ScanResultView | `src/pages/scan/components/ScanResultView.tsx` | Match/no-match + ingredient breakdown + shelf/routine |
+| PostScanDiscovery | `src/pages/scan/components/PostScanDiscovery.tsx` | Compatible products with AI WHY + category filters |
+| ScanReviewPanel | `src/pages/scan/components/ScanReviewPanel.tsx` | Profile-filtered reviews + AI summary |
+| ScanHistory | `src/pages/scan/components/ScanHistory.tsx` | Horizontal scroll of past scan thumbnails |
+
+---
+
+## Full Vision Pipeline (Scan → Discover → Understand → Build)
+
+| Stage | Component | What it does |
+|-------|-----------|--------------|
+| **Scan** | CameraCapture → Edge Function → ScanResultView | Identify product + parse full ingredient list |
+| **Discover** | PostScanDiscovery | Find compatible products via `findCompatibleProducts()` + AI WHY |
+| **Understand** | ScanReviewPanel | Profile-filtered reviews + AI summary via `curated_review_summary` |
+| **Build** | ScanResultView + PostScanDiscovery | Add to Shelf, Add to Routine via RoutinePickerModal |
 
 ---
 
@@ -34,8 +49,11 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 | Quality | 0.75 | Balance: quality vs file size |
 | Target size | 200–400 KB | Fast upload, low token cost |
 | Max payload | 7 MB base64 (~5 MB decoded) | Supabase Edge Function limit |
+| Thumbnail size | 80px (longest edge) | Scan history display |
+| Thumbnail quality | 0.5 | ~5-10 KB per thumbnail |
 
 Pipeline: `File → loadImage() → canvas resize → toDataURL('image/jpeg', 0.75) → strip prefix → raw base64`
+Thumbnail: `File → loadImage() → canvas resize (80px) → toDataURL('image/jpeg', 0.5) → data URL`
 
 ---
 
@@ -43,13 +61,28 @@ Pipeline: `File → loadImage() → canvas resize → toDataURL('image/jpeg', 0.
 
 **Endpoint:** `POST /functions/v1/product-scan`
 
-**Request:**
+**Request (photo mode):**
 ```json
 {
   "image": "<raw-base64-string>",
-  "mediaType": "image/jpeg"
+  "mediaType": "image/jpeg",
+  "skinProfile": {
+    "skinType": "oily",
+    "concerns": ["acne", "dark spots"],
+    "sensitivity": "moderate"
+  }
 }
 ```
+
+**Request (barcode mode):**
+```json
+{
+  "upc": "850001001011"
+}
+```
+
+`skinProfile` is optional — when present, ingredient relevance is personalized.
+When `upc` is present, Vision is skipped and the catalog is searched by UPC directly.
 
 **Response (success):**
 ```json
@@ -62,44 +95,61 @@ Pipeline: `File → loadImage() → canvas resize → toDataURL('image/jpeg', 0.
     "detectedProduct": "Gentle Hydrating Cleanser",
     "detectedBrand": "Pure Essence",
     "detectedCategory": "cleanser",
-    "timestamp": "2026-03-15T..."
+    "ingredients": [
+      { "name": "Hyaluronic Acid", "function": "attracts and retains moisture", "safetyTier": "safe", "relevance": "helps with dryness" }
+    ],
+    "ingredientCount": 12,
+    "timestamp": "2026-03-18T..."
   },
   "meta": { "authenticated": true, "tokensUsed": 1900, "timestamp": "..." }
 }
 ```
 
-**Response (error):**
-```json
-{
-  "success": false,
-  "error": "AI service error: 400",
-  "meta": { "authenticated": true, "timestamp": "..." }
-}
-```
-
-**Auth:** Required. Returns 401 for unauthenticated requests.
+**Auth:** Required. Returns 401 for unauthenticated requests. MAX_TOKENS: 2048.
 
 ---
 
-## Claude Vision Prompt Structure
+## AI Modes (Scan-Related)
 
-The system prompt contains:
-1. Role definition ("skincare product identifier for Lorem Curae")
-2. Full product catalog (12 products with id, name, brand, category, keyIngredients)
-3. Identification instructions (read label → match catalog → return JSON)
-4. Confidence tier definitions (high/medium/low)
-5. Output format specification (strict JSON, no markdown)
+| Mode | Path | Purpose |
+|------|------|---------|
+| `curated_recommendation` | surfaceContext + systemPrompt | Batch AI WHY for compatible products |
+| `curated_review_summary` | surfaceContext + systemPrompt | Summary of profile-filtered reviews |
 
-**When modifying the prompt:**
-- Keep the catalog section separate from instructions
-- Always validate productId against the catalog
-- Never remove the "respond ONLY with valid JSON" directive
-- Test with at least 3 product photos before deploying
+---
 
-**When adding products to the catalog:**
-- Add to `PRODUCT_CATALOG` array in the Edge Function
-- Match the shape: `{ id, name, brand, category, keyIngredients }`
-- When migrating to Supabase, replace the hardcoded array with a database query
+## Scan History
+
+- Storage: localStorage under key `scanHistory`
+- Max entries: 20 (oldest pruned on overflow)
+- Each entry: `{ id, result: ScanResult, thumbnail: string (data URL), timestamp }`
+- Thumbnails are 80px JPEG data URLs (~5-10 KB each)
+- Tapping a history entry restores the full result without re-scanning
+- History is non-critical — silent fail on storage errors
+
+---
+
+## Shelf & Routine Integration
+
+- **Add to Shelf**: calls `savedProductsState.addSavedProduct()` + `PRODUCT_SAVED` gamification trigger
+- **Add to Routine**: opens `RoutinePickerModal` (existing Phase 2 component)
+- Non-matched products create a temporary product object from scan data (negative ID)
+- Both buttons available for matched AND non-matched products
+
+---
+
+## Barcode Scanning
+
+- CameraCapture has a `mode` state: `'photo' | 'barcode'` (default `'photo'`)
+- Uses browser-native **BarcodeDetector API** (Chrome 83+, Edge 83+) — zero npm dependencies
+- Supported formats: `ean_13`, `ean_8`, `upc_a`, `upc_e`
+- Unsupported browsers (Firefox, Safari/iOS): shows error message, stays on photo mode
+- Desktop barcode flow: webcam → continuous frame scanning via `requestAnimationFrame` → 5s timeout
+- Mobile barcode flow: file input → `BarcodeDetector.detect()` on captured image
+- When barcode detected → `onBarcodeDetected(upc)` → `scanByUpc()` → Edge Function UPC lookup
+- Edge Function `PRODUCT_CATALOG` has placeholder `upc` field on each product
+- UPC lookup returns match (if found) or no-match with UPC displayed
+- `ScanResult.upc` field present when scanned via barcode mode
 
 ---
 
@@ -110,10 +160,12 @@ idle → captured → processing → result (match/no-match)
                              → error
 ```
 
-All transitions are forward-only except:
+Transitions:
 - `captured → idle` (retake)
 - `result → idle` (scan another)
 - `error → idle` (try again)
+- `idle → result` (history card tap — bypasses capture/processing)
+- `idle → processing → result` (barcode detected — bypasses capture)
 
 ---
 
@@ -128,9 +180,11 @@ All transitions are forward-only except:
 ## Prohibited Actions
 
 Claude must never:
-- Add new npm dependencies for camera/barcode scanning
+- Add new npm dependencies for camera/barcode scanning without approval (BarcodeDetector is browser-native)
 - Auto-trigger device camera without user action
-- Store scanned images (ephemeral only — not persisted)
+- Store full-resolution scanned images (thumbnails only for history)
 - Skip image compression before upload
 - Modify the prompt without testing identification accuracy
 - Expose raw Claude API errors to the user
+- Fabricate ingredient safety data — safetyTier comes from Claude Vision
+- Show personalized relevance when no skin profile exists

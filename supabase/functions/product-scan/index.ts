@@ -2,7 +2,7 @@
  * Product Scan Edge Function for Lorem Curae
  *
  * Accepts a base64-encoded product photo, sends it to Claude Vision
- * for identification, and matches against the product catalog.
+ * for identification + full ingredient parsing, and matches against the product catalog.
  *
  * Model: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
  * Auth: Required — guest users receive CTA on the client side.
@@ -23,7 +23,7 @@ const corsHeaders = {
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
-const MAX_TOKENS = 512;
+const MAX_TOKENS = 2048;
 
 // Maximum base64 payload size: ~5 MB decoded → ~6.7 MB base64
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
@@ -33,54 +33,99 @@ const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
 // ---------------------------------------------------------------------------
 
 const PRODUCT_CATALOG = [
-  { id: 1, name: 'Gentle Hydrating Cleanser', brand: 'Pure Essence', category: 'cleanser', keyIngredients: ['Hyaluronic Acid', 'Ceramides', 'Glycerin'] },
-  { id: 2, name: 'Brightening Vitamin C Serum', brand: 'Glow Naturals', category: 'serum', keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'] },
-  { id: 3, name: 'Barrier Repair Moisturizer', brand: 'Skin Harmony', category: 'moisturizer', keyIngredients: ['Ceramides', 'Niacinamide', 'Squalane'] },
-  { id: 4, name: 'Clear Skin Salicylic Acid Treatment', brand: 'Clarity Labs', category: 'treatment', keyIngredients: ['Salicylic Acid', 'Niacinamide', 'Zinc'] },
-  { id: 5, name: 'Mineral Sunscreen SPF 50', brand: 'Sun Shield', category: 'sunscreen', keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'] },
-  { id: 6, name: 'Retinol Night Renewal Serum', brand: 'Youth Restore', category: 'serum', keyIngredients: ['Retinol', 'Peptides', 'Hyaluronic Acid'] },
-  { id: 7, name: 'Hydrating Clay Mask', brand: 'Earth Glow', category: 'mask', keyIngredients: ['Kaolin Clay', 'Hyaluronic Acid', 'Aloe Vera'] },
-  { id: 8, name: 'Niacinamide Pore Refining Serum', brand: 'Pore Perfect', category: 'serum', keyIngredients: ['Niacinamide', 'Zinc', 'Hyaluronic Acid'] },
-  { id: 9, name: 'Soothing Centella Cream', brand: 'Calm Skin Co.', category: 'moisturizer', keyIngredients: ['Centella Asiatica', 'Ceramides', 'Panthenol'] },
-  { id: 10, name: 'Exfoliating AHA/BHA Toner', brand: 'Glow Labs', category: 'treatment', keyIngredients: ['Glycolic Acid', 'Salicylic Acid', 'Witch Hazel'] },
-  { id: 11, name: 'Peptide Eye Cream', brand: 'Youth Restore', category: 'treatment', keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'] },
-  { id: 12, name: 'Hydrating Gel Cleanser', brand: 'Fresh Start', category: 'cleanser', keyIngredients: ['Hyaluronic Acid', 'Aloe Vera', 'Green Tea'] },
+  { id: 1, name: 'Gentle Hydrating Cleanser', brand: 'Pure Essence', category: 'cleanser', upc: '850001001011', keyIngredients: ['Hyaluronic Acid', 'Ceramides', 'Glycerin'] },
+  { id: 2, name: 'Brightening Vitamin C Serum', brand: 'Glow Naturals', category: 'serum', upc: '850001001028', keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'] },
+  { id: 3, name: 'Barrier Repair Moisturizer', brand: 'Skin Harmony', category: 'moisturizer', upc: '850001001035', keyIngredients: ['Ceramides', 'Niacinamide', 'Squalane'] },
+  { id: 4, name: 'Clear Skin Salicylic Acid Treatment', brand: 'Clarity Labs', category: 'treatment', upc: '850001001042', keyIngredients: ['Salicylic Acid', 'Niacinamide', 'Zinc'] },
+  { id: 5, name: 'Mineral Sunscreen SPF 50', brand: 'Sun Shield', category: 'sunscreen', upc: '850001001059', keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'] },
+  { id: 6, name: 'Retinol Night Renewal Serum', brand: 'Youth Restore', category: 'serum', upc: '850001001066', keyIngredients: ['Retinol', 'Peptides', 'Hyaluronic Acid'] },
+  { id: 7, name: 'Hydrating Clay Mask', brand: 'Earth Glow', category: 'mask', upc: '850001001073', keyIngredients: ['Kaolin Clay', 'Hyaluronic Acid', 'Aloe Vera'] },
+  { id: 8, name: 'Niacinamide Pore Refining Serum', brand: 'Pore Perfect', category: 'serum', upc: '850001001080', keyIngredients: ['Niacinamide', 'Zinc', 'Hyaluronic Acid'] },
+  { id: 9, name: 'Soothing Centella Cream', brand: 'Calm Skin Co.', category: 'moisturizer', upc: '850001001097', keyIngredients: ['Centella Asiatica', 'Ceramides', 'Panthenol'] },
+  { id: 10, name: 'Exfoliating AHA/BHA Toner', brand: 'Glow Labs', category: 'treatment', upc: '850001001103', keyIngredients: ['Glycolic Acid', 'Salicylic Acid', 'Witch Hazel'] },
+  { id: 11, name: 'Peptide Eye Cream', brand: 'Youth Restore', category: 'treatment', upc: '850001001110', keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'] },
+  { id: 12, name: 'Hydrating Gel Cleanser', brand: 'Fresh Start', category: 'cleanser', upc: '850001001127', keyIngredients: ['Hyaluronic Acid', 'Aloe Vera', 'Green Tea'] },
 ];
 
 const CATALOG_TEXT = PRODUCT_CATALOG
   .map(p => `${p.id}. "${p.name}" by ${p.brand} (${p.category}) — Key ingredients: ${p.keyIngredients.join(', ')}`)
   .join('\n');
 
-const SYSTEM_PROMPT = `You are a skincare product identifier for Lorem Curae. You receive a photo of a skincare product and must identify it.
+// ---------------------------------------------------------------------------
+// System prompt builder
+// ---------------------------------------------------------------------------
+
+interface SkinProfile {
+  skinType?: string;
+  concerns?: string[];
+  sensitivity?: string;
+}
+
+function buildSystemPrompt(skinProfile?: SkinProfile): string {
+  let profileContext = '';
+  if (skinProfile?.skinType || (skinProfile?.concerns && skinProfile.concerns.length > 0)) {
+    const parts: string[] = [];
+    if (skinProfile.skinType) parts.push(`- Skin type: ${skinProfile.skinType}`);
+    if (skinProfile.concerns?.length) parts.push(`- Concerns: ${skinProfile.concerns.join(', ')}`);
+    if (skinProfile.sensitivity) parts.push(`- Sensitivity: ${skinProfile.sensitivity}`);
+    profileContext = `
+
+USER SKIN PROFILE:
+${parts.join('\n')}
+For each ingredient, add a "relevance" field: a short phrase explaining how it relates to this user's skin (e.g., "helps with dryness", "may irritate sensitive skin"). If no specific relevance to this user, omit the relevance field for that ingredient.`;
+  }
+
+  return `You are a skincare product analyzer for Lorem Curae. You receive a photo of a skincare product and must:
+1. Identify the product against our catalog
+2. Parse the full ingredient list visible on the product label
 
 Our product catalog:
 ${CATALOG_TEXT}
 
-Instructions:
+IDENTIFICATION INSTRUCTIONS:
 1. Read the product name, brand, and any visible text on the packaging.
-2. If the product matches one in our catalog, respond with a JSON object containing match: true and the productId.
-3. If the product does NOT match any catalog product, respond with match: false and include whatever product details you can detect.
+2. If the product matches one in our catalog, set match: true and productId.
+3. If the product does NOT match any catalog product, set match: false and include whatever product details you can detect.
 4. Be conservative — only mark match: true if you are reasonably confident.
-5. For confidence: use "high" if brand and product name are clearly visible and match, "medium" if partially visible, "low" if you are guessing from packaging/category alone.
+5. Confidence: "high" if brand and product name are clearly visible and match, "medium" if partially visible, "low" if guessing from packaging alone.
+
+INGREDIENT PARSING INSTRUCTIONS:
+1. Read every ingredient visible on the product label (usually in the ingredients list / INCI list).
+2. For each ingredient provide:
+   - name: the ingredient name as written on the label
+   - function: its primary skincare function in plain language (e.g., "moisturizes and attracts water to skin", "helps protect from sun damage", "gentle surfactant that cleanses skin")
+   - safetyTier: "safe" (generally well-tolerated by most skin types), "caution" (may cause irritation for sensitive skin or has concentration/usage limits), or "avoid" (known common irritant or restricted ingredient)
+3. List ingredients in the order they appear on the label.
+4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.${profileContext}
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 
-For a match:
-{"match":true,"productId":1,"confidence":"high","detectedProduct":"Gentle Hydrating Cleanser","detectedBrand":"Pure Essence","detectedCategory":"cleanser"}
+For a catalog match with ingredients:
+{"match":true,"productId":1,"confidence":"high","detectedProduct":"Gentle Hydrating Cleanser","detectedBrand":"Pure Essence","detectedCategory":"cleanser","ingredients":[{"name":"Water","function":"base solvent","safetyTier":"safe"},{"name":"Glycerin","function":"moisturizes skin","safetyTier":"safe"}],"ingredientCount":2}
 
-For no match:
-{"match":false,"confidence":"medium","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum"}
+For no match with ingredients:
+{"match":false,"confidence":"medium","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum","ingredients":[{"name":"Niacinamide","function":"improves skin texture and tone","safetyTier":"safe"}],"ingredientCount":1}
 
 If the image does not show a skincare product:
-{"match":false,"confidence":"low","detectedProduct":null,"detectedBrand":null,"detectedCategory":null}`;
+{"match":false,"confidence":"low","detectedProduct":null,"detectedBrand":null,"detectedCategory":null,"ingredients":[],"ingredientCount":0}`;
+}
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface ScanRequestBody {
-  image: string;
-  mediaType: 'image/jpeg' | 'image/png' | 'image/webp';
+  image?: string;
+  mediaType?: 'image/jpeg' | 'image/png' | 'image/webp';
+  skinProfile?: SkinProfile;
+  upc?: string;
+}
+
+interface ParsedIngredientResult {
+  name: string;
+  function: string;
+  safetyTier: 'safe' | 'caution' | 'avoid';
+  relevance?: string;
 }
 
 interface ClaudeVisionResult {
@@ -90,6 +135,8 @@ interface ClaudeVisionResult {
   detectedProduct?: string | null;
   detectedBrand?: string | null;
   detectedCategory?: string | null;
+  ingredients?: ParsedIngredientResult[];
+  ingredientCount?: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -99,6 +146,7 @@ interface ClaudeVisionResult {
 async function callClaudeVision(
   imageBase64: string,
   mediaType: string,
+  skinProfile?: SkinProfile,
 ): Promise<{ success: true; result: ClaudeVisionResult; tokensUsed: number } | { success: false; error: string }> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
@@ -108,6 +156,8 @@ async function callClaudeVision(
   }
 
   try {
+    const systemPrompt = buildSystemPrompt(skinProfile);
+
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',
       headers: {
@@ -118,7 +168,7 @@ async function callClaudeVision(
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
         max_tokens: MAX_TOKENS,
-        system: SYSTEM_PROMPT,
+        system: systemPrompt,
         messages: [{
           role: 'user',
           content: [
@@ -132,7 +182,7 @@ async function callClaudeVision(
             },
             {
               type: 'text',
-              text: 'Identify this skincare product. Respond with JSON only.',
+              text: 'Identify this skincare product and parse its full ingredient list. Respond with JSON only.',
             },
           ],
         }],
@@ -169,6 +219,20 @@ async function callClaudeVision(
           parsed.match = false;
           parsed.productId = undefined;
         }
+      }
+
+      // Sanitize ingredients array
+      if (parsed.ingredients && Array.isArray(parsed.ingredients)) {
+        parsed.ingredients = parsed.ingredients.map(ing => ({
+          name: String(ing.name || ''),
+          function: String(ing.function || ''),
+          safetyTier: ['safe', 'caution', 'avoid'].includes(ing.safetyTier) ? ing.safetyTier : 'safe',
+          ...(ing.relevance ? { relevance: String(ing.relevance) } : {}),
+        }));
+        parsed.ingredientCount = parsed.ingredients.length;
+      } else {
+        parsed.ingredients = [];
+        parsed.ingredientCount = 0;
       }
 
       return { success: true, result: parsed, tokensUsed };
@@ -227,6 +291,43 @@ serve(async (req: Request) => {
     // Parse request
     const body: ScanRequestBody = await req.json();
 
+    // ── UPC barcode lookup (skips Vision entirely) ──────────────────────
+    if (body.upc && typeof body.upc === 'string') {
+      const upc = body.upc.trim();
+      const match = PRODUCT_CATALOG.find(p => p.upc === upc);
+
+      const scanResult = match
+        ? {
+            match: true,
+            productId: match.id,
+            confidence: 'high' as const,
+            detectedProduct: match.name,
+            detectedBrand: match.brand,
+            detectedCategory: match.category,
+            upc,
+            ingredients: [],
+            ingredientCount: 0,
+            timestamp: new Date().toISOString(),
+          }
+        : {
+            match: false,
+            confidence: 'high' as const,
+            upc,
+            ingredients: [],
+            ingredientCount: 0,
+            timestamp: new Date().toISOString(),
+          };
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          result: scanResult,
+          meta: { authenticated: true, timestamp: new Date().toISOString() },
+        }),
+        { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
+      );
+    }
+
     // Validate image
     if (!body.image || typeof body.image !== 'string') {
       return new Response(
@@ -252,8 +353,8 @@ serve(async (req: Request) => {
       );
     }
 
-    // Call Claude Vision
-    const result = await callClaudeVision(body.image, body.mediaType);
+    // Call Claude Vision with optional skin profile
+    const result = await callClaudeVision(body.image, body.mediaType, body.skinProfile);
 
     if (!result.success) {
       return new Response(
@@ -277,6 +378,8 @@ serve(async (req: Request) => {
       detectedProduct: result.result.detectedProduct ?? undefined,
       detectedBrand: result.result.detectedBrand ?? undefined,
       detectedCategory: result.result.detectedCategory ?? undefined,
+      ingredients: result.result.ingredients ?? [],
+      ingredientCount: result.result.ingredientCount ?? 0,
       timestamp: new Date().toISOString(),
     };
 

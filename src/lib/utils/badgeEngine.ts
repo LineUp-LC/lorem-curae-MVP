@@ -196,19 +196,14 @@ export function getBadgeDefinition(badgeId: string): BadgeDefinition | undefined
 }
 
 export async function getUserBadges(userId: string): Promise<Badge[]> {
-  try {
-    const { data, error } = await supabase
-      .from('user_badges')
-      .select('*')
-      .eq('user_id', userId)
-      .order('unlocked_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('user_badges')
+    .select('*')
+    .eq('user_id', userId)
+    .order('unlocked_at', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
-  } catch (error) {
-    console.error('Error fetching user badges:', error);
-    return [];
-  }
+  if (error) throw error;
+  return data || [];
 }
 
 export async function awardBadge(userId: string, badgeId: string): Promise<boolean> {
@@ -233,7 +228,14 @@ export async function checkBadgeUnlock(
   userId: string,
   context: BadgeCheckContext
 ): Promise<BadgeDefinition[]> {
-  const existingBadges = await getUserBadges(userId);
+  let existingBadges: Badge[];
+  try {
+    existingBadges = await getUserBadges(userId);
+  } catch (error) {
+    // If we can't verify existing badges, skip ALL awards to prevent duplicates
+    console.error('[Badge] Cannot verify existing badges, skipping awards:', error);
+    return [];
+  }
   const existingIds = new Set(existingBadges.map((b) => b.badge_id));
   const ctxWithExisting = { ...context, existingBadges: Array.from(existingIds) };
 

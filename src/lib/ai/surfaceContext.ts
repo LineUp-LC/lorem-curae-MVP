@@ -53,7 +53,9 @@ export type AIMode =
   | 'rewrite_explanation'
   | 'guided_comparison'
   | 'guided_routine_build'
-  | 'guided_routine_explain';
+  | 'guided_routine_explain'
+  | 'curated_recommendation'
+  | 'curated_review_summary';
 
 // ============================================================================
 // USER PROFILE
@@ -100,7 +102,9 @@ export type PageContext =
   | { mode: 'rewrite_explanation'; originalText: string; targetLevel: ExplanationLevel; product?: Product }
   | { mode: 'guided_comparison'; products: Product[]; conversationTurns: ConversationMessage[] }
   | { mode: 'guided_routine_build'; routineSteps: { category: string; product?: Product }[]; timing: 'am' | 'pm' | 'both'; conversationTurns: ConversationMessage[] }
-  | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] };
+  | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] }
+  | { mode: 'curated_recommendation'; scannedProduct: { name: string; brand: string; category: string; ingredients: string[] }; compatibleProducts: { id: number; name: string; brand: string; category: string; keyIngredients: string[]; matchReasons: string[] }[] }
+  | { mode: 'curated_review_summary'; product: Product; reviews: ReviewForSummary[]; matchStats: { totalMatching: number; avgRating: number; positivePercent: number } };
 
 /**
  * Lightweight retailer shape for AI context serialization.
@@ -411,6 +415,8 @@ export function generateContextCacheKey(ctx: AISurfaceContext): string {
   else if (page.mode === 'guided_comparison') pageId += `:${page.products.map(p => p.id).sort().join(',')}`;
   else if (page.mode === 'guided_routine_build') pageId += `:${page.timing}:${page.routineSteps.length}`;
   else if (page.mode === 'guided_routine_explain') pageId += `:${page.products.map(p => p.id).sort().join(',')}:${page.toneLevel}`;
+  else if (page.mode === 'curated_recommendation') pageId += `:${page.scannedProduct.name}:${page.compatibleProducts.map(p => p.id).sort().join(',')}`;
+  else if (page.mode === 'curated_review_summary') pageId += `:${page.product.id}:${page.matchStats.totalMatching}`;
 
   return `ai-insight:${pageId}:${profileHash}:${envHash}`;
 }
