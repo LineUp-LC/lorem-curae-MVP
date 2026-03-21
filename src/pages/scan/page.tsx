@@ -13,7 +13,7 @@
  * States: idle → captured → processing → result/error
  */
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
@@ -24,11 +24,15 @@ import { productData } from '../../mocks/products';
 import type { ScanResult, ScanHistoryEntry } from '../../types/scan';
 import type { Product } from '../../types/product';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
+
+// Eagerly loaded — needed immediately for idle/captured/processing states
 import CameraCapture from './components/CameraCapture';
 import ScanProcessing from './components/ScanProcessing';
-import ScanResultView from './components/ScanResultView';
-import ScanHistory from './components/ScanHistory';
-import PostScanDiscovery from './components/PostScanDiscovery';
+
+// Lazy loaded — only needed after scan completes
+const ScanResultView = lazy(() => import('./components/ScanResultView'));
+const PostScanDiscovery = lazy(() => import('./components/PostScanDiscovery'));
+const ScanHistory = lazy(() => import('./components/ScanHistory'));
 
 // ---------------------------------------------------------------------------
 // Page states
@@ -197,11 +201,13 @@ export default function ScanPage() {
 
         {/* Scan History — visible when idle */}
         {state.phase === 'idle' && history.length > 0 && (
-          <ScanHistory
-            entries={history}
-            onSelect={handleHistorySelect}
-            onClear={handleClearHistory}
-          />
+          <Suspense fallback={null}>
+            <ScanHistory
+              entries={history}
+              onSelect={handleHistorySelect}
+              onClear={handleClearHistory}
+            />
+          </Suspense>
         )}
 
         {/* State-based content */}
@@ -244,14 +250,16 @@ export default function ScanPage() {
             <ScanProcessing previewUrl={state.previewUrl} />
           )}
 
-          {/* Result — match or no match */}
+          {/* Result — match or no match (lazy loaded) */}
           {state.phase === 'result' && (
-            <ScanResultView
-              result={state.result}
-              previewUrl={state.previewUrl}
-              matchedProduct={state.matchedProduct}
-              onScanAnother={handleScanAnother}
-            />
+            <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+              <ScanResultView
+                result={state.result}
+                previewUrl={state.previewUrl}
+                matchedProduct={state.matchedProduct}
+                onScanAnother={handleScanAnother}
+              />
+            </Suspense>
           )}
 
           {/* Error — retry */}
@@ -299,12 +307,14 @@ export default function ScanPage() {
           )}
         </div>
 
-        {/* Post-scan discovery — below the main card */}
+        {/* Post-scan discovery — below the main card (lazy loaded) */}
         {state.phase === 'result' && (
-          <PostScanDiscovery
-            scanResult={state.result}
-            matchedProduct={state.matchedProduct}
-          />
+          <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
+            <PostScanDiscovery
+              scanResult={state.result}
+              matchedProduct={state.matchedProduct}
+            />
+          </Suspense>
         )}
       </div>
     </div>

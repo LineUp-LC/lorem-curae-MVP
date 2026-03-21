@@ -401,6 +401,7 @@ const Navbar = () => {
               to="/scan"
               className="lc-nav-icon-btn text-[#2D2A26] hover:bg-[#C4704D]/10"
               aria-label="Scan product"
+              onMouseEnter={() => import('../../pages/scan/page')}
             >
               <i className="ri-camera-line text-xl"></i>
             </Link>
@@ -479,6 +480,7 @@ const Navbar = () => {
               className={`lc-mobile-link motion-safe:animate-enter-right ${location.pathname === '/scan' ? 'lc-mobile-link-active' : ''}`}
               style={{ animationDelay: `${Math.min(navLinks.length * 50, 250)}ms` }}
               onClick={() => setShowMobileMenu(false)}
+              onMouseEnter={() => import('../../pages/scan/page')}
               aria-current={location.pathname === '/scan' ? 'page' : undefined}
             >
               <i className="ri-camera-line mr-2"></i>

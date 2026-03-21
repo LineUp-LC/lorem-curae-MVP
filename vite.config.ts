@@ -70,6 +70,20 @@ export default defineConfig({
   build: {
     sourcemap: true,
     outDir: "out",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-supabase": ["@supabase/supabase-js"],
+          "ai-pipeline": [
+            "./src/lib/ai/surfaceClient.ts",
+            "./src/lib/ai/surfaceContext.ts",
+            "./src/lib/ai/systemPrompt.ts",
+            "./src/lib/ai/scanClient.ts",
+          ],
+        },
+      },
+    },
   },
   resolve: {
     alias: {
