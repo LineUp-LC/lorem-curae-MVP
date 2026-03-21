@@ -6,6 +6,7 @@
     "@hcaptcha/react-hcaptcha": "^1.17.3",
     "@stripe/react-stripe-js": "4.0.2",
     "@supabase/supabase-js": "2.57.4",
+    "barcode-detector": "^3.1.1",
     "botid": "^1.5.10",
     "firebase": "12.0.0",
     "framer-motion": "^12.23.26",

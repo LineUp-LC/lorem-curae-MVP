@@ -6,10 +6,11 @@
  *   Desktop: live webcam via getUserMedia + shutter button.
  *   Falls back to file upload if camera is denied or unavailable.
  *
- * Barcode mode (BarcodeDetector API — Chrome 83+):
+ * Barcode mode:
+ *   Uses native BarcodeDetector API (Chrome 83+) with barcode-detector
+ *   polyfill fallback (lazy-loaded ~50KB only when barcode mode is selected).
  *   Desktop: live webcam with continuous frame scanning.
  *   Mobile: file input → detect barcode from image.
- *   Unsupported browsers show an error message.
  */
 
 import { useRef, useState, useEffect, useCallback } from 'react';
@@ -24,7 +25,36 @@ const getIsMobile = () =>
   /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
   (navigator.maxTouchPoints > 0 && window.innerWidth < 768);
 
-const hasBarcodeDetector = () => 'BarcodeDetector' in window;
+// ---------------------------------------------------------------------------
+// BarcodeDetector — native API with polyfill fallback (lazy-loaded)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let cachedDetectorClass: any = null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getDetectorClass(): Promise<any> {
+  if (cachedDetectorClass) return cachedDetectorClass;
+
+  // Try native API first
+  if ('BarcodeDetector' in window) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cachedDetectorClass = (window as any).BarcodeDetector;
+    console.log('[Barcode] Using native BarcodeDetector API');
+    return cachedDetectorClass;
+  }
+
+  // Fallback: lazy-load polyfill (~50KB, only when barcode mode selected)
+  try {
+    const mod = await import('barcode-detector');
+    cachedDetectorClass = mod.BarcodeDetector;
+    console.log('[Barcode] Using barcode-detector polyfill');
+    return cachedDetectorClass;
+  } catch (err) {
+    console.error('[Barcode] Failed to load polyfill:', err);
+    return null;
+  }
+}
 
 export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }: CameraCaptureProps) {
   const inputRef = useRef<HTMLInputElement>(null);
@@ -39,7 +69,7 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [barcodeNotFound, setBarcodeNotFound] = useState(false);
 
-  // Ref callback — wires stream to video element immediately on mount (Fix 3)
+  // Ref callback — wires stream to video element immediately on mount
   const videoRefCallback = useCallback((videoEl: HTMLVideoElement | null) => {
     if (videoEl && streamRef.current) {
       videoEl.srcObject = streamRef.current;
@@ -137,54 +167,78 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
   // Barcode scanning loop — runs when webcam is active in barcode mode
   useEffect(() => {
     if (!webcamActive || mode !== 'barcode' || !videoRef.current) return;
-    if (!hasBarcodeDetector()) return;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const detector = new (window as any).BarcodeDetector({
-      formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'],
-    });
-
-    setBarcodeScanning(true);
-    setBarcodeNotFound(false);
     let active = true;
 
-    const scan = async () => {
-      if (!active || !videoRef.current) return;
+    const startScanning = async () => {
+      console.log('[Barcode] Starting scan loop');
+      console.log('[Barcode] Native BarcodeDetector:', 'BarcodeDetector' in window);
 
-      try {
-        const barcodes = await detector.detect(videoRef.current);
-        if (barcodes.length > 0 && active) {
-          active = false;
-          setBarcodeScanning(false);
-          const upc = barcodes[0].rawValue;
-          stopWebcam();
-          onBarcodeDetected?.(upc);
+      const DetectorClass = await getDetectorClass();
+      if (!DetectorClass || !active) {
+        console.warn('[Barcode] No BarcodeDetector available (native or polyfill)');
+        setBarcodeScanning(false);
+        setWebcamError(
+          'Barcode scanning is not available in this browser. ' +
+          'Try updating Chrome, or enable chrome://flags/#enable-experimental-web-platform-features'
+        );
+        return;
+      }
+
+      const detector = new DetectorClass({
+        formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'],
+      });
+
+      setBarcodeScanning(true);
+      setBarcodeNotFound(false);
+
+      const scan = async () => {
+        if (!active || !videoRef.current) return;
+
+        // Skip if video not ready yet
+        if (videoRef.current.videoWidth === 0 || videoRef.current.videoHeight === 0) {
+          console.warn('[Barcode] Video not ready yet, skipping frame');
+          if (active) scanLoopRef.current = requestAnimationFrame(scan);
           return;
         }
-      } catch {
-        // Detection failed on this frame — continue
-      }
 
-      if (active) {
-        scanLoopRef.current = requestAnimationFrame(scan);
-      }
+        try {
+          const barcodes = await detector.detect(videoRef.current);
+          if (barcodes.length > 0 && active) {
+            active = false;
+            setBarcodeScanning(false);
+            const upc = barcodes[0].rawValue;
+            console.log('[Barcode] Detected:', upc);
+            stopWebcam();
+            onBarcodeDetected?.(upc);
+            return;
+          }
+        } catch (err) {
+          console.error('[Barcode] Detection error:', err);
+        }
+
+        if (active) {
+          scanLoopRef.current = requestAnimationFrame(scan);
+        }
+      };
+
+      // Start scanning after brief delay for video to stabilize
+      setTimeout(() => { if (active) scan(); }, 300);
+
+      // 5-second timeout
+      scanTimeoutRef.current = setTimeout(() => {
+        if (active) {
+          active = false;
+          setBarcodeScanning(false);
+          setBarcodeNotFound(true);
+        }
+      }, 5000);
     };
 
-    // Start scanning after brief delay for video to stabilize
-    const startDelay = setTimeout(() => scan(), 300);
-
-    // 5-second timeout
-    scanTimeoutRef.current = setTimeout(() => {
-      if (active) {
-        active = false;
-        setBarcodeScanning(false);
-        setBarcodeNotFound(true);
-      }
-    }, 5000);
+    startScanning();
 
     return () => {
       active = false;
-      clearTimeout(startDelay);
       if (scanLoopRef.current) cancelAnimationFrame(scanLoopRef.current);
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
     };
@@ -192,25 +246,30 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
 
   // Detect barcode from a file (mobile barcode mode)
   const detectBarcodeFromFile = useCallback(async (file: File) => {
-    if (!hasBarcodeDetector()) {
-      setWebcamError('Barcode scanning is not supported in this browser. Try Chrome.');
+    const DetectorClass = await getDetectorClass();
+    if (!DetectorClass) {
+      setWebcamError(
+        'Barcode scanning is not available in this browser. ' +
+        'Try updating Chrome, or enable chrome://flags/#enable-experimental-web-platform-features'
+      );
       return;
     }
 
     try {
       const img = await createImageBitmap(file);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const detector = new (window as any).BarcodeDetector({
+      const detector = new DetectorClass({
         formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'],
       });
       const barcodes = await detector.detect(img);
 
       if (barcodes.length > 0) {
+        console.log('[Barcode] Detected from file:', barcodes[0].rawValue);
         onBarcodeDetected?.(barcodes[0].rawValue);
       } else {
         setWebcamError('No barcode found in image. Try photo mode instead.');
       }
-    } catch {
+    } catch (err) {
+      console.error('[Barcode] File detection error:', err);
       setWebcamError('Failed to scan barcode from image.');
     }
   }, [onBarcodeDetected]);
@@ -241,11 +300,6 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
 
   const handleModeSwitch = useCallback((newMode: 'photo' | 'barcode') => {
     if (newMode === mode) return;
-
-    if (newMode === 'barcode' && !hasBarcodeDetector()) {
-      setWebcamError('Barcode scanning is not supported in this browser. Try Chrome or Edge.');
-      return;
-    }
 
     // Stop any active webcam/scanning when switching
     if (webcamActive) stopWebcam();
@@ -286,6 +340,13 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
         {/* Barcode scanning status */}
         {mode === 'barcode' && barcodeScanning && (
           <p className="text-xs text-primary animate-pulse">Scanning for barcode...</p>
+        )}
+
+        {/* Barcode error while webcam is active */}
+        {webcamError && (
+          <div className="bg-cream border border-blush rounded-xl px-4 py-3 max-w-xs text-center">
+            <p className="text-xs text-warm-gray">{webcamError}</p>
+          </div>
         )}
 
         {/* Barcode not found — offer fallback */}

@@ -27,18 +27,29 @@ function markOnceEver(action: string): void {
   }
 }
 
-// Actions that should only be awarded once ever
+// All actions award points once ever per user
 const ONCE_EVER_ACTIONS: Set<GamificationAction> = new Set([
   'SIGNUP',
   'SKIN_SURVEY',
+  'PRODUCT_REVIEW',
+  'COMMUNITY_POST',
+  'ROUTINE_CREATED',
+  'ROUTINE_LOGGED',
+  'PRODUCT_PURCHASE',
+  'REFERRAL',
+  'INGREDIENT_SEARCH',
   'PROFILE_COMPLETE',
+  'MONTHLY_ACTIVE',
+  'PRODUCT_SCAN',
+  'PRODUCT_SAVED',
+  'AI_CHAT',
+  'STREAK_7_DAY',
+  'STREAK_30_DAY',
   'FIRST_COMPARISON',
 ]);
 
-// Actions limited to once per session
-const ONCE_PER_SESSION_ACTIONS: Set<GamificationAction> = new Set([
-  'AI_CHAT',
-]);
+// Reserved for future per-session actions (currently empty — all actions are once-ever)
+const ONCE_PER_SESSION_ACTIONS: Set<GamificationAction> = new Set([]);
 
 export async function onAction(
   userId: string | null | undefined,
@@ -52,7 +63,10 @@ export async function onAction(
     // Once-ever duplicate check
     if (ONCE_EVER_ACTIONS.has(action)) {
       const onceEver = getOnceEverActions();
-      if (onceEver.has(action)) return null;
+      if (onceEver.has(action)) {
+        console.log('[Gamification] Action already awarded (once-ever):', action);
+        return null;
+      }
       markOnceEver(action);
     }
 
