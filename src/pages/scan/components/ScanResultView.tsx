@@ -54,9 +54,11 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
 
   if (ingredients.length === 0) return null;
 
+  const previewCount = 5;
+  const hasMore = ingredients.length > previewCount;
   const visible =
     viewState === 'collapsed' ? [] :
-    viewState === 'preview' ? ingredients.slice(0, 5) :
+    viewState === 'preview' ? ingredients.slice(0, previewCount) :
     ingredients;
 
   const toggleCaution = (idx: number) => {
@@ -142,7 +144,7 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
             })}
           </div>
 
-          {ingredients.length > 5 && viewState === 'preview' && (
+          {hasMore && viewState === 'preview' && (
             <button
               onClick={() => setViewState('expanded')}
               className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"
@@ -150,7 +152,7 @@ function IngredientBreakdown({ ingredients }: { ingredients: ParsedIngredient[] 
               Show all {ingredients.length} ingredients
             </button>
           )}
-          {ingredients.length > 5 && viewState === 'expanded' && (
+          {hasMore && viewState === 'expanded' && (
             <button
               onClick={() => setViewState('preview')}
               className="mt-2 text-xs text-primary hover:text-dark transition-colors w-full text-center"

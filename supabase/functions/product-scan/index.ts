@@ -23,7 +23,7 @@ const corsHeaders = {
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
-const MAX_TOKENS = 2048;
+const MAX_TOKENS = 4096;
 
 // Maximum base64 payload size: ~5 MB decoded → ~6.7 MB base64
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
