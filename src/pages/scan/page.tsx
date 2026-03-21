@@ -79,6 +79,7 @@ export default function ScanPage() {
     }
 
     const result = response.result;
+    console.log('[Scan] Raw result:', JSON.stringify(result, null, 2));
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
