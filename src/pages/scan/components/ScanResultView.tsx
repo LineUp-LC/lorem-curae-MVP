@@ -16,7 +16,6 @@ import type { Product } from '../../../types/product';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
-  getEffectivePreferences,
   getEffectiveSensitivity,
 } from '../../../lib/utils/sessionState';
 import { savedProductsState } from '../../../lib/utils/favoritesState';
@@ -26,13 +25,11 @@ import { useAuth } from '../../../lib/auth/AuthContext';
 import { scanProductFull } from '../../../lib/ai/scanClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
-import { scoreSimilarProducts } from '../../../lib/utils/productSimilarity';
 import { searchSimilarProducts, searchProductReviews } from '../../../lib/api/productSearch';
 import { fetchReviewsForProduct } from '../../../lib/data/reviews';
 import { getReviewsForProduct } from '../../../mocks/reviews';
 import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
 import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
-import type { ScoredProduct } from '../../../lib/utils/productSimilarity';
 import type { WebProduct } from '../../../types/webSearch';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
 import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
@@ -279,43 +276,10 @@ function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIn
 }
 
 // ---------------------------------------------------------------------------
-// Similar product card (inline — no separate file needed)
+// Similar product card (web results only)
 // ---------------------------------------------------------------------------
 
-function SimilarProductCard({ product }: { product: ScoredProduct }) {
-  return (
-    <Link
-      to={`/product-detail/${product.id}`}
-      className="flex gap-3 p-3 bg-cream/50 border border-blush/30 rounded-xl hover:border-blush transition-colors"
-    >
-      <img
-        src={product.image || '/placeholder-product.svg'}
-        alt={product.name}
-        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
-          {product.brand}
-        </p>
-        <p className="text-xs font-medium text-deep line-clamp-1 mt-0.5">
-          {product.name}
-        </p>
-        <div className="flex items-center gap-1 mt-1">
-          <i className="ri-star-fill text-amber-500 text-[10px]" />
-          <span className="text-[10px] text-warm-gray">{product.rating}</span>
-        </div>
-        {product.matchReasons.length > 0 && (
-          <p className="text-[10px] text-warm-gray/70 mt-0.5 line-clamp-1">
-            {product.matchReasons[0]}
-          </p>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-function WebSimilarProductCard({ product }: { product: WebProduct }) {
+function SimilarProductCard({ product }: { product: WebProduct }) {
   return (
     <a
       href={product.externalUrl}
@@ -330,15 +294,9 @@ function WebSimilarProductCard({ product }: { product: WebProduct }) {
         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
       />
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5">
-          <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
-            {product.brand}
-          </p>
-          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium bg-cream text-warm-gray border border-blush">
-            <i className="ri-global-line text-[8px]" />
-            Web
-          </span>
-        </div>
+        <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
+          {product.brand}
+        </p>
         <p className="text-xs font-medium text-deep line-clamp-1 mt-0.5">
           {product.name}
         </p>
@@ -466,9 +424,8 @@ export default function ScanResultView({
   const [fullScanError, setFullScanError] = useState<string | null>(null);
 
   // Tab 3 (Similar) cache
-  const [similarProducts, setSimilarProducts] = useState<ScoredProduct[] | null>(null);
-  const [webSimilarProducts, setWebSimilarProducts] = useState<WebProduct[]>([]);
-  const [webSimilarLoading, setWebSimilarLoading] = useState(false);
+  const [similarProducts, setSimilarProducts] = useState<WebProduct[] | null>(null);
+  const [similarLoading, setSimilarLoading] = useState(false);
 
   // Build product-like object for shelf/routine
   const shelfProduct = matchedProduct
@@ -685,30 +642,22 @@ export default function ScanResultView({
       setFullScanLoading(false);
     }
 
-    // Tab 3: Similar — local scoring + web search
+    // Tab 3: Similar — web search only
     if (tab === 'similar' && !similarProducts) {
-      const concerns = getEffectiveConcerns();
-      const preferences = getEffectivePreferences() ?? {};
       const sourceProduct = matchedProduct || buildTempProduct();
-      if (sourceProduct) {
-        const scored = scoreSimilarProducts(sourceProduct, concerns, skinType ?? undefined, preferences, 6);
-        setSimilarProducts(scored);
-
-        // Also fetch web similar products (non-blocking)
-        if (user && webSimilarProducts.length === 0) {
-          setWebSimilarLoading(true);
-          const minDisplay = new Promise(r => setTimeout(r, 800));
-          Promise.all([
-            searchSimilarProducts({
-              name: sourceProduct.name,
-              brand: sourceProduct.brand,
-              category: sourceProduct.category,
-            }),
-            minDisplay,
-          ]).then(([results]) => {
-            if (results) setWebSimilarProducts(results);
-          }).finally(() => setWebSimilarLoading(false));
-        }
+      if (sourceProduct && user) {
+        setSimilarLoading(true);
+        const minDisplay = new Promise(r => setTimeout(r, 800));
+        Promise.all([
+          searchSimilarProducts({
+            name: sourceProduct.name,
+            brand: sourceProduct.brand,
+            category: sourceProduct.category,
+          }),
+          minDisplay,
+        ]).then(([results]) => {
+          setSimilarProducts(results || []);
+        }).finally(() => setSimilarLoading(false));
       } else {
         setSimilarProducts([]);
       }
@@ -1001,44 +950,20 @@ export default function ScanResultView({
           {/* Tab 3: Similar */}
           {activeTab === 'similar' && (
             <>
-              {similarProducts === null ? (
+              {(similarProducts === null || similarLoading) ? (
                 <PersonalizingLoader
-                  steps={['Finding alternatives...', 'Comparing formulations...']}
+                  steps={['Searching for alternatives...', 'Comparing formulations...']}
                   icon="search"
                 />
-              ) : similarProducts.length === 0 && webSimilarProducts.length === 0 && !webSimilarLoading ? (
+              ) : similarProducts.length === 0 ? (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">No similar products found.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {/* Local catalog results */}
-                  {similarProducts.map(p => (
-                    <SimilarProductCard key={p.id} product={p} />
+                  {similarProducts.map((p, idx) => (
+                    <SimilarProductCard key={`sim-${idx}`} product={p} />
                   ))}
-
-                  {/* Web results */}
-                  {webSimilarProducts.length > 0 && (
-                    <>
-                      <div className="flex items-center gap-2 mt-3 mb-1">
-                        <i className="ri-global-line text-warm-gray text-sm" />
-                        <p className="text-[11px] font-medium text-warm-gray">From across the web</p>
-                      </div>
-                      {webSimilarProducts.map((wp, idx) => (
-                        <WebSimilarProductCard key={`web-sim-${idx}`} product={wp} />
-                      ))}
-                    </>
-                  )}
-
-                  {/* Web loading */}
-                  {webSimilarLoading && (
-                    <div className="mt-3">
-                      <PersonalizingLoader
-                        steps={['Searching the web for alternatives...']}
-                        icon="search"
-                      />
-                    </div>
-                  )}
                 </div>
               )}
             </>
