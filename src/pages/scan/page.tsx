@@ -13,7 +13,7 @@
  */
 
 import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
 import type { ScanClientError } from '../../lib/ai/scanClient';
@@ -49,12 +49,13 @@ type ScanState =
 
 export default function ScanPage() {
   const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
   const [state, setState] = useState<ScanState>({ phase: 'idle' });
   const [capturedBase64, setCapturedBase64] = useState<string | undefined>();
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const cancelledRef = useRef(false);
 
-  // Reset to idle on every mount (route entry) + abort on unmount
+  // Reset to idle on every navigation to /scan (location.key changes each visit)
   useEffect(() => {
     cancelledRef.current = false;
     setState({ phase: 'idle' });
@@ -64,7 +65,7 @@ export default function ScanPage() {
     return () => {
       cancelledRef.current = true;
     };
-  }, []);
+  }, [location.key]);
 
   const handleCapture = useCallback((file: File) => {
     const previewUrl = URL.createObjectURL(file);
