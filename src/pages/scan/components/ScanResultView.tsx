@@ -677,6 +677,7 @@ export default function ScanResultView({
 
     // Tab 1 & 2 both need full scan data — fetch on first tap of either
     if ((tab === 'breakdown' || tab === 'compatible') && !fullScanResult && !fullScanLoading) {
+      console.log('[WebSearch] Tab needs full scan. imageBase64:', !!imageBase64, 'tab:', tab);
       if (!imageBase64) {
         setFullScanError('Full ingredient analysis requires a photo scan.');
         return;
@@ -684,6 +685,7 @@ export default function ScanResultView({
       setFullScanLoading(true);
       setFullScanError(null);
       const res = await scanProductFull(imageBase64);
+      console.log('[WebSearch] scanProductFull response:', res.success, 'error:', (res as { error?: string }).error);
       if (res.success) {
         setFullScanResult(res.result);
       } else if (!res.success) {
