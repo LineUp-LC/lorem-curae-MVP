@@ -2,7 +2,7 @@
 
 > **Purpose**: Single source of truth for all Claude agents/sub-agents.
 > Referenced by research, marketing, competitive analysis, and strategy workflows.
-> Fields marked "TBD" need founder input. All other fields sourced from Notion workspace.
+> Fields marked "TBD" need founder input. All other fields sourced from Notion workspace + codebase audit.
 
 ---
 
@@ -10,25 +10,34 @@
 
 - **Company name**: Lorem Curae
 - **Legal entity name**: TBD
-- **Founded / Start date**: 2025 (MVP developed 2025)
+- **Founded / Start date**: 2025 (MVP developed 2025-2026)
 - **Domain / URL**: TBD (pre-launch)
 - **Core links**: TBD
 - **Tagline**: "Clarity, confidence, and community for your skin."
-- **Mission statement**: Empower individuals to achieve their healthiest skin and body confidence through personalized, trustworthy, and accessible routines, products, and nutrition guidance.
-- **Vision**: To become the global platform where beauty, wellness, and commerce intersect—uniting science, community, and adaptive intelligence in one seamless ecosystem.
-- **Stage**: Building MVP
+- **Stage**: Building MVP (app) — camera-powered intelligence platform
 - **Funding status**: Bootstrapped
 - **Team size**: 1 (solo founder / solopreneur)
 - **Founder(s) + roles**: Ethan Jones — Founder & CEO (also sole developer, designer, and operator)
 - **Location / HQ**: United States
 - **Operating regions**: United States (initial), global expansion planned
 
+### Mission
+
+- **MVP**: Empower individuals to understand skincare products on shelves/online, discover what works for their unique skin, all through camera-powered intelligence and a guided daily experience that grows with the user (Hyper-Personalized).
+- **Full Vision**: To empower individuals to achieve their healthiest skin through personalized curations and a trustworthy experience. All while having a community that they can relate to and learn from.
+
+### Vision
+
+- **MVP**: To become the platform people reach for every time they pick up a skincare product — the bridge between what's on the shelf and what your skin actually needs, powered by intelligence that gets smarter the more you use it.
+- **Full Vision**: To become the global platform where beauty, wellness, and commerce intersect — uniting science, community, and adaptive intelligence in one seamless ecosystem.
+
 ---
 
 ## 2. Founder & Credibility
 
 ### Origin Story
-- **Why this business exists**: Finding the right skincare shouldn't require hours of research, endless trial and error, or deciphering confusing ingredient lists. Yet for so many people, that's exactly what it takes. Lorem Curae was built to change that—a space where personalized guidance meets transparency, where you can discover products that actually work for your unique skin, from retailers you can trust. The approach is rooted in science, not hype. In community, not isolation. In care, not commerce.
+- **Why this business exists**: People buy skincare products taking a chance on if it will actually work for their skin. Current platforms provide fragmented or generic information. Lorem Curae exists to fix that — curating personalized reviews from people with similar skin profiles, compatible products for your skin type/environment/weather, and products compatible with what you already have in your routine/shelf. Scan what you have to find compatible products, with info on whether products work for you specifically. Build routines from people who share your skin type using our standard routine template as a foundation.
+- **Full Vision context**: Skincare is fragmented, confusing, and filled with different advice. Users struggle to find what works and shop confidently. Indie creators struggle to be seen. Lorem Curae unifies the entire journey with clarity, confidence, and community.
 - **Personal connection to the problem**: Yes — founder Ethan Jones was tired of spending countless hours researching products that didn't work for his skin. He wanted to create a space where everyone could find their perfect skincare match without the overwhelm.
 - **Catalyst moment**: The frustration of the research-to-purchase cycle — spending hours researching only to end up with products that didn't work, with no way to track what was actually helping or hurting.
 
@@ -48,12 +57,13 @@
 - **Credentials / certifications**: N/A
 - **Media mentions / press**: N/A
 - **Speaking / teaching / content authority**: N/A
-- **Other trust signals**: Full MVP built solo — 78 lazy-loaded routes, 15 Supabase Edge Functions, 36 AI modules, Stripe Connect payment infrastructure, comprehensive design system. Demonstrates exceptional execution for a solo founder of any age.
+- **Other trust signals**: Full MVP built solo — 34 active routes, 48 page directories, 16 Supabase Edge Functions, 35 AI modules, 10 database migrations, Stripe Connect payment infrastructure, comprehensive design system with 18 governance rule files. Demonstrates exceptional execution for a solo founder of any age.
 
 ### Your Edge
-- **Unique angle / belief**: No platform currently unifies personalized education with routine tracking, ingredient transparency, progress insights, and a creator-powered marketplace. Everyone else solves one piece; Lorem Curae solves the whole journey.
-- **Unique method / framework**: Adaptive intelligence that evolves with the user—context-aware recommendations, routine guidance, and progress feedback powered by AI (Curae AI), combined with a trust-first UX and creator enablement marketplace.
-- **Why your take stands out**: Lorem Curae is the only SkinTech platform that fuses diagnostics, education, tracking, wellness, and commerce into one seamless ecosystem—positioning it as a next-gen SkinTech intelligence platform, not just another skincare app.
+- **Unique angle / belief**: No platform currently unifies camera-powered product scanning with personalized reviews from similar skin profiles, compatible product discovery filtered by environment/weather, and guided routine building. Everyone else solves one piece; Lorem Curae solves the whole journey from the moment you pick up a product.
+- **Unique method / framework**: Camera-powered intelligence that identifies any product, analyzes ingredients for YOUR skin, surfaces reviews from people with similar skin profiles, and discovers compatible products based on your skin type, concerns, environment, and existing routine — all evolving with usage.
+- **Why your take stands out (MVP)**: Lorem Curae is the only platform where you can scan a product and instantly know if it works for YOUR skin, see reviews from people like you, find what's compatible with what you already use, and build a routine — all personalized to your profile and environment.
+- **Why your take stands out (Full Vision)**: Lorem Curae is the only SkinTech platform that fuses diagnostics, education, tracking, wellness, and commerce into one seamless ecosystem — positioning it as a next-gen SkinTech intelligence platform, not just another skincare app.
 
 ---
 
@@ -61,64 +71,86 @@
 
 ### Core Product
 - **Product name**: Lorem Curae
-- **One-line description**: A personalized SkinTech platform that helps users discover what works for their skin, track progress, and shop confidently through science-backed insights and a trusted marketplace.
-- **Product category**: SkinTech / Skincare & Wellness / E-Commerce Marketplace / Learning & Analytics / Community & Creator Economy
+- **Product category**: SkinTech / Camera-Powered Skincare Intelligence / Personalized Discovery & Routine Management
 - **Product form factors**: Web app (React 19 + Vite 7 SPA, TypeScript), Mobile app (iOS/Android planned)
+- **Platform split**: App = daily companion (scan, discover, track, build). Website = commerce/intelligence hub.
+
+### One-Sentence Description
+- **MVP**: Lorem Curae is a camera-powered skincare platform where users scan products, discover what's compatible with their skin and environment, build routines and track their progress while the AI grows with the user.
+- **Full Vision**: Lorem Curae is a personalized SkinTech platform that helps users discover what works for their skin, track progress, and shop confidently through science-backed insights and a trusted marketplace.
 
 ### One-Paragraph Description
-Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of skincare and wellness. Through adaptive intelligence, ingredient transparency, and progress tracking, users receive personalized guidance tailored to their goals, routines, and budget. The platform connects them to trusted retailers, verifies product authenticity, and offers a seamless marketplace where indie creators can sell their own products and services. By unifying education, discovery, wellness, and commerce, Lorem Curae empowers individuals to build routines that work—with clarity, confidence, and community.
+- **MVP**: Lorem Curae turns your bathroom or in-store shelves into a personalized skincare engine. Snap a photo of any product you own, and the platform identifies it, shows you exactly what's compatible with it based on its ingredients, your unique skin profile, and surfaces reviews from people who share your skin type, concerns, and climate. Every recommendation explains WHY it was chosen — not just what it is, but how it fits your specific situation. This app is what you'll use daily: scan products, discover what works, build step-by-step routines, track streaks, earn ranks and badges, find or create communities and watch your skin improve over time. By fusing camera-powered discovery with AI that actually understands your skin, Lorem Curae replaces guesswork with clarity.
+- **Full Vision**: Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of skincare and wellness. Through adaptive intelligence, ingredient transparency, and progress tracking, users receive personalized guidance. The platform connects them to trusted retailers, verifies product authenticity, and offers a marketplace where indie creators can sell products and services.
+
+### What We Do
+- **MVP**: Lorem Curae is a camera-powered skincare intelligence platform. Users scan or upload products, get precise personalized information, curated reviews from people with similar skin profiles, compatible/similar product discovery filtered to their unique skin profile and environment, and help building step-by-step routines — powered by a personalization engine that learns from onboarding data, environment/weather (location), and usage patterns. The website serves as commerce, the app is the daily companion (scan, discover, track, build). Users can also find ingredients they may be allergic to using symptoms and past product issues.
+- **Full Vision**: Lorem Curae delivers personalized skincare and wellness guidance through intelligent product discovery, progress tracking, education, and a trusted marketplace that supports both users and indie creators.
 
 ### Problems Solved
 
 | # | Problem (pain point) | Outcome We Deliver | Who Feels This Most |
 |---|---|---|---|
-| 1 | Hard to diagnose skin issues; ingredient safety is confusing; education is scattered and unreliable | Personalized, science-backed guidance and ingredient transparency that gives users clarity | B2C |
-| 2 | No centralized routine tracker; no historical insights; hard to measure progress | Routine management + self-tracking + progress feedback that shows measurable results over time | B2C |
-| 3 | Fear of overpaying, buying from unreliable sources, or wasting money on ineffective products | Trusted product discovery with verified retailers, price-conscious filtering, and community validation | B2C |
-| 4 | Indie sellers lack visibility and a platform that supports both learning and selling | Creator-first marketplace with monetization tools, analytics, and community spotlight | B2B (Indie creators, estheticians) |
-| 5 | No platform connects skincare diagnostics, education, tracking, nutrition, and commerce | One unified ecosystem that replaces 5+ fragmented tools | Both |
+| 1 | People buy skincare taking a chance — no way to know if a product works for YOUR skin before buying | Camera scan any product → instant personalized ingredient analysis + compatibility assessment | B2C |
+| 2 | Reviews are generic — no way to find people with similar skin who've tried the product | Curated reviews from users with matching skin type, concerns, and climate | B2C |
+| 3 | No way to know what's compatible with products you already use | Scan what you have → discover compatible products filtered by ingredients, skin type, environment | B2C |
+| 4 | Building a routine is overwhelming — which products, what order, what works together? | Guided routine building from people who share your skin type, using standard templates | B2C |
+| 5 | Ingredient lists are confusing — hard to know what's safe or relevant for your skin | AI-powered ingredient breakdown with safety tiers, caution explanations, and personalized relevance | B2C |
+| 6 | Indie sellers lack visibility and a platform that supports both learning and selling | Creator-first marketplace with monetization tools, analytics, and community spotlight | B2B (Future) |
 
 ### How It Solves It
-- **Mechanism / approach**: Lorem Curae uses AI-driven personalization (Curae AI) to analyze user skin data, photos, lifestyle, and preferences to deliver adaptive product recommendations, routine suggestions, and dietary guidance. Users track routines, log progress with photos, and receive evolving insights. The platform also hosts a marketplace for indie creators and connects users to trusted retailers with ingredient transparency and product verification.
-- **Primary value proposition**: The only skincare platform that combines intelligent product discovery with personalized guidance—helping users find exactly what they need, learn what works, and track their progress with clarity and confidence.
+- **Mechanism / approach (MVP)**: Users scan products via camera (Claude Vision AI). The platform identifies the product, parses ingredients, assesses safety with caution/avoid explanations, personalizes relevance to the user's skin profile, surfaces reviews from similar skin profiles, discovers compatible products filtered by skin type + environment + existing routine, and guides routine building. The personalization engine learns from onboarding data (skin survey), real-time environment (UV, climate, season via location), and usage patterns.
+- **Primary value proposition (MVP)**: The only skincare platform where you scan a product and instantly know if it works for YOUR skin — with personalized ingredient analysis, reviews from people like you, and compatible product discovery.
 - **Secondary value propositions**:
-  1. Trusted marketplace that supports indie creators and verifies product authenticity
-  2. Holistic wellness integration (nutrition, lifestyle, skincare)
-  3. Community-driven validation and peer-supported skincare journeys
+  1. Guided routine building with step-by-step templates based on skin type
+  2. Gamification (points, badges, streaks, tiers) that rewards consistent skincare habits
+  3. Environment-aware recommendations that adapt to your location, weather, and season
 
-### Features — MVP (Must-Haves)
-
-| Feature Name | Description | Status | Priority |
-|---|---|---|---|
-| Product/Service Comparison & Search | Discovery engine for reliable skincare products with filtering by budget, size, quantity, compatibility | In-progress | P0 (Must-have) |
-| Basic AI Interaction (Curae AI) | Text-based AI: analyze uploaded skin photos, ingredient/product recommendations, dietary suggestions, regimen suggestions | In-progress | P0 (Must-have) |
-| Routine Management | Create, manage, and track skincare regimens with ingredient conflict warnings and alternative recommendations | In-progress | P0 (Must-have) |
-| Nutrition Management | Connect diet with skin health for holistic wellness guidance | In-progress | P0 (Must-have) |
-| Self-Tracking | Log usage, progress, regimen notes, image submissions; automated affirmations and progress popups | In-progress | P0 (Must-have) |
-
-### Features — Should-Haves (Post-MVP)
+### Features — MVP (Must-Haves) — App
 
 | Feature Name | Description | Status | Priority |
 |---|---|---|---|
-| Progress Tracking & Feedback | Historical skin analysis, measurable improvement visualization, churn reduction | Planned | P1 (Should-have) |
-| Basic Marketplace | Buy/sell products directly; indie creators and estheticians onboarding | Planned | P1 (Should-have) |
-| Patch Tests | Guided patch testing to ensure product safety | Planned | P1 (Should-have) |
-| Advanced AI (Adaptive) | Deeper personalization with behavior-adaptive, context-aware recommendations | Planned | P1 (Should-have) |
+| Camera Product Scanner | Scan any product via camera → Claude Vision identifies it, parses ingredients, assesses safety with cautionReasons, personalizes to skin profile | **Shipped** | P0 |
+| Personalized Ingredient Analysis | Full ingredient breakdown with safety tiers (safe/caution/avoid), caution explanations (2-4 sentences), and personalized relevance notes | **Shipped** | P0 |
+| Compatible Product Discovery | Post-scan discovery of compatible products filtered by skin type, environment, and category with AI WHY explanations | **Shipped** | P0 |
+| Profile-Filtered Reviews | Reviews surfaced from users with similar skin type, concerns, and climate + AI summary | **Shipped** | P0 |
+| Routine Management | Create, manage, and track skincare routines with step-by-step structure, versioning, and notes | **Shipped** | P0 |
+| Skin Survey & Personalization | Onboarding quiz → skin type, concerns, sensitivity → drives all personalization | **Shipped** | P0 |
+| AI Chat (Curae AI) | Conversational AI assistant for skincare questions, product advice, routine help | **Shipped** | P0 |
+| Product/Service Discovery | Discovery engine with filtering by skin type, concerns, category, ingredients + AI keyword highlighting | **Shipped** | P0 |
+| Self-Tracking | Routine completion tracking, streak detection, progress insights | **Shipped** | P0 |
+| Environment-Aware Intelligence | UV, climate, season based on user location → personalized product-fit narratives | **Shipped** | P0 |
+| Barcode Scanning | Browser-native BarcodeDetector API for UPC/EAN scanning → catalog lookup | **Shipped** | P0 |
+| Scan History | localStorage persistence of past scans with thumbnails, tap to restore results | **Shipped** | P0 |
+| Shelf Integration | Save any scanned product (catalog or non-catalog) to personal shelf | **Shipped** | P0 |
+| Ingredient Library | Browse ingredients with education, safety info, and personalized relevance | **Shipped** | P0 |
 
-### Features — Could-Haves (Growth/Scale Phase)
+### Features — Growth (Should-Haves)
 
 | Feature Name | Description | Status | Priority |
 |---|---|---|---|
-| AR Skin Visualization | Simulate skincare outcomes, product try-on, facial change visualization | Planned | P2 (Could-have) |
-| Custom Product Creation | Users design custom skincare products with ingredient compatibility checks | Planned | P2 (Could-have) |
-| Social/Community Platform | Profiles, regimen sharing, networking, DMs, follows, badges, communities (Skool-like model) | Planned | P2 (Could-have) |
-| Gamification (Curae Coins & Badges) | Earn coins from reviews, purchases, subscriptions; redeemable for discounts and badges | Planned | P2 (Could-have) |
+| Gamification (Points, Badges, Streaks) | 17 point actions, 20 badges, 4 tiers (Bronze→Platinum), streak milestones, rewards dashboard | **Shipped** | P1 |
+| Review System | Submit reviews with star rating, pros/cons, usage duration, skin type auto-fill; edit/delete own reviews | **Shipped** | P1 |
+| Progress Tracking & Feedback | Historical skin analysis, measurable improvement visualization | Planned | P1 |
+| Basic Marketplace | Buy/sell products directly; indie creators and estheticians onboarding | Planned | P1 |
+| Patch Tests | Guided patch testing to ensure product safety | Planned | P1 |
+| Advanced AI (Adaptive) | Deeper personalization with behavior-adaptive, context-aware recommendations | Planned | P1 |
+| Community Features | Profiles, regimen sharing, networking, communities | Planned | P1 |
+| Nutrition Management | Connect diet with skin health for holistic wellness guidance | Planned | P1 |
+
+### Features — Scale (Could-Haves)
+
+| Feature Name | Description | Status | Priority |
+|---|---|---|---|
+| AR Skin Visualization | Simulate skincare outcomes, product try-on, facial change visualization | Planned | P2 |
+| Custom Product Creation | Users design custom skincare products with ingredient compatibility checks | Planned | P2 |
+| Creator Ecosystem | Full creator tools, analytics, seller dashboard, monetization | Planned | P2 |
 
 ### Features — Won't-Have (For Now)
 
 | Feature Name | Description | Priority |
 |---|---|---|
-| Complex Gamification / Advanced Wellness Integrations | Deep lifestyle tracking, advanced reward systems | Won't-have (for now) |
+| Advanced Wellness Integrations | Deep lifestyle tracking beyond core nutrition | Won't-have |
 
 ### Tech Stack
 
@@ -126,23 +158,23 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 - React 19.1.0 + TypeScript 5.8.3
 - Vite 7.0.3 (bundler) + @vitejs/plugin-react-swc 3.10.2
 - Tailwind CSS 3.4.17
-- React Router DOM 7.6.3 (78 lazy-loaded routes)
+- React Router DOM 7.6.3 (34 active routes, 48 page directories)
 - Framer Motion 12.23.26 (animation)
 - Recharts 3.2.0 (charts/data viz)
 - @dnd-kit (drag & drop)
-- i18next + react-i18next + browser-languagedetector (internationalization)
+- i18next 25.4.1 + react-i18next + browser-languagedetector (internationalization)
 - html2canvas 1.4.1 (screenshots)
 - unplugin-auto-import 19.3.0
 
 **Backend (BaaS)**:
 - Supabase (PostgreSQL, Auth, Edge Functions, Row Level Security)
 - @supabase/supabase-js 2.57.4
-- 15 Supabase Edge Functions (Deno runtime)
-- 8 database migrations
+- 16 Supabase Edge Functions (Deno runtime)
+- 10 database migrations
 
-**Database**: PostgreSQL (via Supabase) — tables for user routines, routine usage events, creator waitlist, routine versions, survey completion, retailer pricing, product catalog, admin RLS policies
+**Database**: PostgreSQL (via Supabase) — tables for user routines, routine usage events, creator waitlist, routine versions, survey completion, retailer pricing, product catalog, admin RLS policies, routine notes, gamification (curae_points, points_transactions, user_badges)
 
-**AI**: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929) via Supabase Edge Functions — 36 AI modules covering surface context, system prompts, chat, discovery, guided assistant, embeddings, vector store, RAG retrieval, knowledge base, product/ingredient/routine/skin intelligence, behavioral/communication/reasoning intelligence, workflow orchestration
+**AI**: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929) via Supabase Edge Functions — 35 AI modules covering: surface context (9+ modes), system prompts (5 layers), chat, discovery, guided assistant, embeddings, vector store, RAG retrieval, knowledge base, product/ingredient/routine/skin intelligence, behavioral/communication/reasoning intelligence, workflow orchestration, **camera scan (Claude Vision for product identification + ingredient parsing)**
 
 **Hosting / Infrastructure**: Cloudflare (scaling planned), Supabase hosted PostgreSQL + Edge Functions
 
@@ -158,36 +190,41 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 
 **Security**: hCaptcha (@hcaptcha/react-hcaptcha 1.17.3), botid 1.5.10, Supabase RLS policies, data anonymization Edge Function, password validation Edge Function
 
-**Key third-party APIs / integrations**: Claude API (Anthropic) for Curae AI, Stripe + Stripe Connect, Firebase, hCaptcha, UV Index API, Geocoding API, Affiliate networks (Skimlinks, Rakuten, Impact — future), AR SDKs (future)
+**Key third-party APIs / integrations**: Claude API (Anthropic) for Curae AI + Camera Scan (Vision), Stripe + Stripe Connect, Firebase, hCaptcha, UV Index API, Geocoding API, BarcodeDetector API (browser-native), Affiliate networks (Skimlinks, Rakuten, Impact — future), AR SDKs (future)
 
 ### Architecture Summary
 
-**Scale**: 48 page directories, 78 lazy-loaded routes, 24 shared components, 36 AI modules, 43 business logic utilities, 15 Edge Functions, 8 database migrations
+**Scale**: 48 page directories, 34 active routes, 26 shared components, 35 AI modules, 44 business logic utilities, 16 Edge Functions, 10 database migrations, 18 governance rule files
 
 **State Management**:
 - Global auth: React Context (AuthContext.tsx)
 - Session profile: sessionState.ts (in-memory + localStorage)
 - Persistence: localStorage for guests, Supabase for authenticated
-- Cart, routines, favorites, recently viewed, location: dedicated state modules with localStorage + Supabase sync
+- Cart, routines, favorites, recently viewed, location, scan history: dedicated state modules with localStorage + Supabase sync
 
 **Personalization Data Flow**: Supabase profile → sessionState → localStorage → graceful null fallback
 
-**Environment Pipeline**: Browser geolocation (opt-in) → geocode-location Edge Function → UV index → climate inference (Köppen-like) → season inference (hemisphere-aware) → texture inference → useEnvironmentContext() hook → all UI
+**Camera Scan Pipeline**: File/camera input → canvas resize (1568px max, JPEG 0.75) → base64 → product-scan Edge Function → Claude Vision (Sonnet 4.5) → product identification + ingredient parsing with safety tiers + cautionReasons → ScanResultView (rich card for ANY identified product) → PostScanDiscovery (compatible products + AI WHY) → ScanReviewPanel (profile-filtered reviews + AI summary) → Shelf/Routine integration
 
-**AI Architecture**: Surface/page → buildAIContext() (9 modes) → buildSystemPrompt() (5 layers) → surfaceClient → ai-insight Edge Function → Claude Sonnet 4.5 → response → highlightRelevantKeywords() → AIInsightBlock render
+**Environment Pipeline**: Browser geolocation (opt-in) → geocode-location Edge Function → UV index → climate inference (Koppen-like) → season inference (hemisphere-aware) → texture inference → useEnvironmentContext() hook → all UI
 
-**Design System**: 8 brand color tokens (primary, cream, deep, sage, warm-gray, blush, light, dark) + 2 legacy (coral, forest) with full 50–900 scales. Fonts: Cormorant Garamond (serif headings), Inter/DM Sans (body). 14 keyframe animations, 6 duration tokens, 5 easing tokens. Breakpoints: xs(375) / sm(640) / md(768) / lg(1024) / xl(1280) / 2xl(1536)
+**AI Architecture**: Surface/page → buildAIContext() (9+ modes) → buildSystemPrompt() (5 layers) → surfaceClient → ai-insight Edge Function → Claude Sonnet 4.5 → response → highlightRelevantKeywords() → AIInsightBlock render
+
+**Gamification Architecture**: User action → onAction() dispatcher (fire-and-forget) → duplicate prevention → curaePoints Supabase CRUD → badgeEngine unlock checks → PointsEarnedToast notification → rewards dashboard (points, tier, badges, streaks, history)
+
+**Design System**: 8 brand color tokens (primary, cream, deep, sage, warm-gray, blush, light, dark) + 2 legacy (coral, forest) with full 50-900 scales. Fonts: Cormorant Garamond (serif headings), Inter/DM Sans (body). 14 keyframe animations, 6 duration tokens, 5 easing tokens. Breakpoints: xs(375) / sm(640) / md(768) / lg(1024) / xl(1280) / 2xl(1536)
 
 **Payment Flows**: Stripe subscriptions (free/plus/premium tiers), Stripe Connect for marketplace sellers, marketplace checkout, affiliate conversion tracking + webhooks
 
-**Governance**: CLAUDE.md (2177-line developer governance, 32 sections), .claude/CLAUDE.md (compact rules + module registry), ai-governance/CLAUDE_PRODUCT.md (user-facing AI tone/safety/content rules), src/lib/ai/systemPrompt.ts (runtime-compiled product governance), .claude/rules/ (5 rule files: code-style, frontend, git, security, testing)
+**Governance**: .claude/CLAUDE.md (master index + navigation), .claude/rules/ (18 rule files covering workflow, code standards, frontend, state management, AI pipeline, AI voice, environment, commerce, security, data layer, testing, git, domain features, consistency, roadmap, routing, camera scan, gamification), ai-governance/CLAUDE_PRODUCT.md (user-facing AI tone/safety/content rules), src/lib/ai/systemPrompt.ts (runtime-compiled product governance)
 
-### Supabase Edge Functions (15)
+### Supabase Edge Functions (16)
 
 | Function | Domain |
 |---|---|
 | ai-insight | AI — Claude Sonnet 4.5 proxy |
 | ai-chat | AI — conversational chat |
+| product-scan | AI — Claude Vision product identification + ingredient parsing |
 | get-uv-index | Environment — UV API wrapper |
 | geocode-location | Environment — geocoding wrapper |
 | ingest-retailer-feed | Data — retailer pricing ingestion |
@@ -204,11 +241,11 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 
 ### Product Roadmap
 
-| Phase | Core Focus | Description | Dependencies |
+| Phase | Core Focus | Description | Status |
 |---|---|---|---|
-| MVP (Validating & Launching) | Foundation, validation, core value delivery | Product search, basic AI, routine management, nutrition, self-tracking | Core platform development |
-| Growth & Differentiation | Engagement, differentiation, AI intelligence, trust | Advanced AI, marketplace, AR, creator tools, progress feedback | MVP validation, user traction |
-| Ecosystem Expansion | Expansion, ecosystem creation, long-term defensibility | Creator economy, custom products, international expansion, data licensing | Growth metrics, partnerships |
+| MVP (App) | Camera-powered intelligence, personalized discovery, routine management | Product scan, ingredient analysis, compatible discovery, profile-filtered reviews, routine builder, self-tracking, gamification | **In progress — core features shipped** |
+| Growth & Differentiation | Marketplace, community, advanced AI, progress visualization | Advanced AI, marketplace, creator tools, progress feedback, community, nutrition | Planned |
+| Ecosystem Expansion | Commerce hub, creator economy, international | Creator economy, custom products, international expansion, data licensing | Planned |
 
 ---
 
@@ -216,14 +253,14 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 
 ### Audience Sophistication
 - **Awareness level**: Problem-aware to Solution-aware (they know skincare is confusing; some actively searching for better tools)
-- **Technical sophistication**: Beginner to Intermediate (most users are not tech-savvy but are digitally active and research-heavy about skincare)
-- **How this changes communication**: Lead with outcomes and emotional benefits ("finally know what works for YOUR skin"), not technical specs. Use plain language, visual proof, before/after framing. Advanced users (estheticians, creators) want specs and integrations.
-- **How this changes selling**: Lead with education and trust-building, not features. Show the journey: confused → guided → confident. For B2B creators, skip intro and show monetization tools and audience access.
+- **Technical sophistication**: Beginner to Intermediate (not tech-savvy but digitally active and research-heavy about skincare)
+- **How this changes communication**: Lead with outcomes and emotional benefits ("finally know what works for YOUR skin"), not technical specs. Use plain language, visual proof, before/after framing. Show the scan → discover → build flow.
+- **How this changes selling**: Lead with the camera scan experience — "scan any product, know instantly if it works for you." For B2B creators (future), show monetization tools and audience access.
 
 ### Audience Segments
 1. **Skincare Enthusiasts** — passionate about products, ingredients, and visible results
 2. **Wellness Seekers** — value holistic health, routines, and self-care
-3. **Beauty Entrepreneurs** — indie brands, estheticians, and creators looking to grow
+3. **Beauty Entrepreneurs** — indie brands, estheticians, and creators looking to grow (future)
 4. **Tech-Forward Consumers** — early adopters who trust AI, AR, and digital tools
 5. **Price-Conscious Shoppers** — want trusted products at the best value
 
@@ -231,16 +268,15 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 - **Primary persona name**: "The Overwhelmed Skincare Seeker"
 - **Demographics**:
   - Gender: Primarily female, inclusive of all genders
-  - Age range: 18–45
+  - Age range: 18-45
   - Income level: Middle to upper-middle income; value-driven but willing to invest
-  - Education: TBD
   - Location: Urban/suburban, digitally active
 - **Psychographics**: Curious but cautious, empowerment-driven, skeptical of hype, science-interested, transparency-focused. Values self-improvement, holistic self-care, and community belonging.
 - **Job / role**: Students, young professionals, wellness-conscious adults
 - **Daily frustration / pain point**: Cannot find reliable, personalized skincare guidance; overwhelmed by conflicting information; wasting money on products that don't work; no way to track what's actually helping
 - **Current solution they use**: Fragmented approach — Reddit/YouTube for education, Sephora/Amazon for shopping, separate apps (if any) for tracking, Instagram/TikTok for community
-- **Why current solution fails them**: No single platform connects discovery, education, tracking, and purchasing. Information is unreliable. No personalization depth. No progress accountability.
-- **Buying triggers**: New breakout or skin concern, frustration with current routine, seeing a friend's skin transformation, starting a self-care journey, seasonal skin changes
+- **Why current solution fails them**: No single platform connects discovery, education, tracking, and purchasing. Information is unreliable. No personalization depth. No progress accountability. Can't scan a product and instantly know if it works for their skin.
+- **Buying triggers**: New breakout or skin concern, frustration with current routine, seeing a friend's skin transformation, starting a self-care journey, seasonal skin changes, standing in a store confused about which product to buy
 - **Objections**:
   1. "Do I really need ANOTHER app for skincare?"
   2. "Can I trust AI recommendations over a real dermatologist?"
@@ -262,22 +298,21 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 - Visible progress
 - Feeling understood
 - Safety and reliability
-- Creative expression (for sellers)
 - Holistic self-care
 - Belonging in a trustworthy community
 
 ### Needs & Pain Points
 
-**Knowledge Gaps**: Hard to diagnose skin issues; ingredient safety is confusing; education is scattered and unreliable.
+**Knowledge Gaps**: Hard to diagnose skin issues; ingredient safety is confusing; education is scattered and unreliable. Standing in a store with no way to know if a product works for YOUR skin.
 
 **Tracking Frustrations**: No centralized routine tracker; no historical insights; hard to measure progress.
 
 **Trust & Money Concerns**: Fear of overpaying; fear of buying from unreliable sources; fear of wasting money on ineffective products.
 
-**Empowerment Barriers**: Indie sellers lack visibility; users want community validation; no platform supports both learning and selling.
+**Empowerment Barriers**: Users want community validation from people with SIMILAR skin; no platform surfaces reviews from matching skin profiles.
 
-### B2B Segment (Secondary — Indie Creators & Estheticians)
-- **Target company size**: Solo creators, micro-businesses (1–10 employees)
+### B2B Segment (Secondary — Future: Indie Creators & Estheticians)
+- **Target company size**: Solo creators, micro-businesses (1-10 employees)
 - **Target industries / verticals**: Indie beauty brands, estheticians, skincare service providers, wellness creators
 - **Primary buyer persona**: Indie brand founder / solo esthetician
 - **Business pain point**: Lack of visibility, high marketplace fees elsewhere, no built-in audience of engaged skincare consumers
@@ -290,16 +325,7 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
   3. "Is the platform credible enough to associate my brand with?"
 - **Sales cycle length**: Short (self-serve onboarding)
 - **Decision makers involved**: Founder/owner
-- **Where they discover tools**: Instagram, TikTok, Product Hunt, peer referral, beauty industry forums
-- **Evaluation criteria**: Audience size, fees/commissions, ease of onboarding, brand alignment, monetization tools
-
-### Secondary / Future Audiences
-
-| Segment | Description | Timeline to Target |
-|---|---|---|
-| Dermatologists & Clinicians | Professional referral partners, content collaborators, clinical credibility | Growth Phase |
-| Wellness Brands | Cross-promotion partners for nutrition, supplements, lifestyle | Growth Phase |
-| International Users | Non-English markets with localized skincare needs | Ecosystem Phase |
+- **Timeline**: Growth Phase (post-MVP validation)
 
 ---
 
@@ -310,66 +336,36 @@ Lorem Curae is a next-generation SkinTech platform that simplifies the chaos of 
 ### Revenue Streams
 
 **1. Affiliate Model**
-- Commission from trusted skincare brands and marketplaces (5–10%)
+- Commission from trusted skincare brands and marketplaces (5-10%)
 - Optional sponsored visibility ("Promoted by [Brand]")
 - Cashback or credits shared with users to build loyalty
-- Why brands pay: They receive targeted, purchase-ready customers
 
-**2. Marketplace Model**
+**2. Marketplace Model (Future)**
 - Transaction fees on products/services sold by indie creators and estheticians
-- Flat fee ($1–$3) or 10–20% per order
+- Flat fee ($1-$3) or 10-20% per order
 - Volume incentives for high-performing sellers
-- Why sellers pay: Visibility, trust, and access to a built-in audience
 
 **3. Freemium to Premium (Subscription)**
-- Free tier: Core discovery, ingredient checks, routine tracking, basic insights
-- Premium tier: Unlimited AR scans, advanced diagnostics, early access to creator launches, exclusive discounts, premium-only bundles, gamified rewards
+- Free tier: Core discovery, ingredient checks, routine tracking, basic insights, camera scan
+- Premium tier: Unlimited AI scans, advanced diagnostics, early access to creator launches, exclusive discounts, premium-only bundles, gamified rewards
 
-**4. E-Commerce Model**
+**4. E-Commerce Model (Future)**
 - Direct product sales, curated collections, exclusive bundles
-- Margin on curated products, seasonal drops, creator collaborations
 
 **5. Data Licensing (Future)**
-- Aggregated, anonymized insights licensed to NGOs, advocacy groups, research institutions, and ethical brands
-- Examples: Ingredient trend data, consumer preference patterns, safety/sustainability insights
+- Aggregated, anonymized insights licensed to research institutions and ethical brands
 
 ### Pricing Tiers (Planned)
 
-| Tier Name | Price | Billing Cycle | Includes | Target Segment |
-|---|---|---|---|---|
-| Standard (Free) | $0 | N/A | Limited Curae AI access, limited conversations/day, 1 regimen build, limited image submissions (1/3 months), limited Curae Coins, 1 concern priority | Casual users, new signups |
-| Skin Enthusiast | $10–15 | Monthly | Unlimited Curae AI (advanced analysis), unlimited regimens, unlimited image submissions, unlimited gift giving, full Curae Coins, faster/free shipping, full access to all services, AR access (when released) | Engaged skincare enthusiasts |
-| Enterprise/Creator | TBD | TBD | Creator tools, analytics, seller dashboard, monetization features | Indie brands, estheticians |
-
-- **Free trial**: TBD
-- **Key conversion metric**: User creates first regimen and receives personalized AI recommendation (activation event)
-- **Average contract value (ACV)**: ~$120–180/year (at $10–15/mo)
-- **Revenue target**: TBD
-- **Pricing strategy principles**: Keep core features free to maximize adoption. Use premium features to deepen engagement. Reward consistent tracking with credits. Maintain transparent, ethical monetization. Affordable for everyday users, powerful for creators and professionals.
-
-### Financial Snapshot
-
-| Metric | Current Value | Target | Notes |
+| Tier Name | Price | Includes | Target Segment |
 |---|---|---|---|
-| Monthly Revenue | $0 | TBD | Pre-launch |
-| Total Monthly Costs | TBD | TBD | AI infrastructure, hosting, development |
-| Monthly Profit | $0 | TBD | Pre-revenue |
-| Monthly Site Clicks | 0 | TBD | Pre-launch |
-| Total Leads (monthly) | 0 | TBD | Waitlist building |
-| Conversion Rate | 0% | TBD | |
-| CAC (actual) | $0 | TBD | |
-| LTV (actual) | $0 | TBD | |
-| LTV:CAC Ratio | N/A | ≥ 3:1 | |
+| Standard (Free) | $0 | Limited Curae AI access, limited conversations/day, 1 regimen build, limited image submissions, limited Curae Coins, 1 concern priority | Casual users, new signups |
+| Skin Enthusiast | $10-15/mo | Unlimited Curae AI, unlimited regimens, unlimited image submissions, full Curae Coins, faster/free shipping, full access, AR (future) | Engaged skincare enthusiasts |
+| Enterprise/Creator | TBD | Creator tools, analytics, seller dashboard, monetization features | Indie brands, estheticians |
 
-### Cost Structure
-Major cost centers:
-- AI infrastructure (model usage, inference, storage)
-- AR technology licensing (future)
-- Engineering & product development
-- Marketplace operations & moderation
-- Customer support
-- Marketing & creator partnerships
-- Compliance (ingredient safety, data privacy)
+- **Key conversion metric**: User scans first product and receives personalized ingredient analysis (activation event)
+- **Average contract value (ACV)**: ~$120-180/year (at $10-15/mo)
+- **Pricing strategy principles**: Keep core features free to maximize adoption. Use premium features to deepen engagement. Reward consistent tracking with credits. Maintain transparent, ethical monetization.
 
 ---
 
@@ -379,11 +375,10 @@ Major cost centers:
 - **Tone of voice**: Clear, science-informed, empathetic, confident but never condescending. Speaks like a knowledgeable friend, not a corporation.
 - **Tone you NEVER use**: Corporate jargon, condescending, hype-driven, fear-mongering, overly clinical
 - **Brand voice examples**:
-  - Tweet: "Your skin is unique. Your routine should be too. Lorem Curae learns what works for YOU—not what's trending."
-  - Customer complaint: "We hear you, and we're on it. Your experience matters to us—let's make this right together."
-  - New feature: "You asked, we built. Say hello to [feature]—designed to make your skincare journey even smoother."
-  - Cold outreach DM: "Hey [name]—I noticed your passion for clean skincare. We're building something I think you'd love. Mind if I share?"
-- **Visual identity notes**: TBD (to be established)
+  - Tweet: "Your skin is unique. Your routine should be too. Lorem Curae learns what works for YOU — not what's trending."
+  - Customer complaint: "We hear you, and we're on it. Your experience matters to us — let's make this right together."
+  - New feature: "You asked, we built. Say hello to [feature] — designed to make your skincare journey even smoother."
+  - Cold outreach DM: "Hey [name] — I noticed your passion for clean skincare. We're building something I think you'd love. Mind if I share?"
 - **Brand values**:
   1. **Integrity** — Transparent product information, trustworthy seller verification
   2. **Empowerment** — Knowledge and tools that put users in control of their journey
@@ -391,129 +386,104 @@ Major cost centers:
   4. **Sustainability** — Prioritizing ethical brands, mindful consumption, and informed choices
   5. **Community** — Enabling peer support and creator-led discovery
 - **Key messaging pillars**:
-  1. Personalized intelligence that evolves with you
-  2. Trust and transparency in every product and recommendation
-  3. Holistic wellness—skin, nutrition, and lifestyle connected
-  4. Creator empowerment and community-driven discovery
+  1. Camera-powered intelligence — scan any product, know instantly
+  2. Personalized to YOUR skin — reviews, products, and routines from people like you
+  3. Trust and transparency in every ingredient and recommendation
+  4. A daily companion that grows smarter with you
 
 ---
 
 ## 7. Competitive Landscape
 
-### Direct Competitors (Same Product Category)
+### Direct Competitors
 
 | Competitor | Key Features | Key Weaknesses | How We Differ |
 |---|---|---|---|
-| Revieve AI Skincare Advisor | AI skin scan, personalized product recs, retailer integrations | Lacks holistic wellness, routine tracking, and user-generated commerce | Unified ecosystem: diagnostics + tracking + education + marketplace |
-| SkinGenie | AI skin analysis, routine builder, product swapping | No AR, no marketplace, limited education or wellness integration | Holistic wellness + creator marketplace + adaptive AI |
-| Skin Bliss | AI skin scan, ingredient analysis, routine builder, photo tracking | No commerce, limited personalization beyond product matching | Full commerce layer + deeper personalization + community |
-| Clenz | Routine tracker, product analyzer, daily reminders, community groups | No diagnostics, limited education, no marketplace or AR | AI-powered diagnostics + marketplace + nutrition integration |
-| TroveSkin | Photo diary, skin analysis, progress tracking, product suggestions | Limited personalization, no commerce or education layer | Deeper personalization + commerce + education + wellness |
-| Perfect Corp: Skincare Pro | AI skin analysis, AR try-on, professional-grade diagnostics | Lacks consumer-facing routine tracking, education, or marketplace | Consumer-first + routine tracking + marketplace + community |
-| Skinive | AI skin scanner for consumers and clinicians | Medical-first, lacks lifestyle/wellness integration | Lifestyle-first + holistic wellness + commerce |
-| Basic Beauty / Skincare Routine | Routine planner, reminders | No diagnostics, personalization, or marketplace | Full-stack SkinTech platform |
+| Revieve AI Skincare Advisor | AI skin scan, personalized product recs, retailer integrations | Lacks camera product scanning, routine tracking, profile-filtered reviews | Camera-powered scan → personalized discovery + profile-matched reviews |
+| SkinGenie | AI skin analysis, routine builder, product swapping | No camera scan, no marketplace, no environment-aware personalization | Scan any product + environment/weather-aware recommendations |
+| Skin Bliss | AI skin scan, ingredient analysis, routine builder, photo tracking | No commerce, limited personalization, no profile-filtered reviews | Full ingredient safety analysis with cautionReasons + reviews from similar skin |
+| Clenz | Routine tracker, product analyzer, daily reminders, community groups | No camera scan, no diagnostics, limited education | Camera scan + AI ingredient analysis + environment-aware intelligence |
+| TroveSkin | Photo diary, skin analysis, progress tracking, product suggestions | Limited personalization, no commerce, no profile-filtered reviews | Personalized reviews + compatible discovery + gamification |
+| Perfect Corp: Skincare Pro | AI skin analysis, AR try-on, professional-grade diagnostics | Lacks consumer routine tracking, education, or marketplace | Consumer-first daily companion + routine management + gamification |
 
-### Indirect Competitors (Different Approach, Same Problem)
+### Indirect Competitors
 
 | Competitor | Approach | Why People Use Them | Where They Fall Short |
 |---|---|---|---|
-| Sephora, Ulta, Amazon Beauty | Beauty & wellness marketplaces | Massive product selection, brand trust, loyalty programs | No personalization depth, no routine tracking, no education layer |
-| Noom, MyFitnessPal, Fabulous | Wellness & habit-tracking apps | Habit tracking, nutrition, mental health | No skin-specific features, no skincare commerce |
-| 23andMe, SkinDNA, GeneU | DNA/skin testing services | Personalized health recs based on genetics | One-time test, no ongoing guidance, no commerce |
-| INCI Decoder, Lab Muffin, Hyram | Skincare education platforms | Trusted ingredient education, product reviews | No personalization, no routine integration, no commerce |
-| The Ordinary, Curology, Typology | Niche skincare brands with communities | Transparency, education, minimalist routines | Brand-locked, no cross-brand discovery or tracking |
-| ModiFace, Perfect Corp (B2B), Revieve (white-label) | AI & AR beauty tech providers | Power many brand experiences behind the scenes | B2B focused, not consumer-facing ecosystems |
+| Sephora, Ulta, Amazon Beauty | Beauty & wellness marketplaces | Massive product selection, brand trust | No camera scan, no personalization, no routine tracking |
+| INCI Decoder, Lab Muffin, Hyram | Skincare education platforms | Trusted ingredient education, product reviews | No camera scan, no personalization, no routine integration |
+| The Ordinary, Curology, Typology | Niche skincare brands with communities | Transparency, education, minimalist routines | Brand-locked, no cross-brand scanning or tracking |
+| Noom, MyFitnessPal | Wellness & habit-tracking apps | Habit tracking, nutrition | No skin-specific features |
 
 ### Competitive Positioning
-- **Our unfair advantage**: No other platform unifies AI-powered personalization, ingredient transparency, routine tracking, nutrition/wellness, education, AND a creator marketplace into one seamless ecosystem. The combination creates network effects and data moats that are hard to replicate.
-- **Our biggest competitive vulnerability**: Pre-launch with no user base, no brand recognition, and complex feature set that may require longer onboarding.
-- **Market gap we exploit**: The skincare experience is completely fragmented. Users currently need 5+ separate tools/platforms to do what Lorem Curae does in one. No competitor owns the full journey from diagnosis to purchase to progress tracking.
-- **Positioning statement (MVP)**: "For individuals overwhelmed by trial-and-error skincare and unreliable sources, Lorem Curae is the intelligent wellness platform that personalizes product discovery, connects you to trusted retailers, and guides your routine with clarity—so you can build a regimen that works, without the guesswork."
-- **Positioning statement (Fully Scaled)**: "For individuals navigating the chaos of skincare and wellness, Lorem Curae is a next-generation SkinTech platform that delivers clarity, control, and creativity. We combine adaptive intelligence, immersive AR, and a trusted marketplace to personalize discovery, guide holistic routines, and empower users to sell their own creations."
+- **Our unfair advantage (MVP)**: No other platform lets you scan any skincare product and instantly get personalized ingredient analysis, reviews from people with similar skin profiles, compatible product discovery filtered by environment, and guided routine building — all in one app.
+- **Our biggest competitive vulnerability**: Pre-launch with no user base, no brand recognition, and the need to prove camera scan accuracy earns trust.
+- **Market gap we exploit**: The moment of standing in a store (or browsing online) confused about whether a product works for YOUR skin. No competitor solves that moment with camera-powered intelligence + personalized context.
+- **Positioning statement (MVP)**: "For individuals overwhelmed by skincare choices, Lorem Curae is the camera-powered intelligence platform that scans any product and tells you exactly how it fits your unique skin, environment, and routine — replacing guesswork with personalized clarity."
 
 ### SWOT Summary
 
-**Strengths**: Holistic integration (diagnostics + education + tracking + wellness + commerce), adaptive intelligence, immersive tech (AR/AI), creator economy enablement, science + self-care bridge.
+**Strengths**: Camera-powered product intelligence, personalized ingredient analysis with safety explanations, profile-filtered reviews, environment-aware recommendations, gamification loop, full routine management, strong technical foundation built by solo founder.
 
-**Weaknesses**: Complex feature set requiring longer onboarding, high development cost, AR adoption variability, marketplace moderation needs, clinical credibility needs partnerships.
+**Weaknesses**: Pre-launch with no user base, catalog matching limited to 12 mock products (real identification works for any product), solo founder bandwidth, marketplace and community not yet built.
 
-**Opportunities**: Rising demand for personalized science-backed skincare, growing creator economy and indie beauty movement, fragmented market ripe for consolidation, increasing consumer interest in holistic wellness and transparency.
+**Opportunities**: Rising demand for personalized skincare, no competitor owns the "scan and know" moment, growing creator economy, fragmented market ripe for a unified daily companion.
 
-**Threats**: Fast-moving competitors replicating features, regulatory scrutiny around health claims, entrenched players (Revieve, Perfect Corp) expanding, user trust erosion if data privacy not clearly communicated.
+**Threats**: Competitors adding camera scan features, regulatory scrutiny around health claims, user trust if AI identification accuracy isn't high enough, entrenched players expanding.
 
 ---
 
 ## 8. Customer Journey & Funnel
 
-### Journey Map
+### Journey Map (MVP)
 
-| Stage | What Happens | Channel / Touchpoint | Content / Action | Success Metric |
-|---|---|---|---|---|
-| 1. Awareness | User discovers Lorem Curae exists | TikTok, Instagram Reels, YouTube Shorts, SEO, Reddit, X, Product Hunt, Influencers, Paid ads | Short-form video, ingredient education, "skincare chaos" hooks | Impressions, reach, video views |
-| 2. Education | User learns what Lorem Curae does and why it's different | Landing page, blog, social content, email welcome sequence | Problem-agitate-solve content, product demos, comparison content | Site visits, time on page, email signups |
-| 3. Trust | User builds confidence to try | Social proof, community validation, transparent ingredient data, reviews | Testimonials, before/after stories, expert endorsements, free tier experience | Signup rate, free tier activation |
-| 4. Conversion | User commits to the platform | Free tier onboarding, upgrade prompts, premium feature gating | Personalized AI insights, regimen builder, "aha moment" triggers | Free-to-paid conversion rate |
-| 5. Delivery | First experience as a customer | In-app onboarding, Curae AI interaction, first regimen creation | Initial skin survey, AI photo analysis, first personalized recommendation | Activation rate (first regimen created) |
-| 6. Retention | User returns and builds habits | Push notifications, progress popups, affirmations, routine reminders | Progress tracking, evolving recommendations, community engagement | DAU/MAU, 30-day retention, regimen adherence |
-| 7. Referral | User brings others | Referral rewards, social sharing, community features | Curae Coins for referrals, shareable progress/regimen cards | Referral rate, viral coefficient |
+| Stage | What Happens | Channel / Touchpoint | Success Metric |
+|---|---|---|---|
+| 1. Awareness | User discovers Lorem Curae | TikTok, Instagram, YouTube, Reddit, Product Hunt | Impressions, video views |
+| 2. Education | User sees camera scan demo, ingredient analysis | Landing page, social content, demo videos | Site visits, signups |
+| 3. Trust | User sees real scan results, personalized reviews | Social proof, free tier experience, scan demos | Signup rate, first scan |
+| 4. Activation | User scans first product, gets personalized analysis | In-app onboarding, skin survey, first scan | First scan completion rate |
+| 5. Engagement | User scans more products, builds first routine, earns points | Push notifications, streak reminders, gamification | DAU/MAU, routine creation |
+| 6. Retention | User returns daily to track routine, scan new products | Progress tracking, streaks, badges, tier progression | 30-day retention, streak length |
+| 7. Referral | User shares scan results or routine with friends | Referral rewards, shareable scan cards | Referral rate, viral coefficient |
 
 ### Key Conversion Points
-- **What triggers signup**: Seeing a personalized skin analysis demo or ingredient breakdown that applies to THEIR specific concern
-- **Activation event**: Creates first regimen and receives first personalized AI recommendation
-- **Aha moment**: When the user sees their first progress insight or gets a recommendation that feels genuinely tailored (not generic)
-- **Upgrade trigger**: Hitting free tier limits (AI conversations, regimen count, image submissions) while actively engaged
+- **What triggers signup**: Seeing a camera scan demo that identifies a product they own and shows personalized insights
+- **Activation event**: Scans first product and receives personalized ingredient analysis
+- **Aha moment**: When the user sees caution/avoid explanations for ingredients they've been using, or discovers a compatible product they didn't know about
+- **Upgrade trigger**: Hitting free tier limits (AI conversations, scan count, image submissions) while actively engaged
 
 ---
 
 ## 9. Marketing & Growth Channels
 
 ### Organic Content / SEO
-- **Blog / content hub URL**: TBD (planned)
-- **Target keywords**: TBD (skincare routine tracker, best products for [skin type], ingredient checker, personalized skincare, skincare AI, etc.)
-- **Content pillars**: Ingredient education, routine guides, skincare myth-busting, product comparisons, wellness + skin connection
+- **Content pillars**: Camera scan demos, ingredient safety breakdowns, "scan this vs. that" comparisons, routine building guides, skincare myth-busting
+- **Target keywords**: TBD (skincare scanner app, ingredient checker, personalized skincare, skincare AI, etc.)
 - **Publishing cadence**: TBD
-- **Content types**: Blog posts, guides, case studies, comparisons, tutorials, short-form video
 
 ### Community / Social Media
-- **Platforms active on**: TBD (pre-launch)
 
-| Platform | Content Type | Posting Cadence |
+| Platform | Content Type | Focus |
 |---|---|---|
-| TikTok | Short-form educational, ingredient breakdowns, skin transformations | TBD |
-| Instagram Reels | Visual routines, before/after, product spotlights | TBD |
-| YouTube Shorts | Quick tips, myth-busting, Curae AI demos | TBD |
-| Reddit | Community engagement, skincare advice, AMA-style posts | TBD |
-| X (Twitter) | Industry commentary, product updates, engagement | TBD |
+| TikTok | Short-form scan demos, ingredient breakdowns, "I scanned this and..." | Primary |
+| Instagram Reels | Visual routines, before/after, product scan reveals | Primary |
+| YouTube Shorts | Quick scan demos, ingredient safety tips | Primary |
+| Reddit | Community engagement, skincare advice (r/SkincareAddiction, r/AsianBeauty) | Secondary |
 
-### Awareness Channels (Launch)
-- TikTok (organic)
-- Instagram Reels
-- YouTube Shorts
-- SEO (top-of-funnel content)
-- Reddit posts
-- X (Twitter)
-- Product Hunt (launch moment)
-- Influencers (organic + paid)
-- Paid ads (broad targeting)
-
-### Partnerships / Affiliates
-- **Target partners**:
-  - Dermatologists & estheticians (credibility + content)
-  - Indie beauty brands (marketplace supply)
-  - Affiliate networks (Skimlinks, Rakuten, Impact)
-  - AR/AI technology providers
-  - Wellness brands (cross-promotions)
-  - NGOs & research institutions (data licensing)
-- **Partnership value proposition**: Access to a targeted, purchase-ready, engaged skincare audience with built-in trust infrastructure
-
-### Growth Levers
-- Viral AR experiences
-- Creator-led product launches
-- Referral and rewards programs (Curae Coins)
+### Growth Levers (MVP)
+- Viral camera scan demos ("I scanned my entire bathroom shelf")
+- Shareable ingredient safety breakdowns
+- "Scan and compare" content between popular products
+- Referral and rewards programs (Curae Points)
 - SEO through ingredient education
-- Personalized routines that increase retention
+- Gamification driving daily return (streaks, badges, tier progression)
+
+### Growth Levers (Future)
+- Creator-led product launches
 - Marketplace expansion
-- Wellness integrations (nutrition, supplements, lifestyle)
+- Viral AR experiences
+- Wellness integrations (nutrition, supplements)
 - International expansion
 
 ---
@@ -521,39 +491,32 @@ Major cost centers:
 ## 10. Metrics & KPIs
 
 ### North Star Metric
-- **Metric**: Weekly Active Users completing a regimen tracking action
+- **Metric**: Weekly Active Users completing a product scan or routine tracking action
 - **Current value**: 0 (pre-launch)
-- **Target (30/60/90 day)**: TBD post-launch
 
 ### Key Metrics Dashboard
 
-| Category | Metric | Current | 30-Day Target | 90-Day Target |
-|---|---|---|---|---|
-| Growth | MRR | $0 | TBD | TBD |
-| Growth | Signups / week | 0 | TBD | TBD |
-| Growth | WAU / MAU | 0 | TBD | TBD |
-| Engagement | Activation rate (first regimen) | 0% | TBD | TBD |
-| Engagement | Curae AI usage rate | 0% | TBD | TBD |
-| Retention | Day 1 / Day 7 / Day 30 retention | 0% | TBD | TBD |
-| Retention | Churn rate (monthly) | 0% | TBD | TBD |
-| Revenue | ARPU | $0 | TBD | TBD |
-| Revenue | LTV:CAC ratio | N/A | TBD | ≥ 3:1 |
-| Marketing | Organic traffic | 0 | TBD | TBD |
-| Marketing | Email list / waitlist size | TBD | TBD | TBD |
-| Marketing | Conversion rate (visitor → signup) | 0% | TBD | TBD |
+| Category | Metric | Current | Target |
+|---|---|---|---|
+| Growth | MRR | $0 | TBD |
+| Growth | Signups / week | 0 | TBD |
+| Engagement | Scans / user / week | 0 | TBD |
+| Engagement | Activation rate (first scan) | 0% | TBD |
+| Engagement | Routine creation rate | 0% | TBD |
+| Retention | Day 1 / Day 7 / Day 30 retention | 0% | TBD |
+| Retention | Streak continuation rate | 0% | TBD |
+| Revenue | ARPU | $0 | TBD |
+| Revenue | LTV:CAC ratio | N/A | >= 3:1 |
 
 ---
 
 ## 11. Legal, Compliance & Constraints
 
 - **Legal structure**: TBD
-- **Terms of service URL**: TBD
-- **Privacy policy URL**: TBD
-- **Data residency requirements**: GDPR and CCPA likely applicable (user skin data, health-adjacent data, photos); HIPAA potentially relevant depending on clinical claims
-- **Content restrictions**: Cannot make medical claims; skincare guidance must be positioned as educational, not diagnostic. Ingredient safety claims must cite sources. "Not a substitute for professional medical advice" disclaimers required.
+- **Data residency requirements**: GDPR and CCPA likely applicable (user skin data, health-adjacent data, photos)
+- **Content restrictions**: Cannot make medical claims; skincare guidance must be positioned as educational, not diagnostic. Ingredient safety claims must cite basis. "Not a substitute for professional medical advice" disclaimers required.
 - **Regulatory considerations**: FDA regulations around skincare claims, FTC guidelines for affiliate disclosures and endorsements, data privacy for biometric/photo data
-- **IP / patents**: TBD
-- **Trademark status**: TBD
+- **Camera/photo data**: Photos are compressed client-side (1568px max, JPEG 0.75), only thumbnails (80px) are persisted locally for scan history. Full images are not stored.
 
 ---
 
@@ -562,39 +525,39 @@ Major cost centers:
 - **Monthly budget** (marketing / growth): Minimal (bootstrapped, high school student)
 - **Tools budget**: Claude API billing active, Supabase (free/pro tier), Cloudflare, Resend, Stripe, Firebase, hCaptcha
 - **Time constraints**: Solo founder currently in high school — limited to evenings, weekends, and breaks. All development, design, marketing, and ops handled by one person.
-- **Skills available in-house**: Full-stack development (React/TypeScript/Supabase/Deno), AI integration (Claude API, RAG, embeddings), product design, UX, payment infrastructure (Stripe Connect), database architecture
+- **Skills available in-house**: Full-stack development (React/TypeScript/Supabase/Deno), AI integration (Claude API, Vision, RAG, embeddings), product design, UX, payment infrastructure (Stripe Connect), database architecture, camera/image pipeline
 - **Skills you need externally**: Graphic design/branding (visual identity finalization), legal counsel, dermatologist partnerships for credibility, video content creation, marketing/growth expertise
-- **Key bottlenecks**: Solo founder bandwidth (one person doing everything); complex feature set to build and maintain; need for clinical credibility partnerships; marketplace supply (chicken-and-egg problem); limited marketing budget
+- **Key bottlenecks**: Solo founder bandwidth; need for clinical credibility partnerships; marketplace supply (chicken-and-egg); limited marketing budget
 
 ---
 
 ## 13. Strategic Context
 
-- **Why now?**: Rising consumer demand for personalized, AI-powered skincare solutions. The skincare market is $115B+ and growing. Beauty AI/AR is mainstream but fragmented. The creator economy in beauty is booming. No one owns the full-stack SkinTech experience yet.
+- **Why now?**: Rising consumer demand for personalized, AI-powered skincare solutions. Camera AI (Claude Vision) is now accurate enough for real-time product identification. The "scan and know" moment doesn't exist yet — no one owns it. The skincare market is $115B+ and growing. The creator economy in beauty is booming.
 - **Market size**:
-  - **TAM (Global Skincare Market)**: $115.65B (2024) → $194.05B (2032), 6.84% CAGR
+  - **TAM (Global Skincare Market)**: $115.65B (2024) -> $194.05B (2032), 6.84% CAGR
   - **SAM (Digital Wellness + Skincare Apps)**: ~$28.28B (2025)
-    - Wellness apps: $12.78B (2025) → $33.78B (2032), 14.9% CAGR
-    - Skincare apps: $15.5B (2024) → $35.2B (2033), 9.8% CAGR
-  - **SOM (Revenue Potential)**: 1% of global skincare ≈ $1.16B; 3% of digital wellness SAM ≈ $1.17B. Combined: ~$2.3B annualized revenue potential.
+  - **SOM (Revenue Potential)**: ~$2.3B annualized
 - **Market trends**:
-  1. Rising demand for personalized, science-backed skincare and wellness
-  2. Growing creator economy and indie beauty movement
-  3. Fragmented market ripe for consolidation into a seamless experience
-  4. Increasing consumer interest in holistic wellness and transparency
-  5. Mainstream adoption of AI/AR in beauty and health
+  1. Rising demand for personalized, science-backed skincare
+  2. Camera-powered AI becoming mainstream in consumer apps
+  3. Growing creator economy and indie beauty movement
+  4. Increasing consumer interest in ingredient transparency
+  5. Fragmented market ripe for a unified daily companion
 - **Risks**:
-  1. Fast-moving competitors replicating core features (AI diagnostics, routine tracking)
-  2. Regulatory scrutiny around health claims, ingredient transparency, and user-generated commerce
-  3. User trust erosion if data privacy or sourcing transparency isn't clearly communicated
+  1. Competitors adding camera scan features
+  2. Regulatory scrutiny around health claims and ingredient safety
+  3. User trust if AI identification isn't accurate enough
 - **Assumptions to validate**:
-  1. Users want an all-in-one platform vs. using separate specialized tools
-  2. AI-powered personalization drives higher retention than generic recommendations
-  3. Indie creators will onboard and sell on the marketplace with competitive fees
+  1. Users will scan products regularly (daily companion hypothesis)
+  2. Personalized ingredient analysis drives trust and retention
+  3. Profile-filtered reviews are more valuable than generic reviews
+  4. Gamification drives daily return and habit formation
 - **Milestones for next 90 days**:
-  1. Complete MVP core feature development
-  2. Launch waitlist and begin pre-launch marketing
-  3. Begin user testing and validation with early adopters
+  1. Complete MVP core feature polish (scan accuracy, review quality, routine UX)
+  2. Launch waitlist and begin pre-launch marketing with scan demo content
+  3. Begin user testing with early adopters
+  4. Deploy to production
 
 ---
 
@@ -604,107 +567,93 @@ Major cost centers:
 |---|---|---|
 | Brand Overview | [Notion: Brand Overview](https://www.notion.so/2727ac2cf64780d1b9dfe2b249d83dd7) | Mission, vision, features, descriptions |
 | Brand Strategy | [Notion: Brand Strategy](https://www.notion.so/2b67ac2cf647804fab01e174d7e6cd1a) | Positioning, target audience, SWOT |
-| Business Model | [Notion: Business Model](https://www.notion.so/24f7ac2cf647805cb530cf087938ddc0) | Revenue streams, pricing, cost structure, growth levers |
+| Business Model | [Notion: Business Model](https://www.notion.so/24f7ac2cf647805cb530cf087938ddc0) | Revenue streams, pricing, cost structure |
 | Market Research | [Notion: Market](https://www.notion.so/2b67ac2cf647802faf88f1f630e9de2d) | Competitor analysis, market size |
 | Technology & Infrastructure | [Notion: Tech & Infra](https://www.notion.so/2b67ac2cf64780d39b07d3dcdb358369) | Tech stack, AI prompts, scaling |
 | Legal & Compliance | [Notion: Legal](https://www.notion.so/1717ac2cf6478044bbc9e2bff6a6062c) | Business legal, contracts, copyright, IP |
-| Roadmap | [Notion: Roadmap](https://www.notion.so/1937ac2cf64780c0935ccb32d50cb749) | MVP → Growth → Ecosystem phasing |
-| Features (Model 1) | [Notion: Model 1](https://www.notion.so/1b17ac2cf647805f96bfcc164e0fe872) | Detailed feature specs — Stage 1 & Stage 2 |
-| Features (Model 2 / MoSCoW) | [Notion: Model 2](https://www.notion.so/1b17ac2cf6478050bc73fb5b2f45f4f4) | Feature prioritization, habit loops, phased info |
-| Marketing | [Notion: Marketing](https://www.notion.so/31f7ac2cf647801cb2c1ee90da9b122a) | Organic, hybrid, paid channels |
-| Funnel | [Notion: Funnel](https://www.notion.so/3107ac2cf647802da7ede3da98d747ed) | Awareness → Trust → Conversion → Retention |
-| KPI | [Notion: KPI](https://www.notion.so/30a7ac2cf64780c79d4bd1329c7d0f6d) | Key performance indicators |
-| Success Metrics | [Notion: Success Metrics](https://www.notion.so/30a7ac2cf647805b9ec0ff3c449a6496) | Success measurement framework |
+| Roadmap | [Notion: Roadmap](https://www.notion.so/1937ac2cf64780c0935ccb32d50cb749) | MVP -> Growth -> Ecosystem phasing |
+| Features | [Notion: Features](https://www.notion.so/18d7ac2cf64780eb977ddf502c5ebbd4) | Feature specs |
 
 ---
 
 ## 15. Key Business Model Details (Extended)
 
-> Additional section for agents needing deeper business model context.
-
 ### Key Partners
-- Dermatologists & estheticians (credibility + content)
-- Indie beauty brands (marketplace supply)
+- Dermatologist partnerships (credibility + content validation)
+- Indie beauty brands (future marketplace supply)
 - Affiliate networks (Skimlinks, Rakuten, Impact)
-- AR/AI technology providers
-- Wellness brands (cross-promotions)
-- NGOs & research institutions (data licensing)
+- AR/AI technology providers (future)
+- Wellness brands (cross-promotions, future)
 
-### Key Activities
-- Maintaining the AI personalization engine
+### Key Activities (MVP)
+- Maintaining camera scan accuracy and AI personalization engine
 - Curating product data and ingredient transparency
-- Moderating marketplace sellers
-- Running creator onboarding programs
-- Updating educational content
-- Improving AR diagnostics
-- Running community engagement initiatives
+- Building and refining the personalization engine (skin profile + environment + usage)
+- Running gamification and engagement loops
+- Producing scan demo content for marketing
 
 ### Key Resources
-- AI models and personalization algorithms
-- Ingredient and product databases
-- AR scanning and visualization tools
-- Marketplace infrastructure
-- Creator tools and analytics
-- Brand partnerships
-- Community and user base
+- Claude Vision AI (product identification + ingredient parsing)
+- Personalization engine (skin profile + environment + usage patterns)
+- Ingredient safety knowledge (safety tiers + cautionReasons)
+- Gamification system (points, badges, streaks, tiers)
+- Community and user base (future)
 
 ---
 
-## 16. White Space & Differentiation Map (Extended)
-
-> Additional section for agents doing competitive analysis and positioning work.
+## 16. White Space & Differentiation Map
 
 ### MVP White Space
-- No platform unifies personalized education with routine tracking
-- Ingredient transparency exists, but without guided context or progress insights
-- Marketplaces offer commerce but lack holistic personalization
-- Community validation is disconnected from individual skincare journeys
-- No dynamic matching system that filters by budget, size, quantity, and compatibility
+- No platform lets you scan a product and instantly know if it works for YOUR skin
+- Reviews exist everywhere but are never filtered to people with similar skin profiles
+- Compatible product discovery exists but is never filtered by environment/weather/season
+- Ingredient safety info exists but never explains WHY something is flagged with precautions
+- Routine building tools exist but are disconnected from product scanning and compatibility
 
 ### Fully Scaled White Space
-- Competitors offer personalization but lack deep education, wellness integration, and commerce
-- Ingredient transparency is siloed and not tied to user progress
-- Marketplaces lack personalized matching and routine support
+- No platform unifies camera scanning, personalized discovery, routine tracking, community, and commerce
 - No creator-first SkinTech ecosystem exists
 - No platform connects diagnostics, education, tracking, and commerce into one adaptive experience
 
 ---
 
-## 17. Habit Loop Design (Extended)
-
-> Additional section for product and growth agents understanding retention mechanics.
+## 17. Habit Loop Design
 
 ### MVP Habit Loops
-**Trigger → Action → Reward → Investment**
+**Trigger -> Action -> Reward -> Investment**
+- Trigger: Picking up a skincare product (in store or at home)
+- Action: Scan it with Lorem Curae camera
+- Reward: Instant personalized analysis — ingredient safety, compatibility, reviews from similar skin
+- Investment: Scan history, shelf data, routine data, streak progress (creates switching costs)
+
+**Daily Loop:**
 - Trigger: Morning/evening routine reminder
-- Action: Log routine, check ingredients, get AI recommendation
-- Reward: Personalized insight, progress update, Curae Coins
-- Investment: Routine history, skin data, regimen notes (creates switching costs)
+- Action: Log routine completion
+- Reward: Streak continuation, points earned, badge progress, tier advancement
+- Investment: Streak length, routine history, personalization depth
 
 ### Growth Phase Additions
-- Community validation loops (share progress → get feedback → feel motivated)
-- Creator content loops (publish → get engagement → earn revenue)
-- AR exploration loops (try products virtually → discover → purchase)
+- Community validation loops (share progress -> get feedback -> feel motivated)
+- Creator content loops (publish -> get engagement -> earn revenue)
+- AR exploration loops (try products virtually -> discover -> purchase)
 
 ---
 
-## 18. Exploitation & Mitigation Strategies (Extended)
+## 18. Exploitation & Mitigation Strategies
 
-> Additional section for strategy agents evaluating risk and opportunity.
-
-### Strength Exploitation
-- Position as the "all-in-one SkinTech hub" — highlight seamless transitions between diagnostics, education, tracking, and commerce
-- Showcase real-time personalization in demos and onboarding
-- Create viral AR experiences (e.g., "Try Your Future Skin")
-- Launch a "Founding Creators" program to onboard indie brands
-- Publish expert-backed content and ingredient explainers to drive SEO
+### Strength Exploitation (MVP)
+- Position as the "scan and know" platform — the tool you reach for every time you pick up a product
+- Create viral scan demo content ("I scanned my entire bathroom shelf — here's what I found")
+- Showcase real-time personalized ingredient analysis in demos and onboarding
+- Use gamification to drive daily return and habit formation
+- Leverage profile-filtered reviews as a unique trust differentiator
 
 ### Weakness Mitigation
-- Build interactive onboarding with guided walkthroughs and "Quick Start" modes per user type
-- Prioritize modular MVP with scalable architecture
-- Make AR optional and complementary to core features
-- Implement tiered seller onboarding, verified profiles, and community rating systems
-- Partner with dermatologists, estheticians, and wellness experts for content validation
+- Build interactive onboarding with skin survey -> first scan guided flow
+- Camera scan works with ANY product (not just catalog) — highlight this
+- Prioritize scan accuracy and ingredient safety quality
+- Partner with dermatologists for content validation and credibility
+- Keep the app focused (daily companion) vs. trying to do everything at once
 
 ---
 
@@ -714,18 +663,19 @@ Major cost centers:
 
 | Agent | Sections They Reference | Example Task |
 |---|---|---|
-| **Research Agent** | §7 Competitive Landscape, §9 Marketing, §13 Strategic Context, §3 Problems Solved, §16 White Space | "Compare our pricing to competitors" |
-| **Reviewer Agent** | §3 Tech Stack, §17 Habit Loops | "Review onboarding flow against our retention model" |
-| **QA/Testing Agent** | §3 Tech Stack, §11 Compliance | "Verify GDPR compliance in data handling" |
-| **Marketing Skills** | §2 Founder & Credibility, §3 Problems Solved, §4 Audience + Sophistication, §6 Brand & Voice, §8 Customer Journey, §9 Channels | "Draft email sequence for B2C segment" |
-| **Strategy Tasks** | §5 Business Model, §10 Metrics, §13 Strategic Context, §15 Key Business Model, §18 Exploitation/Mitigation | "Evaluate whether to add a new pricing tier" |
-| **Competitive Analysis** | §7 Full section, §3 Features, §5 Pricing, §2 Your Edge, §16 White Space | "How does our feature set compare to [competitor]?" |
-| **Content / Copy Tasks** | §2 Origin Story, §4 Audience Sophistication + Emotional Desires, §6 Brand & Voice, §3 Problems Solved | "Write a landing page hero section" |
-| **Product Agent** | §3 Features + Roadmap, §17 Habit Loops, §8 Key Conversion Points, §15 Key Activities | "Prioritize next sprint features" |
-| **Growth Agent** | §9 Growth Channels + Growth Levers, §8 Funnel, §10 KPIs, §18 Exploitation Strategies | "Design pre-launch waitlist campaign" |
+| **Research Agent** | SS7 Competitive, SS9 Marketing, SS13 Strategic, SS3 Problems, SS16 White Space | "Compare our camera scan to competitors" |
+| **Reviewer Agent** | SS3 Tech Stack, SS17 Habit Loops | "Review onboarding flow against retention model" |
+| **QA/Testing Agent** | SS3 Tech Stack, SS11 Compliance | "Verify camera scan data handling" |
+| **Marketing Skills** | SS2 Founder, SS3 Problems, SS4 Audience, SS6 Brand & Voice, SS8 Journey, SS9 Channels | "Draft TikTok script for scan demo" |
+| **Strategy Tasks** | SS5 Business Model, SS10 Metrics, SS13 Strategic, SS15 Key Business Model, SS18 Exploitation | "Evaluate scan-based pricing tiers" |
+| **Competitive Analysis** | SS7 Full section, SS3 Features, SS5 Pricing, SS2 Your Edge, SS16 White Space | "How does our camera scan compare to [competitor]?" |
+| **Content / Copy Tasks** | SS2 Origin Story, SS4 Audience + Emotional Desires, SS6 Brand & Voice, SS3 Descriptions | "Write app store description" |
+| **Product Agent** | SS3 Features + Roadmap, SS17 Habit Loops, SS8 Conversion Points, SS15 Key Activities | "Prioritize next features after MVP" |
+| **Growth Agent** | SS9 Growth Channels + Levers, SS8 Funnel, SS10 KPIs, SS18 Exploitation Strategies | "Design pre-launch scan demo campaign" |
 
 ---
 
-*Last updated: 2026-03-14*
-*Version: 1.0*
-*Source: Lorem Curae Notion workspace — Brand Overview, Brand Strategy, Business Model, Market folders*
+*Last updated: 2026-03-21*
+*Version: 2.0*
+*Source: Lorem Curae Notion workspace (brand identity) + codebase audit (tech/features/architecture)*
+*Major update: MVP repositioned around camera-powered intelligence; all tech stats updated to match codebase*
