@@ -33,6 +33,7 @@ import { useAuth } from '../../../lib/auth/AuthContext';
 import { highlightRelevantKeywords } from '../../../lib/utils/highlightKeywords';
 import { matchesConcern } from '../../../lib/utils/matching';
 import { isComplexionMatch } from '../../../lib/utils/reviewSimilarity';
+import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 interface ScanReviewPanelProps {
@@ -246,11 +247,15 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
       const skinType = getEffectiveSkinType() || '';
       const concerns = getEffectiveConcerns();
       const sensitivity = getEffectiveSensitivity();
-      searchProductReviews(
-        product.name,
-        product.brand,
-        { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-      ).then(results => {
+      const minDisplay = new Promise(r => setTimeout(r, 800));
+      Promise.all([
+        searchProductReviews(
+          product.name,
+          product.brand,
+          { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+        ),
+        minDisplay,
+      ]).then(([results]) => {
         if (!cancelled && results) setWebReviews(results);
       }).finally(() => {
         if (!cancelled) setWebReviewsLoading(false);
@@ -263,10 +268,10 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
   if (loading) {
     return (
       <div className="border-t border-blush/50 px-4 py-4">
-        <div className="space-y-2 animate-pulse">
-          <div className="h-3 bg-blush/40 rounded w-2/3" />
-          <div className="h-3 bg-blush/40 rounded w-1/2" />
-        </div>
+        <PersonalizingLoader
+          steps={['Finding reviews from people like you...', 'Curating by your skin profile...']}
+          icon="search"
+        />
       </div>
     );
   }
@@ -436,10 +441,10 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
           {webExpanded && (
             <div className="px-4 pb-4 space-y-2.5">
               {webReviewsLoading && webReviews.length === 0 && (
-                <div className="space-y-2 animate-pulse">
-                  <div className="h-3 bg-blush/40 rounded w-3/4" />
-                  <div className="h-3 bg-blush/40 rounded w-1/2" />
-                </div>
+                <PersonalizingLoader
+                  steps={['Searching the web for reviews...']}
+                  icon="search"
+                />
               )}
               {webReviews.map((wr, idx) => (
                 <div key={`web-review-${idx}`} className="bg-cream/50 border border-blush/30 rounded-lg p-3">

@@ -2,6 +2,8 @@
  * ScanProcessing — loading state while Claude Vision analyzes the product photo.
  */
 
+import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
+
 interface ScanProcessingProps {
   previewUrl: string;
 }
@@ -17,28 +19,14 @@ export default function ScanProcessing({ previewUrl }: ScanProcessingProps) {
             alt="Product being scanned"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-deep/20 flex items-center justify-center">
-            <div className="w-10 h-10 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          </div>
+          <div className="absolute inset-0 bg-deep/20" />
         </div>
-      ) : (
-        <div className="w-20 h-20 flex items-center justify-center">
-          <div className="w-10 h-10 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-      )}
+      ) : null}
 
-      <div className="text-center space-y-2">
-        <p className="text-sm font-medium text-deep">Analyzing product...</p>
-        <p className="text-xs text-warm-gray">
-          Reading label and identifying ingredients
-        </p>
-      </div>
-
-      {/* Pulse skeleton */}
-      <div className="w-full max-w-xs space-y-2 animate-pulse">
-        <div className="h-3 bg-blush/20 rounded w-full" />
-        <div className="h-3 bg-blush/20 rounded w-4/5" />
-        <div className="h-3 bg-blush/20 rounded w-3/5" />
+      <div className="w-full max-w-xs">
+        <PersonalizingLoader
+          steps={['Identifying product...', 'Reading label...', 'Almost there...']}
+        />
       </div>
     </div>
   );

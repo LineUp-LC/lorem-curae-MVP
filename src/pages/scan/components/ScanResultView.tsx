@@ -35,6 +35,7 @@ import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentCo
 import type { ScoredProduct } from '../../../lib/utils/productSimilarity';
 import type { WebProduct } from '../../../types/webSearch';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
+import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
 // Lazy-loaded tab content
@@ -360,18 +361,6 @@ function WebSimilarProductCard({ product }: { product: WebProduct }) {
 }
 
 // ---------------------------------------------------------------------------
-// Tab spinner
-// ---------------------------------------------------------------------------
-
-function TabSpinner() {
-  return (
-    <div className="flex justify-center py-8">
-      <div className="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-    </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
 // "Is It For Me?" verdict renderer
 // ---------------------------------------------------------------------------
 
@@ -632,7 +621,8 @@ export default function ScanResultView({
         environment: environmentCtx,
       });
 
-      const res = await requestAIInsight(ctx);
+      const minDisplay = new Promise(r => setTimeout(r, 800));
+      const [res] = await Promise.all([requestAIInsight(ctx), minDisplay]);
       if (res.success) {
         setIsItForMeText(res.insight);
       } else {
@@ -684,7 +674,8 @@ export default function ScanResultView({
       }
       setFullScanLoading(true);
       setFullScanError(null);
-      const res = await scanProductFull(imageBase64);
+      const minDisplay = new Promise(r => setTimeout(r, 800));
+      const [res] = await Promise.all([scanProductFull(imageBase64), minDisplay]);
       console.log('[WebSearch] scanProductFull response:', res.success, 'error:', (res as { error?: string }).error);
       if (res.success) {
         setFullScanResult(res.result);
@@ -706,11 +697,15 @@ export default function ScanResultView({
         // Also fetch web similar products (non-blocking)
         if (user && webSimilarProducts.length === 0) {
           setWebSimilarLoading(true);
-          searchSimilarProducts({
-            name: sourceProduct.name,
-            brand: sourceProduct.brand,
-            category: sourceProduct.category,
-          }).then(results => {
+          const minDisplay = new Promise(r => setTimeout(r, 800));
+          Promise.all([
+            searchSimilarProducts({
+              name: sourceProduct.name,
+              brand: sourceProduct.brand,
+              category: sourceProduct.category,
+            }),
+            minDisplay,
+          ]).then(([results]) => {
             if (results) setWebSimilarProducts(results);
           }).finally(() => setWebSimilarLoading(false));
         }
@@ -901,10 +896,9 @@ export default function ScanResultView({
         {isItForMeOpen && (
           <div className="mt-2 px-4 py-3 bg-cream/50 border border-blush/30 rounded-xl">
             {isItForMeLoading ? (
-              <div className="flex items-center gap-2 py-2">
-                <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs text-warm-gray">Analyzing for your skin profile...</span>
-              </div>
+              <PersonalizingLoader
+                steps={['Analyzing for your skin profile...', 'Checking ingredient compatibility...', 'Personalizing recommendation...']}
+              />
             ) : isItForMeText ? (
               <IsItForMeVerdict text={isItForMeText} />
             ) : (
@@ -942,7 +936,11 @@ export default function ScanResultView({
           {/* Tab 1: Breakdown */}
           {activeTab === 'breakdown' && (
             <>
-              {fullScanLoading && <TabSpinner />}
+              {fullScanLoading && (
+                <PersonalizingLoader
+                  steps={['Scanning full ingredient list...', 'Categorizing ingredients...', 'Scoring safety for your skin...']}
+                />
+              )}
               {fullScanError && !fullScanLoading && (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">{fullScanError}</p>
@@ -969,14 +967,23 @@ export default function ScanResultView({
           {activeTab === 'compatible' && console.log('[WebSearch] Compatible tab mounted, fullScanResult:', !!fullScanResult, 'fullScanLoading:', fullScanLoading, 'imageBase64:', !!imageBase64)}
           {activeTab === 'compatible' && (
             <>
-              {fullScanLoading && <TabSpinner />}
+              {fullScanLoading && (
+                <PersonalizingLoader
+                  steps={['Scanning full ingredient list...', 'Finding compatible products...']}
+                />
+              )}
               {fullScanError && !fullScanLoading && (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">{fullScanError}</p>
                 </div>
               )}
               {fullScanResult && !fullScanLoading && (
-                <Suspense fallback={<TabSpinner />}>
+                <Suspense fallback={
+                  <PersonalizingLoader
+                    steps={['Loading compatible products...']}
+                    icon="search"
+                  />
+                }>
                   <PostScanDiscovery
                     scanResult={effectiveResult}
                     matchedProduct={matchedProduct}
@@ -995,7 +1002,10 @@ export default function ScanResultView({
           {activeTab === 'similar' && (
             <>
               {similarProducts === null ? (
-                <TabSpinner />
+                <PersonalizingLoader
+                  steps={['Finding alternatives...', 'Comparing formulations...']}
+                  icon="search"
+                />
               ) : similarProducts.length === 0 && webSimilarProducts.length === 0 && !webSimilarLoading ? (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">No similar products found.</p>
@@ -1022,9 +1032,11 @@ export default function ScanResultView({
 
                   {/* Web loading */}
                   {webSimilarLoading && (
-                    <div className="flex items-center gap-2 mt-3">
-                      <i className="ri-global-line text-warm-gray text-sm animate-pulse" />
-                      <p className="text-[11px] text-warm-gray">Searching the web...</p>
+                    <div className="mt-3">
+                      <PersonalizingLoader
+                        steps={['Searching the web for alternatives...']}
+                        icon="search"
+                      />
                     </div>
                   )}
                 </div>

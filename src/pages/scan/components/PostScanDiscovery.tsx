@@ -27,6 +27,7 @@ import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
+import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
 import ScanReviewPanel from './ScanReviewPanel';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
@@ -130,16 +131,20 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     setWebError(false);
     console.log('[WebSearch] Fetching compatible products, user:', !!user, 'category:', categoryFilter);
 
-    searchCompatibleProducts(
-      {
-        name: scanSourceProduct.name,
-        brand: scanSourceProduct.brand,
-        category: scanSourceProduct.category,
-        ingredients: scanSourceProduct.keyIngredients.slice(0, 10),
-      },
-      { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-      categoryFilter !== 'all' ? categoryFilter : undefined,
-    ).then(results => {
+    const minDisplay = new Promise(r => setTimeout(r, 800));
+    Promise.all([
+      searchCompatibleProducts(
+        {
+          name: scanSourceProduct.name,
+          brand: scanSourceProduct.brand,
+          category: scanSourceProduct.category,
+          ingredients: scanSourceProduct.keyIngredients.slice(0, 10),
+        },
+        { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+        categoryFilter !== 'all' ? categoryFilter : undefined,
+      ),
+      minDisplay,
+    ]).then(([results]) => {
       if (cancelled) return;
       if (results) {
         setWebProducts(results);
@@ -473,23 +478,11 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
 
       {/* Web loading state */}
       {webLoading && (
-        <div className="space-y-3 mt-2">
-          <div className="flex items-center gap-2">
-            <i className="ri-global-line text-warm-gray text-sm animate-pulse" />
-            <p className="text-xs text-warm-gray">Searching the web for compatible products...</p>
-          </div>
-          {[1, 2, 3].map(i => (
-            <div key={i} className="bg-white rounded-2xl border border-blush shadow-sm p-4 animate-pulse">
-              <div className="flex gap-3">
-                <div className="w-16 h-16 rounded-xl bg-blush/40" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-3 bg-blush/40 rounded w-1/4" />
-                  <div className="h-4 bg-blush/40 rounded w-3/4" />
-                  <div className="h-3 bg-blush/40 rounded w-1/2" />
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="mt-2">
+          <PersonalizingLoader
+            steps={['Searching for compatible products...', 'Filtering by your skin profile...', 'Ranking results...']}
+            icon="search"
+          />
         </div>
       )}
 
