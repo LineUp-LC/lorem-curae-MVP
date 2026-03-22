@@ -1,55 +1,71 @@
+import { supabase } from '../supabase-browser';
 import { awardPoints, getPointsAccount, POINTS_ACTIONS } from './curaePoints';
 import { checkBadgeUnlock } from './badgeEngine';
 import type { GamificationAction, GamificationResult, BadgeCheckContext } from '@/types/gamification';
 
-// Track one-time actions per session to prevent duplicate awards
+// ---------------------------------------------------------------------------
+// Session-level caches (reset on page reload — DB is source of truth)
+// ---------------------------------------------------------------------------
+
+/** Tracks once-per-session actions */
 const sessionAwardedActions = new Set<string>();
 
-// Track one-time-ever actions via localStorage
-const ONCE_EVER_KEY = 'gamification_once_ever';
+/** Caches DB lookups for once-ever actions to avoid repeated queries */
+const onceEverCache = new Map<string, boolean>();
 
-function getOnceEverActions(): Set<string> {
-  try {
-    const saved = localStorage.getItem(ONCE_EVER_KEY);
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  } catch {
-    return new Set();
-  }
-}
+// ---------------------------------------------------------------------------
+// Once-ever action sets
+// ---------------------------------------------------------------------------
 
-function markOnceEver(action: string): void {
-  try {
-    const set = getOnceEverActions();
-    set.add(action);
-    localStorage.setItem(ONCE_EVER_KEY, JSON.stringify(Array.from(set)));
-  } catch {
-    // Silent fail — localStorage not critical
-  }
-}
-
-// All actions award points once ever per user
 const ONCE_EVER_ACTIONS: Set<GamificationAction> = new Set([
   'SIGNUP',
   'SKIN_SURVEY',
-  'PRODUCT_REVIEW',
-  'COMMUNITY_POST',
-  'ROUTINE_CREATED',
-  'ROUTINE_LOGGED',
-  'PRODUCT_PURCHASE',
-  'REFERRAL',
-  'INGREDIENT_SEARCH',
   'PROFILE_COMPLETE',
-  'MONTHLY_ACTIVE',
-  'PRODUCT_SCAN',
-  'PRODUCT_SAVED',
-  'AI_CHAT',
-  'STREAK_7_DAY',
-  'STREAK_30_DAY',
   'FIRST_COMPARISON',
 ]);
 
-// Reserved for future per-session actions (currently empty — all actions are once-ever)
-const ONCE_PER_SESSION_ACTIONS: Set<GamificationAction> = new Set([]);
+// Reserved for future per-session actions
+const ONCE_PER_SESSION_ACTIONS: Set<GamificationAction> = new Set([
+  'AI_CHAT',
+]);
+
+// ---------------------------------------------------------------------------
+// Supabase-backed once-ever check
+// ---------------------------------------------------------------------------
+
+async function hasActionBeenAwarded(userId: string, action: string): Promise<boolean> {
+  // Check session cache first
+  const cacheKey = `${userId}:${action}`;
+  if (onceEverCache.has(cacheKey)) {
+    return onceEverCache.get(cacheKey)!;
+  }
+
+  try {
+    const { count, error } = await supabase
+      .from('points_transactions')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('transaction_type', action)
+      .limit(1);
+
+    if (error) {
+      console.error('[Gamification] DB check failed for', action, error);
+      // On error, assume awarded to prevent duplicate points (safe default)
+      return true;
+    }
+
+    const awarded = (count ?? 0) > 0;
+    onceEverCache.set(cacheKey, awarded);
+    return awarded;
+  } catch {
+    // Network error — assume awarded (safe default)
+    return true;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main dispatcher
+// ---------------------------------------------------------------------------
 
 export async function onAction(
   userId: string | null | undefined,
@@ -60,17 +76,16 @@ export async function onAction(
   if (!userId) return null;
 
   try {
-    // Once-ever duplicate check
+    // Once-ever duplicate check (Supabase-backed)
     if (ONCE_EVER_ACTIONS.has(action)) {
-      const onceEver = getOnceEverActions();
-      if (onceEver.has(action)) {
+      const alreadyAwarded = await hasActionBeenAwarded(userId, action);
+      if (alreadyAwarded) {
         console.log('[Gamification] Action already awarded (once-ever):', action);
         return null;
       }
-      markOnceEver(action);
     }
 
-    // Once-per-session duplicate check
+    // Once-per-session duplicate check (in-memory)
     if (ONCE_PER_SESSION_ACTIONS.has(action)) {
       if (sessionAwardedActions.has(action)) return null;
       sessionAwardedActions.add(action);
@@ -87,7 +102,11 @@ export async function onAction(
         action,
         actionConfig.description
       );
-      if (success) pointsAwarded = actionConfig.points;
+      if (success) {
+        pointsAwarded = actionConfig.points;
+        // Update cache — this action is now awarded
+        onceEverCache.set(`${userId}:${action}`, true);
+      }
     }
 
     // Check badge unlocks

@@ -2,7 +2,7 @@
 // See Notion "Deferred Work Tracker" to restore when trigger conditions are met
 
 import { useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUserLocation } from '@/lib/utils/locationState';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
@@ -26,7 +26,6 @@ interface ProfileDropdownProps {
 }
 
 const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
-  const navigate = useNavigate();
   const { user, profile, routineCount, signOut } = useAuth();
   const { displayString: userLocationDisplay, hasLocation } = useUserLocation();
 
@@ -54,9 +53,18 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const isPaidSubscriber = subscriptionTier === 'plus' || subscriptionTier === 'premium';
 
   const handleSignOut = async () => {
-    await signOut();
+    console.log('[Auth] Sign out clicked');
+    try {
+      await signOut();
+    } catch (e) {
+      console.error('[Auth] Sign out error:', e);
+    }
+    // Clear gamification and session data tied to this browser
+    localStorage.removeItem('gamification_once_ever');
+    localStorage.removeItem('scanHistory');
     onClose();
-    navigate('/auth/login');
+    // Hard redirect to clear all React state — navigate() can race with auth listener
+    window.location.href = '/';
   };
 
   return (
