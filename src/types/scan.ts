@@ -58,6 +58,8 @@ export interface ScanRequest {
   mediaType?: 'image/jpeg' | 'image/png' | 'image/webp';
   /** UPC/EAN barcode string — when present, skips Vision and does catalog lookup */
   upc?: string;
+  /** 'identify' = fast ID only (no ingredients), 'full' = complete ingredient analysis */
+  mode?: 'identify' | 'full';
   /** Optional user skin profile for personalized ingredient relevance */
   skinProfile?: {
     skinType?: string;

@@ -119,6 +119,8 @@ export async function createScanThumbnail(file: File | Blob): Promise<string> {
 export interface ScanClientResult {
   success: true;
   result: ScanResult;
+  /** Compressed base64 image for deferred full scan */
+  imageBase64?: string;
 }
 
 export interface ScanClientError {
@@ -209,6 +211,7 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
       body: JSON.stringify({
         image: base64,
         mediaType: 'image/jpeg',
+        mode: 'identify',
         ...(hasSkinProfile ? { skinProfile: { skinType, concerns, sensitivity } } : {}),
       }),
     });
@@ -225,9 +228,63 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
     return {
       success: true,
       result: data.result,
+      imageBase64: base64,
     };
   } catch (error) {
     console.error('[ScanClient] Error calling product-scan:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Network error',
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Full scan (deferred ingredient parsing)
+// ---------------------------------------------------------------------------
+
+/**
+ * Run a full ingredient analysis on a previously captured image.
+ *
+ * Called lazily when the user taps the "Breakdown" tab — not on initial scan.
+ * Sends mode: 'full' to get complete ingredient parsing with categories,
+ * safety tiers, caution reasons, and personalized relevance.
+ */
+export async function scanProductFull(imageBase64: string): Promise<ScanClientResponse> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session?.access_token) {
+    return { success: false, error: 'Sign in to scan products' };
+  }
+
+  const skinType = getEffectiveSkinType() ?? undefined;
+  const concerns = getEffectiveConcerns();
+  const sensitivity = getEffectiveSensitivity() ?? undefined;
+  const hasSkinProfile = skinType || concerns.length > 0;
+
+  try {
+    const response = await fetch(PRODUCT_SCAN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: JSON.stringify({
+        image: imageBase64,
+        mediaType: 'image/jpeg',
+        mode: 'full',
+        ...(hasSkinProfile ? { skinProfile: { skinType, concerns, sensitivity } } : {}),
+      }),
+    });
+
+    const data: ScanResponse = await response.json();
+
+    if (!response.ok || !data.success || !data.result) {
+      return { success: false, error: data.error || 'Full scan failed' };
+    }
+
+    return { success: true, result: data.result };
+  } catch (error) {
+    console.error('[ScanClient] Error calling product-scan (full):', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Network error',

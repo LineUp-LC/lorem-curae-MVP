@@ -17,7 +17,7 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 |-----------|------|---------|
 | Type definitions | `src/types/scan.ts` | `ScanResult`, `ScanRequest`, `ScanResponse`, `ParsedIngredient` (incl. `category`, `cautionReason`), `ScanHistoryEntry` |
 | Edge Function | `supabase/functions/product-scan/index.ts` | Claude Vision proxy — identification + ingredient parsing |
-| Client | `src/lib/ai/scanClient.ts` | Image compress + thumbnail + API caller |
+| Client | `src/lib/ai/scanClient.ts` | Image compress + thumbnail + `scanProduct()` (identify) + `scanProductFull()` (deferred full) |
 | Scan history | `src/lib/utils/scanHistory.ts` | localStorage persistence for past scans |
 | Page | `src/pages/scan/page.tsx` | Main scan page (state machine + history) |
 | CameraCapture | `src/pages/scan/components/CameraCapture.tsx` | File input + webcam + barcode mode (BarcodeDetector API) |
@@ -61,11 +61,28 @@ Thumbnail: `File → loadImage() → canvas resize (80px) → toDataURL('image/j
 
 **Endpoint:** `POST /functions/v1/product-scan`
 
-**Request (photo mode):**
+### Two modes
+
+| Mode | When used | What it does | MAX_TOKENS |
+|------|-----------|-------------|------------|
+| `identify` (default) | Initial scan | Fast product ID only — no ingredient parsing | 512 |
+| `full` | Deferred (tab tap) | Full ingredient analysis with categories, safety, relevance | 8192 |
+
+**Request (identify — default):**
 ```json
 {
   "image": "<raw-base64-string>",
   "mediaType": "image/jpeg",
+  "mode": "identify"
+}
+```
+
+**Request (full — deferred):**
+```json
+{
+  "image": "<raw-base64-string>",
+  "mediaType": "image/jpeg",
+  "mode": "full",
   "skinProfile": {
     "skinType": "oily",
     "concerns": ["acne", "dark spots"],
@@ -82,9 +99,27 @@ Thumbnail: `File → loadImage() → canvas resize (80px) → toDataURL('image/j
 ```
 
 `skinProfile` is optional — when present, ingredient relevance is personalized.
+`mode` defaults to `"identify"` when omitted.
 When `upc` is present, Vision is skipped and the catalog is searched by UPC directly.
 
-**Response (success):**
+**Response (identify):**
+```json
+{
+  "success": true,
+  "result": {
+    "match": true,
+    "productId": 1,
+    "confidence": "high",
+    "detectedProduct": "Gentle Hydrating Cleanser",
+    "detectedBrand": "Pure Essence",
+    "detectedCategory": "cleanser",
+    "timestamp": "2026-03-22T..."
+  },
+  "meta": { "authenticated": true, "tokensUsed": 200, "timestamp": "..." }
+}
+```
+
+**Response (full):**
 ```json
 {
   "success": true,
@@ -100,15 +135,15 @@ When `upc` is present, Vision is skipped and the catalog is searched by UPC dire
       { "name": "Glycolic Acid", "function": "exfoliates dead skin cells", "safetyTier": "caution", "category": "Active Exfoliant", "cautionReason": "Can cause irritation and sun sensitivity. Start at low concentrations and always wear SPF." }
     ],
     "ingredientCount": 12,
-    "timestamp": "2026-03-18T..."
+    "timestamp": "2026-03-22T..."
   },
   "meta": { "authenticated": true, "tokensUsed": 1900, "timestamp": "..." }
 }
 ```
 
-**Auth:** Required. Returns 401 for unauthenticated requests. MAX_TOKENS: 8192.
+**Auth:** Required. Returns 401 for unauthenticated requests.
 
-When `stop_reason === 'max_tokens'`, the response sets `ingredientsTruncated: true` and the UI shows a hint to rescan.
+When `stop_reason === 'max_tokens'` (full mode), the response sets `ingredientsTruncated: true` and the UI shows a hint to rescan.
 
 ---
 
@@ -164,16 +199,33 @@ The scanner works with ANY real product — catalog matching is a bonus, not a r
 
 | Condition | UI Behavior |
 |-----------|-------------|
-| Catalog match (`match: true`) | "Product Identified" + rich card with rating/reviews + "View Product Details" link + ingredients + shelf/routine |
-| Non-catalog product identified (`match: false`, `detectedProduct` present) | "Product Identified" + rich card with brand/name/category + ingredients + shelf/routine |
-| Low-confidence blank (`confidence: 'low'`, no product/brand detected) | "Could Not Identify" + retry tips (lighting, closer, brand visible) |
-| UPC not recognized | "UPC Not Recognized" + UPC displayed |
+| Catalog match (`match: true`) | "Product Identified" + rich card with rating/reviews + "View Product Details" link + shelf/routine + tabs |
+| Non-catalog product identified (`match: false`, `detectedProduct` present) | "Product Identified" + rich card with brand/name/category + shelf/routine + tabs |
+| Low-confidence blank (`confidence: 'low'`, no product/brand detected) | "Could Not Identify" + retry tips — NO tabs |
+| UPC not recognized | "UPC Not Recognized" + UPC displayed — NO tabs |
+
+### Tabbed UI Architecture
+
+After product identification, the result view shows:
+1. **Product card** (always visible — from identify-only response)
+2. **"Is It For Me?"** collapsible block — on-demand AI call via `explain_product` mode
+3. **Tab bar** — 3 tabs, NO tab active by default:
+   - **Breakdown**: calls `scanProductFull()` → IngredientBreakdown + (future: ScanReviewPanel)
+   - **Compatible**: needs full scan data → PostScanDiscovery
+   - **Similar**: `scoreSimilarProducts()` → inline product cards (synchronous, no API)
+
+Tab content is lazy-loaded on first tap and cached in component state (instant on return).
+`imageBase64` is stored in page state after initial identify scan for deferred full scan.
+
+Client functions:
+- `scanProduct(file)` → sends `mode: 'identify'` → fast ID only
+- `scanProductFull(imageBase64)` → sends `mode: 'full'` → full ingredient analysis
 
 ### Key rules
 
 - Both catalog and non-catalog results show the SAME rich card layout (image, brand, name, category, CTAs)
 - The ONLY difference: catalog matches get a "View Product Details" link; non-catalog products don't
-- Ingredient breakdown renders for ALL results with `ingredients.length > 0`
+- Ingredient breakdown is ONLY shown inside the Breakdown tab (not on initial result)
 - "Add to Shelf" and "Add to Routine" work for both matched and non-matched products
 - Gamification points awarded for ANY successful identification (not just catalog matches)
 - Edge Function prompt prioritizes identification over catalog matching — common brands listed as hints

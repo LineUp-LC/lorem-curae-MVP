@@ -23,7 +23,8 @@ const corsHeaders = {
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
-const MAX_TOKENS = 8192;
+const MAX_TOKENS_IDENTIFY = 512;
+const MAX_TOKENS_FULL = 8192;
 
 // Maximum base64 payload size: ~5 MB decoded → ~6.7 MB base64
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
@@ -59,6 +60,23 @@ interface SkinProfile {
   skinType?: string;
   concerns?: string[];
   sensitivity?: string;
+}
+
+function buildIdentifyPrompt(): string {
+  return `You are a skincare product analyzer for Lorem Curae. Identify the product from the photo.
+
+INSTRUCTIONS:
+1. Read the product name, brand, and any visible text on the packaging.
+2. Common skincare brands: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy.
+3. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible, "low" if guessing.
+4. Do NOT parse ingredients — set ingredients to [] and ingredientCount to 0.
+
+CATALOG MATCHING:
+${CATALOG_TEXT}
+If the product matches one in our catalog, set match: true and include the productId. Most products won't match — set match: false.
+
+Respond ONLY with valid JSON (no markdown, no explanation):
+{"match":false,"confidence":"high","detectedProduct":"Product Name","detectedBrand":"Brand","detectedCategory":"serum","ingredients":[],"ingredientCount":0}`;
 }
 
 function buildSystemPrompt(skinProfile?: SkinProfile): string {
@@ -127,6 +145,7 @@ interface ScanRequestBody {
   mediaType?: 'image/jpeg' | 'image/png' | 'image/webp';
   skinProfile?: SkinProfile;
   upc?: string;
+  mode?: 'identify' | 'full';
 }
 
 interface ParsedIngredientResult {
@@ -158,6 +177,7 @@ async function callClaudeVision(
   imageBase64: string,
   mediaType: string,
   skinProfile?: SkinProfile,
+  mode: 'identify' | 'full' = 'identify',
 ): Promise<{ success: true; result: ClaudeVisionResult; tokensUsed: number } | { success: false; error: string }> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
@@ -167,7 +187,8 @@ async function callClaudeVision(
   }
 
   try {
-    const systemPrompt = buildSystemPrompt(skinProfile);
+    const systemPrompt = mode === 'full' ? buildSystemPrompt(skinProfile) : buildIdentifyPrompt();
+    const maxTokens = mode === 'full' ? MAX_TOKENS_FULL : MAX_TOKENS_IDENTIFY;
 
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',
@@ -178,7 +199,7 @@ async function callClaudeVision(
       },
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
-        max_tokens: MAX_TOKENS,
+        max_tokens: maxTokens,
         system: systemPrompt,
         messages: [{
           role: 'user',
@@ -193,7 +214,9 @@ async function callClaudeVision(
             },
             {
               type: 'text',
-              text: 'Identify this skincare product and parse its full ingredient list. Respond with JSON only.',
+              text: mode === 'full'
+                ? 'Identify this skincare product and parse its full ingredient list. Respond with JSON only.'
+                : 'Identify this skincare product. Do NOT parse ingredients. Respond with JSON only.',
             },
           ],
         }],
@@ -395,7 +418,8 @@ serve(async (req: Request) => {
     }
 
     // Call Claude Vision with optional skin profile
-    const result = await callClaudeVision(body.image, body.mediaType, body.skinProfile);
+    const mode = body.mode === 'full' ? 'full' as const : 'identify' as const;
+    const result = await callClaudeVision(body.image, body.mediaType, body.skinProfile, mode);
 
     if (!result.success) {
       return new Response(

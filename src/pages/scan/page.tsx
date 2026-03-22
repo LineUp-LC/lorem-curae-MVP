@@ -1,12 +1,11 @@
 /**
- * Scan Page — Full Vision (Scan → Discover → Understand → Build)
+ * Scan Page — Tabbed Vision (Identify → Explore on demand)
  *
  * Allows authenticated users to photograph a skincare product
- * and identify it via Claude Vision. Includes:
- * - Full ingredient parsing with safety badges
- * - Compatible product discovery with AI WHY tags
- * - Profile-filtered reviews with AI summary
- * - Shelf, routine, and scan history integration
+ * and identify it via Claude Vision (fast identify mode).
+ *
+ * Deeper analysis (ingredients, compatible products, similar products)
+ * is lazy-loaded via tabs inside ScanResultView.
  *
  * Guest users see a login CTA.
  *
@@ -31,7 +30,6 @@ import ScanProcessing from './components/ScanProcessing';
 
 // Lazy loaded — only needed after scan completes
 const ScanResultView = lazy(() => import('./components/ScanResultView'));
-const PostScanDiscovery = lazy(() => import('./components/PostScanDiscovery'));
 const ScanHistory = lazy(() => import('./components/ScanHistory'));
 
 // ---------------------------------------------------------------------------
@@ -52,6 +50,7 @@ type ScanState =
 export default function ScanPage() {
   const { user, loading: authLoading } = useAuth();
   const [state, setState] = useState<ScanState>({ phase: 'idle' });
+  const [capturedBase64, setCapturedBase64] = useState<string | undefined>();
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
 
   // Load scan history on mount
@@ -79,7 +78,7 @@ export default function ScanPage() {
     }
 
     const result = response.result;
-    console.log('[Scan] Raw result:', JSON.stringify(result, null, 2));
+    setCapturedBase64(response.imageBase64);
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
@@ -107,6 +106,7 @@ export default function ScanPage() {
     if (state.phase !== 'idle' && 'previewUrl' in state) {
       URL.revokeObjectURL(state.previewUrl);
     }
+    setCapturedBase64(undefined);
     setState({ phase: 'idle' });
     window.scrollTo(0, 0);
   }, [state]);
@@ -115,6 +115,7 @@ export default function ScanPage() {
     if ('previewUrl' in state) {
       URL.revokeObjectURL(state.previewUrl);
     }
+    setCapturedBase64(undefined);
     setState({ phase: 'idle' });
     window.scrollTo(0, 0);
   }, [state]);
@@ -270,6 +271,7 @@ export default function ScanPage() {
                 result={state.result}
                 previewUrl={state.previewUrl}
                 matchedProduct={state.matchedProduct}
+                imageBase64={capturedBase64}
                 onScanAnother={handleScanAnother}
               />
             </Suspense>
@@ -320,15 +322,6 @@ export default function ScanPage() {
           )}
         </div>
 
-        {/* Post-scan discovery — below the main card (lazy loaded) */}
-        {state.phase === 'result' && (
-          <Suspense fallback={<div className="flex justify-center py-8"><div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" /></div>}>
-            <PostScanDiscovery
-              scanResult={state.result}
-              matchedProduct={state.matchedProduct}
-            />
-          </Suspense>
-        )}
       </div>
     </div>
   );
