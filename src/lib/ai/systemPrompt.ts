@@ -749,17 +749,22 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
 
   // Prohibited terms (synced with CLAUDE_PRODUCT.md Section 5)
   const prohibited = [
-    'diagnose', 'treat', 'cure', 'prescribe', 'medical advice', 'clinical result',
+    'diagnose', 'cure', 'prescribe', 'medical advice', 'clinical result',
     'guaranteed to', 'proven to', 'will fix', 'we recommend this retailer',
   ];
+  // "treat" as standalone is normal skincare language ("helps treat acne").
+  // Only flag medical-diagnostic patterns like "treat your condition/disease".
+  const medicalTreatPattern = /\btreat\s+(your\s+)?(condition|disease|illness|disorder)/i;
   for (const term of prohibited) {
     if (response.toLowerCase().includes(term)) {
-      // Allow "this is not medical advice" as a disclaimer
       if (term === 'medical advice' && response.toLowerCase().includes('this is not medical advice')) {
         continue;
       }
       issues.push(`Contains prohibited term: "${term}"`);
     }
+  }
+  if (medicalTreatPattern.test(response)) {
+    issues.push('Contains prohibited medical-diagnostic "treat" pattern');
   }
 
   // Length check per mode
@@ -782,8 +787,8 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     guided_comparison: 800,
     guided_routine_build: 1000,
     guided_routine_explain: 800,
-    curated_recommendation: 1200,
-    curated_review_summary: 500,
+    curated_recommendation: 2500,
+    curated_review_summary: 1000,
   };
 
   const limit = maxChars[mode] ?? 1000;
