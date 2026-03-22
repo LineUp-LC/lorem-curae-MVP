@@ -32,7 +32,7 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Edge Functions (Deno Runtime)
 
-16 Edge Functions in `supabase/functions/`. These run on Deno — NOT part of Vite/tsc build.
+17 Edge Functions in `supabase/functions/`. These run on Deno — NOT part of Vite/tsc build.
 
 | Function | Domain |
 |----------|--------|
@@ -52,6 +52,7 @@ related: ["09-security.md", "11-testing.md"]
 | affiliate-webhook | Affiliate — webhook handler |
 | data-anonymization | Privacy — user data anonymization |
 | password-check | Security — password validation |
+| product-search | Search — Serper.dev proxy for Google Shopping + reviews |
 
 ### Edge Function Rules
 - Use `Deno.serve()` pattern
@@ -65,7 +66,7 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Database Migrations
 
-9 migrations in `supabase/migrations/`:
+10 migrations in `supabase/migrations/`:
 
 | Migration | Purpose |
 |-----------|---------|
@@ -78,6 +79,7 @@ related: ["09-security.md", "11-testing.md"]
 | `20260308000000_create_products_table` | Product catalog |
 | `20260309000000_add_admin_rls_policies` | Admin RLS policies |
 | `20260316000000_create_gamification_tables` | Points economy, transactions, badges |
+| `20260322000000_create_web_search_cache` | Serper.dev result cache (24h TTL) |
 
 ### Migration Rules
 - Never apply automatically

@@ -10,9 +10,11 @@
 
 import { useState, useEffect } from 'react';
 import type { Product } from '../../../types/product';
+import type { WebReview } from '../../../types/webSearch';
 import type { ReviewForSummary } from '../../../lib/ai/surfaceContext';
 import { fetchReviewsForProduct } from '../../../lib/data/reviews';
 import { getReviewsForProduct } from '../../../mocks/reviews';
+import { searchProductReviews } from '../../../lib/api/productSearch';
 import {
   calculateSimilarityWeight,
   getTierBadgeInfo,
@@ -64,6 +66,9 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
   const [aiLoading, setAiLoading] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [matchPopupReview, setMatchPopupReview] = useState<ScoredReview | null>(null);
+  const [webReviews, setWebReviews] = useState<WebReview[]>([]);
+  const [webReviewsLoading, setWebReviewsLoading] = useState(false);
+  const [webExpanded, setWebExpanded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -234,6 +239,24 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
     }
 
     loadReviews();
+
+    // Fetch web reviews in parallel (non-blocking)
+    if (user) {
+      setWebReviewsLoading(true);
+      const skinType = getEffectiveSkinType() || '';
+      const concerns = getEffectiveConcerns();
+      const sensitivity = getEffectiveSensitivity();
+      searchProductReviews(
+        product.name,
+        product.brand,
+        { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+      ).then(results => {
+        if (!cancelled && results) setWebReviews(results);
+      }).finally(() => {
+        if (!cancelled) setWebReviewsLoading(false);
+      });
+    }
+
     return () => { cancelled = true; };
   }, [product, user]);
 
@@ -248,7 +271,7 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
     );
   }
 
-  if (reviews.length === 0) {
+  if (reviews.length === 0 && webReviews.length === 0 && !webReviewsLoading) {
     return (
       <div className="border-t border-blush/50 px-4 py-4">
         <p className="text-xs text-warm-gray text-center">
@@ -390,6 +413,82 @@ export default function ScanReviewPanel({ product }: ScanReviewPanelProps) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {/* Web reviews — "From across the web" */}
+      {(webReviews.length > 0 || webReviewsLoading) && (
+        <div className="border-t border-blush/30">
+          <button
+            onClick={() => setWebExpanded(!webExpanded)}
+            className="w-full px-4 py-2.5 flex items-center justify-between text-xs text-warm-gray hover:text-primary transition-colors"
+          >
+            <span className="flex items-center gap-1.5">
+              <i className="ri-global-line text-sm" />
+              From across the web
+              {webReviews.length > 0 && (
+                <span className="text-warm-gray/60">({webReviews.length})</span>
+              )}
+            </span>
+            <i className={`ri-arrow-${webExpanded ? 'up' : 'down'}-s-line`} />
+          </button>
+
+          {webExpanded && (
+            <div className="px-4 pb-4 space-y-2.5">
+              {webReviewsLoading && webReviews.length === 0 && (
+                <div className="space-y-2 animate-pulse">
+                  <div className="h-3 bg-blush/40 rounded w-3/4" />
+                  <div className="h-3 bg-blush/40 rounded w-1/2" />
+                </div>
+              )}
+              {webReviews.map((wr, idx) => (
+                <div key={`web-review-${idx}`} className="bg-cream/50 border border-blush/30 rounded-lg p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[11px] font-medium text-deep line-clamp-1">
+                        {wr.sourceTitle}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] text-primary/70">{wr.sourceDomain}</span>
+                        {wr.date && (
+                          <>
+                            <span className="text-warm-gray/30">·</span>
+                            <span className="text-[10px] text-warm-gray/60">{wr.date}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      {wr.extractedRating && (
+                        <span className="inline-flex items-center gap-0.5 text-[10px] text-warm-gray">
+                          <i className="ri-star-fill text-amber-500 text-[9px]" />
+                          {wr.extractedRating}
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium bg-cream text-warm-gray border border-blush">
+                        <i className="ri-global-line text-[8px]" />
+                        Web
+                      </span>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-warm-gray mt-1.5 leading-relaxed line-clamp-3">
+                    {wr.content}
+                  </p>
+
+                  <a
+                    href={wr.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-0.5 mt-1.5 text-[10px] text-primary hover:text-dark transition-colors"
+                  >
+                    Read full review
+                    <i className="ri-external-link-line text-[9px]" />
+                  </a>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 

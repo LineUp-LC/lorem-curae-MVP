@@ -1,7 +1,7 @@
 ---
 scope: "Camera scan page, product-scan Edge Function, scanClient, image pipeline, post-scan discovery"
 authority: primary
-last_synced: "2026-03-21"
+last_synced: "2026-03-22"
 related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-layer.md", "13-domain-features.md"]
 ---
 
@@ -23,8 +23,11 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 | CameraCapture | `src/pages/scan/components/CameraCapture.tsx` | File input + webcam + barcode mode (BarcodeDetector API) |
 | ScanProcessing | `src/pages/scan/components/ScanProcessing.tsx` | Loading state |
 | ScanResultView | `src/pages/scan/components/ScanResultView.tsx` | Unified result view (catalog match + any-product identification) |
-| PostScanDiscovery | `src/pages/scan/components/PostScanDiscovery.tsx` | Compatible products with AI WHY + category filters |
-| ScanReviewPanel | `src/pages/scan/components/ScanReviewPanel.tsx` | Profile-filtered reviews + AI summary |
+| PostScanDiscovery | `src/pages/scan/components/PostScanDiscovery.tsx` | Compatible products with AI WHY + category filters + web results |
+| ScanReviewPanel | `src/pages/scan/components/ScanReviewPanel.tsx` | Profile-filtered reviews + AI summary + web reviews |
+| Web search types | `src/types/webSearch.ts` | `WebProduct`, `WebReview`, `WebSearchRequest`, `WebSearchResponse` |
+| Web search Edge Fn | `supabase/functions/product-search/index.ts` | Serper.dev proxy — Google Shopping + reviews |
+| Web search client | `src/lib/api/productSearch.ts` | `searchCompatibleProducts()`, `searchSimilarProducts()`, `searchProductReviews()` |
 | ScanHistory | `src/pages/scan/components/ScanHistory.tsx` | Horizontal scroll of past scan thumbnails |
 
 ---
@@ -271,6 +274,39 @@ Transitions:
 - Guest users see a login CTA — no API calls, no image processing
 - Auth check happens client-side in `scanClient.ts` before compression
 - Edge Function returns 401 for unauthenticated requests as a safety net
+
+---
+
+## Web Search Integration (Serper.dev)
+
+### Architecture
+- Single Edge Function `product-search` proxies Serper.dev API
+- Three search types: `compatible` (Google Shopping), `similar` (Google Shopping), `reviews` (Google organic)
+- Server-side 24h cache in `web_search_cache` table (SHA-256 query hash key)
+- Client-side session cache + rate limit (10 calls per scan session)
+- Secret: `SERPER_API_KEY` in Supabase Edge Function secrets
+
+### Data Types
+- `WebProduct`: name, brand, price, image, rating, reviewCount, externalUrl, merchant, category, source='web'
+- `WebReview`: content (snippet), sourceUrl, sourceTitle, sourceDomain, date, extractedRating, relevanceScore
+- These are intentionally separate from `Product` and `ProductReview` — web results lack structured fields
+
+### UI Rendering
+- Compatible Products tab: local catalog results first, then "From across the web" section with `WebProduct` cards
+- Similar Products tab: local catalog results first, then web alternatives with "Web" badge
+- Reviews: platform reviews in "From your skin community" section, web reviews in "From across the web" collapsible section
+- Web product cards link externally (no internal product detail page) with "via {merchant}" badge
+- Web review cards show sourceDomain badge + "Read full review" external link
+
+### "Is It For Me?" Integration
+- Web reviews are fetched and summarized as `webReviewData` in the `is_it_for_me` PageContext
+- AI prompt receives: totalResults, avgRating, topSnippets, sourceDomains
+- AI can cite web evidence: "Among web reviews, X out of Y..."
+
+### Fallback Behavior
+- If Serper is down or rate limited: local catalog results shown, subtle "Web search unavailable" message
+- Guest users: no web search calls (consistent with scan auth policy)
+- Empty Serper results: section not rendered
 
 ---
 

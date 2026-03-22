@@ -3,6 +3,11 @@
  *
  * Shows category-filtered compatible products with AI WHY explanations.
  * Each product card can expand to show profile-filtered reviews + AI summary.
+ *
+ * Two data sources:
+ * 1. Local catalog — ingredient-compatibility scored via productSimilarity.ts
+ * 2. Web results — real Google Shopping products via Serper.dev API
+ * Local catalog results show first, web results appended below with "Web result" badge.
  */
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -10,10 +15,13 @@ import { Link } from 'react-router-dom';
 import type { ScanResult } from '../../../types/scan';
 import type { Product } from '../../../types/product';
 import type { CompatibleProduct } from '../../../lib/utils/productSimilarity';
+import type { WebProduct } from '../../../types/webSearch';
 import { findCompatibleProducts } from '../../../lib/utils/productSimilarity';
+import { searchCompatibleProducts } from '../../../lib/api/productSearch';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
+  getEffectiveSensitivity,
 } from '../../../lib/utils/sessionState';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
@@ -56,9 +64,15 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [expandedProductId, setExpandedProductId] = useState<number | null>(null);
   const [expandedWhyIds, setExpandedWhyIds] = useState<Set<number>>(new Set());
   const [routineProduct, setRoutineProduct] = useState<CompatibleProduct | null>(null);
+  const [webProducts, setWebProducts] = useState<WebProduct[]>([]);
+  const [webLoading, setWebLoading] = useState(false);
+  const [webError, setWebError] = useState(false);
+  /** Cache web results per category filter to avoid re-fetching on tab switch */
+  const [webCache, setWebCache] = useState<Record<string, WebProduct[]>>({});
 
   const skinType = getEffectiveSkinType() ?? undefined;
   const concerns = getEffectiveConcerns();
+  const sensitivity = getEffectiveSensitivity();
 
   // Build a pseudo-Product from scan data for compatibility checking
   const scanSourceProduct = useMemo((): Product => {
@@ -99,6 +113,45 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     if (categoryFilter === 'all') return allCompatible;
     return allCompatible.filter(p => p.category === categoryFilter);
   }, [allCompatible, categoryFilter]);
+
+  // Fetch web products from Serper when category changes
+  useEffect(() => {
+    if (!user) return;
+
+    const cacheKey = categoryFilter;
+    if (webCache[cacheKey]) {
+      setWebProducts(webCache[cacheKey]);
+      return;
+    }
+
+    let cancelled = false;
+    setWebLoading(true);
+    setWebError(false);
+
+    searchCompatibleProducts(
+      {
+        name: scanSourceProduct.name,
+        brand: scanSourceProduct.brand,
+        category: scanSourceProduct.category,
+        ingredients: scanSourceProduct.keyIngredients.slice(0, 10),
+      },
+      { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+      categoryFilter !== 'all' ? categoryFilter : undefined,
+    ).then(results => {
+      if (cancelled) return;
+      if (results) {
+        setWebProducts(results);
+        setWebCache(prev => ({ ...prev, [cacheKey]: results }));
+      } else {
+        setWebError(true);
+        setWebProducts([]);
+      }
+    }).finally(() => {
+      if (!cancelled) setWebLoading(false);
+    });
+
+    return () => { cancelled = true; };
+  }, [categoryFilter, user, scanSourceProduct, skinType, concerns, sensitivity]);
 
   // Fetch AI WHY explanations (one batch call)
   const fetchWhyExplanations = useCallback(async () => {
@@ -157,7 +210,8 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     fetchWhyExplanations();
   }, [fetchWhyExplanations]);
 
-  if (allCompatible.length === 0) return null;
+  // Show section if we have local results OR web results (or web is still loading)
+  if (allCompatible.length === 0 && webProducts.length === 0 && !webLoading) return null;
 
   const toggleWhy = (productId: number) => {
     setExpandedWhyIds(prev => {
@@ -330,7 +384,121 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
         ))}
       </div>
 
-      {filteredProducts.length === 0 && (
+      {/* Web results section */}
+      {webProducts.length > 0 && (
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 mt-2">
+            <i className="ri-global-line text-warm-gray text-sm" />
+            <p className="text-xs font-medium text-warm-gray">From across the web</p>
+          </div>
+          {webProducts.map((wp, idx) => (
+            <div key={`web-${idx}`} className="bg-white rounded-2xl border border-blush shadow-sm overflow-hidden">
+              <div className="flex gap-3 p-4">
+                <a href={wp.externalUrl} target="_blank" rel="noopener noreferrer" className="flex-shrink-0">
+                  <img
+                    src={wp.image || '/placeholder-product.svg'}
+                    alt={wp.name}
+                    className="w-16 h-16 rounded-xl object-cover"
+                    onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+                  />
+                </a>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
+                        {wp.brand}
+                      </p>
+                      <a href={wp.externalUrl} target="_blank" rel="noopener noreferrer">
+                        <h4 className="text-sm font-semibold text-deep line-clamp-1 hover:text-primary transition-colors">
+                          {wp.name}
+                        </h4>
+                      </a>
+                    </div>
+                    <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-medium bg-cream text-warm-gray border border-blush flex-shrink-0">
+                      <i className="ri-global-line text-[10px]" />
+                      Web result
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="text-xs text-warm-gray capitalize">{wp.category}</span>
+                    {wp.rating > 0 && (
+                      <>
+                        <span className="text-warm-gray/30">·</span>
+                        <div className="flex items-center gap-0.5">
+                          <i className="ri-star-fill text-amber-500 text-[10px]" />
+                          <span className="text-[11px] text-warm-gray">{wp.rating}</span>
+                          {wp.reviewCount > 0 && (
+                            <span className="text-[10px] text-warm-gray/60">({wp.reviewCount.toLocaleString()})</span>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    {wp.price > 0 && (
+                      <>
+                        <span className="text-warm-gray/30">·</span>
+                        <span className="text-[11px] font-medium text-deep">${wp.price.toFixed(2)}</span>
+                      </>
+                    )}
+                  </div>
+
+                  {/* Merchant badge */}
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <span className="text-[10px] text-warm-gray/70">
+                      via {wp.merchant}
+                    </span>
+                    <span className="text-[10px] text-warm-gray/40">· Verify ingredients before use</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* External link CTA */}
+              <div className="border-t border-blush/50 px-4 py-2">
+                <a
+                  href={wp.externalUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium text-primary hover:text-dark transition-colors"
+                >
+                  <i className="ri-external-link-line" />
+                  View on {wp.merchant}
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Web loading state */}
+      {webLoading && (
+        <div className="space-y-3 mt-2">
+          <div className="flex items-center gap-2">
+            <i className="ri-global-line text-warm-gray text-sm animate-pulse" />
+            <p className="text-xs text-warm-gray">Searching the web for compatible products...</p>
+          </div>
+          {[1, 2, 3].map(i => (
+            <div key={i} className="bg-white rounded-2xl border border-blush shadow-sm p-4 animate-pulse">
+              <div className="flex gap-3">
+                <div className="w-16 h-16 rounded-xl bg-blush/40" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-3 bg-blush/40 rounded w-1/4" />
+                  <div className="h-4 bg-blush/40 rounded w-3/4" />
+                  <div className="h-3 bg-blush/40 rounded w-1/2" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Web error — subtle, non-blocking */}
+      {webError && !webLoading && (
+        <p className="text-xs text-warm-gray/60 text-center mt-2">
+          Web search unavailable — showing results from our catalog
+        </p>
+      )}
+
+      {filteredProducts.length === 0 && webProducts.length === 0 && !webLoading && (
         <div className="text-center py-6">
           <p className="text-sm text-warm-gray">
             No compatible products found in this category

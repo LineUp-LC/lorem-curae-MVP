@@ -106,7 +106,7 @@ export type PageContext =
   | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] }
   | { mode: 'curated_recommendation'; scannedProduct: { name: string; brand: string; category: string; ingredients: string[] }; compatibleProducts: { id: number; name: string; brand: string; category: string; keyIngredients: string[]; matchReasons: string[] }[] }
   | { mode: 'curated_review_summary'; product: Product; reviews: ReviewForSummary[]; matchStats: { totalMatching: number; avgRating: number; positivePercent: number } }
-  | { mode: 'is_it_for_me'; product: Product; scannedIngredients?: { name: string; safetyTier: string; category?: string }[]; shelfProducts: { name: string; brand: string; category: string; keyIngredients: string[] }[]; routineProducts: { name: string; category: string; timeOfDay: string }[]; reviewStats?: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] } };
+  | { mode: 'is_it_for_me'; product: Product; scannedIngredients?: { name: string; safetyTier: string; category?: string }[]; shelfProducts: { name: string; brand: string; category: string; keyIngredients: string[] }[]; routineProducts: { name: string; category: string; timeOfDay: string }[]; reviewStats?: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] }; webReviewData?: { totalResults: number; avgRating?: number; topSnippets: string[]; sourceDomains: string[] } };
 
 /**
  * Lightweight retailer shape for AI context serialization.

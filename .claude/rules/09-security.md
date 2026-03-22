@@ -26,6 +26,7 @@ related: ["04-state-management.md", "08-commerce.md", "10-data-layer.md"]
 - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
 - `SITE_PASSWORD`
 - `ANTHROPIC_API_KEY` (for ai-insight and ai-chat functions)
+- `SERPER_API_KEY` (for product-search function — Serper.dev web search)
 
 ### Rules
 - NEVER hardcode secrets in source code

@@ -27,11 +27,13 @@ import { scanProductFull } from '../../../lib/ai/scanClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { scoreSimilarProducts } from '../../../lib/utils/productSimilarity';
+import { searchSimilarProducts, searchProductReviews } from '../../../lib/api/productSearch';
 import { fetchReviewsForProduct } from '../../../lib/data/reviews';
 import { getReviewsForProduct } from '../../../mocks/reviews';
 import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
 import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
 import type { ScoredProduct } from '../../../lib/utils/productSimilarity';
+import type { WebProduct } from '../../../types/webSearch';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
@@ -312,6 +314,51 @@ function SimilarProductCard({ product }: { product: ScoredProduct }) {
   );
 }
 
+function WebSimilarProductCard({ product }: { product: WebProduct }) {
+  return (
+    <a
+      href={product.externalUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex gap-3 p-3 bg-cream/50 border border-blush/30 rounded-xl hover:border-blush transition-colors"
+    >
+      <img
+        src={product.image || '/placeholder-product.svg'}
+        alt={product.name}
+        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+      />
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-1.5">
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
+            {product.brand}
+          </p>
+          <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[9px] font-medium bg-cream text-warm-gray border border-blush">
+            <i className="ri-global-line text-[8px]" />
+            Web
+          </span>
+        </div>
+        <p className="text-xs font-medium text-deep line-clamp-1 mt-0.5">
+          {product.name}
+        </p>
+        <div className="flex items-center gap-2 mt-1">
+          {product.rating > 0 && (
+            <div className="flex items-center gap-0.5">
+              <i className="ri-star-fill text-amber-500 text-[10px]" />
+              <span className="text-[10px] text-warm-gray">{product.rating}</span>
+            </div>
+          )}
+          {product.price > 0 && (
+            <span className="text-[10px] font-medium text-deep">${product.price.toFixed(2)}</span>
+          )}
+          <span className="text-[10px] text-warm-gray/60">via {product.merchant}</span>
+        </div>
+      </div>
+      <i className="ri-external-link-line text-warm-gray/40 text-sm self-center flex-shrink-0" />
+    </a>
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Tab spinner
 // ---------------------------------------------------------------------------
@@ -431,6 +478,8 @@ export default function ScanResultView({
 
   // Tab 3 (Similar) cache
   const [similarProducts, setSimilarProducts] = useState<ScoredProduct[] | null>(null);
+  const [webSimilarProducts, setWebSimilarProducts] = useState<WebProduct[]>([]);
+  const [webSimilarLoading, setWebSimilarLoading] = useState(false);
 
   // Build product-like object for shelf/routine
   const shelfProduct = matchedProduct
@@ -549,6 +598,27 @@ export default function ScanResultView({
         }
       }
 
+      // Fetch web reviews for additional evidence (non-blocking — use whatever arrives)
+      let webReviewData: { totalResults: number; avgRating?: number; topSnippets: string[]; sourceDomains: string[] } | undefined;
+      try {
+        const webReviews = await searchProductReviews(
+          product.name,
+          product.brand,
+          { skinType: skinType || undefined, concerns: getEffectiveConcerns(), sensitivity: getEffectiveSensitivity() || undefined },
+        );
+        if (webReviews && webReviews.length > 0) {
+          const ratings = webReviews.filter(r => r.extractedRating).map(r => r.extractedRating!);
+          webReviewData = {
+            totalResults: webReviews.length,
+            avgRating: ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : undefined,
+            topSnippets: webReviews.slice(0, 3).map(r => r.content),
+            sourceDomains: [...new Set(webReviews.map(r => r.sourceDomain))],
+          };
+        }
+      } catch {
+        // Web reviews are supplementary — don't block the verdict
+      }
+
       const ctx = buildAIContext('is_it_for_me', {
         page: {
           mode: 'is_it_for_me',
@@ -557,6 +627,7 @@ export default function ScanResultView({
           shelfProducts,
           routineProducts,
           reviewStats,
+          webReviewData,
         },
         environment: environmentCtx,
       });
@@ -621,7 +692,7 @@ export default function ScanResultView({
       setFullScanLoading(false);
     }
 
-    // Tab 3: Similar — synchronous scoring, no API call
+    // Tab 3: Similar — local scoring + web search
     if (tab === 'similar' && !similarProducts) {
       const concerns = getEffectiveConcerns();
       const preferences = getEffectivePreferences() ?? {};
@@ -629,6 +700,18 @@ export default function ScanResultView({
       if (sourceProduct) {
         const scored = scoreSimilarProducts(sourceProduct, concerns, skinType ?? undefined, preferences, 6);
         setSimilarProducts(scored);
+
+        // Also fetch web similar products (non-blocking)
+        if (user && webSimilarProducts.length === 0) {
+          setWebSimilarLoading(true);
+          searchSimilarProducts({
+            name: sourceProduct.name,
+            brand: sourceProduct.brand,
+            category: sourceProduct.category,
+          }).then(results => {
+            if (results) setWebSimilarProducts(results);
+          }).finally(() => setWebSimilarLoading(false));
+        }
       } else {
         setSimilarProducts([]);
       }
@@ -910,15 +993,37 @@ export default function ScanResultView({
             <>
               {similarProducts === null ? (
                 <TabSpinner />
-              ) : similarProducts.length === 0 ? (
+              ) : similarProducts.length === 0 && webSimilarProducts.length === 0 && !webSimilarLoading ? (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">No similar products found.</p>
                 </div>
               ) : (
                 <div className="space-y-2">
+                  {/* Local catalog results */}
                   {similarProducts.map(p => (
                     <SimilarProductCard key={p.id} product={p} />
                   ))}
+
+                  {/* Web results */}
+                  {webSimilarProducts.length > 0 && (
+                    <>
+                      <div className="flex items-center gap-2 mt-3 mb-1">
+                        <i className="ri-global-line text-warm-gray text-sm" />
+                        <p className="text-[11px] font-medium text-warm-gray">From across the web</p>
+                      </div>
+                      {webSimilarProducts.map((wp, idx) => (
+                        <WebSimilarProductCard key={`web-sim-${idx}`} product={wp} />
+                      ))}
+                    </>
+                  )}
+
+                  {/* Web loading */}
+                  {webSimilarLoading && (
+                    <div className="flex items-center gap-2 mt-3">
+                      <i className="ri-global-line text-warm-gray text-sm animate-pulse" />
+                      <p className="text-[11px] text-warm-gray">Searching the web...</p>
+                    </div>
+                  )}
                 </div>
               )}
             </>

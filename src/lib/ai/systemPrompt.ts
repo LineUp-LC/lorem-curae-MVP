@@ -461,6 +461,16 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
         rs.commonCons.length > 0 ? `- Common concerns: ${rs.commonCons.join(', ')}` : '',
       ].filter(Boolean).join('\n'));
     }
+    if (page.webReviewData && page.webReviewData.totalResults > 0) {
+      const wd = page.webReviewData;
+      sections.push([
+        'WEB REVIEW DATA (from Google search):',
+        `- ${wd.totalResults} review sources found`,
+        wd.avgRating ? `- Average extracted rating: ${wd.avgRating.toFixed(1)}/5` : '',
+        `- Sources: ${wd.sourceDomains.slice(0, 5).join(', ')}`,
+        wd.topSnippets.length > 0 ? `- Key excerpts:\n${wd.topSnippets.slice(0, 3).map(s => `  "${s}"`).join('\n')}` : '',
+      ].filter(Boolean).join('\n'));
+    }
   } else if (page.mode === 'find_alternatives') {
     sections.push([
       'SOURCE PRODUCT:',
