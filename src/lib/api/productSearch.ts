@@ -56,9 +56,14 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
     };
   }
 
-  // Auth check
-  const { data: { session } } = await supabase.auth.getSession();
+  // Auth check — retry once after 1s if session not yet hydrated
+  let { data: { session } } = await supabase.auth.getSession();
   if (!session?.access_token) {
+    await new Promise(r => setTimeout(r, 1000));
+    ({ data: { session } } = await supabase.auth.getSession());
+  }
+  if (!session?.access_token) {
+    console.warn('[WebSearch] Auth check failed — no session after retry');
     return {
       success: false,
       type: body.type,
