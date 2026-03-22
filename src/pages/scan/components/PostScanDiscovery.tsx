@@ -57,6 +57,7 @@ const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
 // ---------------------------------------------------------------------------
 
 export default function PostScanDiscovery({ scanResult, matchedProduct }: PostScanDiscoveryProps) {
+  console.log('[PostScanDiscovery] Rendering, scanResult:', !!scanResult);
   const { user } = useAuth();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
   const [whyTexts, setWhyTexts] = useState<Record<number, string>>({});
@@ -127,6 +128,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     let cancelled = false;
     setWebLoading(true);
     setWebError(false);
+    console.log('[WebSearch] Fetching compatible products, user:', !!user, 'category:', categoryFilter);
 
     searchCompatibleProducts(
       {

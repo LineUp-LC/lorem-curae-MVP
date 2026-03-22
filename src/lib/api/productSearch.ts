@@ -78,6 +78,7 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
   sessionCallCount++;
 
   try {
+    console.log('[WebSearch] Calling Edge Function:', PRODUCT_SEARCH_URL, 'body:', JSON.stringify(body));
     const response = await fetch(PRODUCT_SEARCH_URL, {
       method: 'POST',
       headers: {
@@ -86,6 +87,8 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
       },
       body: JSON.stringify(body),
     });
+
+    console.log('[WebSearch] Response status:', response.status, 'ok:', response.ok);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -103,6 +106,7 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
     }
 
     const data: WebSearchResponse = await response.json();
+    console.log('[WebSearch] Parsed response:', JSON.stringify(data).substring(0, 500));
 
     // Cache successful results
     if (data.success) {

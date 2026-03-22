@@ -964,6 +964,7 @@ export default function ScanResultView({
           )}
 
           {/* Tab 2: Compatible */}
+          {activeTab === 'compatible' && console.log('[WebSearch] Compatible tab mounted, fullScanResult:', !!fullScanResult, 'fullScanLoading:', fullScanLoading, 'imageBase64:', !!imageBase64)}
           {activeTab === 'compatible' && (
             <>
               {fullScanLoading && <TabSpinner />}
