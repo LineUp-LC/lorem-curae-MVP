@@ -12,7 +12,7 @@
  * States: idle → captured → processing → result/error
  */
 
-import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
+import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
@@ -52,10 +52,18 @@ export default function ScanPage() {
   const [state, setState] = useState<ScanState>({ phase: 'idle' });
   const [capturedBase64, setCapturedBase64] = useState<string | undefined>();
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
+  const cancelledRef = useRef(false);
 
-  // Load scan history on mount
+  // Reset to idle on every mount (route entry) + abort on unmount
   useEffect(() => {
+    cancelledRef.current = false;
+    setState({ phase: 'idle' });
+    setCapturedBase64(undefined);
     setHistory(getScanHistory());
+
+    return () => {
+      cancelledRef.current = true;
+    };
   }, []);
 
   const handleCapture = useCallback((file: File) => {
@@ -70,6 +78,7 @@ export default function ScanPage() {
     setState({ phase: 'processing', previewUrl, file });
 
     const response = await scanProduct(file);
+    if (cancelledRef.current) return;
 
     if (!response.success) {
       const errResponse = response as ScanClientError;
@@ -92,12 +101,14 @@ export default function ScanPage() {
     // Save to scan history
     try {
       const thumbnail = await createScanThumbnail(file);
+      if (cancelledRef.current) return;
       addScanHistoryEntry(result, thumbnail);
       setHistory(getScanHistory());
     } catch {
       // Thumbnail failure is non-critical
     }
 
+    if (cancelledRef.current) return;
     setState({ phase: 'result', result, previewUrl, matchedProduct });
     window.scrollTo(0, 0);
   }, [state, user?.id]);
@@ -135,6 +146,7 @@ export default function ScanPage() {
     setState({ phase: 'processing', previewUrl: '' });
 
     const response = await scanByUpc(upc);
+    if (cancelledRef.current) return;
 
     if (!response.success) {
       const errResponse = response as ScanClientError;
@@ -153,6 +165,7 @@ export default function ScanPage() {
       onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
+    if (cancelledRef.current) return;
     setState({ phase: 'result', result, previewUrl: '', matchedProduct });
     window.scrollTo(0, 0);
   }, [user?.id]);

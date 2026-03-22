@@ -83,10 +83,32 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+      }
+      if (videoRef.current) {
+        videoRef.current.srcObject = null;
       }
       if (scanLoopRef.current) cancelAnimationFrame(scanLoopRef.current);
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
     };
+  }, []);
+
+  // Release camera when browser tab is hidden (Alt+Tab, tab switch)
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && streamRef.current) {
+        streamRef.current.getTracks().forEach(t => t.stop());
+        streamRef.current = null;
+        if (videoRef.current) videoRef.current.srcObject = null;
+        if (scanLoopRef.current) cancelAnimationFrame(scanLoopRef.current);
+        if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
+        setWebcamActive(false);
+        setBarcodeScanning(false);
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
   }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
