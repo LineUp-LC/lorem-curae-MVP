@@ -17,14 +17,20 @@ import {
   getEffectiveSkinType,
   getEffectiveConcerns,
   getEffectivePreferences,
+  getEffectiveSensitivity,
 } from '../../../lib/utils/sessionState';
 import { savedProductsState } from '../../../lib/utils/favoritesState';
+import { getLocalRoutines } from '../../../lib/utils/routineState';
 import { onAction } from '../../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import { scanProductFull } from '../../../lib/ai/scanClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
 import { scoreSimilarProducts } from '../../../lib/utils/productSimilarity';
+import { fetchReviewsForProduct } from '../../../lib/data/reviews';
+import { getReviewsForProduct } from '../../../mocks/reviews';
+import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
+import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
 import type { ScoredProduct } from '../../../lib/utils/productSimilarity';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
@@ -319,6 +325,81 @@ function TabSpinner() {
 }
 
 // ---------------------------------------------------------------------------
+// "Is It For Me?" verdict renderer
+// ---------------------------------------------------------------------------
+
+type VerdictLevel = 'great' | 'good' | 'not';
+
+function parseVerdict(text: string): { level: VerdictLevel; headline: string; bullets: string[]; tip: string | null } {
+  const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+  if (lines.length === 0) return { level: 'good', headline: text, bullets: [], tip: null };
+
+  const firstLine = lines[0].toLowerCase();
+  let level: VerdictLevel = 'good';
+  if (firstLine.includes('great fit')) level = 'great';
+  else if (firstLine.includes('not the best') || firstLine.includes('not recommended')) level = 'not';
+  else if (firstLine.includes('good fit') || firstLine.includes('maybe') || firstLine.includes('precaution')) level = 'good';
+
+  const headline = lines[0];
+  const bullets: string[] = [];
+  let tip: string | null = null;
+
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.startsWith('•') || line.startsWith('-') || line.startsWith('*')) {
+      bullets.push(line.replace(/^[•\-*]\s*/, ''));
+    } else if (i === lines.length - 1 && (line.toLowerCase().startsWith('start') || line.toLowerCase().startsWith('apply') || line.toLowerCase().startsWith('use') || line.toLowerCase().startsWith('tip'))) {
+      tip = line;
+    } else {
+      bullets.push(line);
+    }
+  }
+
+  return { level, headline, bullets, tip };
+}
+
+const VERDICT_CONFIG: Record<VerdictLevel, { icon: string; iconColor: string; bgColor: string; borderColor: string }> = {
+  great: { icon: 'ri-check-line', iconColor: 'text-sage', bgColor: 'bg-sage/10', borderColor: 'border-sage/30' },
+  good: { icon: 'ri-alert-line', iconColor: 'text-primary', bgColor: 'bg-primary/5', borderColor: 'border-primary/20' },
+  not: { icon: 'ri-close-circle-line', iconColor: 'text-warm-gray', bgColor: 'bg-warm-gray/5', borderColor: 'border-warm-gray/20' },
+};
+
+function IsItForMeVerdict({ text }: { text: string }) {
+  const { level, headline, bullets, tip } = parseVerdict(text);
+  const config = VERDICT_CONFIG[level];
+
+  return (
+    <div className="space-y-3">
+      {/* Verdict header */}
+      <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${config.bgColor} ${config.borderColor}`}>
+        <i className={`${config.icon} text-base ${config.iconColor}`} />
+        <span className="text-sm font-serif font-semibold text-deep">{headline}</span>
+      </div>
+
+      {/* Evidence bullets */}
+      {bullets.length > 0 && (
+        <ul className="space-y-1.5 px-1">
+          {bullets.map((bullet, i) => (
+            <li key={i} className="flex items-start gap-2 text-xs text-warm-gray leading-relaxed">
+              <span className="text-primary/40 mt-0.5 flex-shrink-0">•</span>
+              <span>{bullet}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Practical tip */}
+      {tip && (
+        <div className="flex items-start gap-1.5 px-1 pt-1 border-t border-blush/20">
+          <i className="ri-lightbulb-line text-primary/50 text-xs mt-0.5 flex-shrink-0" />
+          <span className="text-[11px] text-primary/70 leading-relaxed">{tip}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
 
@@ -331,6 +412,7 @@ export default function ScanResultView({
 }: ScanResultViewProps) {
   const { user } = useAuth();
   const skinType = getEffectiveSkinType();
+  const { env: environmentCtx } = useEnvironmentContext();
   const [savedToShelf, setSavedToShelf] = useState(false);
   const [routineModalOpen, setRoutineModalOpen] = useState(false);
 
@@ -377,7 +459,7 @@ export default function ScanResultView({
     setSavedToShelf(true);
   };
 
-  // "Is It For Me?" handler
+  // "Is It For Me?" handler — gathers full user context + review data
   const handleIsItForMe = async () => {
     setIsItForMeOpen(prev => !prev);
     if (isItForMeText !== null) return; // already fetched
@@ -387,9 +469,98 @@ export default function ScanResultView({
 
     setIsItForMeLoading(true);
     try {
-      const ctx = buildAIContext('explain_product', {
-        page: { mode: 'explain_product', product, question: 'Is this product right for my skin?' },
+      // Gather shelf products
+      const shelfProducts = savedProductsState.getSavedProducts().map(sp => ({
+        name: sp.name,
+        brand: sp.brand,
+        category: sp.category || 'unknown',
+        keyIngredients: [] as string[],
+      }));
+
+      // Gather routine products
+      const routines = getLocalRoutines();
+      const routineProducts = routines.flatMap(r =>
+        r.steps.filter(s => s.product).map(s => ({
+          name: s.product!.name,
+          category: s.product!.category || 'unknown',
+          timeOfDay: s.timeOfDay || r.timeOfDay,
+        }))
+      );
+
+      // Gather scanned ingredients (from full scan or initial result)
+      const scannedIngredients = (fullScanResult?.ingredients || result.ingredients || []).map(i => ({
+        name: i.name,
+        safetyTier: i.safetyTier,
+        category: i.category,
+      }));
+
+      // Fetch review data for catalog matches
+      let reviewStats: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] } | undefined;
+      if (matchedProduct) {
+        const userSkinType = skinType || '';
+        const userConcerns = getEffectiveConcerns();
+        const userSensitivity = getEffectiveSensitivity();
+
+        const [supaReviews, mockReviews] = await Promise.all([
+          fetchReviewsForProduct(matchedProduct.id).catch(() => []),
+          Promise.resolve(getReviewsForProduct(matchedProduct.id)),
+        ]);
+
+        // Merge and dedupe reviews
+        const allReviews = [...supaReviews];
+        const existingIds = new Set(allReviews.map(r => r.id));
+        for (const mr of mockReviews) {
+          if (!existingIds.has(mr.id)) allReviews.push(mr as any);
+        }
+
+        if (allReviews.length > 0 && userSkinType) {
+          // Score by similarity and collect stats
+          const scored = allReviews
+            .map(r => ({
+              review: r,
+              sim: calculateSimilarityWeight(
+                { skinType: (r as any).skin_type || (r as any).skinType || '', skinConcerns: (r as any).skin_concerns || (r as any).skinConcerns || [], age: (r as any).age || 30 },
+                { skinType: userSkinType, primaryConcerns: userConcerns, sensitivity: userSensitivity, complexion: '', lifestyle: [], age: 0 },
+              ),
+            }))
+            .filter(s => s.sim.score >= 30);
+
+          if (scored.length > 0) {
+            const ratings = scored.map(s => (s.review as any).rating ?? 0);
+            const avgRating = ratings.reduce((a, b) => a + b, 0) / ratings.length;
+            const positiveCount = ratings.filter(r => r >= 4).length;
+
+            // Collect pros/cons
+            const prosMap: Record<string, number> = {};
+            const consMap: Record<string, number> = {};
+            scored.forEach(s => {
+              ((s.review as any).pros || []).forEach((p: string) => { prosMap[p] = (prosMap[p] || 0) + 1; });
+              ((s.review as any).cons || []).forEach((c: string) => { consMap[c] = (consMap[c] || 0) + 1; });
+            });
+
+            reviewStats = {
+              totalMatching: scored.length,
+              avgRating,
+              positivePercent: Math.round((positiveCount / scored.length) * 100),
+              commonPros: Object.entries(prosMap).sort(([, a], [, b]) => b - a).slice(0, 3).map(([k]) => k),
+              commonCons: Object.entries(consMap).sort(([, a], [, b]) => b - a).slice(0, 3).map(([k]) => k),
+            };
+          }
+        }
+      }
+
+      const ctx = buildAIContext('is_it_for_me', {
+        page: {
+          mode: 'is_it_for_me',
+          product,
+          scannedIngredients,
+          shelfProducts,
+          routineProducts,
+          reviewStats,
+        },
+        environment: environmentCtx,
       });
+
       const res = await requestAIInsight(ctx);
       if (res.success) {
         setIsItForMeText(res.insight);
@@ -650,9 +821,7 @@ export default function ScanResultView({
                 <span className="text-xs text-warm-gray">Analyzing for your skin profile...</span>
               </div>
             ) : isItForMeText ? (
-              <p className="text-xs text-warm-gray leading-relaxed whitespace-pre-line">
-                {isItForMeText}
-              </p>
+              <IsItForMeVerdict text={isItForMeText} />
             ) : (
               <p className="text-xs text-warm-gray/60">Sign in and complete your skin profile for personalized analysis.</p>
             )}

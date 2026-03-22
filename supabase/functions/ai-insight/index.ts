@@ -39,6 +39,7 @@ const MODE_MAX_TOKENS: Record<string, number> = {
   survey_results: 768,
   chat: 4096, // Fallback — chat mode should use ai-chat function
   explain_product: 512,
+  is_it_for_me: 2048,
   find_alternatives: 512,
   review_summary: 512,
   natural_discovery: 384,
@@ -59,6 +60,7 @@ const SUPPORTED_MODES = [
   'nutrition',
   'survey_results',
   'explain_product',
+  'is_it_for_me',
   'find_alternatives',
   'review_summary',
   'natural_discovery',

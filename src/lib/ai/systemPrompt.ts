@@ -263,6 +263,29 @@ RULES:
 - Never use clinical jargon — explain what products DO, not ingredient mechanisms.
 - Do not use markdown formatting. Return plain text lines only.`,
 
+  is_it_for_me: `TASK: Give this user a clear, personalized verdict on whether this scanned product is right for them.
+OUTPUT STRUCTURE:
+Line 1: Start with EXACTLY one of these verdict phrases (the UI parses this line):
+- "Great fit for you" — if the product aligns well with their skin type, concerns, and preferences
+- "Good fit with precautions" — if it could work but has risks for their sensitivity, conflicts with shelf products, or needs careful use
+- "Not the best fit" — if it conflicts with their skin type, sensitivity, or existing routine
+Line 2-6: Evidence bullets. Each bullet must start with "•" and reference SPECIFIC user data:
+- Name their skin type: "Your oily skin benefits from..."
+- Name their concerns: "For your dark spots, the vitamin C in this product..."
+- Reference shelf/routine conflicts: "The retinol in your evening routine may conflict with the AHA in this product"
+- Reference reviews if provided: "Among reviewers with similar skin, most saw results within..."
+- Reference environment if provided: "In your current humid climate, this lightweight texture..."
+- Reference preferences if provided: "This product is fragrance-free, matching your preference"
+Line 7: End with one practical tip: "Start with..." or "Apply after..." or "Use SPF when..."
+RULES:
+- Be specific — never say "based on your profile" without naming what in their profile
+- If shelf or routine products may conflict, explain which ingredients and why
+- If no review data is provided, skip the review bullet — do not fabricate
+- If no environment data, skip the environment bullet
+- Never use clinical jargon — explain what ingredients DO in plain language
+- Never say "diagnose", "treat", "cure", "prescribe", or "guaranteed"
+- Use conditional voice: "may help", "can support", "commonly associated with"`,
+
   curated_review_summary: `TASK: Summarize reviews from people with similar skin profiles who used this product.
 OUTPUT STRUCTURE:
 1. Match summary (1 sentence) — "Among X reviewers with similar skin..." with a key statistic
@@ -396,6 +419,47 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
     ].filter(Boolean).join('\n'));
     if (page.question) {
       sections.push(`USER QUESTION: "${page.question}"`);
+    }
+  } else if (page.mode === 'is_it_for_me') {
+    const p = page.product;
+    sections.push([
+      'SCANNED PRODUCT:',
+      `- Name: ${p.name}`,
+      `- Brand: ${p.brand}`,
+      `- Category: ${p.category}`,
+      p.keyIngredients.length > 0 ? `- Key ingredients: ${p.keyIngredients.join(', ')}` : '',
+      p.skinTypes.length > 0 ? `- Targets skin types: ${p.skinTypes.join(', ')}` : '',
+      (p.concerns ?? []).length > 0 ? `- Targets concerns: ${(p.concerns ?? []).join(', ')}` : '',
+      p.texture ? `- Texture: ${p.texture}` : '',
+    ].filter(Boolean).join('\n'));
+    if (page.scannedIngredients && page.scannedIngredients.length > 0) {
+      const ingList = page.scannedIngredients.map(i =>
+        `${i.name} (${i.safetyTier}${i.category ? `, ${i.category}` : ''})`
+      ).join('; ');
+      sections.push(`FULL INGREDIENT LIST FROM SCAN: ${ingList}`);
+    }
+    if (page.shelfProducts.length > 0) {
+      const shelfLines = page.shelfProducts.map(sp =>
+        `- ${sp.brand} ${sp.name} (${sp.category}) — ingredients: ${sp.keyIngredients.join(', ')}`
+      );
+      sections.push(['PRODUCTS ON USER SHELF:', ...shelfLines].join('\n'));
+    }
+    if (page.routineProducts.length > 0) {
+      const routineLines = page.routineProducts.map(rp =>
+        `- ${rp.name} (${rp.category}, ${rp.timeOfDay})`
+      );
+      sections.push(['PRODUCTS IN USER ROUTINES:', ...routineLines].join('\n'));
+    }
+    if (page.reviewStats) {
+      const rs = page.reviewStats;
+      sections.push([
+        'REVIEW DATA FROM SIMILAR SKIN PROFILES:',
+        `- ${rs.totalMatching} reviewers with similar skin`,
+        `- Average rating: ${rs.avgRating.toFixed(1)}/5`,
+        `- ${rs.positivePercent}% rated positively`,
+        rs.commonPros.length > 0 ? `- Common positives: ${rs.commonPros.join(', ')}` : '',
+        rs.commonCons.length > 0 ? `- Common concerns: ${rs.commonCons.join(', ')}` : '',
+      ].filter(Boolean).join('\n'));
     }
   } else if (page.mode === 'find_alternatives') {
     sections.push([
@@ -652,6 +716,7 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'routine_builder': return 1024;
     case 'survey_results': return 1024;
     case 'explain_product': return 1024;
+    case 'is_it_for_me': return 2048;
     case 'find_alternatives': return 1024;
     case 'review_summary': return 1024;
     case 'natural_discovery': return 768;
@@ -699,6 +764,7 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     chat: 3000,
     survey_results: 800,
     explain_product: 800,
+    is_it_for_me: 2000,
     find_alternatives: 700,
     review_summary: 700,
     natural_discovery: 500,

@@ -55,7 +55,8 @@ export type AIMode =
   | 'guided_routine_build'
   | 'guided_routine_explain'
   | 'curated_recommendation'
-  | 'curated_review_summary';
+  | 'curated_review_summary'
+  | 'is_it_for_me';
 
 // ============================================================================
 // USER PROFILE
@@ -104,7 +105,8 @@ export type PageContext =
   | { mode: 'guided_routine_build'; routineSteps: { category: string; product?: Product }[]; timing: 'am' | 'pm' | 'both'; conversationTurns: ConversationMessage[] }
   | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] }
   | { mode: 'curated_recommendation'; scannedProduct: { name: string; brand: string; category: string; ingredients: string[] }; compatibleProducts: { id: number; name: string; brand: string; category: string; keyIngredients: string[]; matchReasons: string[] }[] }
-  | { mode: 'curated_review_summary'; product: Product; reviews: ReviewForSummary[]; matchStats: { totalMatching: number; avgRating: number; positivePercent: number } };
+  | { mode: 'curated_review_summary'; product: Product; reviews: ReviewForSummary[]; matchStats: { totalMatching: number; avgRating: number; positivePercent: number } }
+  | { mode: 'is_it_for_me'; product: Product; scannedIngredients?: { name: string; safetyTier: string; category?: string }[]; shelfProducts: { name: string; brand: string; category: string; keyIngredients: string[] }[]; routineProducts: { name: string; category: string; timeOfDay: string }[]; reviewStats?: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] } };
 
 /**
  * Lightweight retailer shape for AI context serialization.
@@ -360,6 +362,11 @@ export function buildAIContext(
         user.concerns,
         page.product.concerns ?? [],
       );
+    } else if (page.mode === 'is_it_for_me' && user.concerns.length > 0) {
+      evidence.concernAlignment = computeConcernAlignment(
+        user.concerns,
+        page.product.concerns ?? [],
+      );
     } else if (page.mode === 'find_alternatives' && user.concerns.length > 0) {
       const allConcerns = [
         ...(page.sourceProduct.concerns ?? []),
@@ -417,6 +424,7 @@ export function generateContextCacheKey(ctx: AISurfaceContext): string {
   else if (page.mode === 'guided_routine_explain') pageId += `:${page.products.map(p => p.id).sort().join(',')}:${page.toneLevel}`;
   else if (page.mode === 'curated_recommendation') pageId += `:${page.scannedProduct.name}:${page.compatibleProducts.map(p => p.id).sort().join(',')}`;
   else if (page.mode === 'curated_review_summary') pageId += `:${page.product.id}:${page.matchStats.totalMatching}`;
+  else if (page.mode === 'is_it_for_me') pageId += `:${page.product.id}:${page.shelfProducts.length}`;
 
   return `ai-insight:${pageId}:${profileHash}:${envHash}`;
 }

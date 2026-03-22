@@ -160,6 +160,34 @@ function buildFallbackInsight(ctx: AISurfaceContext): string | undefined {
     return parts.length > 0 ? parts.join(' ') : undefined;
   }
 
+  // Is-it-for-me fallback: assemble from product data + evidence
+  if (ctx.mode === 'is_it_for_me' && ctx.page.mode === 'is_it_for_me') {
+    const p = ctx.page.product;
+    const skinType = ctx.user.skinType;
+    const skinMatch = skinType && p.skinTypes.length > 0 &&
+      p.skinTypes.some(st => st.toLowerCase() === skinType.toLowerCase() || st.toLowerCase() === 'all');
+    const concernMatch = evidence.concernAlignment?.matched ?? [];
+    if (skinMatch && concernMatch.length > 0) {
+      parts.push('Great fit for you');
+    } else if (skinMatch || concernMatch.length > 0) {
+      parts.push('Good fit with precautions');
+    } else {
+      parts.push('Not the best fit');
+    }
+    if (skinType) {
+      parts.push(skinMatch
+        ? `• This ${p.category} is suitable for your ${skinType} skin.`
+        : `• This product does not specifically target ${skinType} skin.`);
+    }
+    if (concernMatch.length > 0) {
+      parts.push(`• Addresses ${concernMatch.join(' and ')}, which matches your concerns.`);
+    }
+    if (p.keyIngredients.length > 0) {
+      parts.push(`• Key ingredients include ${p.keyIngredients.slice(0, 3).join(', ')}.`);
+    }
+    return parts.join('\n');
+  }
+
   // Explain-product fallback: assemble from product data + evidence
   if (ctx.mode === 'explain_product' && ctx.page.mode === 'explain_product') {
     const p = ctx.page.product;
