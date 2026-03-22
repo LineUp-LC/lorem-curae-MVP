@@ -1,11 +1,22 @@
 // Phase 1: Deferred links removed (profile/customize, my-skin, nutrition, subscription, badges)
 // See Notion "Deferred Work Tracker" to restore when trigger conditions are met
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useUserLocation } from '@/lib/utils/locationState';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
+
+function AnimatedDots() {
+  const [dots, setDots] = useState('');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? '' : prev + '.');
+    }, 400);
+    return () => clearInterval(interval);
+  }, []);
+  return <span className="inline-block w-4 text-left">{dots}</span>;
+}
 
 /**
  * ProfileDropdown Component
@@ -28,16 +39,17 @@ interface ProfileDropdownProps {
 const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const { user, profile, routineCount, signOut } = useAuth();
   const { displayString: userLocationDisplay, hasLocation } = useUserLocation();
+  const [signingOut, setSigningOut] = useState(false);
 
-  // Close on Escape key
+  // Close on Escape key (disabled while signing out)
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen || signingOut) return;
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
-  }, [isOpen, onClose]);
+  }, [isOpen, signingOut, onClose]);
 
   if (!isOpen) return null;
 
@@ -53,17 +65,20 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
   const isPaidSubscriber = subscriptionTier === 'plus' || subscriptionTier === 'premium';
 
   const handleSignOut = async () => {
-    console.log('[Auth] Sign out clicked');
-    try {
-      await signOut();
-    } catch (e) {
-      console.error('[Auth] Sign out error:', e);
-    }
+    setSigningOut(true);
+
     // Clear gamification and session data tied to this browser
     localStorage.removeItem('gamification_once_ever');
     localStorage.removeItem('scanHistory');
-    onClose();
-    // Hard redirect to clear all React state — navigate() can race with auth listener
+
+    try {
+      const signOutPromise = signOut();
+      const timeoutPromise = new Promise(r => setTimeout(r, 1500));
+      await Promise.race([signOutPromise, timeoutPromise]);
+    } catch {
+      // Even if signOut fails, still redirect
+    }
+
     window.location.href = '/';
   };
 
@@ -82,9 +97,9 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
           transform: translateX(2px);
         }
       `}</style>
-      <div 
-        className="fixed inset-0 z-40 motion-safe:animate-enter-fade" 
-        onClick={onClose}
+      <div
+        className="fixed inset-0 z-40 motion-safe:animate-enter-fade"
+        onClick={signingOut ? undefined : onClose}
       />
       {/* Mobile: Full-width bottom sheet | Desktop: Positioned dropdown */}
       <div className="lc-dropdown fixed sm:absolute right-0 left-0 sm:left-auto bottom-0 sm:bottom-auto sm:top-full sm:mt-2 w-full sm:w-64 bg-white rounded-t-xl sm:rounded-xl shadow-xl border border-[#E8D4CC]/50 z-50 max-h-[85vh] sm:max-h-none overflow-y-auto sm:overflow-visible motion-safe:animate-enter-up sm:motion-safe:animate-enter-scale origin-top-right will-change-transform">
@@ -198,7 +213,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
         )}
 
         {/* Navigation Links - Only show when logged in */}
-        {user && (
+        {user && !signingOut && (
           <div className="py-1">
           <Link
             to="/account"
@@ -264,7 +279,7 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
         )}
 
         {/* Bottom Section - Only show when logged in */}
-        {user && (
+        {user && !signingOut && (
           <div className="border-t border-[#E8D4CC]/30 py-1">
             <Link
               to="/settings"
@@ -282,6 +297,16 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
               <i className="ri-logout-box-line text-sm"></i>
               <span className="ml-2.5 text-xs">Sign Out</span>
             </button>
+          </div>
+        )}
+
+        {/* Signing Out State */}
+        {signingOut && (
+          <div className="px-4 py-6 flex items-center justify-center">
+            <div className="flex items-center gap-1.5 text-sm text-[#6B635A]">
+              <i className="ri-logout-box-line text-sm animate-pulse"></i>
+              <span>Signing out<AnimatedDots /></span>
+            </div>
           </div>
         )}
 
