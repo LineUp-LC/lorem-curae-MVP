@@ -120,6 +120,7 @@ last_synced: "2026-03-22"
 | Supabase safety rules | `rules/09-security.md` |
 | Stripe safety rules | `rules/09-security.md` |
 | Guest vs authenticated policy | `rules/09-security.md` |
+| Auth hydration guard / hasHydratedRef / session recovery | `rules/09-security.md` |
 | Safe development / deployment rules | `rules/09-security.md` |
 | Auth route registry | `rules/09-security.md` |
 

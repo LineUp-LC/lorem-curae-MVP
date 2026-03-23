@@ -132,6 +132,15 @@ All auth pages: centered card, gradient background, Lorem Curae wordmark, brand 
 - Server-side cache: 24h TTL in `web_search_cache` table (SHA-256 query hash key)
 - Gamification duplicate prevention: once-ever actions checked against `points_transactions` table (Supabase-backed, not localStorage)
 
+## Auth Hydration Guard
+
+- `AuthContext.tsx` uses `hasHydratedRef` to skip re-hydration on session recovery events
+- Supabase `onAuthStateChange` fires `SIGNED_IN` on session recovery (tab refocus, token refresh), not just actual sign-ins
+- Full hydration (mergeGuestData, loadUserProfile, getRoutineCount) only runs on first `SIGNED_IN` per user
+- `hasHydratedRef` resets on `SIGNED_OUT` to allow fresh hydration on next sign-in
+- Hydration timeout (8s) warns instead of throwing — uses cached profile data as fallback
+- Any page gated on `authLoading` (e.g., scan page) will NOT flash a loading spinner on navigation
+
 ## Guest vs Authenticated
 
 - Guest users: rule-based fallback only — no Supabase calls, no API calls
