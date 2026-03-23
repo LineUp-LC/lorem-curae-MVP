@@ -165,7 +165,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 await mergeGuestDataToAccount(authUser.id, null)
                 await createUserProfile(authUser)
               } else {
-                await mergeGuestDataToAccount(authUser.id, existing)
+                // Skip merge when no guest data exists — saves 1-2s on hydration
+                const hasGuestData =
+                  localStorage.getItem('skinSurveyData') ||
+                  localStorage.getItem('survey_answers') ||
+                  localStorage.getItem('savedProducts') ||
+                  localStorage.getItem('routines') ||
+                  localStorage.getItem('user_location')
+                if (hasGuestData) {
+                  await mergeGuestDataToAccount(authUser.id, existing)
+                } else {
+                  console.log('[auth] No guest data to merge, skipping')
+                }
               }
 
               const userProfile = await loadUserProfile(authUser.id)
@@ -182,7 +193,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await Promise.race([
               hydrate(),
               new Promise<void>((_, reject) =>
-                setTimeout(() => reject(new Error('[auth] Sign-in hydration timed out')), 8000)
+                setTimeout(() => reject(new Error('[auth] Sign-in hydration timed out')), 10000)
               ),
             ])
             hasHydratedRef.current = true
