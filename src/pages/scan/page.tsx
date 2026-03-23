@@ -175,8 +175,8 @@ export default function ScanPage() {
     setHistory([]);
   }, []);
 
-  // Auth loading
-  if (authLoading) {
+  // Auth loading — only show spinner on cold start (no user yet), not on session refresh flicker
+  if (authLoading && !user) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
