@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   useMemo,
   useCallback,
   ReactNode,
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [routineCount, setRoutineCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const hasHydratedRef = useRef(false)
 
   // Sync profile to sessionState + rehydrate localStorage if needed
   const syncProfileToSessionState = (userProfile: UserProfile) => {
@@ -128,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setProfile(userProfile)
             setRoutineCount(count)
             if (userProfile) syncProfileToSessionState(userProfile)
+            hasHydratedRef.current = true
           }
         }
       } catch (e) {
@@ -148,6 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser)
 
         if (event === 'SIGNED_IN' && authUser) {
+          // Skip re-hydration if we've already hydrated this user (session recovery, token refresh)
+          if (hasHydratedRef.current && user?.id === authUser.id) {
+            return
+          }
+
           setLoading(true)
           try {
             const hydrate = async () => {
@@ -177,14 +185,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 setTimeout(() => reject(new Error('[auth] Sign-in hydration timed out')), 8000)
               ),
             ])
+            hasHydratedRef.current = true
           } catch (e) {
-            console.error('[auth] Failed to hydrate profile after sign-in:', e)
+            console.warn('[auth] Hydration slow or failed — continuing with cached data:', e)
+            hasHydratedRef.current = true
           } finally {
             if (isMounted) setLoading(false)
           }
         }
 
         if (event === 'SIGNED_OUT') {
+          hasHydratedRef.current = false
           if (isMounted) {
             setProfile(null)
             setRoutineCount(0)
