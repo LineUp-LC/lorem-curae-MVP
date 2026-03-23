@@ -4,7 +4,7 @@
 // =====================================================
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import ProfileDropdown from './ProfileDropdown';
 import SearchOverlay from './SearchOverlay';
 import { useCartCount } from '../../lib/utils/cartState';
@@ -45,6 +45,7 @@ const Navbar = () => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [pointsBalance, setPointsBalance] = useState<number | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -402,6 +403,12 @@ const Navbar = () => {
               className="lc-nav-icon-btn text-[#2D2A26] hover:bg-[#C4704D]/10"
               aria-label="Scan product"
               onMouseEnter={() => import('../../pages/scan/page')}
+              onClick={(e) => {
+                if (location.pathname === '/scan') {
+                  e.preventDefault();
+                  navigate('/scan', { replace: true, state: { reset: Date.now() } });
+                }
+              }}
             >
               <i className="ri-camera-line text-xl"></i>
             </Link>
@@ -479,7 +486,13 @@ const Navbar = () => {
               to="/scan"
               className={`lc-mobile-link motion-safe:animate-enter-right ${location.pathname === '/scan' ? 'lc-mobile-link-active' : ''}`}
               style={{ animationDelay: `${Math.min(navLinks.length * 50, 250)}ms` }}
-              onClick={() => setShowMobileMenu(false)}
+              onClick={(e) => {
+                setShowMobileMenu(false);
+                if (location.pathname === '/scan') {
+                  e.preventDefault();
+                  navigate('/scan', { replace: true, state: { reset: Date.now() } });
+                }
+              }}
               onMouseEnter={() => import('../../pages/scan/page')}
               aria-current={location.pathname === '/scan' ? 'page' : undefined}
             >

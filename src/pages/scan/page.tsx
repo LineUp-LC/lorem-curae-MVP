@@ -65,7 +65,7 @@ export default function ScanPage() {
     return () => {
       cancelledRef.current = true;
     };
-  }, [location.key]);
+  }, [location.key, location.state]);
 
   const handleCapture = useCallback((file: File) => {
     const previewUrl = URL.createObjectURL(file);
