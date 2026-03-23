@@ -138,7 +138,8 @@ All auth pages: centered card, gradient background, Lorem Curae wordmark, brand 
 - Supabase `onAuthStateChange` fires `SIGNED_IN` on session recovery (tab refocus, token refresh), not just actual sign-ins
 - Full hydration (mergeGuestData, loadUserProfile, getRoutineCount) only runs on first `SIGNED_IN` per user
 - `hasHydratedRef` resets on `SIGNED_OUT` to allow fresh hydration on next sign-in
-- Hydration timeout (8s) warns instead of throwing — uses cached profile data as fallback
+- Hydration timeout (10s) warns instead of throwing — uses cached profile data as fallback
+- Guest merge skip: when profile exists and no guest localStorage keys (`skinSurveyData`, `survey_answers`, `savedProducts`, `routines`, `user_location`), `mergeGuestDataToAccount` is skipped entirely
 - Any page gated on `authLoading` (e.g., scan page) will NOT flash a loading spinner on navigation
 
 ## Guest vs Authenticated
