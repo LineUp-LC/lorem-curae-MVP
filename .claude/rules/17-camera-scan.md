@@ -37,7 +37,7 @@ related: ["01-workflow.md", "03-frontend.md", "05-ai-pipeline.md", "10-data-laye
 | Stage | Component | What it does |
 |-------|-----------|--------------|
 | **Scan** | CameraCapture → Edge Function → ScanResultView | Identify product + parse full ingredient list |
-| **Discover** | PostScanDiscovery | Find compatible products via `findCompatibleProducts()` + AI WHY |
+| **Discover** | PostScanDiscovery | Find compatible products via `searchCompatibleProducts()` (Serper.dev web search) |
 | **Understand** | ScanReviewPanel | Profile-filtered reviews + AI summary via `curated_review_summary` |
 | **Build** | ScanResultView + PostScanDiscovery | Add to Shelf, Add to Routine via RoutinePickerModal |
 
@@ -215,7 +215,7 @@ After product identification, the result view shows:
 3. **Tab bar** — 3 tabs, NO tab active by default:
    - **Breakdown**: calls `scanProductFull()` → IngredientBreakdown + (future: ScanReviewPanel)
    - **Compatible**: needs full scan data → PostScanDiscovery
-   - **Similar**: `scoreSimilarProducts()` → inline product cards (synchronous, no API)
+   - **Similar**: `searchSimilarProducts()` → web search product cards (async, Serper.dev)
 
 Tab content is lazy-loaded on first tap and cached in component state (instant on return).
 `imageBase64` is stored in page state after initial identify scan for deferred full scan.
@@ -267,6 +267,25 @@ Transitions:
 - `idle → result` (history card tap — bypasses capture/processing)
 - `idle → processing → result` (barcode detected — bypasses capture)
 
+### Navigation Reset
+
+The scan page resets to idle on every navigation via a multi-layered approach:
+
+1. **`useEffect([location.key, location.state])`** — resets all state (phase, capturedBase64, history) whenever React Router generates a new key or state changes
+2. **Navbar same-path force** — when already on `/scan`, navbar onClick calls `navigate('/scan', { replace: true, state: { reset: Date.now() } })` to force a state change even for same-path clicks
+3. **`cancelledRef`** — tracks whether the component has been unmounted/reset; checked after every async boundary (`scanProduct`, `createScanThumbnail`) to abort stale operations
+4. **`visibilitychange` listener** — stops webcam tracks and cancels barcode scanning when the browser tab becomes hidden
+
+This is necessary because React Router's shared `AppLayout` with `<Outlet />` keeps child components mounted across navigations, so empty-deps `useEffect([], [])` only fires once.
+
+### PersonalizingLoader
+
+Tab loading states use `PersonalizingLoader` from `src/components/feature/PersonalizingLoader.tsx` — a shared animated loader with rotating step messages and configurable icon.
+
+### JSON Parser Resilience
+
+The product-scan Edge Function strips markdown code fences (`json ... `) from Claude Vision responses before JSON.parse, as Claude occasionally wraps JSON output in markdown formatting.
+
 ---
 
 ## Guest Policy
@@ -292,10 +311,10 @@ Transitions:
 - These are intentionally separate from `Product` and `ProductReview` — web results lack structured fields
 
 ### UI Rendering
-- Compatible Products tab: local catalog results first, then "From across the web" section with `WebProduct` cards
-- Similar Products tab: local catalog results first, then web alternatives with "Web" badge
+- Compatible Products tab: web-only results via `searchCompatibleProducts()` with category filter pills
+- Similar Products tab: web-only results via `searchSimilarProducts()` — no local catalog scoring
 - Reviews: platform reviews in "From your skin community" section, web reviews in "From across the web" collapsible section
-- Web product cards link externally (no internal product detail page) with "via {merchant}" badge
+- All product cards link externally (no internal product detail page) with "via {merchant}" badge
 - Web review cards show sourceDomain badge + "Read full review" external link
 
 ### "Is It For Me?" Integration
@@ -304,9 +323,9 @@ Transitions:
 - AI can cite web evidence: "Among web reviews, X out of Y..."
 
 ### Fallback Behavior
-- If Serper is down or rate limited: local catalog results shown, subtle "Web search unavailable" message
+- If Serper is down or rate limited: "Web search unavailable. Try again later." message
 - Guest users: no web search calls (consistent with scan auth policy)
-- Empty Serper results: section not rendered
+- Empty Serper results: "No compatible products found. Try a different category filter."
 
 ---
 

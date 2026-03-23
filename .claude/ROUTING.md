@@ -1,7 +1,7 @@
 ---
 scope: "Query-pattern → file routing table for all governance files"
 authority: primary
-last_synced: "2026-03-14"
+last_synced: "2026-03-22"
 ---
 
 # Governance Routing Table
@@ -129,9 +129,9 @@ last_synced: "2026-03-14"
 |---------------|------|
 | Supabase client configuration | `rules/10-data-layer.md` |
 | Data access module registry | `rules/10-data-layer.md` |
-| Edge Function registry (all 16) | `rules/10-data-layer.md` |
+| Edge Function registry (all 17) | `rules/10-data-layer.md` |
 | Edge Function development rules | `rules/10-data-layer.md` |
-| Database migration registry (all 8) | `rules/10-data-layer.md` |
+| Database migration registry (all 10) | `rules/10-data-layer.md` |
 | Migration safety rules | `rules/10-data-layer.md` |
 | Mock data conventions | `rules/10-data-layer.md` |
 
@@ -196,7 +196,16 @@ last_synced: "2026-03-14"
 | product-scan Edge Function / Claude Vision | `rules/17-camera-scan.md` |
 | Scan result types / ScanResult / ScanResponse | `rules/17-camera-scan.md` |
 | Scan UX state machine (idle/captured/processing/result/error) | `rules/17-camera-scan.md` |
-| Barcode / UPC scanning (future) | `rules/17-camera-scan.md` |
+| Barcode / UPC scanning (BarcodeDetector API) | `rules/17-camera-scan.md` |
+| Compatible products (web search / PostScanDiscovery) | `rules/17-camera-scan.md` |
+| Similar products (web search / ScanResultView) | `rules/17-camera-scan.md` |
+| Is It For Me (AI analysis / explain_product mode) | `rules/17-camera-scan.md` |
+| Product breakdown (ingredients / full scan mode) | `rules/17-camera-scan.md` |
+| Web reviews (ScanReviewPanel / Serper) | `rules/17-camera-scan.md` |
+| Scan page navigation reset (location.key + location.state) | `rules/17-camera-scan.md` |
+| Serper.dev web search / product-search Edge Function | `rules/17-camera-scan.md` |
+| Web search client / productSearch.ts rate limiting | `rules/10-data-layer.md` |
+| API rate limiting / session limits | `rules/09-security.md` |
 
 ## Gamification
 

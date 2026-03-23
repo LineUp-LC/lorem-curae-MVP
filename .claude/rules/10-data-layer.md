@@ -1,7 +1,7 @@
 ---
 scope: "Supabase queries, RLS, migrations, Edge Functions, data access patterns, mock data conventions"
 authority: primary
-last_synced: "2026-03-14"
+last_synced: "2026-03-22"
 related: ["09-security.md", "11-testing.md"]
 ---
 
@@ -27,6 +27,7 @@ related: ["09-security.md", "11-testing.md"]
 | supabaseProductsAdmin | `src/lib/data/supabaseProductsAdmin.ts` | Admin product operations |
 | retailerData | `src/lib/utils/retailerData.ts` | Retailer data access |
 | productRetrieval | `src/lib/utils/productRetrieval.ts` | Product data fetching |
+| productSearch | `src/lib/api/productSearch.ts` | Serper.dev web search client (compatible, similar, reviews) with session rate limiting (10 calls/session) |
 
 ---
 

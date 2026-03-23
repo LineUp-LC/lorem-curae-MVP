@@ -1,7 +1,7 @@
 ---
 scope: "Auth, env vars, hCaptcha, Supabase safety, Stripe safety, GDPR, guest vs authenticated"
 authority: primary
-last_synced: "2026-03-14"
+last_synced: "2026-03-22"
 related: ["04-state-management.md", "08-commerce.md", "10-data-layer.md"]
 ---
 
@@ -124,6 +124,13 @@ All auth pages: centered card, gradient background, Lorem Curae wordmark, brand 
 - NEVER expose commission/affiliate internals to end users
 - NEVER log or print payment-related secrets
 - Webhook secrets must only be used in Edge Functions, never in frontend
+
+## API Rate Limiting
+
+- `product-search` Edge Function: requires authentication (returns 401 for unauth)
+- Client-side rate limit: 10 Serper.dev calls per scan session (`src/lib/api/productSearch.ts`)
+- Server-side cache: 24h TTL in `web_search_cache` table (SHA-256 query hash key)
+- Gamification duplicate prevention: once-ever actions checked against `points_transactions` table (Supabase-backed, not localStorage)
 
 ## Guest vs Authenticated
 
