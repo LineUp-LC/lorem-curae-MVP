@@ -40,9 +40,9 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 | INGREDIENT_SEARCH | 10 | ingredient detail view |
 | PROFILE_COMPLETE | 75 | settings profile save |
 | MONTHLY_ACTIVE | 50 | cron (future) |
-| PRODUCT_SCAN | 15 | scan match success |
-| PRODUCT_SAVED | 5 | product save |
-| AI_CHAT | 5 | first chat message per session |
+| PRODUCT_SCAN | 15 | scan match success (once-ever) |
+| PRODUCT_SAVED | 5 | product save (once-ever) |
+| AI_CHAT | 5 | first chat message (once-ever) |
 | STREAK_7_DAY | 50 | streak milestone |
 | STREAK_30_DAY | 200 | streak milestone |
 | FIRST_COMPARISON | 20 | comparison modal open |
