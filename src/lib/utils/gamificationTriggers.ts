@@ -22,11 +22,14 @@ const ONCE_EVER_ACTIONS: Set<GamificationAction> = new Set([
   'SKIN_SURVEY',
   'PROFILE_COMPLETE',
   'FIRST_COMPARISON',
+  'PRODUCT_SCAN',
+  'PRODUCT_SAVED',
+  'PRODUCT_REVIEW',
+  'AI_CHAT',
 ]);
 
 // Reserved for future per-session actions
 const ONCE_PER_SESSION_ACTIONS: Set<GamificationAction> = new Set([
-  'AI_CHAT',
 ]);
 
 // ---------------------------------------------------------------------------

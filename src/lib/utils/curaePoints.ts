@@ -22,23 +22,23 @@ export interface CuraePointsAccount {
 
 // Point earning actions
 export const POINTS_ACTIONS = {
-  SIGNUP: { points: 100, description: 'Welcome bonus for joining Lorem Curae' },
-  SKIN_SURVEY: { points: 50, description: 'Completed skin assessment' },
-  PRODUCT_REVIEW: { points: 25, description: 'Wrote a product review' },
+  SIGNUP: { points: 100, description: 'Welcome Bonus' },
+  SKIN_SURVEY: { points: 50, description: 'Completed Skin Survey' },
+  PRODUCT_REVIEW: { points: 25, description: 'First Review' },
   COMMUNITY_POST: { points: 15, description: 'Created a community post' },
   ROUTINE_CREATED: { points: 30, description: 'Created a skincare routine' },
   ROUTINE_LOGGED: { points: 10, description: 'Logged daily routine' },
   PRODUCT_PURCHASE: { points: 1, description: 'Points per dollar spent' }, // 1 point per $1
   REFERRAL: { points: 200, description: 'Referred a friend who signed up' },
   INGREDIENT_SEARCH: { points: 10, description: 'Researched an ingredient' },
-  PROFILE_COMPLETE: { points: 75, description: 'Completed profile information' },
+  PROFILE_COMPLETE: { points: 75, description: 'Profile Completed' },
   MONTHLY_ACTIVE: { points: 50, description: 'Active user bonus' },
-  PRODUCT_SCAN: { points: 15, description: 'Scanned a product' },
-  PRODUCT_SAVED: { points: 5, description: 'Saved a product to collection' },
-  AI_CHAT: { points: 5, description: 'Started an AI chat session' },
+  PRODUCT_SCAN: { points: 15, description: 'First Scan' },
+  PRODUCT_SAVED: { points: 5, description: 'First Product Saved' },
+  AI_CHAT: { points: 5, description: 'First AI Chat' },
   STREAK_7_DAY: { points: 50, description: '7-day routine streak bonus' },
   STREAK_30_DAY: { points: 200, description: '30-day routine streak bonus' },
-  FIRST_COMPARISON: { points: 20, description: 'Compared products for the first time' },
+  FIRST_COMPARISON: { points: 20, description: 'First Comparison' },
 };
 
 // Tier thresholds
