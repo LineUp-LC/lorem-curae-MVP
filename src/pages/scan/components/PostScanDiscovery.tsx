@@ -71,7 +71,6 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [webProducts, setWebProducts] = useState<WebProduct[]>([]);
   const [webLoading, setWebLoading] = useState(false);
   const [webError, setWebError] = useState(false);
-  const [webCache, setWebCache] = useState<Record<string, WebProduct[]>>({});
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
   const skinType = getEffectiveSkinType() ?? undefined;
@@ -100,21 +99,15 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     };
   }, [scanResult, matchedProduct]);
 
-  // Filter web results by selected category (client-side)
+  // Filter client-side using the same inference as countByCategory — counts always match display
   const filteredProducts = useMemo(() => {
     if (categoryFilter === 'all') return webProducts;
-    return webProducts.filter(p => p.category?.toLowerCase() === categoryFilter);
+    return webProducts.filter(p => inferCategoryFromName(p.name) === categoryFilter);
   }, [webProducts, categoryFilter]);
 
-  // Fetch web products from Serper when category changes
+  // Fetch once on mount — all filtering is client-side so no re-fetch per category
   useEffect(() => {
     if (!user) return;
-
-    const cacheKey = categoryFilter;
-    if (webCache[cacheKey]) {
-      setWebProducts(webCache[cacheKey]);
-      return;
-    }
 
     let cancelled = false;
     setWebLoading(true);
@@ -128,12 +121,10 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
         ingredients: scanSourceProduct.ingredients.slice(0, 10),
       },
       { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-      categoryFilter !== 'all' ? categoryFilter : undefined,
     ).then((results) => {
       if (cancelled) return;
       if (results) {
         setWebProducts(results);
-        setWebCache(prev => ({ ...prev, [cacheKey]: results }));
       } else {
         setWebError(true);
         setWebProducts([]);
@@ -143,7 +134,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     });
 
     return () => { cancelled = true; };
-  }, [categoryFilter, user, scanSourceProduct, skinType, concerns, sensitivity]);
+  }, [user, scanSourceProduct, skinType, concerns, sensitivity]);
 
   return (
     <div className="mt-6 space-y-4">
