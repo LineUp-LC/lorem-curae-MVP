@@ -42,10 +42,23 @@ const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
   { value: 'mask', label: 'Mask' },
 ];
 
-// Number of web results that match each category (for pill counts)
+// Infer category from product name — mirrors Edge Function logic, used for pill counts
+function inferCategoryFromName(name: string): CategoryFilter {
+  const t = name.toLowerCase();
+  if (t.includes('eye cream') || t.includes('eye gel') || t.includes('eye serum') || t.includes('eye care') || t.includes('under eye')) return 'eye cream';
+  if (t.includes('sunscreen') || t.includes('sun screen') || /\bspf\s*\d/.test(t) || t.includes('sun protection') || t.includes('uv protect')) return 'sunscreen';
+  if (t.includes('mask') || t.includes('masque') || t.includes('sheet mask') || t.includes('clay mask')) return 'mask';
+  if (t.includes('cleanser') || t.includes('face wash') || t.includes('cleansing foam') || t.includes('cleansing gel') || t.includes('facial wash') || t.includes('micellar')) return 'cleanser';
+  if (t.includes('toner') || t.includes('toning water') || t.includes('facial mist')) return 'toner';
+  if (t.includes('serum') || t.includes('ampoule')) return 'serum';
+  if (t.includes('moisturizer') || t.includes('moisturiser') || t.includes('face cream') || t.includes('day cream') || t.includes('night cream') || t.includes('hydrating cream') || t.includes('face lotion')) return 'moisturizer';
+  return 'treatment';
+}
+
+// Number of web results that match each category (inferred from title, independent of cached stamps)
 function countByCategory(products: WebProduct[], category: CategoryFilter): number {
   if (category === 'all') return products.length;
-  return products.filter(p => p.category?.toLowerCase() === category).length;
+  return products.filter(p => inferCategoryFromName(p.name) === category).length;
 }
 
 // ---------------------------------------------------------------------------
