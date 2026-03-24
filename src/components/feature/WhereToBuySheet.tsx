@@ -75,24 +75,6 @@ export default function WhereToBuySheet({
     }
   }, [isOpen, user?.id, productName]);
 
-  // Pre-fetch reviews for the top retailer on open (warms session cache)
-  const preFetchedForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!isOpen || listings.length === 0) return;
-    const topDomain = listings[0].domain;
-    if (preFetchedForRef.current === topDomain) return;
-    preFetchedForRef.current = topDomain;
-
-    const skinType = getEffectiveSkinType();
-    const concerns = getEffectiveConcerns();
-    const sensitivity = getEffectiveSensitivity();
-    const userProfile = skinType || concerns.length > 0 || sensitivity
-      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
-      : undefined;
-
-    searchRetailerReviews(productName, productBrand, topDomain, userProfile).catch(() => {});
-  }, [isOpen, listings, productName, productBrand]);
-
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
@@ -114,6 +96,24 @@ export default function WhereToBuySheet({
     () => buildRetailerListings(retailerProducts, sortKey, { freeShipping, freeReturns }),
     [retailerProducts, sortKey, freeShipping, freeReturns],
   );
+
+  // Pre-fetch reviews for the top retailer on open (warms session cache)
+  const preFetchedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isOpen || listings.length === 0) return;
+    const topDomain = listings[0].domain;
+    if (preFetchedForRef.current === topDomain) return;
+    preFetchedForRef.current = topDomain;
+
+    const skinType = getEffectiveSkinType();
+    const concerns = getEffectiveConcerns();
+    const sensitivity = getEffectiveSensitivity();
+    const userProfile = skinType || concerns.length > 0 || sensitivity
+      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
+      : undefined;
+
+    searchRetailerReviews(productName, productBrand, topDomain, userProfile).catch(() => {});
+  }, [isOpen, listings, productName, productBrand]);
 
   const handleBuyClick = useCallback((listing: RetailerListing) => {
     onBuyIntent?.(listing);
