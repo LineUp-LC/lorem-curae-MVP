@@ -26,7 +26,7 @@ function App() {
     setToast({
       points: detail.pointsAwarded ?? 0,
       description: detail.description ?? '',
-      badgeName: detail.badgesUnlocked?.[0],
+      badgeName: detail.badgesUnlocked?.[0]?.name,
     });
   }, []);
 
