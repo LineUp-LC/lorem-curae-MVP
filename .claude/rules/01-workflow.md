@@ -48,6 +48,12 @@ Every operation must include:
 
 ---
 
+## Model Selection
+
+See `19-model-selection.md` for model + effort level guidance to optimize token usage. Not every task needs Opus + High.
+
+---
+
 ## Session-Limit Recovery
 
 If Claude Code hits a limit:
