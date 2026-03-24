@@ -10,7 +10,7 @@
 // Search request types (sent to product-search Edge Function)
 // ---------------------------------------------------------------------------
 
-export type WebSearchType = 'compatible' | 'similar' | 'reviews' | 'retailer_reviews';
+export type WebSearchType = 'compatible' | 'similar' | 'reviews' | 'retailer_reviews' | 'buy';
 
 export interface WebSearchRequest {
   type: WebSearchType;

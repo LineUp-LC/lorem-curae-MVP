@@ -220,6 +220,16 @@ last_synced: "2026-03-22"
 | Adding new points actions or badges | `rules/18-gamification.md` |
 | Gamification database tables (curae_points, points_transactions, user_badges) | `rules/18-gamification.md` |
 
+## Model Selection
+
+| Query Pattern | File |
+|---------------|------|
+| Which Claude model to use / model selection | `rules/19-model-selection.md` |
+| Effort level / thinking level for tasks | `rules/19-model-selection.md` |
+| Token cost optimization / saving money | `rules/19-model-selection.md` |
+| How to switch models in Claude Code | `rules/19-model-selection.md` |
+| Opus vs Sonnet decision | `rules/19-model-selection.md` |
+
 ## Roadmap & Priority
 
 | Query Pattern | File |

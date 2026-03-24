@@ -40,6 +40,7 @@ No test runner configured. No test files exist.
 | 16 | `rules/16-routing.md` | Active routes, deferred route governance, navigation components |
 | 17 | `rules/17-camera-scan.md` | Scan page, product-scan Edge Function, image pipeline, Claude Vision |
 | 18 | `rules/18-gamification.md` | Points economy, badges, streaks, triggers, rewards dashboard |
+| 19 | `rules/19-model-selection.md` | Model + effort level matrix, cost estimates, switching commands |
 
 > Full query-pattern routing: `.claude/ROUTING.md`
 

@@ -2,7 +2,7 @@
 // Bottom sheet (mobile) / modal (desktop) for "Where to Buy" feature.
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
-import type { WebProduct } from '../../types/webSearch';
+import type { WebProduct, WebReview } from '../../types/webSearch';
 import type { RetailerListing, RetailerSortKey } from '../../types/retailerDirectory';
 import {
   buildRetailerListings,
@@ -11,7 +11,7 @@ import {
 import RetailerCard from './RetailerCard';
 import RetailerReviews from './RetailerReviews';
 import RoutinePickerModal from './RoutinePickerModal';
-import { searchRetailerReviews } from '../../lib/api/productSearch';
+import { searchWhereToBuy, searchProductReviews, searchRetailerReviews } from '../../lib/api/productSearch';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../lib/auth/AuthContext';
 import {
@@ -19,6 +19,7 @@ import {
   getEffectiveConcerns,
   getEffectiveSensitivity,
 } from '../../lib/utils/sessionState';
+import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
 
 interface WhereToBuySheetProps {
   isOpen: boolean;
@@ -65,6 +66,17 @@ export default function WhereToBuySheet({
   const gamificationFired = useRef(false);
   const routineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Dedicated product search state (finds the product across many retailers)
+  const [buyProducts, setBuyProducts] = useState<WebProduct[]>([]);
+  const [buySearchDone, setBuySearchDone] = useState(false);
+  const buySearchFiredRef = useRef<string | null>(null);
+
+  // General Google reviews state
+  const [googleReviews, setGoogleReviews] = useState<WebReview[] | null>(null);
+  const [googleReviewsLoading, setGoogleReviewsLoading] = useState(false);
+  const [googleReviewsOpen, setGoogleReviewsOpen] = useState(false);
+  const googleReviewsFiredRef = useRef<string | null>(null);
+
   // Fire WHERE_TO_BUY gamification on first open
   useEffect(() => {
     if (isOpen && user?.id && !gamificationFired.current) {
@@ -74,6 +86,83 @@ export default function WhereToBuySheet({
       }).catch(() => {});
     }
   }, [isOpen, user?.id, productName]);
+
+  // Dedicated product search — find this product across ALL retailers
+  useEffect(() => {
+    if (!isOpen || !user) return;
+    const searchKey = `${productBrand}:${productName}`;
+    if (buySearchFiredRef.current === searchKey) return;
+    buySearchFiredRef.current = searchKey;
+
+    searchWhereToBuy(productName, productBrand).then(results => {
+      if (results) setBuyProducts(results);
+      setBuySearchDone(true);
+    }).catch(() => {
+      setBuySearchDone(true);
+    });
+  }, [isOpen, user, productName, productBrand]);
+
+  // Fetch general Google reviews on first expand
+  useEffect(() => {
+    if (!googleReviewsOpen || !user) return;
+    const reviewKey = `${productBrand}:${productName}`;
+    if (googleReviewsFiredRef.current === reviewKey) return;
+    googleReviewsFiredRef.current = reviewKey;
+
+    setGoogleReviewsLoading(true);
+    const skinType = getEffectiveSkinType();
+    const concerns = getEffectiveConcerns();
+    const sensitivity = getEffectiveSensitivity();
+    const userProfile = skinType || concerns.length > 0 || sensitivity
+      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
+      : undefined;
+
+    searchProductReviews(productName, productBrand, userProfile).then(results => {
+      setGoogleReviews(results);
+    }).catch(() => {
+      setGoogleReviews([]);
+    }).finally(() => {
+      setGoogleReviewsLoading(false);
+    });
+  }, [googleReviewsOpen, user, productName, productBrand]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
+
+  // Merge: existing allWebProducts matches + dedicated buy search results (deduplicate by domain)
+  const allRetailerProducts = useMemo(() => {
+    if (!isOpen) return [];
+    const fromExisting = findRetailerListings(targetProduct, allWebProducts);
+    if (buyProducts.length === 0) return fromExisting;
+
+    const seenDomains = new Set(fromExisting.map(p => {
+      try { return new URL(p.externalUrl).hostname.replace('www.', ''); } catch { return p.merchant.toLowerCase(); }
+    }));
+
+    const additional = buyProducts.filter(p => {
+      const domain = (() => {
+        try { return new URL(p.externalUrl).hostname.replace('www.', ''); } catch { return p.merchant.toLowerCase(); }
+      })();
+      if (seenDomains.has(domain)) return false;
+      seenDomains.add(domain);
+      return true;
+    });
+
+    return [...fromExisting, ...additional];
+  }, [isOpen, targetProduct, allWebProducts, buyProducts]);
+
+  // Build sorted + filtered listings
+  const listings = useMemo(
+    () => buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns }),
+    [allRetailerProducts, sortKey, freeShipping, freeReturns],
+  );
 
   // Pre-fetch reviews for the top retailer on open (warms session cache)
   const preFetchedForRef = useRef<string | null>(null);
@@ -92,28 +181,6 @@ export default function WhereToBuySheet({
 
     searchRetailerReviews(productName, productBrand, topDomain, userProfile).catch(() => {});
   }, [isOpen, listings, productName, productBrand]);
-
-  // Close on Escape
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
-
-  // Find all retailer listings for this product
-  const retailerProducts = useMemo(() => {
-    if (!isOpen) return [];
-    return findRetailerListings(targetProduct, allWebProducts);
-  }, [isOpen, targetProduct, allWebProducts]);
-
-  // Build sorted + filtered listings
-  const listings = useMemo(
-    () => buildRetailerListings(retailerProducts, sortKey, { freeShipping, freeReturns }),
-    [retailerProducts, sortKey, freeShipping, freeReturns],
-  );
 
   const handleBuyClick = useCallback((listing: RetailerListing) => {
     onBuyIntent?.(listing);
@@ -148,6 +215,18 @@ export default function WhereToBuySheet({
   if (!isOpen) return null;
 
   const retailerCount = listings.length;
+  const isSearching = !buySearchDone && retailerCount === 0;
+
+  const skinType = getEffectiveSkinType();
+  const concerns = getEffectiveConcerns();
+  const sensitivity = getEffectiveSensitivity();
+  const highlightProfile = {
+    skinType: skinType ?? null,
+    concerns,
+    sensitivity: sensitivity ?? null,
+    excludeNames: [productName, productBrand],
+    highlightSentiment: true,
+  };
 
   return (
     <div
@@ -168,11 +247,13 @@ export default function WhereToBuySheet({
             <div>
               <h2 className="text-base font-serif font-bold text-deep">Where to Buy</h2>
               <p className="text-[11px] text-warm-gray">
-                {retailerCount === 0
-                  ? 'Not available online'
-                  : retailerCount === 1
-                    ? `Available on ${listings[0].retailerName}`
-                    : `Compare ${retailerCount} retailers`}
+                {isSearching
+                  ? 'Searching retailers...'
+                  : retailerCount === 0
+                    ? 'Not available online'
+                    : retailerCount === 1
+                      ? `Available on ${listings[0].retailerName}`
+                      : `Compare ${retailerCount} retailers`}
               </p>
             </div>
           </div>
@@ -185,8 +266,16 @@ export default function WhereToBuySheet({
           </button>
         </div>
 
-        {/* 0 retailers — Not available online */}
-        {retailerCount === 0 && (
+        {/* Searching state */}
+        {isSearching && (
+          <div className="flex-1 flex flex-col items-center justify-center p-8">
+            <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mb-3" />
+            <p className="text-sm text-warm-gray">Finding retailers for this product...</p>
+          </div>
+        )}
+
+        {/* 0 retailers — Not available online (only after search completes) */}
+        {!isSearching && retailerCount === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-14 h-14 flex items-center justify-center bg-cream rounded-full mb-4">
               <i className="ri-map-pin-line text-2xl text-warm-gray" />
@@ -284,6 +373,70 @@ export default function WhereToBuySheet({
                   </button>
                 </div>
               )}
+
+              {/* General Google Reviews section */}
+              <div className="pt-2 border-t border-blush/50">
+                <button
+                  onClick={() => setGoogleReviewsOpen(prev => !prev)}
+                  className="w-full flex items-center justify-between py-2 cursor-pointer"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <i className="ri-chat-quote-line text-primary text-sm" />
+                    <span className="text-xs font-medium text-deep">Reviews from across the web</span>
+                    {googleReviews && googleReviews.length > 0 && (
+                      <span className="text-[10px] text-warm-gray/70">({googleReviews.length})</span>
+                    )}
+                  </div>
+                  <i className={`ri-arrow-${googleReviewsOpen ? 'up' : 'down'}-s-line text-warm-gray`} />
+                </button>
+
+                {googleReviewsOpen && (
+                  <div className="space-y-2 pb-2">
+                    {googleReviewsLoading && (
+                      <div className="space-y-2">
+                        {[1, 2, 3].map(i => (
+                          <div key={i} className="p-2.5 rounded-lg bg-cream/50 border border-blush/30 animate-pulse">
+                            <div className="h-3 bg-blush/40 rounded w-full mb-2" />
+                            <div className="h-3 bg-blush/30 rounded w-3/4" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {!googleReviewsLoading && googleReviews && googleReviews.length > 0 && (
+                      googleReviews.slice(0, 6).map((review, i) => (
+                        <div key={i} className="p-2.5 rounded-lg bg-white border border-blush/30">
+                          <div className="flex items-start justify-between gap-2">
+                            <p className="text-xs text-warm-gray leading-relaxed flex-1">
+                              {highlightRelevantKeywords(review.content, highlightProfile)}
+                            </p>
+                            {review.extractedRating && (
+                              <span className="flex-shrink-0 text-[10px] text-warm-gray whitespace-nowrap">
+                                {review.extractedRating}/5 <i className="ri-star-fill text-primary/60" />
+                              </span>
+                            )}
+                          </div>
+                          <div className="flex items-center justify-between mt-1.5">
+                            <span className="text-[10px] text-warm-gray/70">{review.sourceDomain}</span>
+                            <a
+                              href={review.sourceUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-primary hover:text-dark transition-colors"
+                            >
+                              Read full review <i className="ri-external-link-line" />
+                            </a>
+                          </div>
+                        </div>
+                      ))
+                    )}
+
+                    {!googleReviewsLoading && googleReviews && googleReviews.length === 0 && (
+                      <p className="text-xs text-warm-gray text-center py-3">No web reviews found for this product.</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Ingredient consistency badge */}
               {listings.length > 0 && (

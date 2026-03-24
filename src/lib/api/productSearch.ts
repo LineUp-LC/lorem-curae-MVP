@@ -213,6 +213,27 @@ export async function searchRetailerReviews(
 }
 
 /**
+ * Search for a specific product across all retailers (Google Shopping).
+ * Used by Where to Buy to find the product on Amazon, Sephora, Ulta, etc.
+ * Returns WebProduct[] or null on failure.
+ */
+export async function searchWhereToBuy(
+  productName: string,
+  productBrand: string,
+): Promise<WebProduct[] | null> {
+  if (!productName?.trim() || !productBrand?.trim()) return null;
+
+  const result = await callProductSearch({
+    type: 'buy',
+    productName,
+    productBrand,
+  });
+
+  if (!result.success || !result.products) return null;
+  return result.products;
+}
+
+/**
  * Get current session call count (for UI display).
  */
 export function getSearchCallCount(): number {

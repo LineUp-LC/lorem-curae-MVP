@@ -163,9 +163,11 @@ When `stop_reason === 'max_tokens'` (full mode), the response sets `ingredientsT
 
 - Storage: localStorage under key `scanHistory`
 - Max entries: 20 (oldest pruned on overflow)
-- Each entry: `{ id, result: ScanResult, thumbnail: string (data URL), timestamp }`
+- Each entry: `{ id, result: ScanResult, thumbnail: string, imageBase64?: string, fullScanResult?: ScanResult, timestamp }`
 - Thumbnails are 80px JPEG data URLs (~5-10 KB each)
-- Tapping a history entry restores the full result without re-scanning
+- `imageBase64` (~200-400KB each): compressed JPEG for re-running full scan from history. Only kept for the 5 most recent entries (`MAX_IMAGE_ENTRIES = 5`) to limit localStorage usage.
+- `fullScanResult`: cached full ingredient parse. Written back after lazy full scan via `updateScanHistoryEntry()`. Stripped on localStorage overflow fallback.
+- Tapping a history entry restores `capturedBase64`, `initialFullScan`, and `currentHistoryId` — tabs work instantly if `fullScanResult` is cached, or re-trigger full scan if `imageBase64` is available. Old entries without `imageBase64` show a rescan prompt.
 - History is non-critical — silent fail on storage errors
 
 ---

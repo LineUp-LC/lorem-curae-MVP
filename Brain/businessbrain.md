@@ -106,6 +106,26 @@
   2. Gamification (points, badges, streaks, tiers) that rewards consistent skincare habits
   3. Environment-aware recommendations that adapt to your location, weather, and season
 
+### USP (Unique Selling Proposition)
+
+**The Hook (one line):**
+> Scan any skincare product. Know instantly if it works for YOUR skin.
+
+**The Pitch (expanded):**
+> Lorem Curae is the only skincare app where you point your camera at any product — on a shelf, in your bathroom, or online — and instantly see how every ingredient affects YOUR skin type, what people with similar skin profiles actually think, and what's compatible with what you already use. No research. No guesswork. Just scan and know.
+
+**USP Framework:**
+
+| Element | Answer |
+|---|---|
+| For whom? | Anyone who buys skincare and doesn't know if it'll work for them |
+| What is it? | The only app that turns your camera into a personalized skincare advisor |
+| ONE differentiating action | Scan → personalized verdict (ingredients, safety, reviews, compatibility) |
+| Why should they care? | Stop wasting money on products that don't work — know before you buy |
+| Why can't competitors say this? | No one else combines camera ID + personalized ingredient analysis + profile-matched reviews + environment-aware compatibility in one scan |
+
+---
+
 ### Features — MVP (Must-Haves) — App
 
 | Feature Name | Description | Status | Priority |
@@ -169,7 +189,7 @@
 **Backend (BaaS)**:
 - Supabase (PostgreSQL, Auth, Edge Functions, Row Level Security)
 - @supabase/supabase-js 2.57.4
-- 16 Supabase Edge Functions (Deno runtime)
+- 17 Supabase Edge Functions (Deno runtime)
 - 10 database migrations
 
 **Database**: PostgreSQL (via Supabase) — tables for user routines, routine usage events, creator waitlist, routine versions, survey completion, retailer pricing, product catalog, admin RLS policies, routine notes, gamification (curae_points, points_transactions, user_badges)
@@ -194,7 +214,7 @@
 
 ### Architecture Summary
 
-**Scale**: 48 page directories, 34 active routes, 26 shared components, 35 AI modules, 44 business logic utilities, 16 Edge Functions, 10 database migrations, 18 governance rule files
+**Scale**: 48 page directories, 34 active routes, 26 shared components, 35 AI modules, 44 business logic utilities, 17 Edge Functions, 10 database migrations, 18 governance rule files
 
 **State Management**:
 - Global auth: React Context (AuthContext.tsx)
@@ -218,7 +238,7 @@
 
 **Governance**: .claude/CLAUDE.md (master index + navigation), .claude/rules/ (18 rule files covering workflow, code standards, frontend, state management, AI pipeline, AI voice, environment, commerce, security, data layer, testing, git, domain features, consistency, roadmap, routing, camera scan, gamification), ai-governance/CLAUDE_PRODUCT.md (user-facing AI tone/safety/content rules), src/lib/ai/systemPrompt.ts (runtime-compiled product governance)
 
-### Supabase Edge Functions (16)
+### Supabase Edge Functions (17)
 
 | Function | Domain |
 |---|---|
@@ -238,6 +258,7 @@
 | affiliate-webhook | Affiliate — webhook handler |
 | data-anonymization | Privacy — user data anonymization |
 | password-check | Security — password validation |
+| product-search | Search — Serper.dev proxy for Google Shopping + reviews |
 
 ### Product Roadmap
 
@@ -419,17 +440,17 @@
 - **Our unfair advantage (MVP)**: No other platform lets you scan any skincare product and instantly get personalized ingredient analysis, reviews from people with similar skin profiles, compatible product discovery filtered by environment, and guided routine building — all in one app.
 - **Our biggest competitive vulnerability**: Pre-launch with no user base, no brand recognition, and the need to prove camera scan accuracy earns trust.
 - **Market gap we exploit**: The moment of standing in a store (or browsing online) confused about whether a product works for YOUR skin. No competitor solves that moment with camera-powered intelligence + personalized context.
-- **Positioning statement (MVP)**: "For individuals overwhelmed by skincare choices, Lorem Curae is the camera-powered intelligence platform that scans any product and tells you exactly how it fits your unique skin, environment, and routine — replacing guesswork with personalized clarity."
+- **Positioning statement (MVP)**: "For anyone who's ever picked up a skincare product and wondered 'will this actually work for me?', Lorem Curae is the camera-powered skincare intelligence app that scans any product and instantly delivers a personalized verdict — ingredient safety for YOUR skin, reviews from people like you, and products compatible with what you already use — replacing guesswork with clarity that grows smarter every day."
 
 ### SWOT Summary
 
-**Strengths**: Camera-powered product intelligence, personalized ingredient analysis with safety explanations, profile-filtered reviews, environment-aware recommendations, gamification loop, full routine management, strong technical foundation built by solo founder.
+**Strengths**: Camera-powered product intelligence (scan any product, instant personalized analysis), profile-matched reviews (auto-filtered to similar skin), environment-aware personalization (UV, climate, season), full ingredient transparency with caution explanations, scan-to-routine pipeline (entirely new flow), gamification loop, strong technical foundation built by solo founder.
 
-**Weaknesses**: Pre-launch with no user base, catalog matching limited to 12 mock products (real identification works for any product), solo founder bandwidth, marketplace and community not yet built.
+**Weaknesses**: Pre-launch with no user base or brand recognition, catalog matching limited to mock products (real identification works for any product via Claude Vision), solo founder bandwidth, marketplace and community not yet built, need clinical credibility partnerships.
 
-**Opportunities**: Rising demand for personalized skincare, no competitor owns the "scan and know" moment, growing creator economy, fragmented market ripe for a unified daily companion.
+**Opportunities**: No competitor owns the "scan and know" moment (first mover), rising demand for personalized science-backed skincare, camera AI accuracy now good enough for real-time identification, growing creator economy in beauty, fragmented market ripe for a unified daily companion.
 
-**Threats**: Competitors adding camera scan features, regulatory scrutiny around health claims, user trust if AI identification accuracy isn't high enough, entrenched players expanding.
+**Threats**: Competitors adding camera scan features (Revieve, Perfect Corp expanding), regulatory scrutiny around health/ingredient claims, user trust if AI identification accuracy isn't high enough at launch, entrenched players (Sephora, Amazon) expanding personalization.
 
 ---
 
@@ -675,7 +696,8 @@
 
 ---
 
-*Last updated: 2026-03-21*
-*Version: 2.0*
+*Last updated: 2026-03-22*
+*Version: 2.1*
 *Source: Lorem Curae Notion workspace (brand identity) + codebase audit (tech/features/architecture)*
-*Major update: MVP repositioned around camera-powered intelligence; all tech stats updated to match codebase*
+*v2.1: Added USP section, updated positioning statement, fixed Edge Function count (17), added product-search to EF table, updated SWOT summary*
+*v2.0: MVP repositioned around camera-powered intelligence; all tech stats updated to match codebase*
