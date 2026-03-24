@@ -84,10 +84,11 @@ export default function RetailerReviews({
       onKeywordMatches?.(listing.domain, matches, result.length);
 
       setLoading(false);
+      console.log('[RetailerReviews] Reviews fetched:', result?.length, 'loading set to false');
 
       // Auto-trigger AI summary if we have reviews + user profile
       if (result.length > 0 && (skinType || concerns.length > 0)) {
-        generateAiSummary(result, matches);
+        generateAiSummary(result, matches).catch(() => {});
       }
     }
 
@@ -121,28 +122,39 @@ export default function RetailerReviews({
   async function generateAiSummary(webReviews: WebReview[], matches: KeywordMatch[]) {
     setAiLoading(true);
     try {
-      const ctx = buildAIContext('retailer_review_summary', {
-        page: {
-          mode: 'retailer_review_summary',
-          productName,
-          productBrand,
-          retailerName: listing.retailerName,
-          retailerDomain: listing.domain,
-          reviews: webReviews.slice(0, 8).map(r => ({
-            content: r.content,
-            sourceTitle: r.sourceTitle,
-            relevanceScore: r.relevanceScore,
-            extractedRating: r.extractedRating,
-          })),
-          keywordMatches: matches,
-        },
-      });
-      const result = await requestAIInsight(ctx);
+      console.log('[RetailerReviews] AI summary call starting for', listing.retailerName);
+
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('AI summary timeout')), 15000),
+      );
+
+      const aiPromise = (async () => {
+        const ctx = buildAIContext('retailer_review_summary', {
+          page: {
+            mode: 'retailer_review_summary',
+            productName,
+            productBrand,
+            retailerName: listing.retailerName,
+            retailerDomain: listing.domain,
+            reviews: webReviews.slice(0, 8).map(r => ({
+              content: r.content,
+              sourceTitle: r.sourceTitle,
+              relevanceScore: r.relevanceScore,
+              extractedRating: r.extractedRating,
+            })),
+            keywordMatches: matches,
+          },
+        });
+        return await requestAIInsight(ctx);
+      })();
+
+      const result = await Promise.race([aiPromise, timeoutPromise]);
+      console.log('[RetailerReviews] AI summary result:', result.success, result.insight?.substring(0, 50));
       if (result.success && result.insight) {
         setAiSummary(result.insight);
       }
-    } catch {
-      // Non-critical — silently fail
+    } catch (err) {
+      console.warn('[RetailerReviews] AI summary failed/timed out:', err);
     } finally {
       setAiLoading(false);
     }
