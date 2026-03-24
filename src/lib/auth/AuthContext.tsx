@@ -124,7 +124,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
 
         if (currentUser) {
-          hasHydratedRef.current = true  // claim slot before await — blocks race with SIGNED_IN
           const userProfile = await loadUserProfile(currentUser.id)
           const count = await getRoutineCount(currentUser.id)
           if (isMounted) {
