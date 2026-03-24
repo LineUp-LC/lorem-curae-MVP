@@ -28,16 +28,17 @@ interface PostScanDiscoveryProps {
   matchedProduct?: Product;
 }
 
-type CategoryFilter = 'all' | 'cleanser' | 'toner' | 'serum' | 'moisturizer' | 'sunscreen' | 'treatment' | 'mask';
+type CategoryFilter = 'all' | 'cleanser' | 'toner' | 'serum' | 'moisturizer' | 'sunscreen' | 'treatment' | 'mask' | 'eye cream';
 
 const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'cleanser', label: 'Cleanser' },
-  { value: 'toner', label: 'Toner' },
-  { value: 'serum', label: 'Serum' },
   { value: 'moisturizer', label: 'Moisturizer' },
+  { value: 'serum', label: 'Serum' },
+  { value: 'cleanser', label: 'Cleanser' },
   { value: 'sunscreen', label: 'SPF' },
+  { value: 'toner', label: 'Toner' },
   { value: 'treatment', label: 'Treatment' },
+  { value: 'eye cream', label: 'Eye Care' },
   { value: 'mask', label: 'Mask' },
 ];
 
@@ -145,7 +146,6 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {CATEGORY_OPTIONS.map(opt => {
           const count = countByCategory(webProducts, opt.value);
-          if (count === 0 && opt.value !== 'all' && !webLoading) return null;
           return (
             <button
               key={opt.value}
