@@ -92,6 +92,22 @@ async function sha256(input: string): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// Utility: Infer product category from title keywords
+// ---------------------------------------------------------------------------
+
+function inferCategoryFromTitle(title: string): string {
+  const t = title.toLowerCase();
+  if (t.includes('eye cream') || t.includes('eye gel') || t.includes('eye serum') || t.includes('eye care') || t.includes('under eye')) return 'eye cream';
+  if (t.includes('sunscreen') || t.includes('sun screen') || /\bspf\s*\d/.test(t) || t.includes('sun protection') || t.includes('uv protect')) return 'sunscreen';
+  if (t.includes('mask') || t.includes('masque') || t.includes('sheet mask') || t.includes('clay mask')) return 'mask';
+  if (t.includes('cleanser') || t.includes('face wash') || t.includes('cleansing foam') || t.includes('cleansing gel') || t.includes('facial wash') || t.includes('micellar')) return 'cleanser';
+  if (t.includes('toner') || t.includes('toning water') || t.includes('facial mist')) return 'toner';
+  if (t.includes('serum') || t.includes('ampoule')) return 'serum';
+  if (t.includes('moisturizer') || t.includes('moisturiser') || t.includes('face cream') || t.includes('day cream') || t.includes('night cream') || t.includes('hydrating cream') || t.includes('face lotion')) return 'moisturizer';
+  return 'treatment';
+}
+
+// ---------------------------------------------------------------------------
 // Utility: Extract domain from URL
 // ---------------------------------------------------------------------------
 
@@ -348,7 +364,7 @@ async function callSerperSearch(
 
 function mapShoppingResults(
   items: Array<Record<string, unknown>>,
-  category: string,
+  category: string | null,
 ): WebProduct[] {
   if (!items || !Array.isArray(items)) return [];
 
@@ -367,7 +383,7 @@ function mapShoppingResults(
         reviewCount: typeof item.ratingCount === 'number' ? item.ratingCount : 0,
         externalUrl: String(item.link || ''),
         merchant,
-        category,
+        category: category ?? inferCategoryFromTitle(title),
         source: 'web' as const,
       };
     })
@@ -588,9 +604,11 @@ serve(async (req: Request) => {
       }
       results = mapSearchResults(serperData.organic || [], body.userProfile);
     } else {
-      const category = body.categoryFilter && body.categoryFilter !== 'all'
+      // Explicit filter → stamp all results with that category.
+      // No filter ('all') → infer category per product from title.
+      const categoryOverride = body.categoryFilter && body.categoryFilter !== 'all'
         ? body.categoryFilter
-        : body.scannedProduct?.category || 'skincare';
+        : null;
 
       const serperData = await callSerperShopping(query, serperKey, numResults);
       if (!serperData) {
@@ -599,7 +617,7 @@ serve(async (req: Request) => {
           { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
-      results = mapShoppingResults(serperData.shopping || [], category);
+      results = mapShoppingResults(serperData.shopping || [], categoryOverride);
     }
     console.log(`[product-search] Serper call: ${Date.now() - t1}ms (${results.length} results)`);
 
