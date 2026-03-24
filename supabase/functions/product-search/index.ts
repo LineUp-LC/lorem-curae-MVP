@@ -534,13 +534,14 @@ serve(async (req: Request) => {
     }
 
     console.log(`[product-search] ${body.type} query: "${query}"`);
+    const t0 = Date.now();
 
     // Check cache
     const cacheKey = await sha256(`${body.type}:${query}`);
     const cached = await getCachedResults(supabaseService, cacheKey);
+    console.log(`[product-search] Cache check: ${Date.now() - t0}ms (hit: ${cached.found})`);
 
     if (cached.found) {
-      console.log(`[product-search] Cache hit for ${body.type}: "${query}"`);
 
       const response: Record<string, unknown> = {
         success: true,
@@ -561,10 +562,14 @@ serve(async (req: Request) => {
     }
 
     // Call Serper
+    const t1 = Date.now();
     let results: WebProduct[] | WebReview[];
 
+    // Use fewer results for retailer reviews (5 is plenty for per-site search)
+    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : 10;
+
     if (body.type === 'reviews' || body.type === 'retailer_reviews') {
-      const serperData = await callSerperSearch(query, serperKey);
+      const serperData = await callSerperSearch(query, serperKey, numResults);
       if (!serperData) {
         return new Response(
           JSON.stringify({ success: false, type: body.type, error: 'Search service unavailable', cached: false }),
@@ -577,7 +582,7 @@ serve(async (req: Request) => {
         ? body.categoryFilter
         : body.scannedProduct?.category || 'skincare';
 
-      const serperData = await callSerperShopping(query, serperKey);
+      const serperData = await callSerperShopping(query, serperKey, numResults);
       if (!serperData) {
         return new Response(
           JSON.stringify({ success: false, type: body.type, error: 'Search service unavailable', cached: false }),
@@ -586,6 +591,7 @@ serve(async (req: Request) => {
       }
       results = mapShoppingResults(serperData.shopping || [], category);
     }
+    console.log(`[product-search] Serper call: ${Date.now() - t1}ms (${results.length} results)`);
 
     // Write to cache (fire-and-forget)
     setCachedResults(supabaseService, cacheKey, body.type, query, results).catch(() => {});

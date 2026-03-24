@@ -9,7 +9,7 @@
  * All tab content is fetched on first tap and cached in component state.
  */
 
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useState, useEffect, useMemo, useRef, lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import type { ScanResult, ParsedIngredient } from '../../../types/scan';
 import type { Product } from '../../../types/product';
@@ -25,7 +25,7 @@ import { useAuth } from '../../../lib/auth/AuthContext';
 import { scanProductFull } from '../../../lib/ai/scanClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
-import { searchSimilarProducts, searchProductReviews } from '../../../lib/api/productSearch';
+import { searchSimilarProducts, searchCompatibleProducts, searchProductReviews } from '../../../lib/api/productSearch';
 import { fetchReviewsForProduct } from '../../../lib/data/reviews';
 import { getReviewsForProduct } from '../../../mocks/reviews';
 import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
@@ -447,6 +447,34 @@ export default function ScanResultView({
 
   // Where to Buy sheet
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
+
+  // Pre-fetch: warm session cache for compatible + similar products on result render
+  const preFetchedRef = useRef(false);
+  useEffect(() => {
+    if (preFetchedRef.current || !user) return;
+    preFetchedRef.current = true;
+
+    const sourceProduct = matchedProduct || (result.detectedProduct ? {
+      name: result.detectedProduct,
+      brand: result.detectedBrand || 'Unknown',
+      category: (result.detectedCategory || 'treatment') as string,
+    } : null);
+    if (!sourceProduct) return;
+
+    const skinType = getEffectiveSkinType();
+    const concerns = getEffectiveConcerns();
+    const sensitivity = getEffectiveSensitivity();
+
+    // Fire-and-forget: populates productSearch session cache
+    searchCompatibleProducts(
+      { name: sourceProduct.name, brand: sourceProduct.brand, category: sourceProduct.category },
+      { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+    ).catch(() => {});
+
+    searchSimilarProducts(
+      { name: sourceProduct.name, brand: sourceProduct.brand, category: sourceProduct.category },
+    ).catch(() => {});
+  }, [user, result, matchedProduct]);
 
   // Build product-like object for shelf/routine
   const shelfProduct = matchedProduct

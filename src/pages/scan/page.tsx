@@ -57,6 +57,16 @@ export default function ScanPage() {
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const cancelledRef = useRef(false);
 
+  // Warm up Edge Functions on mount (OPTIONS → warms container, no code execution)
+  useEffect(() => {
+    const url = import.meta.env.VITE_SUPABASE_URL;
+    if (!url) return;
+    Promise.allSettled([
+      fetch(`${url}/functions/v1/product-search`, { method: 'OPTIONS' }),
+      fetch(`${url}/functions/v1/ai-insight`, { method: 'OPTIONS' }),
+    ]).catch(() => {});
+  }, []);
+
   // Reset to idle on every navigation to /scan (location.key changes each visit)
   useEffect(() => {
     cancelledRef.current = false;

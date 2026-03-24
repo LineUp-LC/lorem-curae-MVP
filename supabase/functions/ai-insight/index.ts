@@ -47,9 +47,9 @@ const MODE_MAX_TOKENS: Record<string, number> = {
   guided_comparison: 768,
   guided_routine_build: 768,
   guided_routine_explain: 512,
-  curated_recommendation: 1024,
-  curated_review_summary: 768,
-  retailer_review_summary: 512,
+  curated_recommendation: 512,
+  curated_review_summary: 384,
+  retailer_review_summary: 256,
 };
 
 // Supported non-chat modes

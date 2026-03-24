@@ -769,9 +769,9 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'guided_comparison': return 768;
     case 'guided_routine_build': return 768;
     case 'guided_routine_explain': return 512;
-    case 'curated_recommendation': return 1024;
-    case 'curated_review_summary': return 512;
-    case 'retailer_review_summary': return 512;
+    case 'curated_recommendation': return 512;
+    case 'curated_review_summary': return 384;
+    case 'retailer_review_summary': return 256;
     default: return 1024;
   }
 }

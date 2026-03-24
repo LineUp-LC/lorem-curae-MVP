@@ -14,7 +14,6 @@ import {
 } from '../../lib/utils/sessionState';
 import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
-import PersonalizingLoader from './PersonalizingLoader';
 
 interface RetailerReviewsProps {
   listing: RetailerListing;
@@ -170,10 +169,17 @@ export default function RetailerReviews({
 
   if (loading) {
     return (
-      <div className="px-4 py-6">
-        <PersonalizingLoader
-          steps={['Searching reviews...', 'Finding relevant mentions...']}
-        />
+      <div className="border-t border-blush/50 bg-cream/30 px-4 py-3 space-y-2">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="p-2.5 rounded-lg bg-white border border-blush/30 animate-pulse">
+            <div className="h-3 bg-blush/40 rounded w-full mb-2" />
+            <div className="h-3 bg-blush/30 rounded w-3/4 mb-2" />
+            <div className="flex items-center justify-between mt-1.5">
+              <div className="h-2 bg-blush/20 rounded w-16" />
+              <div className="h-2 bg-blush/20 rounded w-20" />
+            </div>
+          </div>
+        ))}
       </div>
     );
   }

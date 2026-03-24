@@ -11,9 +11,14 @@ import {
 import RetailerCard from './RetailerCard';
 import RetailerReviews from './RetailerReviews';
 import RoutinePickerModal from './RoutinePickerModal';
+import { searchRetailerReviews } from '../../lib/api/productSearch';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../lib/auth/AuthContext';
-import { getEffectiveSkinType } from '../../lib/utils/sessionState';
+import {
+  getEffectiveSkinType,
+  getEffectiveConcerns,
+  getEffectiveSensitivity,
+} from '../../lib/utils/sessionState';
 
 interface WhereToBuySheetProps {
   isOpen: boolean;
@@ -69,6 +74,24 @@ export default function WhereToBuySheet({
       }).catch(() => {});
     }
   }, [isOpen, user?.id, productName]);
+
+  // Pre-fetch reviews for the top retailer on open (warms session cache)
+  const preFetchedForRef = useRef<string | null>(null);
+  useEffect(() => {
+    if (!isOpen || listings.length === 0) return;
+    const topDomain = listings[0].domain;
+    if (preFetchedForRef.current === topDomain) return;
+    preFetchedForRef.current = topDomain;
+
+    const skinType = getEffectiveSkinType();
+    const concerns = getEffectiveConcerns();
+    const sensitivity = getEffectiveSensitivity();
+    const userProfile = skinType || concerns.length > 0 || sensitivity
+      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
+      : undefined;
+
+    searchRetailerReviews(productName, productBrand, topDomain, userProfile).catch(() => {});
+  }, [isOpen, listings, productName, productBrand]);
 
   // Close on Escape
   useEffect(() => {
