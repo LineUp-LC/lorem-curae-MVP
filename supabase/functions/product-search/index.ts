@@ -592,7 +592,7 @@ serve(async (req: Request) => {
     let results: WebProduct[] | WebReview[];
 
     // Use fewer results for retailer reviews (5 is plenty for per-site search)
-    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : body.type === 'buy' ? 15 : 10;
+    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : body.type === 'buy' ? 15 : body.type === 'compatible' ? 20 : 10;
 
     if (body.type === 'reviews' || body.type === 'retailer_reviews') {
       const serperData = await callSerperSearch(query, serperKey, numResults);
