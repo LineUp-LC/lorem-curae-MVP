@@ -81,6 +81,35 @@ Freshness logic must live in `src/lib/utils/retailerPricing.ts` (`getPriceFreshn
 
 ---
 
+## Where to Buy Module Registry
+
+| Module | Path | Purpose |
+|--------|------|---------|
+| Types | `src/types/retailerDirectory.ts` | `KnownRetailer`, `TrustBadge`, `RetailerListing`, `RetailerSortKey` |
+| RetailerDirectory | `src/lib/data/retailerDirectory.ts` | 13 known retailers, lookup, trust badges, price normalization, listing builder, product matching |
+| AffiliateLinks | `src/lib/utils/affiliateLinks.ts` | Affiliate-ready URL builder (pass-through for MVP) |
+| WhereToBuySheet | `src/components/feature/WhereToBuySheet.tsx` | Bottom sheet / modal with sort, filter, retailer list |
+| RetailerCard | `src/components/feature/RetailerCard.tsx` | Single retailer row (favicon, badges, price, CTA, review expand) |
+| RetailerReviews | `src/components/feature/RetailerReviews.tsx` | Per-retailer keyword-matched reviews with lazy AI summary |
+| productSearch | `src/lib/api/productSearch.ts` | `searchRetailerReviews()` — Serper.dev retailer-scoped review search |
+
+### Where to Buy Integration Points
+
+- PostScanDiscovery (Compatible tab): "Where to Buy" CTA per product card
+- ScanResultView (Similar tab): "Where to Buy" CTA per product card
+- Gamification: `WHERE_TO_BUY` action (10 points, once-ever) + 3 Smart Shopper badges
+
+### Where to Buy Rules
+
+- Reviews are keyword-matched, not profile-matched — say "reviews mentioning [term]" not "reviewers with [profile]"
+- AI summaries are lazy — only generated when user expands that retailer's review section
+- Post-purchase routine prompt appears 3s after "Buy on [Retailer]" click
+- Ingredient consistency badge: "Ingredients verified from your scan" (scanned) or "Verify ingredients on retailer site" (not scanned)
+- Return policy color: sage for generous (60+ days), default for limited, hidden for unknown
+- Affiliate URLs go through `buildAffiliateUrl()` — pass-through for MVP
+
+---
+
 ## Marketplace & Seller Governance
 
 For user-facing marketplace UX and product listing content rules → `ai-governance/CLAUDE_PRODUCT.md` Section 13.

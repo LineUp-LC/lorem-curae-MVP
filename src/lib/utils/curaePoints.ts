@@ -39,6 +39,7 @@ export const POINTS_ACTIONS = {
   STREAK_7_DAY: { points: 50, description: '7-day routine streak bonus' },
   STREAK_30_DAY: { points: 200, description: '30-day routine streak bonus' },
   FIRST_COMPARISON: { points: 20, description: 'First Comparison' },
+  WHERE_TO_BUY: { points: 10, description: 'First Where to Buy' },
 };
 
 // Tier thresholds

@@ -32,6 +32,7 @@ import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
 import { useEnvironmentContext } from '../../../lib/environment/useEnvironmentContext';
 import type { WebProduct } from '../../../types/webSearch';
 import RoutinePickerModal from '../../../components/feature/RoutinePickerModal';
+import WhereToBuySheet from '../../../components/feature/WhereToBuySheet';
 import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
 import NeuralBloomIcon from '../../../components/icons/NeuralBloomIcon';
 
@@ -279,42 +280,53 @@ function IngredientBreakdown({ ingredients, truncated }: { ingredients: ParsedIn
 // Similar product card (web results only)
 // ---------------------------------------------------------------------------
 
-function SimilarProductCard({ product }: { product: WebProduct }) {
+function SimilarProductCard({ product, onWhereToBuy }: { product: WebProduct; onWhereToBuy: (p: WebProduct) => void }) {
   return (
-    <a
-      href={product.externalUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="flex gap-3 p-3 bg-cream/50 border border-blush/30 rounded-xl hover:border-blush transition-colors"
-    >
-      <img
-        src={product.image || '/placeholder-product.svg'}
-        alt={product.name}
-        className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
-        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
-      />
-      <div className="flex-1 min-w-0">
-        <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
-          {product.brand}
-        </p>
-        <p className="text-xs font-medium text-deep line-clamp-1 mt-0.5">
-          {product.name}
-        </p>
-        <div className="flex items-center gap-2 mt-1">
-          {product.rating > 0 && (
-            <div className="flex items-center gap-0.5">
-              <i className="ri-star-fill text-amber-500 text-[10px]" />
-              <span className="text-[10px] text-warm-gray">{product.rating}</span>
-            </div>
-          )}
-          {product.price > 0 && (
-            <span className="text-[10px] font-medium text-deep">${product.price.toFixed(2)}</span>
-          )}
-          <span className="text-[10px] text-warm-gray/60">via {product.merchant}</span>
+    <div className="bg-cream/50 border border-blush/30 rounded-xl hover:border-blush transition-colors overflow-hidden">
+      <a
+        href={product.externalUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex gap-3 p-3"
+      >
+        <img
+          src={product.image || '/placeholder-product.svg'}
+          alt={product.name}
+          className="w-14 h-14 rounded-lg object-cover flex-shrink-0"
+          onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder-product.svg'; }}
+        />
+        <div className="flex-1 min-w-0">
+          <p className="text-[10px] font-semibold text-primary uppercase tracking-wide">
+            {product.brand}
+          </p>
+          <p className="text-xs font-medium text-deep line-clamp-1 mt-0.5">
+            {product.name}
+          </p>
+          <div className="flex items-center gap-2 mt-1">
+            {product.rating > 0 && (
+              <div className="flex items-center gap-0.5">
+                <i className="ri-star-fill text-amber-500 text-[10px]" />
+                <span className="text-[10px] text-warm-gray">{product.rating}</span>
+              </div>
+            )}
+            {product.price > 0 && (
+              <span className="text-[10px] font-medium text-deep">${product.price.toFixed(2)}</span>
+            )}
+            <span className="text-[10px] text-warm-gray/60">via {product.merchant}</span>
+          </div>
         </div>
+        <i className="ri-external-link-line text-warm-gray/40 text-sm self-center flex-shrink-0" />
+      </a>
+      <div className="border-t border-blush/20 px-3 py-1.5 flex justify-end">
+        <button
+          onClick={() => onWhereToBuy(product)}
+          className="flex items-center gap-1 px-2.5 py-1 text-[10px] font-medium text-primary border border-primary/30 rounded-full hover:bg-primary/5 transition-colors cursor-pointer"
+        >
+          <i className="ri-shopping-bag-line" />
+          Where to Buy
+        </button>
       </div>
-      <i className="ri-external-link-line text-warm-gray/40 text-sm self-center flex-shrink-0" />
-    </a>
+    </div>
   );
 }
 
@@ -426,6 +438,9 @@ export default function ScanResultView({
   // Tab 3 (Similar) cache
   const [similarProducts, setSimilarProducts] = useState<WebProduct[] | null>(null);
   const [similarLoading, setSimilarLoading] = useState(false);
+
+  // Where to Buy sheet
+  const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
   // Build product-like object for shelf/routine
   const shelfProduct = matchedProduct
@@ -962,7 +977,7 @@ export default function ScanResultView({
               ) : (
                 <div className="space-y-2">
                   {similarProducts.map((p, idx) => (
-                    <SimilarProductCard key={`sim-${idx}`} product={p} />
+                    <SimilarProductCard key={`sim-${idx}`} product={p} onWhereToBuy={setWtbProduct} />
                   ))}
                 </div>
               )}
@@ -986,6 +1001,19 @@ export default function ScanResultView({
           isOpen={routineModalOpen}
           onClose={() => setRoutineModalOpen(false)}
           product={shelfProduct}
+        />
+      )}
+
+      {/* Where to Buy sheet */}
+      {wtbProduct && (
+        <WhereToBuySheet
+          isOpen={!!wtbProduct}
+          onClose={() => setWtbProduct(null)}
+          targetProduct={wtbProduct}
+          allWebProducts={similarProducts || []}
+          productName={wtbProduct.name}
+          productBrand={wtbProduct.brand}
+          wasScanned
         />
       )}
     </div>

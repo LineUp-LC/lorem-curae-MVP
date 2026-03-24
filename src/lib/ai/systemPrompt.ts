@@ -294,6 +294,19 @@ OUTPUT STRUCTURE:
 SAFETY: Only reference data provided in the evidence. Never fabricate quotes, statistics, or reviewer details.
 Use conversational framing: "people with similar skin" not exact reviewer counts or percentages.
 Keep total response to exactly 3 sentences. Do not use markdown formatting.`,
+
+  retailer_review_summary: `TASK: Summarize reviews found on a specific retailer's site for this product, highlighting snippets relevant to this user's skin profile.
+OUTPUT STRUCTURE:
+1. Overview (1 sentence) — "On [Retailer], reviews mentioning [skin type/concern] ..." with a key finding
+2. What reviewers are saying (1-2 sentences) — common themes from the keyword-matched review snippets
+3. For your skin (1 sentence) — connect the reviewer sentiment to this user's specific concerns
+CRITICAL RULES:
+- These are keyword-matched review excerpts from a retailer website, NOT confirmed reviewer skin profiles.
+- Say "reviews mentioning [term]" NOT "reviewers with [skin type]" — we do not know their actual skin type.
+- Never imply that external reviewers have structured skin profile data.
+- Only reference data provided in the evidence — never fabricate quotes or statistics.
+- If keyword match count is provided, you may say "X of Y reviews mention [term]".
+Keep total response to 3-4 sentences. Do not use markdown formatting.`,
 };
 
 // ============================================================================
@@ -470,6 +483,28 @@ function buildEvidenceSection(ctx: AISurfaceContext): string {
         `- Sources: ${wd.sourceDomains.slice(0, 5).join(', ')}`,
         wd.topSnippets.length > 0 ? `- Key excerpts:\n${wd.topSnippets.slice(0, 3).map(s => `  "${s}"`).join('\n')}` : '',
       ].filter(Boolean).join('\n'));
+    }
+  } else if (page.mode === 'retailer_review_summary') {
+    sections.push([
+      'PRODUCT:',
+      `- Name: ${page.productBrand} ${page.productName}`,
+    ].join('\n'));
+    sections.push([
+      'RETAILER:',
+      `- Name: ${page.retailerName}`,
+      `- Domain: ${page.retailerDomain}`,
+    ].join('\n'));
+    if (page.keywordMatches.length > 0) {
+      const kwLines = page.keywordMatches.map(km =>
+        `  - "${km.term}": mentioned in ${km.count} review(s)`
+      );
+      sections.push(['KEYWORD MATCHES (from review text — NOT confirmed reviewer profiles):', ...kwLines].join('\n'));
+    }
+    if (page.reviews.length > 0) {
+      const reviewLines = page.reviews.slice(0, 8).map((r, i) =>
+        `  ${i + 1}. [Score: ${r.relevanceScore}]${r.extractedRating ? ` Rating: ${r.extractedRating}/5` : ''} "${r.content.substring(0, 200)}${r.content.length > 200 ? '...' : ''}"`
+      );
+      sections.push(['KEYWORD-MATCHED REVIEW SNIPPETS:', ...reviewLines].join('\n'));
     }
   } else if (page.mode === 'find_alternatives') {
     sections.push([
@@ -736,6 +771,7 @@ export function getMaxTokensForMode(mode: AIMode): number {
     case 'guided_routine_explain': return 512;
     case 'curated_recommendation': return 1024;
     case 'curated_review_summary': return 512;
+    case 'retailer_review_summary': return 512;
     default: return 1024;
   }
 }
@@ -789,6 +825,7 @@ export function validateAIResponse(response: string, mode: AIMode): string[] {
     guided_routine_explain: 800,
     curated_recommendation: 2500,
     curated_review_summary: 1000,
+    retailer_review_summary: 600,
   };
 
   const limit = maxChars[mode] ?? 1000;

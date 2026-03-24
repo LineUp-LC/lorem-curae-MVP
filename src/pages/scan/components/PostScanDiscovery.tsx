@@ -17,6 +17,7 @@ import {
 } from '../../../lib/utils/sessionState';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
+import WhereToBuySheet from '../../../components/feature/WhereToBuySheet';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -57,6 +58,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [webLoading, setWebLoading] = useState(false);
   const [webError, setWebError] = useState(false);
   const [webCache, setWebCache] = useState<Record<string, WebProduct[]>>({});
+  const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
   const skinType = getEffectiveSkinType() ?? undefined;
   const concerns = getEffectiveConcerns();
@@ -228,16 +230,23 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
                 </div>
               </div>
 
-              <div className="border-t border-blush/50 px-4 py-2">
+              <div className="border-t border-blush/50 px-4 py-2 flex items-center gap-2">
                 <a
                   href={wp.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium text-primary hover:text-dark transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium text-primary hover:text-dark transition-colors"
                 >
                   <i className="ri-external-link-line" />
                   View on {wp.merchant}
                 </a>
+                <button
+                  onClick={() => setWtbProduct(wp)}
+                  className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-medium text-primary border border-primary/30 rounded-full hover:bg-primary/5 transition-colors cursor-pointer"
+                >
+                  <i className="ri-shopping-bag-line" />
+                  Where to Buy
+                </button>
               </div>
             </div>
           ))}
@@ -260,6 +269,19 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
             No compatible products found. Try a different category filter.
           </p>
         </div>
+      )}
+
+      {/* Where to Buy sheet */}
+      {wtbProduct && (
+        <WhereToBuySheet
+          isOpen={!!wtbProduct}
+          onClose={() => setWtbProduct(null)}
+          targetProduct={wtbProduct}
+          allWebProducts={webProducts}
+          productName={wtbProduct.name}
+          productBrand={wtbProduct.brand}
+          wasScanned
+        />
       )}
     </div>
   );

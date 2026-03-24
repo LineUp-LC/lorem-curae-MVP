@@ -49,6 +49,7 @@ const MODE_MAX_TOKENS: Record<string, number> = {
   guided_routine_explain: 512,
   curated_recommendation: 1024,
   curated_review_summary: 768,
+  retailer_review_summary: 512,
 };
 
 // Supported non-chat modes
@@ -72,6 +73,7 @@ const SUPPORTED_MODES = [
   'guided_routine_explain',
   'curated_recommendation',
   'curated_review_summary',
+  'retailer_review_summary',
 ];
 
 // ---------------------------------------------------------------------------

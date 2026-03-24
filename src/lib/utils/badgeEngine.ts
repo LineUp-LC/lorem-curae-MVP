@@ -185,6 +185,35 @@ export const BADGE_DEFINITIONS: BadgeDefinition[] = [
     requirement: 'Accumulate 1,000 lifetime points',
     checkUnlock: (ctx) => (ctx.lifetimePoints ?? 0) >= 1000,
   },
+
+  // ── Smart Shopper badges ──
+  {
+    id: 'smart-shopper',
+    name: 'Smart Shopper',
+    description: 'Used Where to Buy to compare retailers',
+    icon: 'ri-store-2-line',
+    rarity: 'Common',
+    requirement: 'Use the Where to Buy feature',
+    checkUnlock: (ctx) => ctx.action === 'WHERE_TO_BUY',
+  },
+  {
+    id: 'skincare-strategist',
+    name: 'Skincare Strategist',
+    description: 'Compared retailers with a personalized skin profile',
+    icon: 'ri-shopping-bag-line',
+    rarity: 'Rare',
+    requirement: 'Use Where to Buy with a complete skin profile',
+    checkUnlock: (ctx) => ctx.action === 'WHERE_TO_BUY' && ctx.surveyCompleted === true,
+  },
+  {
+    id: 'evidence-based-buyer',
+    name: 'Evidence-Based Buyer',
+    description: 'Compared retailers after scanning a product',
+    icon: 'ri-search-eye-line',
+    rarity: 'Rare',
+    requirement: 'Use Where to Buy after scanning a product',
+    checkUnlock: (ctx) => ctx.action === 'WHERE_TO_BUY' && (ctx.totalScans ?? 0) >= 1,
+  },
 ];
 
 export function getBadgeDefinitions(): BadgeDefinition[] {

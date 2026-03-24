@@ -17,7 +17,7 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 |-----------|------|---------|
 | Types | `src/types/gamification.ts` | Badge, BadgeDefinition, GamificationAction, StreakMilestone |
 | Points economy | `src/lib/utils/curaePoints.ts` | POINTS_ACTIONS, tier calculation, Supabase CRUD |
-| Badge engine | `src/lib/utils/badgeEngine.ts` | 20 badge definitions, unlock checks, Supabase CRUD |
+| Badge engine | `src/lib/utils/badgeEngine.ts` | 23 badge definitions, unlock checks, Supabase CRUD |
 | Triggers | `src/lib/utils/gamificationTriggers.ts` | `onAction()` dispatcher, duplicate prevention, event emitter |
 | Streaks | `src/lib/utils/routineStreaks.ts` | Product streaks + milestone detection |
 | Rewards page | `src/pages/rewards/page.tsx` | Dashboard with 5 sub-components |
@@ -25,7 +25,7 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 
 ---
 
-## Points Actions (17 total)
+## Points Actions (18 total)
 
 | Action | Points | Trigger Location |
 |--------|--------|-----------------|
@@ -46,6 +46,7 @@ related: ["01-workflow.md", "03-frontend.md", "10-data-layer.md", "13-domain-fea
 | STREAK_7_DAY | 50 | streak milestone |
 | STREAK_30_DAY | 200 | streak milestone |
 | FIRST_COMPARISON | 20 | comparison modal open |
+| WHERE_TO_BUY | 10 | Where to Buy sheet open (once-ever) |
 
 ### Adding a New Points Action
 1. Add to `POINTS_ACTIONS` in `curaePoints.ts`

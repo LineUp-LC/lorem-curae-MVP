@@ -191,6 +191,28 @@ export async function searchProductReviews(
 }
 
 /**
+ * Search for product reviews on a specific retailer site (Google Search with site: restriction).
+ * Returns WebReview[] or null on failure.
+ */
+export async function searchRetailerReviews(
+  productName: string,
+  productBrand: string,
+  retailerDomain: string,
+  userProfile?: { skinType?: string; concerns?: string[]; sensitivity?: string },
+): Promise<WebReview[] | null> {
+  const result = await callProductSearch({
+    type: 'retailer_reviews',
+    productName,
+    productBrand,
+    retailerDomain,
+    userProfile,
+  });
+
+  if (!result.success || !result.reviews) return null;
+  return result.reviews;
+}
+
+/**
  * Get current session call count (for UI display).
  */
 export function getSearchCallCount(): number {

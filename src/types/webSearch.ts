@@ -10,7 +10,7 @@
 // Search request types (sent to product-search Edge Function)
 // ---------------------------------------------------------------------------
 
-export type WebSearchType = 'compatible' | 'similar' | 'reviews';
+export type WebSearchType = 'compatible' | 'similar' | 'reviews' | 'retailer_reviews';
 
 export interface WebSearchRequest {
   type: WebSearchType;
@@ -33,6 +33,8 @@ export interface WebSearchRequest {
   productName?: string;
   /** Product brand for review searches */
   productBrand?: string;
+  /** Retailer domain for site-restricted review searches */
+  retailerDomain?: string;
 }
 
 // ---------------------------------------------------------------------------

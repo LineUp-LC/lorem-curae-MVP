@@ -51,7 +51,8 @@ export type GamificationAction =
   | 'AI_CHAT'
   | 'STREAK_7_DAY'
   | 'STREAK_30_DAY'
-  | 'FIRST_COMPARISON';
+  | 'FIRST_COMPARISON'
+  | 'WHERE_TO_BUY';
 
 export interface StreakMilestone {
   days: number;

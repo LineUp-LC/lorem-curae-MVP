@@ -26,6 +26,7 @@ const ONCE_EVER_ACTIONS: Set<GamificationAction> = new Set([
   'PRODUCT_SAVED',
   'PRODUCT_REVIEW',
   'AI_CHAT',
+  'WHERE_TO_BUY',
 ]);
 
 // Reserved for future per-session actions

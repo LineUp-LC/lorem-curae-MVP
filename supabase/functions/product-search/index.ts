@@ -38,7 +38,7 @@ const CACHE_TTL_HOURS = 24;
 // ---------------------------------------------------------------------------
 
 interface SearchRequest {
-  type: 'compatible' | 'similar' | 'reviews';
+  type: 'compatible' | 'similar' | 'reviews' | 'retailer_reviews';
   scannedProduct?: {
     name: string;
     brand: string;
@@ -53,6 +53,7 @@ interface SearchRequest {
   categoryFilter?: string;
   productName?: string;
   productBrand?: string;
+  retailerDomain?: string;
 }
 
 interface WebProduct {
@@ -254,6 +255,23 @@ function buildReviewQuery(req: SearchRequest): string {
 
   if (req.userProfile?.skinType) {
     parts.push(`${req.userProfile.skinType} skin`);
+  }
+
+  return parts.join(' ');
+}
+
+function buildRetailerReviewQuery(req: SearchRequest): string {
+  const product = req.productName || req.scannedProduct?.name || '';
+  const brand = req.productBrand || req.scannedProduct?.brand || '';
+  const parts = [`${brand} ${product} review`.trim()];
+
+  if (req.userProfile?.skinType) {
+    parts.push(`${req.userProfile.skinType} skin`);
+  }
+
+  // site: restriction to the specific retailer domain
+  if (req.retailerDomain) {
+    parts.push(`site:${req.retailerDomain}`);
   }
 
   return parts.join(' ');
@@ -475,7 +493,7 @@ serve(async (req: Request) => {
     // Parse request
     const body: SearchRequest = await req.json();
 
-    if (!body.type || !['compatible', 'similar', 'reviews'].includes(body.type)) {
+    if (!body.type || !['compatible', 'similar', 'reviews', 'retailer_reviews'].includes(body.type)) {
       return new Response(
         JSON.stringify({ error: `Invalid search type: "${body.type}"` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
@@ -510,6 +528,9 @@ serve(async (req: Request) => {
       case 'reviews':
         query = buildReviewQuery(body);
         break;
+      case 'retailer_reviews':
+        query = buildRetailerReviewQuery(body);
+        break;
     }
 
     console.log(`[product-search] ${body.type} query: "${query}"`);
@@ -527,7 +548,7 @@ serve(async (req: Request) => {
         cached: true,
       };
 
-      if (body.type === 'reviews') {
+      if (body.type === 'reviews' || body.type === 'retailer_reviews') {
         response.reviews = cached.results;
       } else {
         response.products = cached.results;
@@ -542,7 +563,7 @@ serve(async (req: Request) => {
     // Call Serper
     let results: WebProduct[] | WebReview[];
 
-    if (body.type === 'reviews') {
+    if (body.type === 'reviews' || body.type === 'retailer_reviews') {
       const serperData = await callSerperSearch(query, serperKey);
       if (!serperData) {
         return new Response(
@@ -576,7 +597,7 @@ serve(async (req: Request) => {
       cached: false,
     };
 
-    if (body.type === 'reviews') {
+    if (body.type === 'reviews' || body.type === 'retailer_reviews') {
       response.reviews = results;
     } else {
       response.products = results;

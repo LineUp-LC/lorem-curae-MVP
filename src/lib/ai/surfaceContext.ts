@@ -56,7 +56,8 @@ export type AIMode =
   | 'guided_routine_explain'
   | 'curated_recommendation'
   | 'curated_review_summary'
-  | 'is_it_for_me';
+  | 'is_it_for_me'
+  | 'retailer_review_summary';
 
 // ============================================================================
 // USER PROFILE
@@ -106,7 +107,8 @@ export type PageContext =
   | { mode: 'guided_routine_explain'; products: Product[]; timing: 'am' | 'pm'; toneLevel: 'simple' | 'detailed' | 'science'; conversationTurns: ConversationMessage[] }
   | { mode: 'curated_recommendation'; scannedProduct: { name: string; brand: string; category: string; ingredients: string[] }; compatibleProducts: { id: number; name: string; brand: string; category: string; keyIngredients: string[]; matchReasons: string[] }[] }
   | { mode: 'curated_review_summary'; product: Product; reviews: ReviewForSummary[]; matchStats: { totalMatching: number; avgRating: number; positivePercent: number } }
-  | { mode: 'is_it_for_me'; product: Product; scannedIngredients?: { name: string; safetyTier: string; category?: string }[]; shelfProducts: { name: string; brand: string; category: string; keyIngredients: string[] }[]; routineProducts: { name: string; category: string; timeOfDay: string }[]; reviewStats?: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] }; webReviewData?: { totalResults: number; avgRating?: number; topSnippets: string[]; sourceDomains: string[] } };
+  | { mode: 'is_it_for_me'; product: Product; scannedIngredients?: { name: string; safetyTier: string; category?: string }[]; shelfProducts: { name: string; brand: string; category: string; keyIngredients: string[] }[]; routineProducts: { name: string; category: string; timeOfDay: string }[]; reviewStats?: { totalMatching: number; avgRating: number; positivePercent: number; commonPros: string[]; commonCons: string[] }; webReviewData?: { totalResults: number; avgRating?: number; topSnippets: string[]; sourceDomains: string[] } }
+  | { mode: 'retailer_review_summary'; productName: string; productBrand: string; retailerName: string; retailerDomain: string; reviews: { content: string; sourceTitle: string; relevanceScore: number; extractedRating?: number }[]; keywordMatches: { term: string; count: number }[] };
 
 /**
  * Lightweight retailer shape for AI context serialization.
@@ -425,6 +427,7 @@ export function generateContextCacheKey(ctx: AISurfaceContext): string {
   else if (page.mode === 'curated_recommendation') pageId += `:${page.scannedProduct.name}:${page.compatibleProducts.map(p => p.id).sort().join(',')}`;
   else if (page.mode === 'curated_review_summary') pageId += `:${page.product.id}:${page.matchStats.totalMatching}`;
   else if (page.mode === 'is_it_for_me') pageId += `:${page.product.id}:${page.shelfProducts.length}`;
+  else if (page.mode === 'retailer_review_summary') pageId += `:${page.productName}:${page.retailerDomain}:${page.reviews.length}`;
 
   return `ai-insight:${pageId}:${profileHash}:${envHash}`;
 }
