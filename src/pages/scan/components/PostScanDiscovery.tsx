@@ -106,20 +106,16 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     setWebLoading(true);
     setWebError(false);
 
-    const minDisplay = new Promise(r => setTimeout(r, 800));
-    Promise.all([
-      searchCompatibleProducts(
-        {
-          name: scanSourceProduct.name,
-          brand: scanSourceProduct.brand,
-          category: scanSourceProduct.category,
-          ingredients: scanSourceProduct.ingredients.slice(0, 10),
-        },
-        { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-        categoryFilter !== 'all' ? categoryFilter : undefined,
-      ),
-      minDisplay,
-    ]).then(([results]) => {
+    searchCompatibleProducts(
+      {
+        name: scanSourceProduct.name,
+        brand: scanSourceProduct.brand,
+        category: scanSourceProduct.category,
+        ingredients: scanSourceProduct.ingredients.slice(0, 10),
+      },
+      { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
+      categoryFilter !== 'all' ? categoryFilter : undefined,
+    ).then((results) => {
       if (cancelled) return;
       if (results) {
         setWebProducts(results);

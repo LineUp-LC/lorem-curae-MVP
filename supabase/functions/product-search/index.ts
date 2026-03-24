@@ -38,7 +38,7 @@ const CACHE_TTL_HOURS = 24;
 // ---------------------------------------------------------------------------
 
 interface SearchRequest {
-  type: 'compatible' | 'similar' | 'reviews' | 'retailer_reviews';
+  type: 'compatible' | 'similar' | 'reviews' | 'retailer_reviews' | 'buy';
   scannedProduct?: {
     name: string;
     brand: string;
@@ -258,6 +258,13 @@ function buildReviewQuery(req: SearchRequest): string {
   }
 
   return parts.join(' ');
+}
+
+function buildBuyQuery(req: SearchRequest): string {
+  const product = req.productName || req.scannedProduct?.name || '';
+  const brand = req.productBrand || req.scannedProduct?.brand || '';
+  const query = `${brand} ${product}`.trim();
+  return query || 'skincare product';
 }
 
 function buildRetailerReviewQuery(req: SearchRequest): string {
@@ -493,7 +500,7 @@ serve(async (req: Request) => {
     // Parse request
     const body: SearchRequest = await req.json();
 
-    if (!body.type || !['compatible', 'similar', 'reviews', 'retailer_reviews'].includes(body.type)) {
+    if (!body.type || !['compatible', 'similar', 'reviews', 'retailer_reviews', 'buy'].includes(body.type)) {
       return new Response(
         JSON.stringify({ error: `Invalid search type: "${body.type}"` }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
@@ -531,6 +538,9 @@ serve(async (req: Request) => {
       case 'retailer_reviews':
         query = buildRetailerReviewQuery(body);
         break;
+      case 'buy':
+        query = buildBuyQuery(body);
+        break;
     }
 
     console.log(`[product-search] ${body.type} query: "${query}"`);
@@ -566,7 +576,7 @@ serve(async (req: Request) => {
     let results: WebProduct[] | WebReview[];
 
     // Use fewer results for retailer reviews (5 is plenty for per-site search)
-    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : 10;
+    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : body.type === 'buy' ? 15 : 10;
 
     if (body.type === 'reviews' || body.type === 'retailer_reviews') {
       const serperData = await callSerperSearch(query, serperKey, numResults);

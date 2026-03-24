@@ -27,6 +27,27 @@ interface KeywordMatch {
   count: number;
 }
 
+/** Detect product page descriptions (not actual customer reviews) */
+function isProductDescription(content: string): boolean {
+  const lower = content.toLowerCase();
+  const markers = [
+    'what it is:',
+    'skin type:',
+    'highlighted ingredients:',
+    'what it does:',
+    'clinical results:',
+    'how to use:',
+    'suggested usage:',
+    'size:',
+    'about the brand',
+    'free shipping',
+    'add to basket',
+    'add to cart',
+    'items in your cart',
+  ];
+  return markers.some(m => lower.includes(m));
+}
+
 export default function RetailerReviews({
   listing,
   productName,
@@ -75,15 +96,16 @@ export default function RetailerReviews({
         return;
       }
 
-      setReviews(result);
+      // Filter out product page descriptions masquerading as reviews
+      const filtered = result.filter(r => !isProductDescription(r.content));
+      setReviews(filtered);
 
       // Compute keyword matches from review text
-      const matches = computeKeywordMatches(result);
+      const matches = computeKeywordMatches(filtered);
       setKeywordMatches(matches);
-      onKeywordMatches?.(listing.domain, matches, result.length);
+      onKeywordMatches?.(listing.domain, matches, filtered.length);
 
       setLoading(false);
-      console.log('[RetailerReviews] Reviews fetched:', result?.length, 'loading set to false');
 
       // Auto-trigger AI summary if we have reviews + user profile
       if (result.length > 0 && (skinType || concerns.length > 0)) {
