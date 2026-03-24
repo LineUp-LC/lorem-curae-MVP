@@ -18,7 +18,7 @@ import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
 import type { ScanClientError } from '../../lib/ai/scanClient';
 import { onAction } from '../../lib/utils/gamificationTriggers';
-import { getScanHistory, addScanHistoryEntry } from '../../lib/utils/scanHistory';
+import { getScanHistory, addScanHistoryEntry, updateScanHistoryEntry } from '../../lib/utils/scanHistory';
 import { productData } from '../../mocks/products';
 import type { ScanResult, ScanHistoryEntry } from '../../types/scan';
 import type { Product } from '../../types/product';
@@ -52,6 +52,8 @@ export default function ScanPage() {
   const location = useLocation();
   const [state, setState] = useState<ScanState>({ phase: 'idle' });
   const [capturedBase64, setCapturedBase64] = useState<string | undefined>();
+  const [initialFullScan, setInitialFullScan] = useState<ScanResult | undefined>();
+  const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const cancelledRef = useRef(false);
 
@@ -60,6 +62,8 @@ export default function ScanPage() {
     cancelledRef.current = false;
     setState({ phase: 'idle' });
     setCapturedBase64(undefined);
+    setInitialFullScan(undefined);
+    setCurrentHistoryId(null);
     setHistory(getScanHistory());
 
     return () => {
@@ -99,11 +103,13 @@ export default function ScanPage() {
       onAction(user?.id, 'PRODUCT_SCAN').catch(() => {});
     }
 
-    // Save to scan history
+    // Save to scan history (include imageBase64 for future full scan from history)
     try {
       const thumbnail = await createScanThumbnail(file);
       if (cancelledRef.current) return;
-      addScanHistoryEntry(result, thumbnail);
+      const historyEntry = addScanHistoryEntry(result, thumbnail, response.imageBase64);
+      setCurrentHistoryId(historyEntry.id);
+      setInitialFullScan(undefined);
       setHistory(getScanHistory());
     } catch {
       // Thumbnail failure is non-critical
@@ -119,6 +125,8 @@ export default function ScanPage() {
       URL.revokeObjectURL(state.previewUrl);
     }
     setCapturedBase64(undefined);
+    setInitialFullScan(undefined);
+    setCurrentHistoryId(null);
     setState({ phase: 'idle' });
     window.scrollTo(0, 0);
   }, [state]);
@@ -128,9 +136,18 @@ export default function ScanPage() {
       URL.revokeObjectURL(state.previewUrl);
     }
     setCapturedBase64(undefined);
+    setInitialFullScan(undefined);
+    setCurrentHistoryId(null);
     setState({ phase: 'idle' });
     window.scrollTo(0, 0);
   }, [state]);
+
+  const handleFullScanComplete = useCallback((fullResult: ScanResult) => {
+    if (currentHistoryId) {
+      updateScanHistoryEntry(currentHistoryId, { fullScanResult: fullResult });
+      setHistory(getScanHistory());
+    }
+  }, [currentHistoryId]);
 
   const handleHistorySelect = useCallback((entry: ScanHistoryEntry) => {
     const result = entry.result;
@@ -138,6 +155,10 @@ export default function ScanPage() {
     if (result.match && result.productId) {
       matchedProduct = productData.find(p => p.id === result.productId);
     }
+    // Restore imageBase64 for full scan re-trigger + cached fullScanResult for instant tabs
+    setCapturedBase64(entry.imageBase64);
+    setInitialFullScan(entry.fullScanResult);
+    setCurrentHistoryId(entry.id);
     // Use the thumbnail as the preview (it's a data URL, not a blob URL)
     setState({ phase: 'result', result, previewUrl: entry.thumbnail, matchedProduct });
     window.scrollTo(0, 0);
@@ -286,7 +307,9 @@ export default function ScanPage() {
                 previewUrl={state.previewUrl}
                 matchedProduct={state.matchedProduct}
                 imageBase64={capturedBase64}
+                initialFullScanResult={initialFullScan}
                 onScanAnother={handleScanAnother}
+                onFullScanComplete={handleFullScanComplete}
               />
             </Suspense>
           )}

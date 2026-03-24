@@ -88,6 +88,10 @@ export interface ScanHistoryEntry {
   result: ScanResult;
   /** Small base64 JPEG thumbnail for display (~5-10KB) */
   thumbnail: string;
+  /** Compressed JPEG base64 for re-running full scan (~200-400KB). Only kept for 5 most recent entries. */
+  imageBase64?: string;
+  /** Cached full ingredient parse — avoids re-fetching when revisiting from history */
+  fullScanResult?: ScanResult;
   /** ISO timestamp */
   timestamp: string;
 }

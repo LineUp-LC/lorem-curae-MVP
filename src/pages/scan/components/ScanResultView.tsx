@@ -48,7 +48,11 @@ interface ScanResultViewProps {
   previewUrl: string;
   matchedProduct?: Product;
   imageBase64?: string;
+  /** Pre-cached full scan result from scan history */
+  initialFullScanResult?: ScanResult;
   onScanAnother: () => void;
+  /** Called after a full scan completes so parent can cache it in history */
+  onFullScanComplete?: (result: ScanResult) => void;
 }
 
 type TabId = 'breakdown' | 'compatible' | 'similar';
@@ -414,7 +418,9 @@ export default function ScanResultView({
   previewUrl,
   matchedProduct,
   imageBase64,
+  initialFullScanResult,
   onScanAnother,
+  onFullScanComplete,
 }: ScanResultViewProps) {
   const { user } = useAuth();
   const skinType = getEffectiveSkinType();
@@ -430,8 +436,8 @@ export default function ScanResultView({
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId | null>(null);
 
-  // Tab 1 (Breakdown) cache
-  const [fullScanResult, setFullScanResult] = useState<ScanResult | null>(null);
+  // Tab 1 (Breakdown) cache — pre-populated from history if available
+  const [fullScanResult, setFullScanResult] = useState<ScanResult | null>(initialFullScanResult ?? null);
   const [fullScanLoading, setFullScanLoading] = useState(false);
   const [fullScanError, setFullScanError] = useState<string | null>(null);
 
@@ -639,18 +645,17 @@ export default function ScanResultView({
 
     // Tab 1 & 2 both need full scan data — fetch on first tap of either
     if ((tab === 'breakdown' || tab === 'compatible') && !fullScanResult && !fullScanLoading) {
-      console.log('[WebSearch] Tab needs full scan. imageBase64:', !!imageBase64, 'tab:', tab);
       if (!imageBase64) {
-        setFullScanError('Full ingredient analysis requires a photo scan.');
+        setFullScanError('no_image');
         return;
       }
       setFullScanLoading(true);
       setFullScanError(null);
       const minDisplay = new Promise(r => setTimeout(r, 800));
       const [res] = await Promise.all([scanProductFull(imageBase64), minDisplay]);
-      console.log('[WebSearch] scanProductFull response:', res.success, 'error:', (res as { error?: string }).error);
       if (res.success) {
         setFullScanResult(res.result);
+        onFullScanComplete?.(res.result);
       } else if (!res.success) {
         setFullScanError((res as { error: string }).error);
       }
@@ -905,9 +910,26 @@ export default function ScanResultView({
                   steps={['Scanning full ingredient list...', 'Categorizing ingredients...', 'Scoring safety for your skin...']}
                 />
               )}
-              {fullScanError && !fullScanLoading && (
+              {fullScanError && !fullScanLoading && fullScanError !== 'no_image' && (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">{fullScanError}</p>
+                </div>
+              )}
+              {fullScanError === 'no_image' && !fullScanLoading && (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-10 h-10 bg-cream rounded-full flex items-center justify-center mx-auto">
+                    <i className="ri-camera-line text-lg text-warm-gray" />
+                  </div>
+                  <p className="text-xs text-warm-gray">
+                    Scan this product again for full analysis
+                  </p>
+                  <button
+                    onClick={onScanAnother}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-primary border border-primary/30 rounded-full hover:bg-primary/5 transition-colors cursor-pointer"
+                  >
+                    <i className="ri-camera-line" />
+                    Rescan product
+                  </button>
                 </div>
               )}
               {fullScanResult && !fullScanLoading && (
@@ -928,7 +950,6 @@ export default function ScanResultView({
           )}
 
           {/* Tab 2: Compatible */}
-          {activeTab === 'compatible' && console.log('[WebSearch] Compatible tab mounted, fullScanResult:', !!fullScanResult, 'fullScanLoading:', fullScanLoading, 'imageBase64:', !!imageBase64)}
           {activeTab === 'compatible' && (
             <>
               {fullScanLoading && (
@@ -936,7 +957,7 @@ export default function ScanResultView({
                   steps={['Scanning full ingredient list...', 'Finding compatible products...']}
                 />
               )}
-              {fullScanError && !fullScanLoading && (
+              {fullScanError && !fullScanLoading && fullScanError !== 'no_image' && (
                 <div className="text-center py-4">
                   <p className="text-xs text-warm-gray">{fullScanError}</p>
                 </div>
@@ -954,9 +975,21 @@ export default function ScanResultView({
                   />
                 </Suspense>
               )}
-              {!fullScanResult && !fullScanLoading && !fullScanError && !imageBase64 && (
-                <div className="text-center py-4">
-                  <p className="text-xs text-warm-gray">Full ingredient analysis requires a photo scan.</p>
+              {!fullScanResult && !fullScanLoading && (fullScanError === 'no_image' || !imageBase64) && (
+                <div className="text-center py-6 space-y-3">
+                  <div className="w-10 h-10 bg-cream rounded-full flex items-center justify-center mx-auto">
+                    <i className="ri-camera-line text-lg text-warm-gray" />
+                  </div>
+                  <p className="text-xs text-warm-gray">
+                    Scan this product again for full analysis
+                  </p>
+                  <button
+                    onClick={onScanAnother}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-medium text-primary border border-primary/30 rounded-full hover:bg-primary/5 transition-colors cursor-pointer"
+                  >
+                    <i className="ri-camera-line" />
+                    Rescan product
+                  </button>
                 </div>
               )}
             </>
