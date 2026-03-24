@@ -124,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
 
         if (currentUser) {
+          hasHydratedRef.current = true  // claim slot before await — blocks race with SIGNED_IN
           const userProfile = await loadUserProfile(currentUser.id)
           const count = await getRoutineCount(currentUser.id)
           if (isMounted) {
@@ -151,19 +152,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser)
 
         if (event === 'SIGNED_IN' && authUser) {
-          // Skip re-hydration if we've already hydrated this user (session recovery, token refresh)
-          if (hasHydratedRef.current && user?.id === authUser.id) {
+          // Skip re-hydration on session recovery / token refresh
+          if (hasHydratedRef.current) {
             return
           }
 
           setLoading(true)
           try {
             const hydrate = async () => {
-              const existing = await loadUserProfile(authUser.id)
+              let userProfile = await loadUserProfile(authUser.id)
 
-              if (!existing) {
+              if (!userProfile) {
                 await mergeGuestDataToAccount(authUser.id, null)
                 await createUserProfile(authUser)
+                userProfile = await loadUserProfile(authUser.id)
               } else {
                 // Skip merge when no guest data exists — saves 1-2s on hydration
                 const hasGuestData =
@@ -173,13 +175,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                   localStorage.getItem('routines') ||
                   localStorage.getItem('user_location')
                 if (hasGuestData) {
-                  await mergeGuestDataToAccount(authUser.id, existing)
+                  await mergeGuestDataToAccount(authUser.id, userProfile)
+                  userProfile = await loadUserProfile(authUser.id)  // reload post-merge
                 } else {
                   console.log('[auth] No guest data to merge, skipping')
                 }
               }
 
-              const userProfile = await loadUserProfile(authUser.id)
               const count = await getRoutineCount(authUser.id)
 
               if (isMounted) {
