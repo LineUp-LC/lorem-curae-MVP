@@ -15,6 +15,8 @@
 ## Debugging Insights
 
 <!-- Format: [symptom] → [root cause] → [fix] -->
+- AI summary timeout in RetailerReviews → Sonnet 4.5 used for 256-token task + 15s client timeout too tight for Deno cold start → Route lightweight modes (retailer_review_summary, curated_review_summary, natural_discovery) to Haiku 4.5 in ai-insight Edge Function; increase timeout to 25s
+- surfaceClient.ts fetch() has no AbortController → hangs indefinitely if Edge Function stalls → only protected by Promise.race in consuming component (known gap, not fixed)
 
 ## Phase 1: Website Hub Restructure (Steps 2-3)
 
