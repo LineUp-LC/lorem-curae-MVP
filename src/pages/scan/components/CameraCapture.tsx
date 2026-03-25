@@ -497,48 +497,22 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
         </div>
       )}
 
-      {/* Main action button — mobile: file input, desktop: webcam trigger */}
-      {mobile ? (
-        <label
-          className={`
-            inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm
-            transition-all cursor-pointer
-            ${disabled
-              ? 'bg-blush text-warm-gray cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-dark active:scale-[0.98] shadow-md hover:shadow-lg'
-            }
-          `}
-        >
-          <i className={`${mode === 'barcode' ? 'ri-barcode-line' : 'ri-camera-line'} text-lg`} />
-          {mode === 'barcode' ? 'Scan Barcode' : 'Take Photo'}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            onChange={handleFileChange}
-            disabled={disabled}
-            className="sr-only"
-            aria-label={mode === 'barcode' ? 'Capture barcode image' : 'Capture product photo'}
-          />
-        </label>
-      ) : (
-        <button
-          onClick={startWebcam}
-          disabled={disabled}
-          className={`
-            inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm
-            transition-all
-            ${disabled
-              ? 'bg-blush text-warm-gray cursor-not-allowed'
-              : 'bg-primary text-white hover:bg-dark active:scale-[0.98] shadow-md hover:shadow-lg'
-            }
-          `}
-        >
-          <i className={`${mode === 'barcode' ? 'ri-barcode-line' : 'ri-camera-line'} text-lg`} />
-          {mode === 'barcode' ? 'Start Scanner' : 'Take Photo'}
-        </button>
-      )}
+      {/* Main action button — always use getUserMedia for direct camera access */}
+      <button
+        onClick={startWebcam}
+        disabled={disabled}
+        className={`
+          inline-flex items-center gap-2 px-6 py-3 rounded-xl font-medium text-sm
+          transition-all
+          ${disabled
+            ? 'bg-blush text-warm-gray cursor-not-allowed'
+            : 'bg-primary text-white hover:bg-dark active:scale-[0.98] shadow-md hover:shadow-lg cursor-pointer'
+          }
+        `}
+      >
+        <i className={`${mode === 'barcode' ? 'ri-barcode-line' : 'ri-camera-line'} text-lg`} />
+        {mode === 'barcode' ? 'Start Scanner' : 'Take Photo'}
+      </button>
 
       {/* Gallery fallback */}
       <label className="inline-flex items-center gap-1.5 text-sm text-primary hover:text-dark transition-colors cursor-pointer">

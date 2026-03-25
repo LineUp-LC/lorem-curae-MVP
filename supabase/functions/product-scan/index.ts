@@ -29,6 +29,13 @@ const MAX_TOKENS_FULL = 8192;
 // Maximum base64 payload size: ~5 MB decoded → ~6.7 MB base64
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
 
+const VALID_CATEGORIES = new Set([
+  'Active Exfoliant', 'Hydration/Moisture', 'Soothing/Botanical', 'Antioxidant',
+  'Brightening', 'Anti-Aging', 'Acne Treatment', 'Sun Protection', 'Preservative',
+  'Base/Solvent', 'Emulsifier', 'Surfactant/Cleanser', 'Fragrance', 'pH Adjuster',
+  'Thickener/Texture', 'Vitamin/Nutrient', 'Barrier Repair',
+]);
+
 // ---------------------------------------------------------------------------
 // System prompt builder
 // ---------------------------------------------------------------------------
@@ -248,7 +255,7 @@ async function callClaudeVision(
           name: String(ing.name || ''),
           function: String(ing.function || ''),
           safetyTier: ['safe', 'caution', 'avoid'].includes(ing.safetyTier) ? ing.safetyTier : 'safe',
-          category: String(ing.category || 'Other'),
+          category: VALID_CATEGORIES.has(ing.category) ? ing.category : 'Other',
           ...(ing.relevance ? { relevance: String(ing.relevance) } : {}),
           ...(ing.cautionReason ? { cautionReason: String(ing.cautionReason) } : {}),
         }));

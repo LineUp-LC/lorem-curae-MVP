@@ -160,6 +160,8 @@ export default function ScanPage() {
     if (currentHistoryId) {
       updateScanHistoryEntry(currentHistoryId, { fullScanResult: fullResult });
       setHistory(getScanHistory());
+    } else {
+      console.warn('[Scan] Full scan complete but no history entry ID — result not persisted to history');
     }
   }, [currentHistoryId]);
 

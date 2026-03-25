@@ -7,6 +7,7 @@ import type { Product } from '../../types/product';
 import { normalizeUserConcern } from '../../lib/utils/matching';
 import { useLocalStorageState } from '../../lib/utils/useLocalStorageState';
 import { supabase } from '../../lib/supabase-browser';
+import { resetSearchSession } from '../../lib/api/productSearch';
 
 /**
  * DiscoverPage Component
@@ -29,6 +30,9 @@ const DiscoverPage = () => {
   const normalizedConcerns = userConcerns.map((c) => normalizeUserConcern(c));
 
   useEffect(() => {
+    // Fresh search budget when navigating to discover
+    resetSearchSession();
+
     // Check if we should auto-open comparison (from footer link)
     const shouldOpenComparison = localStorage.getItem('openComparisonOnLoad');
     if (shouldOpenComparison === 'true') {
