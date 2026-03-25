@@ -31,7 +31,9 @@ const corsHeaders = {
 
 const SERPER_API_URL_SHOPPING = 'https://google.serper.dev/shopping';
 const SERPER_API_URL_SEARCH = 'https://google.serper.dev/search';
-const CACHE_TTL_HOURS = 24;
+const CACHE_TTL_HOURS_REVIEWS = 24;
+const CACHE_TTL_HOURS_SHOPPING = 168; // 7 days for product metadata
+const PRODUCT_CACHE_TTL_DAYS = 7;
 
 // ---------------------------------------------------------------------------
 // Types (server-side — mirrors src/types/webSearch.ts shapes)
@@ -423,6 +425,7 @@ function mapSearchResults(
 async function getCachedResults(
   supabase: ReturnType<typeof createClient>,
   queryHash: string,
+  searchType: string,
 ): Promise<{ results: unknown; found: boolean }> {
   try {
     const { data, error } = await supabase
@@ -433,11 +436,15 @@ async function getCachedResults(
 
     if (error || !data) return { results: null, found: false };
 
-    // Check TTL
+    // Type-aware TTL: 7 days for shopping results, 24h for reviews
+    const ttlHours = (searchType === 'reviews' || searchType === 'retailer_reviews')
+      ? CACHE_TTL_HOURS_REVIEWS
+      : CACHE_TTL_HOURS_SHOPPING;
+
     const createdAt = new Date(data.created_at);
     const age = (Date.now() - createdAt.getTime()) / (1000 * 60 * 60);
 
-    if (age > CACHE_TTL_HOURS) {
+    if (age > ttlHours) {
       // Stale — delete and return miss
       await supabase.from('web_search_cache').delete().eq('query_hash', queryHash);
       return { results: null, found: false };
@@ -468,6 +475,112 @@ async function setCachedResults(
     });
   } catch (error) {
     console.error('[product-search] Cache write failed:', error);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Write-through: upsert Serper shopping results into products + retailers
+// ---------------------------------------------------------------------------
+
+function generateSlug(brand: string, name: string): string {
+  return `${brand}-${name}`
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+    .slice(0, 120);
+}
+
+async function upsertProductsFromShopping(
+  supabase: ReturnType<typeof createClient>,
+  products: WebProduct[],
+  query: string,
+): Promise<void> {
+  if (!products.length) return;
+
+  let written = 0;
+  let failed = 0;
+
+  try {
+    for (const wp of products) {
+      if (!wp.brand || !wp.name || !wp.merchant) continue;
+
+      try {
+        const slug = generateSlug(wp.brand, wp.name);
+
+        // Upsert product (dedup on brand+name via slug uniqueness)
+        const { data: productRow, error: pErr } = await supabase
+          .from('products')
+          .upsert(
+            {
+              slug,
+              name: wp.name,
+              brand: wp.brand,
+              category: wp.category || 'treatment',
+              price: wp.price || 0,
+              rating: wp.rating || 0,
+              review_count: wp.reviewCount || 0,
+              image: wp.image || '',
+              source: 'serper',
+              status: 'published',
+              search_query: query,
+              serper_last_fetched_at: new Date().toISOString(),
+              hit_count: 1,
+            },
+            { onConflict: 'slug' },
+          )
+          .select('id')
+          .single();
+
+        if (pErr || !productRow) { failed++; continue; }
+        const productId = productRow.id;
+
+        // Upsert retailer (dedup on merchant slug)
+        const retailerSlug = wp.merchant
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)/g, '');
+
+        const { data: retailerRow, error: rErr } = await supabase
+          .from('retailers')
+          .upsert(
+            { slug: retailerSlug, name: wp.merchant },
+            { onConflict: 'slug' },
+          )
+          .select('id')
+          .single();
+
+        if (rErr || !retailerRow) { failed++; continue; }
+
+        // Upsert retailer price
+        await supabase
+          .from('retailer_prices')
+          .upsert(
+            {
+              product_id: productId,
+              retailer_id: retailerRow.id,
+              price: wp.price || 0,
+              shipping_cost: 0,
+              total_price: wp.price || 0,
+              in_stock: true,
+              url: wp.externalUrl || '',
+              source: 'serper',
+              source_query: query,
+              last_updated: new Date().toISOString(),
+            },
+            { onConflict: 'product_id,retailer_id' },
+          );
+
+        written++;
+      } catch {
+        failed++;
+      }
+    }
+
+    if (written > 0 || failed > 0) {
+      console.log(`[product-search] Write-through: ${written} upserted, ${failed} failed`);
+    }
+  } catch (error) {
+    console.error('[product-search] Write-through failed:', error);
   }
 }
 
@@ -564,7 +677,7 @@ serve(async (req: Request) => {
 
     // Check cache
     const cacheKey = await sha256(`${body.type}:${query}`);
-    const cached = await getCachedResults(supabaseService, cacheKey);
+    const cached = await getCachedResults(supabaseService, cacheKey, body.type);
     console.log(`[product-search] Cache check: ${Date.now() - t0}ms (hit: ${cached.found})`);
 
     if (cached.found) {
@@ -618,6 +731,9 @@ serve(async (req: Request) => {
         );
       }
       results = mapShoppingResults(serperData.shopping || [], categoryOverride);
+
+      // Write-through: upsert shopping results into products + retailers tables (fire-and-forget)
+      upsertProductsFromShopping(supabaseService, results as WebProduct[], query).catch(() => {});
     }
     console.log(`[product-search] Serper call: ${Date.now() - t1}ms (${results.length} results)`);
 

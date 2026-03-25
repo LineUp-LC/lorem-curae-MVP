@@ -53,7 +53,7 @@ related: ["09-security.md", "11-testing.md"]
 | affiliate-webhook | Affiliate — webhook handler |
 | data-anonymization | Privacy — user data anonymization |
 | password-check | Security — password validation |
-| product-search | Search — Serper.dev proxy for Google Shopping + reviews |
+| product-search | Search — Serper.dev proxy for Google Shopping + reviews + write-through to products/retailers tables |
 
 ### Edge Function Rules
 - Use `Deno.serve()` pattern
@@ -67,7 +67,7 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Database Migrations
 
-10 migrations in `supabase/migrations/`:
+13 migrations in `supabase/migrations/`:
 
 | Migration | Purpose |
 |-----------|---------|
@@ -79,8 +79,11 @@ related: ["09-security.md", "11-testing.md"]
 | `20260306000000_create_retailer_pricing_tables` | Retailer pricing |
 | `20260308000000_create_products_table` | Product catalog |
 | `20260309000000_add_admin_rls_policies` | Admin RLS policies |
+| `20260315000000_create_routine_notes` | Routine notes |
 | `20260316000000_create_gamification_tables` | Points economy, transactions, badges |
 | `20260322000000_create_web_search_cache` | Serper.dev result cache (24h TTL) |
+| `20260324000000_extend_product_cache` | Serper write-through: cache columns, source constraints, dedup index |
+| `20260324000001_create_product_reviews_table` | User product reviews with RLS |
 
 ### Migration Rules
 - Never apply automatically
