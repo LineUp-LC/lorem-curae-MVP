@@ -539,7 +539,7 @@ async function upsertProductsFromShopping(
           .update({ hit_count: (productRow.hit_count || 0) + 1 })
           .eq('id', productRow.id)
           .then(() => {})
-          .catch(() => {});
+          .catch((err: Error) => console.warn(`[product-search] hit_count increment failed for ${slug}:`, err?.message));
 
         const productId = productRow.id;
 
