@@ -118,24 +118,22 @@ export default function RetailerCard({
         </div>
       </div>
 
-      {/* Expandable reviews trigger */}
-      {knownRetailer && (
-        <button
-          onClick={() => onExpandReviews(listing)}
-          className="w-full flex items-center justify-between px-4 py-2 border-t border-blush/50 text-xs text-warm-gray hover:bg-cream/50 transition-colors cursor-pointer"
-        >
-          <span className="flex items-center gap-1">
-            <i className="ri-chat-3-line" />
-            Reviews on {retailerName}
-            {keywordSummary && keywordSummary.matchCount > 0 && (
-              <span className="ml-1 text-primary font-medium">
-                · {keywordSummary.matchCount} of {keywordSummary.totalReviews} mention &ldquo;{keywordSummary.topTerm}&rdquo;
-              </span>
-            )}
-          </span>
-          <i className={`ri-arrow-${reviewsExpanded ? 'up' : 'down'}-s-line text-sm transition-transform`} />
-        </button>
-      )}
+      {/* Expandable reviews trigger — shown for ALL retailers (known + web-discovered) */}
+      <button
+        onClick={() => onExpandReviews(listing)}
+        className="w-full flex items-center justify-between px-4 py-2 border-t border-blush/50 text-xs text-warm-gray hover:bg-cream/50 transition-colors cursor-pointer"
+      >
+        <span className="flex items-center gap-1">
+          <i className="ri-chat-3-line" />
+          Reviews on {retailerName}
+          {keywordSummary && keywordSummary.matchCount > 0 && (
+            <span className="ml-1 text-primary font-medium">
+              · {keywordSummary.matchCount} of {keywordSummary.totalReviews} mention &ldquo;{keywordSummary.topTerm}&rdquo;
+            </span>
+          )}
+        </span>
+        <i className={`ri-arrow-${reviewsExpanded ? 'up' : 'down'}-s-line text-sm transition-transform`} />
+      </button>
     </div>
   );
 }

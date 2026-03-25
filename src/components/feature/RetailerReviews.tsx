@@ -5,6 +5,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { WebReview } from '../../types/webSearch';
 import type { RetailerListing } from '../../types/retailerDirectory';
+import { reviewMatchesRetailer } from '../../lib/data/retailerDirectory';
 import { buildAIContext } from '../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
 import {
@@ -72,17 +73,14 @@ export default function RetailerReviews({
   const concerns = getEffectiveConcerns();
   const sensitivity = getEffectiveSensitivity();
 
-  // Filter reviews: domain-specific only — no fallback to unrelated sources.
-  // Match exact domain or subdomain (e.g. "www.sephora.com") but not partial
-  // strings (e.g. "targetnews.com" must not match "target.com").
+  // Filter reviews: match by domain brand slug, subdomain, or retailer name.
+  // Handles regional TLDs (sephora.sg → sephora.com) and name variations.
   const reviews = useMemo(() => {
-    const domain = listing.domain.toLowerCase();
     const filtered = webReviews.filter(r => !isProductDescription(r.content));
-    return filtered.filter(r => {
-      const src = r.sourceDomain?.toLowerCase() ?? '';
-      return src === domain || src.endsWith(`.${domain}`);
-    });
-  }, [webReviews, listing.domain]);
+    return filtered.filter(r =>
+      reviewMatchesRetailer(r, listing.domain, listing.retailerName),
+    );
+  }, [webReviews, listing.domain, listing.retailerName]);
 
   // Compute keyword matches from filtered reviews
   const keywordMatches = useMemo(() => {

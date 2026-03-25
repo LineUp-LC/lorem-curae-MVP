@@ -200,6 +200,94 @@ const KNOWN_RETAILERS: Record<string, KnownRetailer> = {
 };
 
 // ---------------------------------------------------------------------------
+// Brand slug extraction for fuzzy domain matching
+// ---------------------------------------------------------------------------
+
+/** Known compound TLDs (country-code second-level domains) */
+const COMPOUND_TLDS = new Set([
+  'co.uk', 'co.jp', 'co.kr', 'co.in', 'co.nz', 'co.za', 'co.id', 'co.th',
+  'com.au', 'com.br', 'com.mx', 'com.sg', 'com.my', 'com.ph', 'com.tw',
+  'com.hk', 'com.tr', 'com.ar', 'com.co', 'com.pe', 'com.vn',
+]);
+
+/**
+ * Extract the brand slug from a domain — strips www, TLD, and ccTLD.
+ * Handles regional variants: sephora.sg → "sephora", amazon.co.uk → "amazon"
+ * Strips apostrophes and special chars: "kiehl's" → "kiehls"
+ */
+export function extractBrandSlug(domainOrName: string): string {
+  let d = domainOrName.toLowerCase().trim();
+  // Strip protocol if present
+  if (d.includes('://')) {
+    try { d = new URL(d).hostname; } catch { /* keep as-is */ }
+  }
+  d = d.replace(/^www\./, '');
+
+  // Check compound TLDs first (e.g. .co.uk, .com.au)
+  for (const ctld of COMPOUND_TLDS) {
+    if (d.endsWith(`.${ctld}`)) {
+      d = d.slice(0, -(ctld.length + 1));
+      break;
+    }
+  }
+
+  // Strip simple TLD (.com, .sg, .fr, etc.)
+  d = d.replace(/\.[a-z]{2,6}$/, '');
+
+  // Strip subdomains — keep only the last segment (brand name)
+  const parts = d.split('.');
+  d = parts[parts.length - 1];
+
+  // Remove apostrophes and non-alphanumeric chars
+  return d.replace(/[^a-z0-9]/g, '');
+}
+
+/**
+ * Check if a web review matches a retailer for display in that retailer's card.
+ * Matching strategy (in order):
+ *   1. Exact domain match (sephora.com === sephora.com)
+ *   2. Subdomain match (www.sephora.com ends with .sephora.com)
+ *   3. Brand slug match (sephora.sg → "sephora" === sephora.com → "sephora")
+ *   4. Retailer name in sourceDomain (e.g. "kiehls" in "kiehls.com")
+ *   5. Retailer name in sourceTitle (e.g. "Sephora" in "CeraVe Review - Sephora")
+ */
+export function reviewMatchesRetailer(
+  review: { sourceDomain?: string; sourceTitle?: string },
+  retailerDomain: string,
+  retailerName: string,
+): boolean {
+  const src = review.sourceDomain?.toLowerCase() ?? '';
+  const domain = retailerDomain.toLowerCase();
+
+  // 1. Exact domain
+  if (src === domain) return true;
+
+  // 2. Subdomain (www.sephora.com matches sephora.com)
+  if (src.endsWith(`.${domain}`)) return true;
+
+  // 3. Brand slug comparison (sephora.sg → "sephora" matches sephora.com → "sephora")
+  if (src) {
+    const reviewSlug = extractBrandSlug(src);
+    const retailerSlug = extractBrandSlug(domain);
+    if (reviewSlug && retailerSlug && reviewSlug === retailerSlug) return true;
+  }
+
+  // 4. Retailer name slug in sourceDomain (handles "kiehls.com" matching retailer "Kiehl's")
+  // Require min 3 chars to avoid false positives from short names like "CVS" matching "reviews.com"
+  const nameSlug = retailerName.toLowerCase().replace(/[^a-z0-9]/g, '');
+  if (nameSlug.length >= 3) {
+    const namePattern = new RegExp(`(^|[^a-z0-9])${nameSlug}([^a-z0-9]|$)`);
+    if (namePattern.test(src.replace(/[^a-z0-9]/g, ' '))) return true;
+
+    // 5. Retailer name in sourceTitle (word-boundary match)
+    const title = review.sourceTitle?.toLowerCase() ?? '';
+    if (namePattern.test(title.replace(/[^a-z0-9]/g, ' '))) return true;
+  }
+
+  return false;
+}
+
+// ---------------------------------------------------------------------------
 // Lookup
 // ---------------------------------------------------------------------------
 
