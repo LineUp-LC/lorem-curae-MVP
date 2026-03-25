@@ -58,6 +58,8 @@ export default function WhereToBuySheet({
   const [sortKey, setSortKey] = useState<RetailerSortKey>('best');
   const [freeShipping, setFreeShipping] = useState(false);
   const [freeReturns, setFreeReturns] = useState(false);
+  const [beautyAuthority, setBeautyAuthority] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<string | null>(null);
   const [keywordSummaries, setKeywordSummaries] = useState<Record<string, { matchCount: number; totalReviews: number; topTerm: string }>>({});
   const [routinePromptListing, setRoutinePromptListing] = useState<RetailerListing | null>(null);
@@ -159,10 +161,13 @@ export default function WhereToBuySheet({
   }, [isOpen, targetProduct, allWebProducts, buyProducts]);
 
   // Build sorted + filtered listings
-  const listings = useMemo(
-    () => buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns }),
-    [allRetailerProducts, sortKey, freeShipping, freeReturns],
-  );
+  const listings = useMemo(() => {
+    let result = buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns });
+    if (beautyAuthority) {
+      result = result.filter(l => l.knownRetailer?.skincareSpecialist === true);
+    }
+    return result;
+  }, [allRetailerProducts, sortKey, freeShipping, freeReturns, beautyAuthority]);
 
   const handleBuyClick = useCallback((listing: RetailerListing) => {
     onBuyIntent?.(listing);
@@ -192,6 +197,13 @@ export default function WhereToBuySheet({
       ...prev,
       [domain]: { matchCount: matches[0].count, totalReviews, topTerm: matches[0].term },
     }));
+  }, []);
+
+  const activeFilterCount = (freeShipping ? 1 : 0) + (freeReturns ? 1 : 0) + (beautyAuthority ? 1 : 0);
+  const clearAllFilters = useCallback(() => {
+    setFreeShipping(false);
+    setFreeReturns(false);
+    setBeautyAuthority(false);
   }, []);
 
   if (!isOpen) return null;
@@ -283,40 +295,80 @@ export default function WhereToBuySheet({
           <>
             {/* Sort + filter bar (only for 2+ retailers) */}
             {retailerCount >= 2 && (
-              <div className="px-4 py-2.5 border-b border-blush/50 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                <select
-                  value={sortKey}
-                  onChange={(e) => setSortKey(e.target.value as RetailerSortKey)}
-                  className="text-xs bg-cream border border-blush rounded-lg px-2 py-1.5 text-deep cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/30"
-                >
-                  {SORT_OPTIONS.map(opt => (
-                    <option key={opt.key} value={opt.key}>{opt.label}</option>
-                  ))}
-                </select>
+              <div className="border-b border-blush/50">
+                <div className="px-4 py-2.5 flex items-center gap-2">
+                  <select
+                    value={sortKey}
+                    onChange={(e) => setSortKey(e.target.value as RetailerSortKey)}
+                    className="text-xs bg-cream border border-blush rounded-lg px-2 py-1.5 text-deep cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/30"
+                  >
+                    {SORT_OPTIONS.map(opt => (
+                      <option key={opt.key} value={opt.key}>{opt.label}</option>
+                    ))}
+                  </select>
 
-                <button
-                  onClick={() => setFreeShipping(!freeShipping)}
-                  className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                    freeShipping
-                      ? 'bg-sage/15 text-sage border-sage/30'
-                      : 'bg-white text-warm-gray border-blush hover:bg-cream'
-                  }`}
-                >
-                  <i className="ri-gift-line mr-1" />
-                  Free Shipping
-                </button>
+                  <button
+                    onClick={() => setFiltersOpen(prev => !prev)}
+                    className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                      activeFilterCount > 0
+                        ? 'bg-primary/10 text-primary border-primary/30'
+                        : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                    }`}
+                  >
+                    <i className="ri-filter-3-line mr-1" />
+                    Filters{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
+                    <i className={`ri-arrow-${filtersOpen ? 'up' : 'down'}-s-line ml-0.5`} />
+                  </button>
+                </div>
 
-                <button
-                  onClick={() => setFreeReturns(!freeReturns)}
-                  className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                    freeReturns
-                      ? 'bg-sage/15 text-sage border-sage/30'
-                      : 'bg-white text-warm-gray border-blush hover:bg-cream'
-                  }`}
-                >
-                  <i className="ri-refresh-line mr-1" />
-                  Free Returns
-                </button>
+                {filtersOpen && (
+                  <div className="px-4 pb-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                    <button
+                      onClick={() => setFreeShipping(!freeShipping)}
+                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                        freeShipping
+                          ? 'bg-sage/15 text-sage border-sage/30'
+                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                      }`}
+                    >
+                      <i className="ri-gift-line mr-1" />
+                      Free Shipping
+                    </button>
+
+                    <button
+                      onClick={() => setFreeReturns(!freeReturns)}
+                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                        freeReturns
+                          ? 'bg-sage/15 text-sage border-sage/30'
+                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                      }`}
+                    >
+                      <i className="ri-refresh-line mr-1" />
+                      Free Returns
+                    </button>
+
+                    <button
+                      onClick={() => setBeautyAuthority(!beautyAuthority)}
+                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                        beautyAuthority
+                          ? 'bg-primary/10 text-primary border-primary/30'
+                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                      }`}
+                    >
+                      <i className="ri-heart-pulse-line mr-1" />
+                      Beauty Authority
+                    </button>
+
+                    {activeFilterCount > 0 && (
+                      <button
+                        onClick={clearAllFilters}
+                        className="flex-shrink-0 text-[11px] px-2.5 py-1 text-warm-gray hover:text-deep transition-colors cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
 
@@ -349,7 +401,7 @@ export default function WhereToBuySheet({
                 <div className="text-center py-6">
                   <p className="text-sm text-warm-gray">No retailers match your filters.</p>
                   <button
-                    onClick={() => { setFreeShipping(false); setFreeReturns(false); }}
+                    onClick={() => { setFreeShipping(false); setFreeReturns(false); setBeautyAuthority(false); }}
                     className="mt-2 text-xs text-primary hover:text-dark transition-colors cursor-pointer"
                   >
                     Clear filters
