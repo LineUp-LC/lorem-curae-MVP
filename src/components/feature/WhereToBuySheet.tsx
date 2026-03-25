@@ -56,15 +56,16 @@ export default function WhereToBuySheet({
 }: WhereToBuySheetProps) {
   const { user } = useAuth();
   const [sortKey, setSortKey] = useState<RetailerSortKey>('best');
+  const [sortOpen, setSortOpen] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [freeReturns, setFreeReturns] = useState(false);
   const [beautyAuthority, setBeautyAuthority] = useState(false);
-  const [filtersOpen, setFiltersOpen] = useState(false);
   const [expandedReviews, setExpandedReviews] = useState<string | null>(null);
   const [keywordSummaries, setKeywordSummaries] = useState<Record<string, { matchCount: number; totalReviews: number; topTerm: string }>>({});
   const [routinePromptListing, setRoutinePromptListing] = useState<RetailerListing | null>(null);
   const [routineModalOpen, setRoutineModalOpen] = useState(false);
   const sheetRef = useRef<HTMLDivElement>(null);
+  const sortRef = useRef<HTMLDivElement>(null);
   const gamificationFired = useRef(false);
   const routineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -132,11 +133,26 @@ export default function WhereToBuySheet({
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        if (sortOpen) { setSortOpen(false); return; }
+        onClose();
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, sortOpen]);
+
+  // Close sort dropdown on outside click
+  useEffect(() => {
+    if (!sortOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) {
+        setSortOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [sortOpen]);
 
   // Merge: existing allWebProducts matches + dedicated buy search results (deduplicate by domain)
   const allRetailerProducts = useMemo(() => {
@@ -295,80 +311,89 @@ export default function WhereToBuySheet({
           <>
             {/* Sort + filter bar (only for 2+ retailers) */}
             {retailerCount >= 2 && (
-              <div className="border-b border-blush/50">
-                <div className="px-4 py-2.5 flex items-center gap-2">
-                  <select
-                    value={sortKey}
-                    onChange={(e) => setSortKey(e.target.value as RetailerSortKey)}
-                    className="text-xs bg-cream border border-blush rounded-lg px-2 py-1.5 text-deep cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/30"
+              <div className="border-b border-blush/50 px-4 py-2.5 flex items-center gap-2">
+                {/* Custom sort dropdown — outside overflow so menu isn't clipped */}
+                <div ref={sortRef} className="relative flex-shrink-0 z-20">
+                  <button
+                    onClick={() => setSortOpen(prev => !prev)}
+                    className="flex items-center gap-1 text-xs bg-cream border border-blush rounded-full px-2.5 py-1.5 text-deep cursor-pointer hover:bg-blush/30 transition-colors focus:outline-none focus:ring-1 focus:ring-primary/30"
                   >
-                    {SORT_OPTIONS.map(opt => (
-                      <option key={opt.key} value={opt.key}>{opt.label}</option>
-                    ))}
-                  </select>
+                    <i className="ri-sort-desc text-warm-gray text-sm" />
+                    {SORT_OPTIONS.find(o => o.key === sortKey)?.label ?? 'Sort'}
+                    <i className={`ri-arrow-${sortOpen ? 'up' : 'down'}-s-line text-warm-gray`} />
+                  </button>
+
+                  {sortOpen && (
+                    <div className="absolute top-full left-0 mt-1 min-w-[180px] bg-white border border-blush rounded-lg shadow-lg z-30 py-1 animate-enter-fade">
+                      {SORT_OPTIONS.map(opt => (
+                        <button
+                          key={opt.key}
+                          onClick={() => { setSortKey(opt.key); setSortOpen(false); }}
+                          className={`w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer flex items-center justify-between ${
+                            sortKey === opt.key
+                              ? 'bg-primary/8 text-primary font-medium'
+                              : 'text-deep hover:bg-cream'
+                          }`}
+                        >
+                          {opt.label}
+                          {sortKey === opt.key && <i className="ri-check-line text-primary" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Divider */}
+                <div className="w-px h-5 bg-blush/70 flex-shrink-0" />
+
+                {/* Filter pills — scrollable independently */}
+                <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide min-w-0">
+                  <button
+                    onClick={() => setFreeShipping(!freeShipping)}
+                    className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                      freeShipping
+                        ? 'bg-sage/15 text-sage border-sage/30'
+                        : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                    }`}
+                  >
+                    <i className="ri-gift-line mr-1" />
+                    Free Shipping
+                  </button>
 
                   <button
-                    onClick={() => setFiltersOpen(prev => !prev)}
+                    onClick={() => setFreeReturns(!freeReturns)}
                     className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                      activeFilterCount > 0
+                      freeReturns
+                        ? 'bg-sage/15 text-sage border-sage/30'
+                        : 'bg-white text-warm-gray border-blush hover:bg-cream'
+                    }`}
+                  >
+                    <i className="ri-refresh-line mr-1" />
+                    Free Returns
+                  </button>
+
+                  <button
+                    onClick={() => setBeautyAuthority(!beautyAuthority)}
+                    className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
+                      beautyAuthority
                         ? 'bg-primary/10 text-primary border-primary/30'
                         : 'bg-white text-warm-gray border-blush hover:bg-cream'
                     }`}
                   >
-                    <i className="ri-filter-3-line mr-1" />
-                    Filters{activeFilterCount > 0 ? ` · ${activeFilterCount}` : ''}
-                    <i className={`ri-arrow-${filtersOpen ? 'up' : 'down'}-s-line ml-0.5`} />
+                    <i className="ri-heart-pulse-line mr-1" />
+                    Beauty Authority
                   </button>
+
+                  {activeFilterCount > 0 && (
+                    <button
+                      onClick={clearAllFilters}
+                      className="flex-shrink-0 text-[11px] px-2.5 py-1 text-warm-gray hover:text-deep transition-colors cursor-pointer"
+                    >
+                      <i className="ri-close-line mr-0.5" />
+                      Clear
+                    </button>
+                  )}
                 </div>
-
-                {filtersOpen && (
-                  <div className="px-4 pb-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                    <button
-                      onClick={() => setFreeShipping(!freeShipping)}
-                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                        freeShipping
-                          ? 'bg-sage/15 text-sage border-sage/30'
-                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
-                      }`}
-                    >
-                      <i className="ri-gift-line mr-1" />
-                      Free Shipping
-                    </button>
-
-                    <button
-                      onClick={() => setFreeReturns(!freeReturns)}
-                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                        freeReturns
-                          ? 'bg-sage/15 text-sage border-sage/30'
-                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
-                      }`}
-                    >
-                      <i className="ri-refresh-line mr-1" />
-                      Free Returns
-                    </button>
-
-                    <button
-                      onClick={() => setBeautyAuthority(!beautyAuthority)}
-                      className={`flex-shrink-0 text-[11px] px-2.5 py-1 rounded-full border transition-colors cursor-pointer ${
-                        beautyAuthority
-                          ? 'bg-primary/10 text-primary border-primary/30'
-                          : 'bg-white text-warm-gray border-blush hover:bg-cream'
-                      }`}
-                    >
-                      <i className="ri-heart-pulse-line mr-1" />
-                      Beauty Authority
-                    </button>
-
-                    {activeFilterCount > 0 && (
-                      <button
-                        onClick={clearAllFilters}
-                        className="flex-shrink-0 text-[11px] px-2.5 py-1 text-warm-gray hover:text-deep transition-colors cursor-pointer"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                )}
               </div>
             )}
 
