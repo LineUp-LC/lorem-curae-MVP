@@ -508,6 +508,7 @@ async function upsertProductsFromShopping(
         const slug = generateSlug(wp.brand, wp.name);
 
         // Upsert product (dedup on brand+name via slug uniqueness)
+        // Omit hit_count from upsert so it's not reset on conflict (defaults to 0 on insert)
         const { data: productRow, error: pErr } = await supabase
           .from('products')
           .upsert(
@@ -524,14 +525,22 @@ async function upsertProductsFromShopping(
               status: 'published',
               search_query: query,
               serper_last_fetched_at: new Date().toISOString(),
-              hit_count: 1,
             },
             { onConflict: 'slug' },
           )
-          .select('id')
+          .select('id, hit_count')
           .single();
 
         if (pErr || !productRow) { failed++; continue; }
+
+        // Increment hit_count (Supabase JS can't do SQL expressions, so read+write)
+        supabase
+          .from('products')
+          .update({ hit_count: (productRow.hit_count || 0) + 1 })
+          .eq('id', productRow.id)
+          .then(() => {})
+          .catch(() => {});
+
         const productId = productRow.id;
 
         // Upsert retailer (dedup on merchant slug)
@@ -705,7 +714,7 @@ serve(async (req: Request) => {
     let results: WebProduct[] | WebReview[];
 
     // Use fewer results for retailer reviews (5 is plenty for per-site search)
-    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : body.type === 'buy' ? 15 : body.type === 'compatible' ? 20 : 10;
+    const numResults = body.type === 'retailer_reviews' ? 5 : body.type === 'similar' ? 8 : body.type === 'buy' ? 30 : body.type === 'compatible' ? 20 : 10;
 
     if (body.type === 'reviews' || body.type === 'retailer_reviews') {
       const serperData = await callSerperSearch(query, serperKey, numResults);
