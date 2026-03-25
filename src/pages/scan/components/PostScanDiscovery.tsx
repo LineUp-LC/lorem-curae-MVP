@@ -28,23 +28,37 @@ interface PostScanDiscoveryProps {
   matchedProduct?: Product;
 }
 
-type CategoryFilter = 'all' | 'cleanser' | 'toner' | 'serum' | 'moisturizer' | 'sunscreen' | 'treatment' | 'mask';
+type CategoryFilter = 'all' | 'cleanser' | 'toner' | 'serum' | 'moisturizer' | 'sunscreen' | 'treatment' | 'mask' | 'eye cream';
 
 const CATEGORY_OPTIONS: { value: CategoryFilter; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'cleanser', label: 'Cleanser' },
-  { value: 'toner', label: 'Toner' },
-  { value: 'serum', label: 'Serum' },
   { value: 'moisturizer', label: 'Moisturizer' },
+  { value: 'serum', label: 'Serum' },
+  { value: 'cleanser', label: 'Cleanser' },
   { value: 'sunscreen', label: 'SPF' },
+  { value: 'toner', label: 'Toner' },
   { value: 'treatment', label: 'Treatment' },
+  { value: 'eye cream', label: 'Eye Care' },
   { value: 'mask', label: 'Mask' },
 ];
 
-// Number of web results that match each category (for pill counts)
+// Infer category from product name — mirrors Edge Function logic, used for pill counts
+function inferCategoryFromName(name: string): CategoryFilter {
+  const t = name.toLowerCase();
+  if (t.includes('eye cream') || t.includes('eye gel') || t.includes('eye serum') || t.includes('eye care') || t.includes('under eye')) return 'eye cream';
+  if (t.includes('sunscreen') || t.includes('sun screen') || /\bspf\s*\d/.test(t) || t.includes('sun protection') || t.includes('uv protect')) return 'sunscreen';
+  if (t.includes('mask') || t.includes('masque') || t.includes('sheet mask') || t.includes('clay mask')) return 'mask';
+  if (t.includes('cleanser') || t.includes('face wash') || t.includes('cleansing foam') || t.includes('cleansing gel') || t.includes('facial wash') || t.includes('micellar')) return 'cleanser';
+  if (t.includes('toner') || t.includes('toning water') || t.includes('facial mist')) return 'toner';
+  if (t.includes('serum') || t.includes('ampoule')) return 'serum';
+  if (t.includes('moisturizer') || t.includes('moisturiser') || t.includes('face cream') || t.includes('day cream') || t.includes('night cream') || t.includes('hydrating cream') || t.includes('face lotion')) return 'moisturizer';
+  return 'treatment';
+}
+
+// Number of web results that match each category (inferred from title, independent of cached stamps)
 function countByCategory(products: WebProduct[], category: CategoryFilter): number {
   if (category === 'all') return products.length;
-  return products.filter(p => p.category?.toLowerCase() === category).length;
+  return products.filter(p => inferCategoryFromName(p.name) === category).length;
 }
 
 // ---------------------------------------------------------------------------
@@ -57,7 +71,6 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [webProducts, setWebProducts] = useState<WebProduct[]>([]);
   const [webLoading, setWebLoading] = useState(false);
   const [webError, setWebError] = useState(false);
-  const [webCache, setWebCache] = useState<Record<string, WebProduct[]>>({});
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
   const skinType = getEffectiveSkinType() ?? undefined;
@@ -86,21 +99,15 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     };
   }, [scanResult, matchedProduct]);
 
-  // Filter web results by selected category (client-side)
+  // Filter client-side using the same inference as countByCategory — counts always match display
   const filteredProducts = useMemo(() => {
     if (categoryFilter === 'all') return webProducts;
-    return webProducts.filter(p => p.category?.toLowerCase() === categoryFilter);
+    return webProducts.filter(p => inferCategoryFromName(p.name) === categoryFilter);
   }, [webProducts, categoryFilter]);
 
-  // Fetch web products from Serper when category changes
+  // Fetch once on mount — all filtering is client-side so no re-fetch per category
   useEffect(() => {
     if (!user) return;
-
-    const cacheKey = categoryFilter;
-    if (webCache[cacheKey]) {
-      setWebProducts(webCache[cacheKey]);
-      return;
-    }
 
     let cancelled = false;
     setWebLoading(true);
@@ -114,12 +121,10 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
         ingredients: scanSourceProduct.ingredients.slice(0, 10),
       },
       { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-      categoryFilter !== 'all' ? categoryFilter : undefined,
     ).then((results) => {
       if (cancelled) return;
       if (results) {
         setWebProducts(results);
-        setWebCache(prev => ({ ...prev, [cacheKey]: results }));
       } else {
         setWebError(true);
         setWebProducts([]);
@@ -129,7 +134,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     });
 
     return () => { cancelled = true; };
-  }, [categoryFilter, user, scanSourceProduct, skinType, concerns, sensitivity]);
+  }, [user, scanSourceProduct, skinType, concerns, sensitivity]);
 
   return (
     <div className="mt-6 space-y-4">
@@ -145,7 +150,6 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {CATEGORY_OPTIONS.map(opt => {
           const count = countByCategory(webProducts, opt.value);
-          if (count === 0 && opt.value !== 'all' && !webLoading) return null;
           return (
             <button
               key={opt.value}

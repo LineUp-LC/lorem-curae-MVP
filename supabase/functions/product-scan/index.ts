@@ -30,29 +30,6 @@ const MAX_TOKENS_FULL = 8192;
 const MAX_IMAGE_SIZE_BYTES = 7 * 1024 * 1024;
 
 // ---------------------------------------------------------------------------
-// Product catalog — embedded for prompt injection into Claude Vision
-// ---------------------------------------------------------------------------
-
-const PRODUCT_CATALOG = [
-  { id: 1, name: 'Gentle Hydrating Cleanser', brand: 'Pure Essence', category: 'cleanser', upc: '850001001011', keyIngredients: ['Hyaluronic Acid', 'Ceramides', 'Glycerin'] },
-  { id: 2, name: 'Brightening Vitamin C Serum', brand: 'Glow Naturals', category: 'serum', upc: '850001001028', keyIngredients: ['Vitamin C', 'Ferulic Acid', 'Vitamin E'] },
-  { id: 3, name: 'Barrier Repair Moisturizer', brand: 'Skin Harmony', category: 'moisturizer', upc: '850001001035', keyIngredients: ['Ceramides', 'Niacinamide', 'Squalane'] },
-  { id: 4, name: 'Clear Skin Salicylic Acid Treatment', brand: 'Clarity Labs', category: 'treatment', upc: '850001001042', keyIngredients: ['Salicylic Acid', 'Niacinamide', 'Zinc'] },
-  { id: 5, name: 'Mineral Sunscreen SPF 50', brand: 'Sun Shield', category: 'sunscreen', upc: '850001001059', keyIngredients: ['Zinc Oxide', 'Titanium Dioxide', 'Vitamin E'] },
-  { id: 6, name: 'Retinol Night Renewal Serum', brand: 'Youth Restore', category: 'serum', upc: '850001001066', keyIngredients: ['Retinol', 'Peptides', 'Hyaluronic Acid'] },
-  { id: 7, name: 'Hydrating Clay Mask', brand: 'Earth Glow', category: 'mask', upc: '850001001073', keyIngredients: ['Kaolin Clay', 'Hyaluronic Acid', 'Aloe Vera'] },
-  { id: 8, name: 'Niacinamide Pore Refining Serum', brand: 'Pore Perfect', category: 'serum', upc: '850001001080', keyIngredients: ['Niacinamide', 'Zinc', 'Hyaluronic Acid'] },
-  { id: 9, name: 'Soothing Centella Cream', brand: 'Calm Skin Co.', category: 'moisturizer', upc: '850001001097', keyIngredients: ['Centella Asiatica', 'Ceramides', 'Panthenol'] },
-  { id: 10, name: 'Exfoliating AHA/BHA Toner', brand: 'Glow Labs', category: 'treatment', upc: '850001001103', keyIngredients: ['Glycolic Acid', 'Salicylic Acid', 'Witch Hazel'] },
-  { id: 11, name: 'Peptide Eye Cream', brand: 'Youth Restore', category: 'treatment', upc: '850001001110', keyIngredients: ['Peptides', 'Caffeine', 'Hyaluronic Acid'] },
-  { id: 12, name: 'Hydrating Gel Cleanser', brand: 'Fresh Start', category: 'cleanser', upc: '850001001127', keyIngredients: ['Hyaluronic Acid', 'Aloe Vera', 'Green Tea'] },
-];
-
-const CATALOG_TEXT = PRODUCT_CATALOG
-  .map(p => `${p.id}. "${p.name}" by ${p.brand} (${p.category}) — Key ingredients: ${p.keyIngredients.join(', ')}`)
-  .join('\n');
-
-// ---------------------------------------------------------------------------
 // System prompt builder
 // ---------------------------------------------------------------------------
 
@@ -70,10 +47,6 @@ INSTRUCTIONS:
 2. Common skincare brands: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy.
 3. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible, "low" if guessing.
 4. Do NOT parse ingredients — set ingredients to [] and ingredientCount to 0.
-
-CATALOG MATCHING:
-${CATALOG_TEXT}
-If the product matches one in our catalog, set match: true and include the productId. Most products won't match — set match: false.
 
 Respond ONLY with valid JSON (no markdown, no explanation):
 {"match":false,"confidence":"high","detectedProduct":"Product Name","detectedBrand":"Brand","detectedCategory":"serum","ingredients":[],"ingredientCount":0}`;
@@ -105,11 +78,6 @@ IDENTIFICATION INSTRUCTIONS:
 4. If the image is blurry or partially obscured, still attempt identification with confidence: "low". A low-confidence result with a brand name is more useful than null.
 5. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible or inferred from context, "low" if guessing from partial text or packaging shape alone.
 
-CATALOG MATCHING (optional bonus):
-Our internal product catalog:
-${CATALOG_TEXT}
-If the identified product matches one in our catalog, set match: true and include the productId. Most real-world products will NOT be in this catalog — set match: false and still provide full identification and ingredients.
-
 INGREDIENT PARSING INSTRUCTIONS:
 1. Read every ingredient visible on the product label (usually in the ingredients list / INCI list).
 2. For each ingredient provide:
@@ -126,10 +94,6 @@ INGREDIENT PARSING INSTRUCTIONS:
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
 
-For a catalog match with ingredients:
-{"match":true,"productId":1,"confidence":"high","detectedProduct":"Gentle Hydrating Cleanser","detectedBrand":"Pure Essence","detectedCategory":"cleanser","ingredients":[{"name":"Water","function":"base solvent","safetyTier":"safe","category":"Base/Solvent"},{"name":"Glycolic Acid","function":"exfoliates dead skin","safetyTier":"caution","category":"Active Exfoliant","cautionReason":"Can cause irritation and sun sensitivity at higher concentrations. Start at 5-8%, limit to 2-3 times per week, and always wear SPF."}],"ingredientCount":2}
-
-For no match with ingredients:
 {"match":false,"confidence":"medium","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum","ingredients":[{"name":"Niacinamide","function":"improves skin texture and tone","safetyTier":"safe","category":"Brightening"}],"ingredientCount":1}
 
 If the image does not show a skincare product:

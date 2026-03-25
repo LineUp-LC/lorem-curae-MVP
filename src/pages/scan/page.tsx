@@ -19,7 +19,7 @@ import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanCl
 import type { ScanClientError } from '../../lib/ai/scanClient';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { getScanHistory, addScanHistoryEntry, updateScanHistoryEntry } from '../../lib/utils/scanHistory';
-import { productData } from '../../mocks/products';
+import { getProductById } from '../../lib/data/products';
 import type { ScanResult, ScanHistoryEntry } from '../../types/scan';
 import type { Product } from '../../types/product';
 import NeuralBloomIcon from '../../components/icons/NeuralBloomIcon';
@@ -105,7 +105,7 @@ export default function ScanPage() {
     setCapturedBase64(response.imageBase64);
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
-      matchedProduct = productData.find(p => p.id === result.productId);
+      matchedProduct = getProductById(result.productId) ?? undefined;
     }
 
     // Gamification: award scan points for ANY successful identification (non-blocking)
@@ -163,7 +163,7 @@ export default function ScanPage() {
     const result = entry.result;
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
-      matchedProduct = productData.find(p => p.id === result.productId);
+      matchedProduct = getProductById(result.productId) ?? undefined;
     }
     // Restore imageBase64 for full scan re-trigger + cached fullScanResult for instant tabs
     setCapturedBase64(entry.imageBase64);
@@ -189,7 +189,7 @@ export default function ScanPage() {
     const result = response.result;
     let matchedProduct: Product | undefined;
     if (result.match && result.productId) {
-      matchedProduct = productData.find(p => p.id === result.productId);
+      matchedProduct = getProductById(result.productId) ?? undefined;
     }
 
     // Award scan points for any identification or UPC scan
