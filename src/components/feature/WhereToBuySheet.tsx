@@ -11,7 +11,7 @@ import {
 import RetailerCard from './RetailerCard';
 import RetailerReviews from './RetailerReviews';
 import RoutinePickerModal from './RoutinePickerModal';
-import { searchWhereToBuy, searchProductReviews, searchRetailerReviews } from '../../lib/api/productSearch';
+import { searchWhereToBuy, searchProductReviews } from '../../lib/api/productSearch';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../lib/auth/AuthContext';
 import {
@@ -102,9 +102,9 @@ export default function WhereToBuySheet({
     });
   }, [isOpen, user, productName, productBrand]);
 
-  // Fetch general Google reviews on first expand
+  // Fetch general Google reviews on sheet open (not on expand)
   useEffect(() => {
-    if (!googleReviewsOpen || !user) return;
+    if (!isOpen || !user) return;
     const reviewKey = `${productBrand}:${productName}`;
     if (googleReviewsFiredRef.current === reviewKey) return;
     googleReviewsFiredRef.current = reviewKey;
@@ -124,7 +124,7 @@ export default function WhereToBuySheet({
     }).finally(() => {
       setGoogleReviewsLoading(false);
     });
-  }, [googleReviewsOpen, user, productName, productBrand]);
+  }, [isOpen, user, productName, productBrand]);
 
   // Close on Escape
   useEffect(() => {
@@ -163,24 +163,6 @@ export default function WhereToBuySheet({
     () => buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns }),
     [allRetailerProducts, sortKey, freeShipping, freeReturns],
   );
-
-  // Pre-fetch reviews for the top retailer on open (warms session cache)
-  const preFetchedForRef = useRef<string | null>(null);
-  useEffect(() => {
-    if (!isOpen || listings.length === 0) return;
-    const topDomain = listings[0].domain;
-    if (preFetchedForRef.current === topDomain) return;
-    preFetchedForRef.current = topDomain;
-
-    const skinType = getEffectiveSkinType();
-    const concerns = getEffectiveConcerns();
-    const sensitivity = getEffectiveSensitivity();
-    const userProfile = skinType || concerns.length > 0 || sensitivity
-      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
-      : undefined;
-
-    searchRetailerReviews(productName, productBrand, topDomain, userProfile).catch(() => {});
-  }, [isOpen, listings, productName, productBrand]);
 
   const handleBuyClick = useCallback((listing: RetailerListing) => {
     onBuyIntent?.(listing);
@@ -355,6 +337,7 @@ export default function WhereToBuySheet({
                       listing={listing}
                       productName={productName}
                       productBrand={productBrand}
+                      webReviews={googleReviews ?? []}
                       onKeywordMatches={handleKeywordMatches}
                     />
                   )}

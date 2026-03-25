@@ -45,6 +45,9 @@ export function resetSearchSession(): void {
 // Core caller
 // ---------------------------------------------------------------------------
 
+/** Timeout for Edge Function calls (20s — generous for cold starts) */
+const FETCH_TIMEOUT_MS = 20_000;
+
 async function callProductSearch(body: WebSearchRequest): Promise<WebSearchResponse> {
   // Rate limit check
   if (sessionCallCount >= MAX_CALLS_PER_SESSION) {
@@ -56,71 +59,88 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
     };
   }
 
-  // Auth check — retry once after 1s if session not yet hydrated
-  let { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
-    await new Promise(r => setTimeout(r, 1000));
-    ({ data: { session } } = await supabase.auth.getSession());
-  }
-  if (!session?.access_token) {
-    console.warn('[WebSearch] Auth check failed — no session after retry');
-    return {
-      success: false,
-      type: body.type,
-      cached: false,
-      error: 'Authentication required',
-    };
-  }
-
-  // Build cache key from request params
-  const cacheKey = JSON.stringify(body);
-  const cached = sessionCache.get(cacheKey);
-  if (cached) {
-    return { ...cached, cached: true };
-  }
-
-  // Call Edge Function
-  sessionCallCount++;
-
   try {
-    console.log('[WebSearch] Calling Edge Function:', PRODUCT_SEARCH_URL, 'body:', JSON.stringify(body));
-    const response = await fetch(PRODUCT_SEARCH_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
-      },
-      body: JSON.stringify(body),
-    });
-
-    console.log('[WebSearch] Response status:', response.status, 'ok:', response.ok);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[productSearch] Edge Function error:', response.status, errorText);
-
-      // Don't count auth failures against rate limit
-      if (response.status === 401) sessionCallCount--;
-
+    // Auth check — retry once after 1s if session not yet hydrated
+    let { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      await new Promise(r => setTimeout(r, 1000));
+      ({ data: { session } } = await supabase.auth.getSession());
+    }
+    if (!session?.access_token) {
+      console.warn('[WebSearch] Auth check failed — no session after retry');
       return {
         success: false,
         type: body.type,
         cached: false,
-        error: `Search failed (${response.status})`,
+        error: 'Authentication required',
       };
     }
 
-    const data: WebSearchResponse = await response.json();
-    console.log('[WebSearch] Parsed response:', JSON.stringify(data).substring(0, 500));
-
-    // Cache successful results
-    if (data.success) {
-      sessionCache.set(cacheKey, data);
+    // Build cache key from request params
+    const cacheKey = JSON.stringify(body);
+    const cached = sessionCache.get(cacheKey);
+    if (cached) {
+      return { ...cached, cached: true };
     }
 
-    return data;
+    // Call Edge Function with timeout
+    sessionCallCount++;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+    try {
+      console.log('[WebSearch] Calling Edge Function:', PRODUCT_SEARCH_URL, 'body:', JSON.stringify(body));
+      const response = await fetch(PRODUCT_SEARCH_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify(body),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+      console.log('[WebSearch] Response status:', response.status, 'ok:', response.ok);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('[productSearch] Edge Function error:', response.status, errorText);
+
+        // Don't count auth failures against rate limit
+        if (response.status === 401) sessionCallCount--;
+
+        return {
+          success: false,
+          type: body.type,
+          cached: false,
+          error: `Search failed (${response.status})`,
+        };
+      }
+
+      const data: WebSearchResponse = await response.json();
+      console.log('[WebSearch] Parsed response:', JSON.stringify(data).substring(0, 500));
+
+      // Cache successful results
+      if (data.success) {
+        sessionCache.set(cacheKey, data);
+      }
+
+      return data;
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      const isTimeout = fetchError instanceof DOMException && fetchError.name === 'AbortError';
+      console.error('[productSearch]', isTimeout ? 'Request timed out' : 'Network error:', fetchError);
+      return {
+        success: false,
+        type: body.type,
+        cached: false,
+        error: isTimeout ? 'Search timed out — try again' : 'Search service unavailable',
+      };
+    }
   } catch (error) {
-    console.error('[productSearch] Network error:', error);
+    console.error('[productSearch] Unexpected error:', error);
     return {
       success: false,
       type: body.type,

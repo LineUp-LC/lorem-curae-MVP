@@ -1,10 +1,10 @@
 // src/components/feature/RetailerReviews.tsx
 // Per-retailer keyword-matched reviews with lazy AI summary.
+// Receives pre-fetched web reviews from parent — filters by domain client-side.
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import type { WebReview } from '../../types/webSearch';
 import type { RetailerListing } from '../../types/retailerDirectory';
-import { searchRetailerReviews } from '../../lib/api/productSearch';
 import { buildAIContext } from '../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
 import {
@@ -19,6 +19,8 @@ interface RetailerReviewsProps {
   listing: RetailerListing;
   productName: string;
   productBrand: string;
+  /** Pre-fetched general web reviews (from parent) */
+  webReviews: WebReview[];
   onKeywordMatches?: (domain: string, matches: KeywordMatch[], totalReviews: number) => void;
 }
 
@@ -52,71 +54,54 @@ export default function RetailerReviews({
   listing,
   productName,
   productBrand,
+  webReviews,
   onKeywordMatches,
 }: RetailerReviewsProps) {
-  const [reviews, setReviews] = useState<WebReview[] | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [keywordMatches, setKeywordMatches] = useState<KeywordMatch[]>([]);
-  const fetchedRef = useRef(false);
+  const cancelledRef = useRef(false);
+  const aiTriggeredRef = useRef(false);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { cancelledRef.current = true; };
+  }, []);
 
   const skinType = getEffectiveSkinType();
   const concerns = getEffectiveConcerns();
   const sensitivity = getEffectiveSensitivity();
 
-  // Fetch reviews on mount (lazy — only when this component is rendered)
-  useEffect(() => {
-    if (fetchedRef.current) return;
-    fetchedRef.current = true;
+  // Filter reviews: domain-matching first, then all reviews as fallback
+  const reviews = useMemo(() => {
+    const filtered = webReviews.filter(r => !isProductDescription(r.content));
+    const domainMatches = filtered.filter(
+      r => r.sourceDomain?.toLowerCase().includes(listing.domain.toLowerCase()),
+    );
+    return domainMatches.length > 0 ? domainMatches : filtered;
+  }, [webReviews, listing.domain]);
 
-    let cancelled = false;
-
-    async function fetchReviews() {
-      setLoading(true);
-      setError(null);
-
-      const userProfile = skinType || concerns.length > 0 || sensitivity
-        ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
-        : undefined;
-
-      const result = await searchRetailerReviews(
-        productName,
-        productBrand,
-        listing.domain,
-        userProfile,
-      );
-
-      if (cancelled) return;
-
-      if (!result) {
-        setError('Could not load reviews for this retailer.');
-        setLoading(false);
-        return;
-      }
-
-      // Filter out product page descriptions masquerading as reviews
-      const filtered = result.filter(r => !isProductDescription(r.content));
-      setReviews(filtered);
-
-      // Compute keyword matches from review text
-      const matches = computeKeywordMatches(filtered);
-      setKeywordMatches(matches);
-      onKeywordMatches?.(listing.domain, matches, filtered.length);
-
-      setLoading(false);
-
-      // Auto-trigger AI summary if we have reviews + user profile
-      if (result.length > 0 && (skinType || concerns.length > 0)) {
-        generateAiSummary(result, matches).catch(() => {});
-      }
-    }
-
-    fetchReviews();
-    return () => { cancelled = true; };
+  // Compute keyword matches from filtered reviews
+  const keywordMatches = useMemo(() => {
+    return computeKeywordMatches(reviews);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listing.domain, productName, productBrand, skinType, concerns, sensitivity]);
+  }, [reviews, skinType, concerns, sensitivity]);
+
+  // Notify parent of keyword matches
+  useEffect(() => {
+    if (reviews.length > 0 && keywordMatches.length > 0) {
+      onKeywordMatches?.(listing.domain, keywordMatches, reviews.length);
+    }
+  }, [listing.domain, keywordMatches, reviews.length, onKeywordMatches]);
+
+  // Auto-trigger AI summary once if we have reviews + user profile
+  useEffect(() => {
+    if (aiTriggeredRef.current) return;
+    if (reviews.length > 0 && (skinType || concerns.length > 0)) {
+      aiTriggeredRef.current = true;
+      generateAiSummary(reviews, keywordMatches).catch(() => {});
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reviews.length, skinType, concerns.length]);
 
   function computeKeywordMatches(webReviews: WebReview[]): KeywordMatch[] {
     const terms: string[] = [];
@@ -140,7 +125,7 @@ export default function RetailerReviews({
     return matches.sort((a, b) => b.count - a.count);
   }
 
-  async function generateAiSummary(webReviews: WebReview[], matches: KeywordMatch[]) {
+  async function generateAiSummary(summaryReviews: WebReview[], matches: KeywordMatch[]) {
     setAiLoading(true);
     try {
       console.log('[RetailerReviews] AI summary call starting for', listing.retailerName);
@@ -157,7 +142,7 @@ export default function RetailerReviews({
             productBrand,
             retailerName: listing.retailerName,
             retailerDomain: listing.domain,
-            reviews: webReviews.slice(0, 8).map(r => ({
+            reviews: summaryReviews.slice(0, 8).map(r => ({
               content: r.content,
               sourceTitle: r.sourceTitle,
               relevanceScore: r.relevanceScore,
@@ -170,6 +155,7 @@ export default function RetailerReviews({
       })();
 
       const result = await Promise.race([aiPromise, timeoutPromise]);
+      if (cancelledRef.current) return;
       console.log('[RetailerReviews] AI summary result:', result.success, result.insight?.substring(0, 50));
       if (result.success && result.insight) {
         setAiSummary(result.insight);
@@ -189,35 +175,10 @@ export default function RetailerReviews({
     highlightSentiment: true,
   };
 
-  if (loading) {
-    return (
-      <div className="border-t border-blush/50 bg-cream/30 px-4 py-3 space-y-2">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="p-2.5 rounded-lg bg-white border border-blush/30 animate-pulse">
-            <div className="h-3 bg-blush/40 rounded w-full mb-2" />
-            <div className="h-3 bg-blush/30 rounded w-3/4 mb-2" />
-            <div className="flex items-center justify-between mt-1.5">
-              <div className="h-2 bg-blush/20 rounded w-16" />
-              <div className="h-2 bg-blush/20 rounded w-20" />
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  if (error) {
+  if (reviews.length === 0) {
     return (
       <div className="px-4 py-3 text-xs text-warm-gray text-center">
-        {error}
-      </div>
-    );
-  }
-
-  if (!reviews || reviews.length === 0) {
-    return (
-      <div className="px-4 py-3 text-xs text-warm-gray text-center">
-        No reviews found on {listing.retailerName} for this product.
+        No web reviews available for this product yet.
       </div>
     );
   }
@@ -290,7 +251,7 @@ export default function RetailerReviews({
 
         {reviews.length > 5 && (
           <p className="text-[10px] text-warm-gray text-center pt-1">
-            +{reviews.length - 5} more review snippets on {listing.retailerName}
+            +{reviews.length - 5} more review snippets
           </p>
         )}
       </div>
