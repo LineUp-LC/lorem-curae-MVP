@@ -42,11 +42,17 @@ const THUMBNAIL_QUALITY = 0.5;
 function loadImage(file: File | Blob): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    const timeout = setTimeout(() => {
+      URL.revokeObjectURL(img.src);
+      reject(new Error('Image load timed out'));
+    }, 10_000);
     img.onload = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(img.src);
       resolve(img);
     };
     img.onerror = () => {
+      clearTimeout(timeout);
       URL.revokeObjectURL(img.src);
       reject(new Error('Failed to load image'));
     };

@@ -26,8 +26,8 @@ const PRODUCT_SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pr
 /** Max Serper calls per scan session (client-side enforcement) */
 const MAX_CALLS_PER_SESSION = 10;
 
-/** Call types exempt from session rate limiting (Where to Buy + general reviews) */
-const RATE_LIMIT_EXEMPT: ReadonlySet<string> = new Set(['buy', 'reviews']);
+/** Call types exempt from session rate limiting (Where to Buy + reviews) */
+const RATE_LIMIT_EXEMPT: ReadonlySet<string> = new Set(['buy', 'reviews', 'retailer_reviews']);
 
 // ---------------------------------------------------------------------------
 // Session-level state

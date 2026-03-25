@@ -236,6 +236,7 @@ async function callClaudeVision(
       if (parsed.match && parsed.productId) {
         const inCatalog = PRODUCT_CATALOG.some(p => p.id === parsed.productId);
         if (!inCatalog) {
+          console.warn(`[Product-Scan] Claude hallucinated product ID ${parsed.productId} (not in catalog) — demoting to no-match`);
           parsed.match = false;
           parsed.productId = undefined;
         }

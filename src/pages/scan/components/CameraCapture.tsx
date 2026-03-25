@@ -68,6 +68,7 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
   const [mode, setMode] = useState<'photo' | 'barcode'>('photo');
   const [barcodeScanning, setBarcodeScanning] = useState(false);
   const [barcodeNotFound, setBarcodeNotFound] = useState(false);
+  const videoRestartCount = useRef(0);
 
   // Ref callback — wires stream to video element immediately on mount
   const videoRefCallback = useCallback((videoEl: HTMLVideoElement | null) => {
@@ -344,9 +345,18 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
             onLoadedMetadata={() => {
               const v = videoRef.current;
               if (v && (v.videoWidth === 0 || v.videoHeight === 0)) {
-                console.warn('[Camera] Video dimensions 0x0, restarting stream');
+                if (videoRestartCount.current >= 2) {
+                  console.warn('[Camera] Video dimensions 0x0 after 2 retries, giving up');
+                  setWebcamError('Camera returned invalid video. Try uploading a photo instead.');
+                  stopWebcam();
+                  return;
+                }
+                videoRestartCount.current++;
+                console.warn('[Camera] Video dimensions 0x0, restarting stream (attempt', videoRestartCount.current, ')');
                 stopWebcam();
                 setTimeout(startWebcam, 500);
+              } else {
+                videoRestartCount.current = 0;
               }
             }}
           />
@@ -411,7 +421,7 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
           )}
 
           {/* Retry scan — barcode mode when timed out */}
-          {mode === 'barcode' && barcodeNotFound && (
+          {mode === 'barcode' && barcodeNotFound && !webcamError && (
             <button
               onClick={() => {
                 setBarcodeNotFound(false);
@@ -423,6 +433,16 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
               className="px-4 py-2 text-sm font-medium text-white bg-primary rounded-xl hover:bg-dark transition-colors"
             >
               Retry
+            </button>
+          )}
+
+          {/* Switch to photo mode when barcode webcam fails */}
+          {mode === 'barcode' && webcamError && (
+            <button
+              onClick={() => { setMode('photo'); setWebcamError(null); setBarcodeNotFound(false); stopWebcam(); }}
+              className="px-4 py-2 text-sm font-medium text-primary border border-primary/30 rounded-xl hover:bg-primary/5 transition-colors"
+            >
+              Switch to Photo
             </button>
           )}
 
@@ -443,7 +463,9 @@ export default function CameraCapture({ onCapture, onBarcodeDetected, disabled }
         <p className="text-xs text-warm-gray">
           {mode === 'photo'
             ? 'Position the product label in frame'
-            : 'Hold the barcode steady in frame'}
+            : webcamError
+              ? 'Camera unavailable — upload a photo or switch modes'
+              : 'Hold the barcode steady in frame'}
         </p>
       </div>
     );

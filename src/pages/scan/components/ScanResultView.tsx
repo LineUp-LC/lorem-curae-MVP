@@ -444,6 +444,7 @@ export default function ScanResultView({
   // Tab 3 (Similar) cache
   const [similarProducts, setSimilarProducts] = useState<WebProduct[] | null>(null);
   const [similarLoading, setSimilarLoading] = useState(false);
+  const [similarError, setSimilarError] = useState(false);
 
   // Where to Buy sheet
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
@@ -691,7 +692,7 @@ export default function ScanResultView({
     }
 
     // Tab 3: Similar — web search only
-    if (tab === 'similar' && !similarProducts) {
+    if (tab === 'similar' && !similarProducts && !similarError) {
       const sourceProduct = matchedProduct || buildTempProduct();
       if (sourceProduct && user) {
         setSimilarLoading(true);
@@ -704,7 +705,13 @@ export default function ScanResultView({
           }),
           minDisplay,
         ]).then(([results]) => {
-          setSimilarProducts(results || []);
+          if (results) {
+            setSimilarProducts(results);
+          } else {
+            setSimilarError(true);
+          }
+        }).catch(() => {
+          setSimilarError(true);
         }).finally(() => setSimilarLoading(false));
       } else {
         setSimilarProducts([]);
@@ -1026,7 +1033,22 @@ export default function ScanResultView({
           {/* Tab 3: Similar */}
           {activeTab === 'similar' && (
             <>
-              {(similarProducts === null || similarLoading) ? (
+              {similarLoading ? (
+                <PersonalizingLoader
+                  steps={['Searching for alternatives...', 'Comparing formulations...']}
+                  icon="search"
+                />
+              ) : similarError ? (
+                <div className="text-center py-4">
+                  <p className="text-xs text-warm-gray">Web search unavailable. Try again later.</p>
+                  <button
+                    onClick={() => { setSimilarError(false); setSimilarProducts(null); handleTabTap('similar'); }}
+                    className="mt-2 text-xs text-primary hover:text-dark transition-colors cursor-pointer"
+                  >
+                    Retry
+                  </button>
+                </div>
+              ) : similarProducts === null ? (
                 <PersonalizingLoader
                   steps={['Searching for alternatives...', 'Comparing formulations...']}
                   icon="search"
