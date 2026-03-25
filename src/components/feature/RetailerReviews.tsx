@@ -59,6 +59,7 @@ export default function RetailerReviews({
 }: RetailerReviewsProps) {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const cancelledRef = useRef(false);
   const aiTriggeredRef = useRef(false);
 
@@ -71,13 +72,16 @@ export default function RetailerReviews({
   const concerns = getEffectiveConcerns();
   const sensitivity = getEffectiveSensitivity();
 
-  // Filter reviews: domain-matching first, then all reviews as fallback
+  // Filter reviews: domain-specific only — no fallback to unrelated sources.
+  // Match exact domain or subdomain (e.g. "www.sephora.com") but not partial
+  // strings (e.g. "targetnews.com" must not match "target.com").
   const reviews = useMemo(() => {
+    const domain = listing.domain.toLowerCase();
     const filtered = webReviews.filter(r => !isProductDescription(r.content));
-    const domainMatches = filtered.filter(
-      r => r.sourceDomain?.toLowerCase().includes(listing.domain.toLowerCase()),
-    );
-    return domainMatches.length > 0 ? domainMatches : filtered;
+    return filtered.filter(r => {
+      const src = r.sourceDomain?.toLowerCase() ?? '';
+      return src === domain || src.endsWith(`.${domain}`);
+    });
   }, [webReviews, listing.domain]);
 
   // Compute keyword matches from filtered reviews
@@ -178,7 +182,7 @@ export default function RetailerReviews({
   if (reviews.length === 0) {
     return (
       <div className="px-4 py-3 text-xs text-warm-gray text-center">
-        No web reviews available for this product yet.
+        No {listing.retailerName} reviews found in web results.
       </div>
     );
   }
@@ -223,7 +227,7 @@ export default function RetailerReviews({
 
       {/* Review snippets */}
       <div className="px-4 py-3 space-y-2">
-        {reviews.slice(0, 5).map((review, i) => (
+        {(showAll ? reviews : reviews.slice(0, 5)).map((review, i) => (
           <div key={i} className="p-2.5 rounded-lg bg-white border border-blush/30">
             <div className="flex items-start justify-between gap-2">
               <p className="text-xs text-warm-gray leading-relaxed flex-1">
@@ -249,10 +253,21 @@ export default function RetailerReviews({
           </div>
         ))}
 
-        {reviews.length > 5 && (
-          <p className="text-[10px] text-warm-gray text-center pt-1">
-            +{reviews.length - 5} more review snippets
-          </p>
+        {!showAll && reviews.length > 5 && (
+          <button
+            onClick={() => setShowAll(true)}
+            className="w-full text-[10px] text-primary hover:text-dark transition-colors text-center pt-1 cursor-pointer"
+          >
+            +{reviews.length - 5} more review snippets <i className="ri-arrow-down-s-line" />
+          </button>
+        )}
+        {showAll && (
+          <button
+            onClick={() => setShowAll(false)}
+            className="w-full text-[10px] text-warm-gray hover:text-deep transition-colors text-center pt-1 cursor-pointer"
+          >
+            Show less <i className="ri-arrow-up-s-line" />
+          </button>
         )}
       </div>
     </div>
