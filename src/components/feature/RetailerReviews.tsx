@@ -131,7 +131,7 @@ export default function RetailerReviews({
       console.log('[RetailerReviews] AI summary call starting for', listing.retailerName);
 
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('AI summary timeout')), 15000),
+        setTimeout(() => reject(new Error('AI summary timeout')), 25000),
       );
 
       const aiPromise = (async () => {

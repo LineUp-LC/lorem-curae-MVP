@@ -5,7 +5,7 @@
  * routine builder, comparison, etc.). Optimised for compact 1-4 sentence
  * responses with lower token limits than the full chat function.
  *
- * Model: Claude Sonnet 4.5 (claude-sonnet-4-5-20250929)
+ * Models: Sonnet 4.5 (reasoning modes) / Haiku 4.5 (lightweight summary modes)
  * Auth: Required — unauthenticated users receive rule-based fallback on the
  *       client side and never reach this function.
  */
@@ -24,7 +24,16 @@ const corsHeaders = {
 };
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const ANTHROPIC_MODEL = 'claude-sonnet-4-5-20250929';
+const ANTHROPIC_MODEL_SONNET = 'claude-sonnet-4-5-20250929';
+const ANTHROPIC_MODEL_HAIKU = 'claude-haiku-4-5-20251001';
+
+// Lightweight summarization modes routed to Haiku — faster + cheaper.
+// All other modes use Sonnet for reasoning quality.
+const HAIKU_MODES = new Set([
+  'retailer_review_summary',
+  'curated_review_summary',
+  'natural_discovery',
+]);
 
 // Mode-specific token budgets — tuned for 1-4 sentence compact responses.
 // Lower limits = faster generation (less time waiting for output tokens).
@@ -107,6 +116,7 @@ async function callClaude(
   systemPrompt: string,
   userMessage: string,
   maxTokens: number,
+  model: string,
 ): Promise<{ success: true; text: string; tokensUsed: number } | { success: false; error: string }> {
   const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
@@ -124,7 +134,7 @@ async function callClaude(
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: ANTHROPIC_MODEL,
+        model,
         max_tokens: maxTokens,
         system: systemPrompt,
         messages: [{ role: 'user', content: userMessage }],
@@ -223,11 +233,12 @@ serve(async (req: Request) => {
       body.message ||
       `Analyze this ${body.mode.replace(/_/g, ' ')} context and provide a concise insight.`;
 
-    // Get token limit for this mode
+    // Get token limit and model for this mode
     const maxTokens = MODE_MAX_TOKENS[body.mode] ?? 1024;
+    const model = HAIKU_MODES.has(body.mode) ? ANTHROPIC_MODEL_HAIKU : ANTHROPIC_MODEL_SONNET;
 
     // Call Claude
-    const result = await callClaude(body.systemPrompt, userMessage, maxTokens);
+    const result = await callClaude(body.systemPrompt, userMessage, maxTokens, model);
 
     if (!result.success) {
       const errorResponse: AIInsightResponse = {
