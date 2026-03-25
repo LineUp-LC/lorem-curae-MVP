@@ -16,6 +16,7 @@ import { useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../lib/auth/AuthContext';
 import { scanProduct, scanByUpc, createScanThumbnail } from '../../lib/ai/scanClient';
+import { resetSearchSession } from '../../lib/api/productSearch';
 import type { ScanClientError } from '../../lib/ai/scanClient';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { getScanHistory, addScanHistoryEntry, updateScanHistoryEntry } from '../../lib/utils/scanHistory';
@@ -88,6 +89,9 @@ export default function ScanPage() {
 
   const handleIdentify = useCallback(async () => {
     if (state.phase !== 'captured') return;
+
+    // Reset Serper session counter for new scan
+    resetSearchSession();
 
     const { file, previewUrl } = state;
     setState({ phase: 'processing', previewUrl, file });
@@ -175,6 +179,7 @@ export default function ScanPage() {
   }, []);
 
   const handleBarcodeDetected = useCallback(async (upc: string) => {
+    resetSearchSession();
     setState({ phase: 'processing', previewUrl: '' });
 
     const response = await scanByUpc(upc);

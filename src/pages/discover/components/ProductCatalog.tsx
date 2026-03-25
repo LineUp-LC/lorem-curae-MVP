@@ -471,6 +471,19 @@ export default function ProductCatalog({
               : 'opacity-0 scale-95 -translate-y-1 pointer-events-none'
             }
           `}>
+            <div className="flex items-center gap-2 mb-2 pb-2 border-b border-blush/30">
+              <button
+                onClick={() => setIsIngredientsOpen(false)}
+                className="flex items-center justify-center w-6 h-6 rounded-full hover:bg-cream transition-colors cursor-pointer"
+                aria-label="Close ingredient filter"
+              >
+                <i className="ri-arrow-left-s-line text-base text-warm-gray" />
+              </button>
+              <span className="text-xs font-medium text-deep">Ingredients</span>
+              {selectedIngredients.length > 0 && (
+                <span className="text-[10px] text-primary bg-primary/10 px-1.5 py-0.5 rounded-full">{selectedIngredients.length} selected</span>
+              )}
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {sortedIngredientOptions.map((option) => {
                 const isActive = selectedIngredients.includes(option.slug);

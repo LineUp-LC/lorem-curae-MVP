@@ -5,7 +5,7 @@
  * Three functions: compatible products, similar products, reviews.
  *
  * - Auth required (guest users get null — caller should fall back to local catalog)
- * - Client-side rate limiting: max 10 calls per scan session
+ * - Client-side rate limiting: max 10 calls per scan session (buy + reviews exempt)
  * - Results cached in-memory per session (no localStorage)
  */
 
@@ -25,6 +25,9 @@ const PRODUCT_SEARCH_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/pr
 
 /** Max Serper calls per scan session (client-side enforcement) */
 const MAX_CALLS_PER_SESSION = 10;
+
+/** Call types exempt from session rate limiting (Where to Buy + general reviews) */
+const RATE_LIMIT_EXEMPT: ReadonlySet<string> = new Set(['buy', 'reviews']);
 
 // ---------------------------------------------------------------------------
 // Session-level state
@@ -49,8 +52,10 @@ export function resetSearchSession(): void {
 const FETCH_TIMEOUT_MS = 20_000;
 
 async function callProductSearch(body: WebSearchRequest): Promise<WebSearchResponse> {
-  // Rate limit check
-  if (sessionCallCount >= MAX_CALLS_PER_SESSION) {
+  const isExempt = RATE_LIMIT_EXEMPT.has(body.type);
+
+  // Rate limit check (buy + reviews calls are exempt)
+  if (!isExempt && sessionCallCount >= MAX_CALLS_PER_SESSION) {
     return {
       success: false,
       type: body.type,
@@ -84,7 +89,7 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
     }
 
     // Call Edge Function with timeout
-    sessionCallCount++;
+    if (!isExempt) sessionCallCount++;
 
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
@@ -109,7 +114,7 @@ async function callProductSearch(body: WebSearchRequest): Promise<WebSearchRespo
         console.error('[productSearch] Edge Function error:', response.status, errorText);
 
         // Don't count auth failures against rate limit
-        if (response.status === 401) sessionCallCount--;
+        if (response.status === 401 && !isExempt) sessionCallCount--;
 
         return {
           success: false,
