@@ -19,7 +19,7 @@ export default function RetailerCard({
   reviewsExpanded,
   keywordSummary,
 }: RetailerCardProps) {
-  const { retailerName, domain, price, url, knownRetailer, trustBadges, bestForYouScore } = listing;
+  const { retailerName, domain, price, url, knownRetailer, trustBadges, bestForYouScore, inStock } = listing;
 
   const priceDisplay = price > 0 ? `$${price.toFixed(2)}` : 'Check price';
   const returnDays = knownRetailer?.returnWindow ? parseInt(knownRetailer.returnWindow) : NaN;
@@ -52,6 +52,28 @@ export default function RetailerCard({
             {knownRetailer?.isCuraePartner && (
               <span className="px-1.5 py-0.5 text-[10px] font-medium bg-primary/15 text-primary rounded-full whitespace-nowrap">
                 Curae Partner
+              </span>
+            )}
+          </div>
+
+          {/* Stock status */}
+          <div className="mt-1">
+            {inStock === true && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-sage font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-sage" />
+                In Stock
+              </span>
+            )}
+            {inStock === false && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-warm-gray">
+                <span className="w-1.5 h-1.5 rounded-full bg-warm-gray/50" />
+                Out of Stock
+              </span>
+            )}
+            {inStock === undefined && (
+              <span className="inline-flex items-center gap-1 text-[10px] text-warm-gray/70">
+                <span className="w-1.5 h-1.5 rounded-full bg-blush" />
+                Check availability
               </span>
             )}
           </div>

@@ -47,4 +47,6 @@ export interface RetailerListing {
   knownRetailer: KnownRetailer | null;
   trustBadges: TrustBadge[];
   bestForYouScore: number;
+  /** Stock status: true = in stock, false = out of stock, undefined = unknown */
+  inStock?: boolean;
 }

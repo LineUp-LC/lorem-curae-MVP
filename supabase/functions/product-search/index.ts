@@ -69,6 +69,7 @@ interface WebProduct {
   merchant: string;
   category: string;
   source: 'web';
+  inStock?: boolean;
 }
 
 interface WebReview {
@@ -282,7 +283,7 @@ function buildBuyQuery(req: SearchRequest): string {
   const product = req.productName || req.scannedProduct?.name || '';
   const brand = req.productBrand || req.scannedProduct?.brand || '';
   const query = `${brand} ${product}`.trim();
-  return query || 'skincare product';
+  return query ? `buy ${query}` : 'buy skincare product';
 }
 
 function buildRetailerReviewQuery(req: SearchRequest): string {
@@ -361,6 +362,23 @@ async function callSerperSearch(
 }
 
 // ---------------------------------------------------------------------------
+// Utility: Infer stock status from Serper delivery field + title
+// ---------------------------------------------------------------------------
+
+const OUT_OF_STOCK_PATTERNS = /\b(out of stock|sold out|unavailable|discontinued|back\s*order)\b/i;
+
+function inferStockStatus(delivery?: string, title?: string): boolean | undefined {
+  // Check title for explicit out-of-stock signals (e.g. "Sold Out" in product title)
+  if (title && OUT_OF_STOCK_PATTERNS.test(title)) return false;
+  if (!delivery) return undefined;
+  // Check delivery field for out-of-stock signals
+  if (OUT_OF_STOCK_PATTERNS.test(delivery)) return false;
+  // Delivery field contains price, date, or "free" → in stock
+  if (/(\$|free|delivery|shipping|\d+\s*(day|business))/i.test(delivery)) return true;
+  return undefined; // unknown
+}
+
+// ---------------------------------------------------------------------------
 // Result mappers
 // ---------------------------------------------------------------------------
 
@@ -375,6 +393,7 @@ function mapShoppingResults(
     .map(item => {
       const title = String(item.title || '');
       const merchant = String(item.source || '');
+      const delivery = item.delivery ? String(item.delivery) : undefined;
 
       return {
         name: cleanProductTitle(title),
@@ -387,6 +406,7 @@ function mapShoppingResults(
         merchant,
         category: category ?? inferCategoryFromTitle(title),
         source: 'web' as const,
+        inStock: inferStockStatus(delivery, title),
       };
     })
     .filter(p => p.name.length > 0);
@@ -560,7 +580,7 @@ async function upsertProductsFromShopping(
 
         if (rErr || !retailerRow) { failed++; continue; }
 
-        // Upsert retailer price
+        // Upsert retailer price (use parsed stock status, default true for unknown)
         await supabase
           .from('retailer_prices')
           .upsert(
@@ -570,7 +590,7 @@ async function upsertProductsFromShopping(
               price: wp.price || 0,
               shipping_cost: 0,
               total_price: wp.price || 0,
-              in_stock: true,
+              in_stock: wp.inStock ?? true,
               url: wp.externalUrl || '',
               source: 'serper',
               source_query: query,

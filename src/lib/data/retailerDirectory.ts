@@ -197,6 +197,90 @@ const KNOWN_RETAILERS: Record<string, KnownRetailer> = {
     isCuraePartner: false,
     lastUpdated: '2026-03-23',
   },
+  'boots.com': {
+    name: 'Boots',
+    domain: 'boots.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=boots.com&sz=32',
+    trustpilotScore: 1.5,
+    trustpilotReviewCount: 15000,
+    shippingEstimate: '3-7 days',
+    freeShippingThreshold: 25,
+    freeReturns: true,
+    returnWindow: '35 days',
+    skincareSpecialist: true,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
+  'lookfantastic.com': {
+    name: 'Lookfantastic',
+    domain: 'lookfantastic.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=lookfantastic.com&sz=32',
+    trustpilotScore: 3.3,
+    trustpilotReviewCount: 55000,
+    shippingEstimate: '3-7 days',
+    freeShippingThreshold: 40,
+    freeReturns: true,
+    returnWindow: '30 days',
+    skincareSpecialist: true,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
+  'bluemercury.com': {
+    name: 'Bluemercury',
+    domain: 'bluemercury.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=bluemercury.com&sz=32',
+    trustpilotScore: 2.1,
+    trustpilotReviewCount: 1200,
+    shippingEstimate: '3-7 days',
+    freeShippingThreshold: 50,
+    freeReturns: true,
+    returnWindow: '60 days',
+    skincareSpecialist: true,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
+  'spacenk.com': {
+    name: 'Space NK',
+    domain: 'spacenk.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=spacenk.com&sz=32',
+    trustpilotScore: 1.8,
+    trustpilotReviewCount: 4500,
+    shippingEstimate: '3-7 days',
+    freeShippingThreshold: 50,
+    freeReturns: true,
+    returnWindow: '28 days',
+    skincareSpecialist: true,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
+  'beautylish.com': {
+    name: 'Beautylish',
+    domain: 'beautylish.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=beautylish.com&sz=32',
+    trustpilotScore: 4.0,
+    trustpilotReviewCount: 3200,
+    shippingEstimate: '3-7 days',
+    freeShippingThreshold: 35,
+    freeReturns: true,
+    returnWindow: '30 days',
+    skincareSpecialist: true,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
+  'revolve.com': {
+    name: 'Revolve',
+    domain: 'revolve.com',
+    faviconUrl: 'https://www.google.com/s2/favicons?domain=revolve.com&sz=32',
+    trustpilotScore: 1.5,
+    trustpilotReviewCount: 9800,
+    shippingEstimate: '2-5 days',
+    freeShippingThreshold: 0,
+    freeReturns: true,
+    returnWindow: '30 days',
+    skincareSpecialist: false,
+    isCuraePartner: false,
+    lastUpdated: '2026-03-25',
+  },
 };
 
 // ---------------------------------------------------------------------------
@@ -578,6 +662,7 @@ export function buildRetailerListings(
       knownRetailer: known,
       trustBadges: badges,
       bestForYouScore: score,
+      inStock: wp.inStock,
     };
   });
 
@@ -617,6 +702,13 @@ export function buildRetailerListings(
       break;
     }
   }
+
+  // Stable sort: in-stock first, then out-of-stock/unknown (preserves sort order within groups)
+  listings.sort((a, b) => {
+    const aStock = a.inStock === false ? 1 : 0;
+    const bStock = b.inStock === false ? 1 : 0;
+    return aStock - bStock;
+  });
 
   // Curae partners pinned first regardless of sort
   const partners = listings.filter(l => l.knownRetailer?.isCuraePartner);

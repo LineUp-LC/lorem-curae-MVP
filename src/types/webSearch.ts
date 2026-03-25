@@ -99,6 +99,8 @@ export interface WebProduct {
   category: string;
   /** Always 'web' — distinguishes from catalog products */
   source: 'web';
+  /** Stock status: true = in stock, false = out of stock, undefined = unknown */
+  inStock?: boolean;
 }
 
 /** A review snippet found via Google Search. */
