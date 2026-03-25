@@ -24,7 +24,7 @@ export type TrustBadgeType =
   | 'free-shipping'
   | 'free-returns'
   | 'easy-returns'
-  | 'skincare-specialist'
+  | 'beauty-authority'
   | 'curae-partner';
 
 export interface TrustBadge {

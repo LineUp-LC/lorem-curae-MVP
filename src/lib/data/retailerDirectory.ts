@@ -278,8 +278,8 @@ export function getTrustBadges(retailer: KnownRetailer): TrustBadge[] {
 
   if (retailer.skincareSpecialist) {
     badges.push({
-      type: 'skincare-specialist',
-      label: 'Skincare Specialist',
+      type: 'beauty-authority',
+      label: 'Beauty Authority',
       icon: 'ri-heart-pulse-line',
       colorClasses: 'bg-primary/10 text-primary',
     });
