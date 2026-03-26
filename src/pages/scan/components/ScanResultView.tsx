@@ -561,7 +561,7 @@ export default function ScanResultView({
     }
 
     counts['same-brand'] = similarProducts.filter(p => p.brand.toLowerCase() === scannedBrand).length;
-    counts['in-stock'] = similarProducts.filter(p => p.inStock === true).length;
+    counts['in-stock'] = similarProducts.filter(p => p.inStock !== false).length;
 
     return counts;
   }, [similarProducts, matchedProduct, result.detectedBrand]);
@@ -600,7 +600,7 @@ export default function ScanResultView({
       results = results.filter(p => p.brand.toLowerCase() === scannedBrand);
     }
     if (similarFilters.has('in-stock')) {
-      results = results.filter(p => p.inStock === true);
+      results = results.filter(p => p.inStock !== false);
     }
 
     // Sort (sort-style mode): mutually exclusive, so at most one is active
