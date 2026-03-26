@@ -57,6 +57,13 @@ interface ScanResultViewProps {
 
 type TabId = 'breakdown' | 'compatible' | 'similar';
 
+type SimilarFilterId =
+  | 'costs-less' | 'higher-rated' | 'more-reviews'
+  | 'best-price' | 'top-rated' | 'most-reviewed'
+  | 'same-brand' | 'in-stock';
+
+const SORT_STYLE_FILTERS: ReadonlySet<SimilarFilterId> = new Set(['best-price', 'top-rated', 'most-reviewed']);
+
 // ---------------------------------------------------------------------------
 // Safety badge
 // ---------------------------------------------------------------------------
@@ -446,6 +453,25 @@ export default function ScanResultView({
   const [similarLoading, setSimilarLoading] = useState(false);
   const [similarError, setSimilarError] = useState(false);
 
+  // Similar tab filters
+  const [similarFilters, setSimilarFilters] = useState<Set<SimilarFilterId>>(new Set());
+
+  const toggleSimilarFilter = (id: SimilarFilterId) => {
+    setSimilarFilters(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        // Sort-style filters are mutually exclusive — deselect siblings
+        if (SORT_STYLE_FILTERS.has(id)) {
+          for (const s of SORT_STYLE_FILTERS) next.delete(s);
+        }
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
   // Where to Buy sheet
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
@@ -496,6 +522,98 @@ export default function ScanResultView({
           category: result.detectedCategory,
         }
       : null;
+
+  // Similar tab: build available filter pills based on catalog match vs detected-only
+  const similarFilterOptions = useMemo(() => {
+    const isComparison = !!matchedProduct;
+    const filters: Array<{ id: SimilarFilterId; label: string; icon: string }> = [];
+
+    if (isComparison) {
+      if (matchedProduct.price > 0) filters.push({ id: 'costs-less', label: 'Costs Less', icon: 'ri-money-dollar-circle-line' });
+      if (matchedProduct.rating > 0) filters.push({ id: 'higher-rated', label: 'Higher Rated', icon: 'ri-star-line' });
+      if (matchedProduct.reviewCount > 0) filters.push({ id: 'more-reviews', label: 'More Reviews', icon: 'ri-chat-3-line' });
+    } else {
+      filters.push({ id: 'best-price', label: 'Best Price', icon: 'ri-money-dollar-circle-line' });
+      filters.push({ id: 'top-rated', label: 'Top Rated', icon: 'ri-star-line' });
+      filters.push({ id: 'most-reviewed', label: 'Most Reviewed', icon: 'ri-chat-3-line' });
+    }
+
+    filters.push({ id: 'same-brand', label: 'Same Brand', icon: 'ri-building-line' });
+    filters.push({ id: 'in-stock', label: 'In Stock', icon: 'ri-checkbox-circle-line' });
+
+    return filters;
+  }, [matchedProduct]);
+
+  // Similar tab: per-filter match counts (against unfiltered list)
+  const similarFilterCounts = useMemo(() => {
+    if (!similarProducts || similarProducts.length === 0) return {} as Record<SimilarFilterId, number>;
+    const scannedBrand = (matchedProduct?.brand || result.detectedBrand || '').toLowerCase();
+    const counts: Partial<Record<SimilarFilterId, number>> = {};
+
+    if (matchedProduct) {
+      if (matchedProduct.price > 0) counts['costs-less'] = similarProducts.filter(p => p.price > 0 && p.price < matchedProduct.price).length;
+      if (matchedProduct.rating > 0) counts['higher-rated'] = similarProducts.filter(p => p.rating > 0 && p.rating > matchedProduct.rating).length;
+      if (matchedProduct.reviewCount > 0) counts['more-reviews'] = similarProducts.filter(p => p.reviewCount > 0 && p.reviewCount > matchedProduct.reviewCount).length;
+    } else {
+      counts['best-price'] = similarProducts.filter(p => p.price > 0).length;
+      counts['top-rated'] = similarProducts.filter(p => p.rating > 0).length;
+      counts['most-reviewed'] = similarProducts.filter(p => p.reviewCount > 0).length;
+    }
+
+    counts['same-brand'] = similarProducts.filter(p => p.brand.toLowerCase() === scannedBrand).length;
+    counts['in-stock'] = similarProducts.filter(p => p.inStock === true).length;
+
+    return counts;
+  }, [similarProducts, matchedProduct, result.detectedBrand]);
+
+  // Similar tab: apply active filters + sort
+  const filteredSimilarProducts = useMemo(() => {
+    if (!similarProducts || similarProducts.length === 0) return similarProducts;
+    const scannedBrand = (matchedProduct?.brand || result.detectedBrand || '').toLowerCase();
+
+    let results = [...similarProducts];
+
+    // Comparison filters (catalog match)
+    if (similarFilters.has('costs-less') && matchedProduct) {
+      results = results.filter(p => p.price > 0 && p.price < matchedProduct.price);
+    }
+    if (similarFilters.has('higher-rated') && matchedProduct) {
+      results = results.filter(p => p.rating > 0 && p.rating > matchedProduct.rating);
+    }
+    if (similarFilters.has('more-reviews') && matchedProduct) {
+      results = results.filter(p => p.reviewCount > 0 && p.reviewCount > matchedProduct.reviewCount);
+    }
+
+    // Sort-style filters (non-catalog) — filter out zero-data + sort
+    if (similarFilters.has('best-price')) {
+      results = results.filter(p => p.price > 0);
+    }
+    if (similarFilters.has('top-rated')) {
+      results = results.filter(p => p.rating > 0);
+    }
+    if (similarFilters.has('most-reviewed')) {
+      results = results.filter(p => p.reviewCount > 0);
+    }
+
+    // Always-available filters
+    if (similarFilters.has('same-brand')) {
+      results = results.filter(p => p.brand.toLowerCase() === scannedBrand);
+    }
+    if (similarFilters.has('in-stock')) {
+      results = results.filter(p => p.inStock === true);
+    }
+
+    // Sort (sort-style mode): mutually exclusive, so at most one is active
+    if (similarFilters.has('best-price')) {
+      results.sort((a, b) => a.price - b.price);
+    } else if (similarFilters.has('top-rated')) {
+      results.sort((a, b) => b.rating - a.rating);
+    } else if (similarFilters.has('most-reviewed')) {
+      results.sort((a, b) => b.reviewCount - a.reviewCount);
+    }
+
+    return results;
+  }, [similarProducts, similarFilters, matchedProduct, result.detectedBrand]);
 
   const handleAddToShelf = () => {
     if (!shelfProduct || savedToShelf) return;
@@ -1058,10 +1176,58 @@ export default function ScanResultView({
                   <p className="text-xs text-warm-gray">No similar products found.</p>
                 </div>
               ) : (
-                <div className="space-y-2">
-                  {similarProducts.map((p, idx) => (
-                    <SimilarProductCard key={`sim-${idx}`} product={p} onWhereToBuy={setWtbProduct} />
-                  ))}
+                <div className="space-y-3">
+                  {/* Filter pills */}
+                  <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
+                    {similarFilterOptions.map(f => {
+                      const active = similarFilters.has(f.id);
+                      const count = similarFilterCounts[f.id as keyof typeof similarFilterCounts];
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() => toggleSimilarFilter(f.id)}
+                          className={`flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium transition-colors cursor-pointer ${
+                            active
+                              ? 'bg-primary text-white'
+                              : 'bg-cream text-warm-gray border border-blush hover:bg-blush/30'
+                          }`}
+                        >
+                          <i className={`${f.icon} text-[10px]`} />
+                          {f.label}
+                          {typeof count === 'number' && count > 0 && (
+                            <span className="ml-0.5 opacity-70">{count}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                    {similarFilters.size > 0 && (
+                      <button
+                        onClick={() => setSimilarFilters(new Set())}
+                        className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium text-primary border border-primary/30 hover:bg-primary/5 transition-colors cursor-pointer"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Filtered product list */}
+                  {filteredSimilarProducts && filteredSimilarProducts.length > 0 ? (
+                    <div className="space-y-2">
+                      {filteredSimilarProducts.map((p, idx) => (
+                        <SimilarProductCard key={`sim-${idx}`} product={p} onWhereToBuy={setWtbProduct} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-xs text-warm-gray">No products match your filters</p>
+                      <button
+                        onClick={() => setSimilarFilters(new Set())}
+                        className="mt-2 text-xs text-primary hover:text-dark transition-colors cursor-pointer"
+                      >
+                        Clear filters
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </>
