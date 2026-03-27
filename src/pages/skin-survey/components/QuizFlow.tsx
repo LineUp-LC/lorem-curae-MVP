@@ -1705,17 +1705,28 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     }
   }, [currentStep]);
 
-  // Clear persisted survey data when completed
+  // Clear persisted survey data when completed + consume pending redirect
+  const pendingRedirect = localStorage.getItem('postAuthRedirect');
+
   const handleViewResults = () => {
     // Save final data to skinSurveyData for results page
     localStorage.setItem('skinSurveyData', JSON.stringify(surveyData));
     // Clear progress data (survey is complete)
     clearCurrentStep();
     clearSurveyData();
+    // Consume postAuthRedirect if present (user was redirected here from auth)
+    if (pendingRedirect) {
+      localStorage.removeItem('postAuthRedirect');
+    }
   };
 
   if (currentStep >= COMPLETION_STEP) {
     const cta = getCompletionCTA();
+    // If user had a pending redirect (e.g. product page they tried to visit before auth),
+    // show a "Continue where you left off" CTA instead of the default scan CTA
+    const primaryTo = pendingRedirect || '/scan';
+    const hasPendingRedirect = !!pendingRedirect;
+
     return (
       <main className="max-w-2xl mx-auto px-6 lg:px-12 py-24 min-h-[calc(100vh-6rem)] flex items-center justify-center">
         <div className="text-center">
@@ -1730,26 +1741,47 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             You can update your profile anytime in settings.
           </p>
 
-          {/* Primary CTA — leads to camera scan */}
+          {/* Primary CTA — pending redirect or camera scan */}
           <Link
-            to="/scan"
+            to={primaryTo}
             onClick={handleViewResults}
             className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-8 py-4 rounded-xl font-semibold text-base transition-colors cursor-pointer whitespace-nowrap shadow-lg mb-4"
           >
-            <i className="ri-camera-line text-lg"></i>
-            <span>{cta.label}</span>
-            <i className="ri-arrow-right-line"></i>
+            {hasPendingRedirect ? (
+              <>
+                <span>Continue Where You Left Off</span>
+                <i className="ri-arrow-right-line"></i>
+              </>
+            ) : (
+              <>
+                <i className="ri-camera-line text-lg"></i>
+                <span>{cta.label}</span>
+                <i className="ri-arrow-right-line"></i>
+              </>
+            )}
           </Link>
-          <p className="text-warm-gray/60 text-xs mb-6">{cta.description}</p>
+          {!hasPendingRedirect && (
+            <p className="text-warm-gray/60 text-xs mb-6">{cta.description}</p>
+          )}
 
-          {/* Secondary CTA — view profile */}
-          <Link
-            to="/my-skin"
-            onClick={handleViewResults}
-            className="text-sm text-warm-gray hover:text-deep underline underline-offset-4 transition-colors"
-          >
-            Or view your skin profile first
-          </Link>
+          {/* Secondary CTA — scan (when redirect pending) or view profile */}
+          {hasPendingRedirect ? (
+            <Link
+              to="/scan"
+              onClick={handleViewResults}
+              className="text-sm text-warm-gray hover:text-deep underline underline-offset-4 transition-colors"
+            >
+              Or scan your first product
+            </Link>
+          ) : (
+            <Link
+              to="/my-skin"
+              onClick={handleViewResults}
+              className="text-sm text-warm-gray hover:text-deep underline underline-offset-4 transition-colors"
+            >
+              Or view your skin profile first
+            </Link>
+          )}
         </div>
       </main>
     );

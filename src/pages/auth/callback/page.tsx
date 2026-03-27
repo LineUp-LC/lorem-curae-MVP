@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../../../lib/supabase';
+import { loadUserProfile, createUserProfile } from '../../../lib/supabase';
 import { needsPeriodicVerification, initializeVerification } from '../../../lib/auth/periodicVerification';
 import { onAction } from '../../../lib/utils/gamificationTriggers';
 
@@ -12,10 +13,8 @@ const AuthCallbackPage = () => {
 
   useEffect(() => {
     const getPostAuthRedirect = async () => {
+      // Read stored redirect but do NOT remove yet — preserve through survey flow
       const stored = localStorage.getItem('postAuthRedirect');
-      if (stored) {
-        localStorage.removeItem('postAuthRedirect');
-      }
       const defaultRedirect = stored || '/account';
 
       // Check periodic verification for returning users
@@ -29,8 +28,29 @@ const AuthCallbackPage = () => {
         if (needsPeriodicVerification(userId) && userEmail) {
           return `/auth/verify-email?type=periodic&email=${encodeURIComponent(userEmail)}`;
         }
+
+        // Check survey completion — redirect to onboarding if not done
+        try {
+          let profile = await loadUserProfile(userId);
+          if (!profile) {
+            // Brand new user — create profile first, then redirect to survey
+            await createUserProfile(currentSession!.user);
+            profile = await loadUserProfile(userId);
+          }
+          if (!profile?.survey_completed) {
+            // Keep postAuthRedirect in localStorage — survey completion will consume it
+            return '/skin-survey';
+          }
+        } catch (e) {
+          console.error('[auth callback] Failed to check survey status:', e);
+          // Fall through to default redirect on error
+        }
       }
 
+      // Survey complete or no user — consume the stored redirect
+      if (stored) {
+        localStorage.removeItem('postAuthRedirect');
+      }
       return defaultRedirect;
     };
 

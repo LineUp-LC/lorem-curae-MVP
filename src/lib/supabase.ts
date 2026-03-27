@@ -93,18 +93,33 @@ export interface DataImpactContribution {
 // Load user profile
 // -----------------------------
 export async function loadUserProfile(userId: string): Promise<UserProfile | null> {
-  const { data, error } = await supabase
-    .from('users_profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  const MAX_RETRIES = 2;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from('users_profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-  if (error) {
-    console.error('Error loading user profile:', error);
-    return null;
+      if (error) {
+        // PGRST116 = row not found — not a transient error, don't retry
+        if (error.code === 'PGRST116') return null;
+        throw error;
+      }
+
+      return data as UserProfile;
+    } catch (err) {
+      if (attempt < MAX_RETRIES) {
+        console.warn(`[loadUserProfile] Error (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying...`);
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+      console.error('Error loading user profile after retries:', err);
+      return null;
+    }
   }
-
-  return data as UserProfile;
+  return null;
 }
 
 // -----------------------------

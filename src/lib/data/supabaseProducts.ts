@@ -101,27 +101,37 @@ export function mapRowToProduct(row: SupabaseProductRow): Product {
  * Returns [] on any error (Supabase unavailable, network failure, etc.).
  */
 export async function fetchPublishedProducts(): Promise<Product[]> {
-  try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .eq('status', 'published')
-      .order('legacy_id', { ascending: true });
+  const MAX_RETRIES = 2;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('status', 'published')
+        .order('legacy_id', { ascending: true });
 
-    if (error) {
-      console.error('[supabaseProducts] Query failed:', error.message);
+      if (error) {
+        console.error('[supabaseProducts] Query failed:', error.message);
+        return [];
+      }
+
+      if (!data || data.length === 0) {
+        return [];
+      }
+
+      return (data as unknown as SupabaseProductRow[]).map(mapRowToProduct);
+    } catch (err) {
+      // Retry on transient network errors (ERR_CONNECTION_CLOSED, etc.)
+      if (attempt < MAX_RETRIES) {
+        console.warn(`[supabaseProducts] Fetch error (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying...`);
+        await new Promise(r => setTimeout(r, 1000 * (attempt + 1)));
+        continue;
+      }
+      console.error('[supabaseProducts] Fetch error after retries:', err);
       return [];
     }
-
-    if (!data || data.length === 0) {
-      return [];
-    }
-
-    return (data as unknown as SupabaseProductRow[]).map(mapRowToProduct);
-  } catch (err) {
-    console.error('[supabaseProducts] Fetch error:', err);
-    return [];
   }
+  return [];
 }
 
 /**

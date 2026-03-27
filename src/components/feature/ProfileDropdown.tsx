@@ -201,13 +201,6 @@ const ProfileDropdown = ({ isOpen, onClose }: ProfileDropdownProps) => {
                 <p className="text-sm font-semibold text-[#2D2A26]">{routineCount > 0 ? routineCount : '—'}</p>
                 <p className="text-[10px] text-[#6B635A]">Routines</p>
               </div>
-              <Link
-                to="/skin-survey-account"
-                className="px-2.5 py-1 bg-[#C4704D] text-white text-[10px] font-medium rounded-md hover:bg-[#8B4D35] transition-colors cursor-pointer"
-                onClick={onClose}
-              >
-                Retake Survey
-              </Link>
             </div>
           </div>
         )}
