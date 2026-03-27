@@ -531,6 +531,105 @@ export function getEffectiveLifestyle(): string[] {
   return [];
 }
 
+// ========================================
+// Onboarding v2 getters
+// Priority: user profile > skinSurveyData > default
+// ========================================
+
+export interface OnboardingV2Data {
+  skincareExperience: string | null;
+  monthlySpend: string | null;
+  spendSatisfaction: string | null;
+  spendPainPoints: string[];
+  productCount: string | null;
+  routineGoal: string | null;
+  purchaseChannels: string[];
+  retailerSatisfaction: string | null;
+  retailerPainPoints: string[];
+  frustrations: string[];
+  frustrationFreeResponse: string | null;
+  skinGoal: string | null;
+  searchFilters: { useClimate: boolean; usePreferences: boolean; useBudget: boolean };
+  prioritizedGoals: string[];
+}
+
+export function getEffectiveOnboardingV2(): OnboardingV2Data {
+  const user = sessionState.getUser();
+  const profile = user as any;
+
+  // Priority 1: authenticated user profile (top-level columns)
+  if (profile?.skincare_experience || profile?.monthly_spend || profile?.skin_goal) {
+    return {
+      skincareExperience: profile.skincare_experience || null,
+      monthlySpend: profile.monthly_spend || null,
+      spendSatisfaction: profile.spend_satisfaction || null,
+      spendPainPoints: profile.spend_pain_points || [],
+      productCount: profile.product_count || null,
+      routineGoal: profile.routine_goal || null,
+      purchaseChannels: profile.purchase_channels || [],
+      retailerSatisfaction: profile.retailer_satisfaction || null,
+      retailerPainPoints: profile.retailer_pain_points || [],
+      frustrations: profile.frustrations || [],
+      frustrationFreeResponse: profile.frustration_free_response || null,
+      skinGoal: profile.skin_goal || null,
+      searchFilters: {
+        useClimate: profile.search_use_climate ?? true,
+        usePreferences: profile.search_use_preferences ?? true,
+        useBudget: profile.search_use_budget ?? true,
+      },
+      prioritizedGoals: profile.prioritized_goals || [],
+    };
+  }
+
+  // Priority 2: localStorage skinSurveyData
+  try {
+    const surveyData = localStorage.getItem('skinSurveyData');
+    if (surveyData) {
+      const parsed = JSON.parse(surveyData);
+      return {
+        skincareExperience: parsed.skincareExperience || null,
+        monthlySpend: parsed.monthlySpend || null,
+        spendSatisfaction: parsed.spendSatisfaction || null,
+        spendPainPoints: parsed.spendPainPoints || [],
+        productCount: parsed.productCount || null,
+        routineGoal: parsed.routineGoal || null,
+        purchaseChannels: parsed.purchaseChannels || [],
+        retailerSatisfaction: parsed.retailerSatisfaction || null,
+        retailerPainPoints: parsed.retailerPainPoints || [],
+        frustrations: parsed.frustrations || [],
+        frustrationFreeResponse: parsed.frustrationFreeResponse || null,
+        skinGoal: parsed.skinGoal || null,
+        searchFilters: {
+          useClimate: parsed.searchFilters?.useClimate ?? true,
+          usePreferences: parsed.searchFilters?.usePreferences ?? true,
+          useBudget: parsed.searchFilters?.useBudget ?? true,
+        },
+        prioritizedGoals: parsed.prioritizedGoals || [],
+      };
+    }
+  } catch (e) {
+    console.error('Failed to parse skinSurveyData onboarding v2:', e);
+  }
+
+  // Default: all nulls/empty
+  return {
+    skincareExperience: null,
+    monthlySpend: null,
+    spendSatisfaction: null,
+    spendPainPoints: [],
+    productCount: null,
+    routineGoal: null,
+    purchaseChannels: [],
+    retailerSatisfaction: null,
+    retailerPainPoints: [],
+    frustrations: [],
+    frustrationFreeResponse: null,
+    skinGoal: null,
+    searchFilters: { useClimate: true, usePreferences: true, useBudget: true },
+    prioritizedGoals: [],
+  };
+}
+
 // React hook for using session state
 export function useSessionState() {
   const [state, setState] = React.useState(sessionState.getState());

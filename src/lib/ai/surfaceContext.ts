@@ -26,8 +26,10 @@ import {
   getEffectiveSensitivity,
   getEffectiveLifestyle,
   getEffectivePreferences,
+  getEffectiveOnboardingV2,
   sessionState,
 } from '../utils/sessionState';
+import type { OnboardingV2Data } from '../utils/sessionState';
 
 // ============================================================================
 // AI MODES
@@ -76,6 +78,7 @@ export interface AIUserProfile {
   preferences: Record<string, boolean>;
   experienceLevel?: string;
   age?: number;
+  onboarding?: OnboardingV2Data;
 }
 
 // ============================================================================
@@ -246,6 +249,8 @@ export interface PageDataInput {
  * Returns nullable fields — never fabricates data.
  */
 function buildUserProfile(): AIUserProfile {
+  const onboarding = getEffectiveOnboardingV2();
+  const hasOnboarding = !!(onboarding.skincareExperience || onboarding.monthlySpend || onboarding.skinGoal);
   return {
     skinType: getEffectiveSkinType() ?? null,
     concerns: getEffectiveConcerns(),
@@ -253,6 +258,7 @@ function buildUserProfile(): AIUserProfile {
     sensitivity: getEffectiveSensitivity(),
     lifestyle: getEffectiveLifestyle(),
     preferences: getEffectivePreferences(),
+    onboarding: hasOnboarding ? onboarding : undefined,
   };
 }
 

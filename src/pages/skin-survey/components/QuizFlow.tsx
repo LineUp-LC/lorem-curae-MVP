@@ -1,5 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useLocalStorageState } from '../../../lib/utils/useLocalStorageState';
 
 interface SurveyData {
@@ -13,13 +30,33 @@ interface SurveyData {
   preferences: string[];
   lifestyle: string[];
   routine: string[];
-  // Extended lifestyle factors
   sleepPattern: string;
   stressLevel: string;
   dietPattern: string;
   waterIntake: string;
   exerciseFrequency: string;
   environmentalExposure: string[];
+  // Onboarding v2
+  skincareExperience: string;
+  monthlySpend: string;
+  spendSatisfaction: string;
+  spendPainPoints: string[];
+  productCount: string;
+  routineGoal: string;
+  purchaseChannel: string[];
+  retailerSatisfaction: string;
+  retailerPainPoints: string[];
+  frustrations: string[];
+  frustrationFreeResponse: string;
+  referralSource: string;
+  referralSourceOther: string;
+  skinGoal: string;
+  searchFilters: {
+    useClimate: boolean;
+    usePreferences: boolean;
+    useBudget: boolean;
+    prioritizedGoals: string[];
+  };
 }
 
 // Skin tone options with Fitzpatrick scale colors
@@ -68,7 +105,75 @@ const skinToneOptions = [
   },
 ];
 
-// FIXED: Added props interface for onComplete callback
+// Sortable goal item for Step 221 drag-and-drop
+const SortableGoalItem = ({ id, index }: { id: string; index: number }) => {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+      className="flex items-center gap-3 p-4 bg-white rounded-xl border border-blush hover:border-primary/50 cursor-grab active:cursor-grabbing transition-colors"
+    >
+      <span className="text-warm-gray/40 text-sm font-medium w-6 text-center">{index + 1}</span>
+      <i className="ri-draggable text-warm-gray/30"></i>
+      <span className="text-deep text-sm font-medium flex-1">{id}</span>
+    </div>
+  );
+};
+
+const buildPrioritizationList = (data: SurveyData): string[] => {
+  const items: string[] = [];
+  if (data.skinGoal) items.push(data.skinGoal);
+  data.concerns
+    .filter(c => !c.startsWith('Other:'))
+    .filter(c => !items.includes(c))
+    .forEach(c => { if (items.length < 8) items.push(c); });
+  return items;
+};
+
+const COMPLETION_STEP = 999;
+
+const DEFAULT_SURVEY_DATA: SurveyData = {
+  sexAtBirth: '',
+  skinType: [],
+  concerns: [],
+  acneType: [],
+  scarringType: [],
+  complexion: '',
+  allergens: [],
+  preferences: [],
+  lifestyle: [],
+  routine: [],
+  sleepPattern: '',
+  stressLevel: '',
+  dietPattern: '',
+  waterIntake: '',
+  exerciseFrequency: '',
+  environmentalExposure: [],
+  skincareExperience: '',
+  monthlySpend: '',
+  spendSatisfaction: '',
+  spendPainPoints: [],
+  productCount: '',
+  routineGoal: '',
+  purchaseChannel: [],
+  retailerSatisfaction: '',
+  retailerPainPoints: [],
+  frustrations: [],
+  frustrationFreeResponse: '',
+  referralSource: '',
+  referralSourceOther: '',
+  skinGoal: '',
+  searchFilters: { useClimate: true, usePreferences: true, useBudget: true, prioritizedGoals: [] },
+};
+
 interface QuizFlowProps {
   onComplete?: (data: SurveyData) => void;
 }
@@ -79,24 +184,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     'survey_current_step',
     1
   );
-  const [surveyData, setSurveyData, clearSurveyData] = useLocalStorageState<SurveyData>('survey_answers', {
-    sexAtBirth: '',
-    skinType: [],
-    concerns: [],
-    acneType: [],
-    scarringType: [],
-    complexion: '',
-    allergens: [],
-    preferences: [],
-    lifestyle: [],
-    routine: [],
-    sleepPattern: '',
-    stressLevel: '',
-    dietPattern: '',
-    waterIntake: '',
-    exerciseFrequency: '',
-    environmentalExposure: []
-  });
+  const [surveyData, setSurveyData, clearSurveyData] = useLocalStorageState<SurveyData>('survey_answers', DEFAULT_SURVEY_DATA);
   const [allergenInput, setAllergenInput] = useState('');
   const [allergenSuggestions, setAllergenSuggestions] = useState<string[]>([]);
   const [showOtherConcern, setShowOtherConcern] = useState(false);
@@ -105,10 +193,39 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   const [pendingPath, setPendingPath] = useState<string | null>(null);
   const navigate = useNavigate();
 
-  const totalSteps = 15; // Updated total steps to include routine preferences
+  // DnD sensors for step 221
+  const dndSensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(TouchSensor),
+    useSensor(KeyboardSensor)
+  );
+
+  // Migrate localStorage data from pre-v2 schema
+  useEffect(() => {
+    if (surveyData && (surveyData as any).searchFilters === undefined) {
+      setSurveyData(prev => ({
+        ...DEFAULT_SURVEY_DATA,
+        ...prev,
+        searchFilters: DEFAULT_SURVEY_DATA.searchFilters,
+      }));
+    }
+  }, []);
+
+  // Initialize prioritized goals when entering step 221
+  useEffect(() => {
+    if (currentStep === 221 && surveyData.searchFilters.prioritizedGoals.length === 0) {
+      const goals = buildPrioritizationList(surveyData);
+      if (goals.length > 0) {
+        setSurveyData(prev => ({
+          ...prev,
+          searchFilters: { ...prev.searchFilters, prioritizedGoals: goals },
+        }));
+      }
+    }
+  }, [currentStep]);
 
   // Warn on browser tab close / refresh when survey is in progress
-  const isInProgress = currentStep > 1 && currentStep <= totalSteps;
+  const isInProgress = currentStep > 1 && currentStep < COMPLETION_STEP;
   useEffect(() => {
     if (!isInProgress) return;
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
@@ -172,10 +289,10 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   const handleMultiSelect = (category: keyof SurveyData, value: string) => {
     setSurveyData(prev => {
       const current = prev[category];
-  
+
       // Only proceed if this field is an array
       if (!Array.isArray(current)) return prev;
-  
+
       return {
         ...prev,
         [category]: current.includes(value)
@@ -190,6 +307,33 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       ...prev,
       [category]: value
     }));
+  };
+
+  const handleToggleSearchFilter = (key: 'useClimate' | 'usePreferences' | 'useBudget') => {
+    setSurveyData(prev => ({
+      ...prev,
+      searchFilters: {
+        ...prev.searchFilters,
+        [key]: !prev.searchFilters[key],
+      },
+    }));
+  };
+
+  const handleGoalReorder = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    setSurveyData(prev => {
+      const goals = [...prev.searchFilters.prioritizedGoals];
+      const oldIndex = goals.indexOf(active.id as string);
+      const newIndex = goals.indexOf(over.id as string);
+      return {
+        ...prev,
+        searchFilters: {
+          ...prev.searchFilters,
+          prioritizedGoals: arrayMove(goals, oldIndex, newIndex),
+        },
+      };
+    });
   };
 
   const handleAllergenInput = (value: string) => {
@@ -224,47 +368,79 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
   };
 
   const getPrevStep = () => {
+    // Existing conditional steps (acne/scarring)
     if (currentStep === 6) {
-      // Going back from complexion — check if acne or scarring steps were shown
-      if (surveyData.concerns.includes('Acne Prone')) {
-        return 5; // Back to acne type
-      } else if (surveyData.concerns.includes('Scarring')) {
-        return 4; // Back to scarring type
-      } else {
-        return 3; // Back to concerns
-      }
+      if (surveyData.concerns.includes('Acne Prone')) return 5;
+      else if (surveyData.concerns.includes('Scarring')) return 4;
+      else return 3;
     }
     if (currentStep === 5) {
-      // Going back from acne type — check if scarring was also shown
-      if (surveyData.concerns.includes('Scarring')) {
-        return 4; // Back to scarring type
-      } else {
-        return 3; // Back to concerns
-      }
+      if (surveyData.concerns.includes('Scarring')) return 4;
+      else return 3;
     }
+    // V2 branching
+    if (currentStep === 170) return 17;
+    if (currentStep === 171) return 170;
+    if (currentStep === 18) {
+      const hadBranch = ['Would like to spend less', 'Honestly not sure if I\'m getting my money\'s worth'].includes(surveyData.spendSatisfaction);
+      return hadBranch ? 171 : 170;
+    }
+    if (currentStep === 180) return 18;
+    if (currentStep === 19) {
+      return surveyData.productCount === 'None yet \u2014 building from scratch' ? 18 : 180;
+    }
+    if (currentStep === 190) return 19;
+    if (currentStep === 191) return 190;
+    if (currentStep === 20) {
+      return surveyData.retailerSatisfaction === 'Open to better options' ? 191 : 190;
+    }
+    if (currentStep === 21) return 20;
+    if (currentStep === 22) return 21;
+    if (currentStep === 220) return 22;
+    if (currentStep === 221) return 220;
     return currentStep - 1;
   };
 
   const getNextStep = () => {
+    // Existing conditional steps (acne/scarring)
     if (currentStep === 3) {
-      // After concerns, check for scarring or acne
-      if (surveyData.concerns.includes('Scarring') || 
+      if (surveyData.concerns.includes('Scarring') ||
           (surveyData.concerns.includes('Acne Prone') && surveyData.concerns.includes('Scarring'))) {
-        return 4; // Scarring type question
+        return 4;
       } else if (surveyData.concerns.includes('Acne Prone')) {
-        return 5; // Acne type question
+        return 5;
       } else {
-        return 6; // Skip to complexion
+        return 6;
       }
     }
     if (currentStep === 4) {
-      // After scarring, check if acne was also selected
       if (surveyData.concerns.includes('Acne Prone')) {
-        return 5; // Acne type question
+        return 5;
       } else {
-        return 6; // Skip to complexion
+        return 6;
       }
     }
+    // V2 branching
+    if (currentStep === 17) return 170;
+    if (currentStep === 170) {
+      const needsBranch = ['Would like to spend less', 'Honestly not sure if I\'m getting my money\'s worth'].includes(surveyData.spendSatisfaction);
+      return needsBranch ? 171 : 18;
+    }
+    if (currentStep === 171) return 18;
+    if (currentStep === 18) {
+      return surveyData.productCount === 'None yet \u2014 building from scratch' ? 19 : 180;
+    }
+    if (currentStep === 180) return 19;
+    if (currentStep === 19) return 190;
+    if (currentStep === 190) {
+      return surveyData.retailerSatisfaction === 'Open to better options' ? 191 : 20;
+    }
+    if (currentStep === 191) return 20;
+    if (currentStep === 20) return 21;
+    if (currentStep === 21) return 22;
+    if (currentStep === 22) return 220;
+    if (currentStep === 220) return 221;
+    if (currentStep === 221) return COMPLETION_STEP;
     return currentStep + 1;
   };
 
@@ -285,13 +461,74 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       case 13: return surveyData.dietPattern !== '';
       case 14: return surveyData.waterIntake !== '';
       case 15: return surveyData.exerciseFrequency !== '';
+      // V2 steps
+      case 16: return surveyData.skincareExperience !== '';
+      case 17: return surveyData.monthlySpend !== '';
+      case 170: return surveyData.spendSatisfaction !== '';
+      case 171: return surveyData.spendPainPoints.length > 0;
+      case 18: return surveyData.productCount !== '';
+      case 180: return surveyData.routineGoal !== '';
+      case 19: return surveyData.purchaseChannel.length > 0;
+      case 190: return surveyData.retailerSatisfaction !== '';
+      case 191: return surveyData.retailerPainPoints.length > 0;
+      case 20: return surveyData.frustrations.length > 0;
+      case 21: return surveyData.referralSource !== '';
+      case 22: return surveyData.skinGoal !== '';
+      case 220: return true;
+      case 221: return true;
       default: return false;
     }
   };
 
+  const getProgressLabel = () => {
+    if (currentStep <= 16) return `Step ${currentStep} of 16 \u2014 Skin Profile`;
+    if ([17, 170, 171].includes(currentStep)) return 'Spending & Budget';
+    if ([18, 180].includes(currentStep)) return 'Your Routine';
+    if ([19, 190, 191].includes(currentStep)) return 'Where You Shop';
+    if (currentStep === 20) return 'Your Frustrations';
+    if (currentStep === 21) return 'Almost Done';
+    if ([22, 220, 221].includes(currentStep)) return 'Final Setup';
+    return '';
+  };
+
+  const getProgressPercent = () => {
+    if (currentStep <= 16) return Math.round((currentStep / 22) * 100);
+    if ([17, 170, 171].includes(currentStep)) return 75;
+    if ([18, 180].includes(currentStep)) return 80;
+    if ([19, 190, 191].includes(currentStep)) return 85;
+    if (currentStep === 20) return 88;
+    if (currentStep === 21) return 92;
+    if ([22, 220, 221].includes(currentStep)) return 96;
+    return 100;
+  };
+
+  const getCompletionCTA = () => {
+    const { skinGoal, productCount, routineGoal } = surveyData;
+
+    if (skinGoal === 'Figure out what caused a reaction') {
+      return { label: 'Scan the Problem Product', description: 'Start with the product that caused issues \u2014 we\'ll flag every ingredient and what it could do to your skin.' };
+    }
+    if (skinGoal === 'Stop wasting money on bad products') {
+      return { label: 'Check If a Product Is Worth It', description: 'Scan any product and we\'ll tell you if the ingredients justify the price \u2014 or if there\'s a better deal.' };
+    }
+    if (skinGoal === 'Simplify my current routine' || routineGoal === 'Simplify it \u2014 I feel like I\'m using too much') {
+      return { label: 'Start Scanning Your Shelf', description: 'Grab the first product in your routine and scan it. We\'ll analyze each one and tell you what to keep and what to cut.' };
+    }
+    if (routineGoal === 'Add more \u2014 I know I\'m missing something') {
+      return { label: 'Scan What You Already Use', description: 'Scan your current products \u2014 we\'ll identify the gaps and find what\'s missing.' };
+    }
+    if (skinGoal === 'Build a routine from scratch' && productCount === 'None yet \u2014 building from scratch') {
+      return { label: 'Scan a Product You\'re Curious About', description: 'Start by scanning something you\'ve seen online, at a store, or at a friend\'s \u2014 we\'ll tell you if it fits your skin.' };
+    }
+    if (skinGoal === 'Understand what\'s in my current products') {
+      return { label: 'Scan Something You Own', description: 'Pick any product from your shelf \u2014 we\'ll break down every ingredient for your skin.' };
+    }
+    return { label: 'Scan Your First Product', description: 'Grab the nearest skincare product and scan it \u2014 we\'ll show you if it\'s right for YOUR skin.' };
+  };
+
   const renderStep = () => {
     switch (currentStep) {
-      // NEW FIRST QUESTION: Sex at Birth
+      // Step 1: Sex at Birth
       case 1:
         return (
           <div>
@@ -315,6 +552,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 2: Skin Type (added "Not Sure" option)
       case 2:
         return (
           <div>
@@ -322,11 +560,12 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Select the option that best describes your skin</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Normal', tip: 'Your skin is generally balanced — not too oily or too dry, with few imperfections' },
+                { label: 'Normal', tip: 'Your skin is generally balanced \u2014 not too oily or too dry, with few imperfections' },
                 { label: 'Dry', tip: 'Your skin often feels tight, rough, or flaky, and may lack moisture throughout the day' },
                 { label: 'Oily', tip: 'Your skin tends to look shiny, especially in the T-zone, and may be prone to clogged pores' },
                 { label: 'Combination', tip: 'Some areas of your face are oily (usually forehead, nose, chin) while others feel dry or normal' },
-                { label: 'Sensitive', tip: 'Your skin reacts easily to products or environment — redness, stinging, or irritation are common' },
+                { label: 'Sensitive', tip: 'Your skin reacts easily to products or environment \u2014 redness, stinging, or irritation are common' },
+                { label: 'Not Sure', tip: 'Don\'t worry \u2014 we\'ll help you figure it out based on your scan results and how your skin behaves throughout the day' },
               ].map(({ label, tip }) => (
                 <button
                   key={label}
@@ -354,6 +593,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 3: Concerns (added 5 new concerns)
       case 3:
         return (
           <div>
@@ -364,7 +604,9 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 'Uneven Skin Tone', 'Dullness', 'Enlarged Pores', 'Textural Irregularities',
                 'Damaged Skin Barrier', 'Signs of Aging', 'Acne Prone', 'Sun Protection',
                 'Exzema', 'Lack of Hydration', 'Sun Damage', 'Rosacea', 'Dark Circles',
-                'Congested skin', 'Scarring', 'Looking for gentle products'
+                'Congested skin', 'Scarring', 'Looking for gentle products',
+                'Hyperpigmentation', 'Fine Lines', 'Wrinkles', 'Hormonal Breakouts',
+                'Post-Inflammatory Marks'
               ].map((concern) => (
                 <button
                   key={concern}
@@ -451,6 +693,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 4: Scarring Type (conditional)
       case 4:
         return (
           <div>
@@ -474,6 +717,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 5: Acne Type (conditional)
       case 5:
         return (
           <div>
@@ -497,6 +741,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 6: Skin Tone (Fitzpatrick)
       case 6:
         return (
           <div>
@@ -575,12 +820,13 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 7: Allergens
       case 7:
         return (
           <div>
             <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Any known allergens?</h2>
             <p className="text-warm-gray text-sm mb-6">Type to search and add allergens (maximum 10)</p>
-            
+
             <div className="relative mb-6">
               <input
                 type="text"
@@ -595,7 +841,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 className="w-full p-4 border-2 border-blush rounded-lg focus:border-primary focus:outline-none bg-white text-deep"
                 disabled={surveyData.allergens.length >= 10}
               />
-              
+
               {allergenSuggestions.length > 0 && (
                 <div className="absolute top-full left-0 right-0 bg-white border border-blush rounded-lg shadow-lg z-10 mt-1">
                   {allergenSuggestions.map((allergen) => (
@@ -635,6 +881,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 8: Product Preferences
       case 8:
         return (
           <div>
@@ -687,6 +934,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 9: Lifestyle Factors
       case 9:
         return (
           <div>
@@ -694,13 +942,13 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
             <p className="text-warm-gray text-sm mb-6">Tell us about your daily environment</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {[
-                { label: 'Active lifestyle', tip: 'You exercise regularly — running, gym, sports, or other physical activities' },
+                { label: 'Active lifestyle', tip: 'You exercise regularly \u2014 running, gym, sports, or other physical activities' },
                 { label: 'Indoor work environment', tip: 'You spend most of your working hours indoors, such as in an office or at home' },
                 { label: 'Frequent travel', tip: 'You travel often, whether for work or leisure, and experience different climates regularly' },
                 { label: 'High stress levels', tip: 'You feel stressed on most days from work, personal life, or other responsibilities' },
                 { label: 'Outdoor work environment', tip: 'You spend a significant part of your day working outdoors or commuting in open air' },
                 { label: 'Frequently wears makeup', tip: 'You wear makeup on most days, whether a full face or just a few key products' },
-                { label: 'Screen time heavy', tip: 'You spend many hours a day in front of screens — computer, phone, or tablet' },
+                { label: 'Screen time heavy', tip: 'You spend many hours a day in front of screens \u2014 computer, phone, or tablet' },
                 { label: 'Sun exposure daily', tip: 'You spend noticeable time in direct sunlight each day, whether by choice or routine' },
                 { label: 'Wears glasses or headsets regularly', tip: 'You wear eyeglasses, sunglasses, or over-ear headsets for extended periods daily' },
               ].map(({ label, tip }) => (
@@ -730,6 +978,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 10: Routine Preferences
       case 10:
         return (
           <div>
@@ -766,7 +1015,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
-      // NEW LIFESTYLE QUESTIONS
+      // Step 11: Sleep Pattern
       case 11:
         return (
           <div>
@@ -796,6 +1045,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 12: Stress Level
       case 12:
         return (
           <div>
@@ -834,6 +1084,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 13: Diet Pattern
       case 13:
         return (
           <div>
@@ -846,7 +1097,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
                 { label: 'High protein focus', tip: 'Your meals emphasize protein-rich foods like meat, eggs, dairy, or protein supplements' },
                 { label: 'Processed/Fast food heavy', tip: 'You frequently eat packaged, pre-made, or fast food meals rather than cooking from scratch' },
                 { label: 'Limited/Restricted diet', tip: 'You follow a diet that excludes certain food groups, whether by choice or due to allergies or intolerances' },
-                { label: 'Variable/Inconsistent', tip: 'Your eating habits change often — some days are healthier than others, with no set pattern' },
+                { label: 'Variable/Inconsistent', tip: 'Your eating habits change often \u2014 some days are healthier than others, with no set pattern' },
               ].map(({ label, tip }) => (
                 <button
                   key={label}
@@ -874,6 +1125,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 14: Water Intake
       case 14:
         return (
           <div>
@@ -902,6 +1154,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // Step 15: Exercise Frequency
       case 15:
         return (
           <div>
@@ -931,17 +1184,526 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
           </div>
         );
 
+      // ====================================================================
+      // ONBOARDING V2 STEPS (16 - 221)
+      // ====================================================================
+
+      // Step 16: Skincare Experience Level
+      case 16:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How would you describe your skincare journey?</h2>
+            <p className="text-warm-gray text-sm mb-6">This helps us calibrate the depth of our explanations and recommendations</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: 'Just getting started', tip: 'You\'re new to skincare and still figuring out the basics \u2014 that\'s exactly why we\'re here' },
+                { label: 'I know the basics', tip: 'You have a routine but aren\'t sure if it\'s optimized for your skin' },
+                { label: 'Skincare enthusiast', tip: 'You research ingredients, follow skincare creators, and actively experiment with products' },
+                { label: 'Expert / Professional', tip: 'You work in skincare or have deep knowledge of ingredients, formulations, and routines' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleSingleSelect('skincareExperience', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.skincareExperience === label
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 17: Monthly Spend
+      case 17:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How much do you typically spend on skincare products per month?</h2>
+            <p className="text-warm-gray text-sm mb-6">No judgment \u2014 this helps us find products in your comfort zone</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['Under $25', '$25 - $50', '$50 - $100', '$100 - $200', '$200+', 'Not sure / It varies a lot'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('monthlySpend', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.monthlySpend === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 170: Spend Satisfaction
+      case 170:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How do you feel about what you're spending?</h2>
+            <p className="text-warm-gray text-sm mb-6">This helps us calibrate whether to suggest alternatives or validate your current products</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: 'Happy with it \u2014 I invest in what works', tip: 'We\'ll focus on optimizing what you have rather than finding cheaper alternatives' },
+                { label: 'Would like to spend less', tip: 'We\'ll actively surface more affordable alternatives that match your skin profile' },
+                { label: 'Willing to spend more for better results', tip: 'We\'ll include premium options when they genuinely outperform for your skin type' },
+                { label: 'Honestly not sure if I\'m getting my money\'s worth', tip: 'We\'ll analyze whether your current products justify their price' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleSingleSelect('spendSatisfaction', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.spendSatisfaction === label
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 171: Spend Pain Points (conditional)
+      case 171:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What bothers you most about what you spend on skincare?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                'Products that promise results but don\'t deliver',
+                'Expensive products that have the same ingredients as cheap ones',
+                'Having to replace products too frequently',
+                'Buying products I end up not using',
+                'Subscription costs that add up',
+                'Not knowing if a cheaper option would work just as well',
+                'Getting influenced into buying products I don\'t need',
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleMultiSelect('spendPainPoints', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.spendPainPoints.includes(option)
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 18: Current Product Count
+      case 18:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How many skincare products are in your current routine?</h2>
+            <p className="text-warm-gray text-sm mb-6">Include everything \u2014 cleansers, serums, moisturizers, sunscreen, treatments</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['None yet \u2014 building from scratch', '1-3 products', '4-6 products', '7-10 products', '10+ products'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('productCount', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.productCount === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 180: Routine Goal (conditional)
+      case 180:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What would you like to do with your routine?</h2>
+            <p className="text-warm-gray text-sm mb-6">This tells our AI how to approach your product recommendations</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: 'Simplify it \u2014 I feel like I\'m using too much', tip: 'We\'ll look for redundancies, flag products doing the same thing, and suggest a streamlined routine' },
+                { label: 'Add more \u2014 I know I\'m missing something', tip: 'We\'ll identify gaps in your routine based on your skin type and concerns' },
+                { label: 'Keep it the same but optimize what I have', tip: 'We\'ll check if your current products are the best options for your profile, or if swaps would improve results' },
+                { label: 'Not sure \u2014 help me figure it out', tip: 'We\'ll analyze your products when you scan them and give you a full picture' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleSingleSelect('routineGoal', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.routineGoal === label
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 19: Purchase Channels
+      case 19:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Where do you usually buy skincare products?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply \u2014 helps us show you where to find products you'll love</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                { label: 'Sephora', tip: 'In-store or online' },
+                { label: 'Ulta', tip: 'In-store or online' },
+                { label: 'Amazon', tip: 'Including Subscribe & Save' },
+                { label: 'Target / Walmart', tip: 'Drugstore and mass-market skincare' },
+                { label: 'Drugstore \u2014 CVS, Walgreens', tip: 'Pharmacy-based skincare shopping' },
+                { label: 'Brand websites (direct)', tip: 'Buying directly from the brand\'s own site' },
+                { label: 'TikTok Shop', tip: 'Purchasing through TikTok\'s in-app shopping' },
+                { label: 'K-Beauty sites \u2014 Stylevana, YesStyle', tip: 'Korean and Asian beauty specialty retailers' },
+                { label: 'Subscription boxes', tip: 'Ipsy, BoxyCharm, FabFitFun, etc.' },
+                { label: 'Dermatologist / Esthetician', tip: 'Professional-grade products from your provider' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleMultiSelect('purchaseChannel', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.purchaseChannel.includes(label)
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 190: Retailer Satisfaction
+      case 190:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How do you feel about where you currently shop for skincare?</h2>
+            <p className="text-warm-gray text-sm mb-6">This helps us decide whether to suggest the same stores or introduce new options</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['Satisfied \u2014 I trust where I shop', 'Open to better options'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('retailerSatisfaction', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.retailerSatisfaction === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 191: Retailer Pain Points (conditional)
+      case 191:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What do you wish was better about where you buy skincare?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select all that apply \u2014 our scan results can help address these</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: 'Product authenticity concerns (worried about fakes)', tip: 'We\'ll flag products where counterfeit risk is higher' },
+                { label: 'Product/packaging quality is hit or miss', tip: 'We\'ll surface retailers known for better fulfillment' },
+                { label: 'Shipping costs or slow delivery', tip: 'We\'ll highlight retailers with free shipping thresholds' },
+                { label: 'Limited selection for my skin type or concerns', tip: 'We\'ll introduce specialty retailers that cater to your needs' },
+                { label: 'Hard to compare products or ingredients before buying', tip: 'This is exactly what our scan does' },
+                { label: 'Prices feel inflated compared to other retailers', tip: 'We\'ll show price comparisons across retailers' },
+                { label: 'Returns are difficult if a product doesn\'t work', tip: 'Scanning before buying reduces return likelihood' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleMultiSelect('retailerPainPoints', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.retailerPainPoints.includes(label)
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 20: Frustrations (multi-select + free response)
+      case 20:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What frustrates you the most about skincare or finding the right products?</h2>
+            <p className="text-warm-gray text-sm mb-6">Select everything that resonates \u2014 and if you want to share more, we're listening</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {[
+                'Wasting money on products that don\'t work',
+                'Conflicting advice from different sources',
+                'Not knowing which ingredients are good for MY skin',
+                'Ingredient lists are confusing and overwhelming',
+                'Can\'t tell if a product is worth the price',
+                'Don\'t know what products work well together',
+                'Tried a product that caused a reaction and don\'t know why',
+                'Too many steps \u2014 skincare feels like a chore',
+                'Reviews are generic \u2014 I want opinions from people with MY skin type',
+                'Don\'t know if my current routine is actually working',
+                'Hard to find products for my specific skin tone',
+                'Overwhelmed by the number of options available',
+                'Trendy products that end up being overhyped',
+                'Products that work for a while then stop working',
+              ].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleMultiSelect('frustrations', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.frustrations.includes(option)
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+
+            {/* Free response textarea */}
+            <div className="mt-6 p-5 bg-cream/50 rounded-xl border border-blush">
+              <label className="block text-sm font-medium text-deep mb-2">
+                Want to share more? We'd love to hear your story.
+              </label>
+              <p className="text-warm-gray text-xs mb-3">
+                Be as detailed as possible \u2014 you can even recall specific events, bad purchases, or moments that made you frustrated. This helps our AI understand exactly what to solve for you.
+              </p>
+              <textarea
+                value={surveyData.frustrationFreeResponse}
+                onChange={(e) => handleSingleSelect('frustrationFreeResponse', e.target.value)}
+                placeholder="Example: I bought a $60 vitamin C serum because everyone on TikTok raved about it, but it broke me out after a week. I still don't know if it was the vitamin C or something else in the formula..."
+                className="w-full p-4 border-2 border-blush rounded-lg focus:border-primary focus:outline-none bg-white text-deep text-sm min-h-[120px] resize-y"
+                maxLength={1000}
+              />
+              <p className="text-warm-gray/50 text-xs mt-2 text-right">
+                {surveyData.frustrationFreeResponse.length}/1000
+              </p>
+            </div>
+          </div>
+        );
+
+      // Step 21: Referral Source
+      case 21:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">How did you discover Lorem Curae?</h2>
+            <p className="text-warm-gray text-sm mb-6">Helps us find more people like you</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {['TikTok', 'Instagram', 'YouTube', 'Reddit', 'Twitter / X', 'Friend or family member', 'App Store search', 'Google search', 'Product Hunt', 'Blog or article', 'Podcast', 'Other'].map((option) => (
+                <button
+                  key={option}
+                  onClick={() => handleSingleSelect('referralSource', option)}
+                  className={`py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.referralSource === option
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
+
+            {/* Other text input */}
+            {surveyData.referralSource === 'Other' && (
+              <input
+                type="text"
+                value={surveyData.referralSourceOther}
+                onChange={(e) => handleSingleSelect('referralSourceOther', e.target.value)}
+                placeholder="Tell us where..."
+                className="w-full mt-4 p-3 border-2 border-blush rounded-lg focus:border-primary focus:outline-none bg-white text-deep"
+              />
+            )}
+          </div>
+        );
+
+      // Step 22: Primary Skin Goal
+      case 22:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">What's the #1 thing you want Lorem Curae to help you with?</h2>
+            <p className="text-warm-gray text-sm mb-6">Pick the one that matters most right now \u2014 you can always update this later</p>
+            <div className="grid grid-cols-1 gap-4">
+              {[
+                { label: 'Find products that actually work for my skin', tip: 'We\'ll prioritize personalized discovery and compatibility checking' },
+                { label: 'Understand what\'s in my current products', tip: 'We\'ll focus on ingredient analysis and safety breakdowns' },
+                { label: 'Build a routine from scratch', tip: 'We\'ll guide you through a step-by-step routine based on your skin profile' },
+                { label: 'Simplify my current routine', tip: 'We\'ll help you identify what\'s redundant and what\'s essential' },
+                { label: 'Stop wasting money on bad products', tip: 'We\'ll highlight cost-effective alternatives and flag ingredient dusting' },
+                { label: 'Figure out what caused a reaction', tip: 'We\'ll track your products and help identify likely irritant ingredients over time' },
+              ].map(({ label, tip }) => (
+                <button
+                  key={label}
+                  onClick={() => handleSingleSelect('skinGoal', label)}
+                  className={`relative py-3.5 px-4 rounded-xl border transition-all text-left cursor-pointer text-sm font-medium ${
+                    surveyData.skinGoal === label
+                      ? 'border-primary bg-primary/5 text-deep shadow-sm'
+                      : 'border-blush hover:border-primary/50 hover:bg-cream/50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span>{label}</span>
+                    <span className="group/tip relative flex-shrink-0">
+                      <i className="ri-information-line text-xs text-warm-gray/40 group-hover/tip:text-primary transition-colors"></i>
+                      <div className="absolute right-0 bottom-full mb-2 opacity-0 invisible group-hover/tip:opacity-100 group-hover/tip:visible transition-all duration-200 z-10 pointer-events-none">
+                        <div className="bg-deep text-white text-[11px] rounded-lg px-3 py-2 shadow-xl leading-relaxed min-w-[180px]">
+                          {tip}
+                        </div>
+                      </div>
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+
+      // Step 220: Search Personalization Toggles
+      case 220:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">When we search for products and recommendations, what should we factor in?</h2>
+            <p className="text-warm-gray text-sm mb-6">You can toggle these on or off anytime in settings \u2014 this is just your starting preference</p>
+            <div className="space-y-4">
+              {([
+                { key: 'useClimate' as const, label: 'Factor in my climate & weather', description: 'Adapt recommendations to your local UV, humidity, and season' },
+                { key: 'usePreferences' as const, label: 'Factor in my product preferences', description: 'Filter by your preferences (cruelty-free, fragrance-free, etc.)' },
+                { key: 'useBudget' as const, label: 'Factor in my budget', description: 'Prioritize products in your price range' },
+              ]).map(({ key, label, description }) => {
+                const isOn = surveyData.searchFilters[key];
+                return (
+                  <button
+                    key={key}
+                    onClick={() => handleToggleSearchFilter(key)}
+                    className="w-full flex items-center justify-between p-4 rounded-xl border border-blush hover:border-primary/50 transition-all cursor-pointer text-left"
+                  >
+                    <div className="flex-1 mr-4">
+                      <p className="text-sm font-medium text-deep">{label}</p>
+                      <p className="text-xs text-warm-gray mt-1">{description}</p>
+                    </div>
+                    <div className={`w-11 h-6 rounded-full transition-colors flex-shrink-0 relative ${isOn ? 'bg-primary' : 'bg-blush'}`}>
+                      <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform ${isOn ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        );
+
+      // Step 221: Goal Prioritization (drag-and-drop)
+      case 221:
+        return (
+          <div>
+            <h2 className="font-serif text-2xl font-semibold text-deep mb-3">Last step \u2014 prioritize your skin goals</h2>
+            <p className="text-warm-gray text-sm mb-6">Drag to reorder. The top items will get the most attention in your scans and recommendations.</p>
+            {surveyData.searchFilters.prioritizedGoals.length > 0 ? (
+              <DndContext
+                sensors={dndSensors}
+                collisionDetection={closestCenter}
+                onDragEnd={handleGoalReorder}
+              >
+                <SortableContext
+                  items={surveyData.searchFilters.prioritizedGoals}
+                  strategy={verticalListSortingStrategy}
+                >
+                  <div className="space-y-2">
+                    {surveyData.searchFilters.prioritizedGoals.map((goal, index) => (
+                      <SortableGoalItem key={goal} id={goal} index={index} />
+                    ))}
+                  </div>
+                </SortableContext>
+              </DndContext>
+            ) : (
+              <p className="text-warm-gray/50 text-sm">Loading your goals...</p>
+            )}
+          </div>
+        );
+
       default:
         return null;
     }
   };
 
-  // FIXED: Call onComplete when quiz is finished
+  // Call onComplete when quiz is finished
   useEffect(() => {
-    if (currentStep > totalSteps && onComplete) {
+    if (currentStep >= COMPLETION_STEP && onComplete) {
       onComplete(surveyData);
     }
-  }, [currentStep, totalSteps]);
+  }, [currentStep]);
 
   // Clear persisted survey data when completed
   const handleViewResults = () => {
@@ -952,24 +1714,41 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
     clearSurveyData();
   };
 
-  if (currentStep > totalSteps) {
+  if (currentStep >= COMPLETION_STEP) {
+    const cta = getCompletionCTA();
     return (
       <main className="max-w-2xl mx-auto px-6 lg:px-12 py-24 min-h-[calc(100vh-6rem)] flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 mx-auto mb-5 bg-primary/10 rounded-full flex items-center justify-center">
             <i className="ri-check-line text-2xl text-primary"></i>
           </div>
-          <h1 className="font-serif text-2xl font-semibold text-deep mb-3">Survey Complete</h1>
-          <p className="text-warm-gray text-sm mb-6">
-            Thank you for completing your skin survey. We're analyzing your responses to create your personalized skincare profile.
+          <h1 className="font-serif text-2xl font-semibold text-deep mb-3">Your Skin Profile Is Ready</h1>
+          <p className="text-warm-gray text-sm mb-2">
+            We've built a personalized profile based on your responses. Every scan, recommendation, and review you see will be tailored to your unique skin.
           </p>
+          <p className="text-warm-gray/60 text-xs mb-8">
+            You can update your profile anytime in settings.
+          </p>
+
+          {/* Primary CTA — leads to camera scan */}
+          <Link
+            to="/scan"
+            onClick={handleViewResults}
+            className="inline-flex items-center space-x-2 bg-primary hover:bg-dark text-white px-8 py-4 rounded-xl font-semibold text-base transition-colors cursor-pointer whitespace-nowrap shadow-lg mb-4"
+          >
+            <i className="ri-camera-line text-lg"></i>
+            <span>{cta.label}</span>
+            <i className="ri-arrow-right-line"></i>
+          </Link>
+          <p className="text-warm-gray/60 text-xs mb-6">{cta.description}</p>
+
+          {/* Secondary CTA — view profile */}
           <Link
             to="/my-skin"
             onClick={handleViewResults}
-            className="inline-flex items-center space-x-2 bg-deep hover:bg-deep/90 text-white px-6 py-3 rounded-lg font-medium text-sm transition-colors cursor-pointer whitespace-nowrap"
+            className="text-sm text-warm-gray hover:text-deep underline underline-offset-4 transition-colors"
           >
-            <span>View Your Skin Profile</span>
-            <i className="ri-arrow-right-line"></i>
+            Or view your skin profile first
           </Link>
         </div>
       </main>
@@ -981,15 +1760,15 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
       {/* Progress Bar */}
       <div className="mb-12">
         <div className="flex items-center justify-between mb-4">
-          <span className="text-sm text-warm-gray">Step {currentStep} of {totalSteps}</span>
+          <span className="text-sm text-warm-gray">{getProgressLabel()}</span>
           <span className="text-sm text-warm-gray">
-            {Math.round(((currentStep - 1) / totalSteps) * 100)}% Complete
+            {getProgressPercent()}% Complete
           </span>
         </div>
         <div className="w-full bg-blush rounded-full h-2">
           <div
             className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentStep - 1) / totalSteps) * 100}%` }}
+            style={{ width: `${getProgressPercent()}%` }}
           />
         </div>
       </div>
@@ -1023,7 +1802,7 @@ const QuizFlow = ({ onComplete }: QuizFlowProps) => {
               : 'bg-blush text-warm-gray/50 cursor-not-allowed'
           }`}
         >
-          <span>Next</span>
+          <span>{currentStep === 221 ? 'Complete' : 'Next'}</span>
           <i className="ri-arrow-right-line"></i>
         </button>
       </div>

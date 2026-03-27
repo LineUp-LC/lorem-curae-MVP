@@ -335,6 +335,58 @@ function buildUserProfileSection(ctx: AISurfaceContext): string {
     lines.push(`- Preferences: ${prefEntries.map(([k]) => k).join(', ')}`);
   }
 
+  // Onboarding v2 context (behavioral + intent signals)
+  if (user.onboarding) {
+    const ob = user.onboarding;
+    const obLines: string[] = ['ONBOARDING CONTEXT:'];
+    if (ob.skincareExperience) obLines.push(`- Experience: ${ob.skincareExperience}`);
+    if (ob.monthlySpend) obLines.push(`- Monthly spend: ${ob.monthlySpend}`);
+    if (ob.spendSatisfaction) obLines.push(`- Spend satisfaction: ${ob.spendSatisfaction}`);
+    if (ob.spendPainPoints.length > 0) obLines.push(`- Spend pain points: ${ob.spendPainPoints.join(', ')}`);
+    if (ob.productCount) obLines.push(`- Current products: ${ob.productCount}`);
+    if (ob.routineGoal) obLines.push(`- Routine goal: ${ob.routineGoal}`);
+    if (ob.purchaseChannels.length > 0) obLines.push(`- Purchase channels: ${ob.purchaseChannels.join(', ')}`);
+    if (ob.retailerSatisfaction) obLines.push(`- Retailer satisfaction: ${ob.retailerSatisfaction}`);
+    if (ob.retailerPainPoints.length > 0) obLines.push(`- Retailer pain points: ${ob.retailerPainPoints.join(', ')}`);
+    if (ob.frustrations.length > 0) obLines.push(`- Frustrations: ${ob.frustrations.join(', ')}`);
+    if (ob.frustrationFreeResponse) obLines.push(`- Additional frustration detail: ${ob.frustrationFreeResponse}`);
+    if (ob.skinGoal) obLines.push(`- Primary goal: ${ob.skinGoal}`);
+    if (ob.prioritizedGoals.length > 0) obLines.push(`- Goal priority order: ${ob.prioritizedGoals.join(' > ')}`);
+    obLines.push(`- Search filters: climate=${ob.searchFilters.useClimate}, preferences=${ob.searchFilters.usePreferences}, budget=${ob.searchFilters.useBudget}`);
+
+    // Behavior rules for AI based on onboarding signals
+    const rules: string[] = ['BEHAVIOR RULES:'];
+    if (ob.spendSatisfaction === 'Would like to spend less' || ob.spendSatisfaction === 'Honestly not sure if I\'m getting my money\'s worth') {
+      rules.push('- User is price-sensitive. Lead with budget-friendly options and value framing.');
+    }
+    if (ob.routineGoal?.includes('Simplify')) {
+      rules.push('- User wants fewer steps. Recommend multi-purpose products and minimal routines.');
+    } else if (ob.routineGoal?.includes('Add more')) {
+      rules.push('- User is building a routine. Explain each step and why it matters.');
+    }
+    if (ob.retailerPainPoints.length > 0) {
+      rules.push(`- User has retailer frustrations (${ob.retailerPainPoints.join(', ')}). Prioritize retailers that address these.`);
+    }
+    if (!ob.searchFilters.useClimate) {
+      rules.push('- User opted out of climate-based filtering. Do not reference weather/UV in recommendations.');
+    }
+    if (!ob.searchFilters.useBudget) {
+      rules.push('- User opted out of budget filtering. Show full price range.');
+    }
+    if (ob.skincareExperience === 'Just starting out') {
+      rules.push('- User is a beginner. Use simple language, avoid jargon, explain basics.');
+    } else if (ob.skincareExperience === 'Expert / Professional') {
+      rules.push('- User is experienced. Use precise terminology and skip basic explanations.');
+    }
+
+    lines.push('');
+    lines.push(obLines.join('\n'));
+    if (rules.length > 1) {
+      lines.push('');
+      lines.push(rules.join('\n'));
+    }
+  }
+
   return lines.join('\n');
 }
 
