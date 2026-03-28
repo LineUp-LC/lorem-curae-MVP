@@ -3,6 +3,7 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   useMemo,
   useCallback,
   ReactNode,
@@ -40,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [routineCount, setRoutineCount] = useState(0)
   const [loading, setLoading] = useState(true)
+  const hasHydratedRef = useRef(false)
 
   // Sync profile to sessionState + rehydrate localStorage if needed
   const syncProfileToSessionState = (userProfile: UserProfile) => {
@@ -122,6 +124,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
 
         if (currentUser) {
+          hasHydratedRef.current = true
           const userProfile = await loadUserProfile(currentUser.id)
           const count = await getRoutineCount(currentUser.id)
           if (isMounted) {
@@ -148,6 +151,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser)
 
         if (event === 'SIGNED_IN' && authUser) {
+          // Skip re-hydration on session recovery (tab refocus, token refresh)
+          if (hasHydratedRef.current) {
+            return
+          }
+          hasHydratedRef.current = true
           setLoading(true)
           try {
             const hydrate = async () => {
@@ -186,6 +194,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (event === 'SIGNED_OUT') {
           if (isMounted) {
+            hasHydratedRef.current = false
             setProfile(null)
             setRoutineCount(0)
             sessionState.clearUser()
