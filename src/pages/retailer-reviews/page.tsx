@@ -324,7 +324,7 @@ const ReviewsPage = () => {
                 <div>
                   <h3 className="text-lg font-semibold text-deep mb-1">Get personalized reviews</h3>
                   <p className="text-warm-gray text-sm mb-3">Take the skin survey to see retailer reviews from individuals with skin similar to yours.</p>
-                  <Link to="/skin-survey" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-dark transition-colors cursor-pointer">
+                  <Link to="/onboarding" className="inline-flex items-center gap-1.5 px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-dark transition-colors cursor-pointer">
                     <i className="ri-arrow-right-line"></i>
                     <span>Take Skin Survey</span>
                   </Link>

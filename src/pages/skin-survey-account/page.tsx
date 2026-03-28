@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase-browser';
 import { sessionState } from '../../lib/utils/sessionState';
-import QuizFlow from '../skin-survey/components/QuizFlow';
+import QuizFlow from '../onboarding/components/QuizFlow';
 
 export default function SkinSurveyAccountPage() {
   const navigate = useNavigate();
@@ -103,7 +103,7 @@ export default function SkinSurveyAccountPage() {
     }
     
     // NOTE: Don't navigate here - let QuizFlow show its completion screen
-    // The user will click "Check Results" to navigate to /skin-survey/results
+    // The user will click "Check Results" to navigate to /onboarding/results
   };
 
   if (isAuthenticated === null) {

@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 /**
  * AuthPrompt Component
  * 
- * Displayed on /skin-survey before the quiz.
+ * Displayed on /onboarding before the quiz.
  * - Create Account → /auth/signup
- * - Sign In → /auth/login  
+ * - Sign In → /auth/login
  * - Continue as Guest → /skin-survey-account (starts the quiz directly)
  */
 

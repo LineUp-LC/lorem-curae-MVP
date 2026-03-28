@@ -40,7 +40,7 @@ const ingredientRegistry: { id: string; name: string; description: string }[] = 
 const pageRegistry: { id: string; title: string; description: string; link: string }[] = [
   { id: 'discover', title: 'Product Discovery', description: 'Discover your perfect skincare routine', link: '/discover' },
   { id: 'ingredients', title: 'Ingredient Library', description: 'Explore skincare ingredients and their benefits', link: '/ingredients' },
-  { id: 'skin-survey', title: 'Skin Survey', description: 'Complete your skin profile assessment', link: '/skin-survey' },
+  { id: 'skin-survey', title: 'Skin Survey', description: 'Complete your skin profile assessment', link: '/onboarding' },
   { id: 'ai-chat', title: 'AI Skin Advisor', description: 'Get personalized skincare guidance', link: '/ai-chat' },
   { id: 'routines', title: 'Routine Builder', description: 'Build and track your skincare routine', link: '/routines' },
   { id: 'community', title: 'Community', description: 'Connect with the skincare community', link: '/community' },

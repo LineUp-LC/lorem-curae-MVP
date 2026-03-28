@@ -11,7 +11,7 @@ related: ["01-workflow.md", "03-frontend.md", "13-domain-features.md"]
 
 ## Active Routes (Phase 1 Hub)
 
-- 25 active routes defined in src/router/config.tsx (includes Phase 4 `/scan` + Phase 5 `/rewards`, `/badges` redirect)
+- 27 active routes defined in src/router/config.tsx (includes `/onboarding` no-layout + Phase 4 `/scan` + Phase 5 `/rewards`, `/badges` redirect)
 - All other routes are commented out with: `// DEFERRED: Phase [X] — see Notion "Deferred Work Tracker" for trigger condition`
 - Do NOT uncomment deferred routes without checking the Notion Deferred Work Tracker for the trigger condition
 - Do NOT add new routes without confirming they belong to the current phase

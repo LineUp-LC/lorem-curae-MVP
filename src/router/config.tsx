@@ -23,9 +23,9 @@ const ProductDetailPage = lazy(() => import('../pages/product-detail/page'));
 const DataAnonymizationPage = lazy(() => import('../pages/data-anonymization/page'));
 const AIChatPage = lazy(() => import('../pages/ai-chat/page'));
 const AboutPage = lazy(() => import('../pages/about/page'));
-const SkinSurveyPage = lazy(() => import('../pages/skin-survey/page'));
+const SkinSurveyPage = lazy(() => import('../pages/onboarding/page'));
 const SkinSurveyAccountPage = lazy(() => import('../pages/skin-survey-account/page'));
-const SurveyResultsPage = lazy(() => import('../pages/skin-survey/results/page'));
+const SurveyResultsPage = lazy(() => import('../pages/onboarding/results/page'));
 const CartPage = lazy(() => import('../pages/cart/page'));
 const ScanPage = lazy(() => import('../pages/scan/page'));
 const RewardsPage = lazy(() => import('../pages/rewards/page'));
@@ -110,6 +110,9 @@ const routes: RouteObject[] = [
   { path: '/data-anonymization', element: <DataAnonymizationPage /> },
   { path: '/admin/products', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
   { path: '/admin/products/:id', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
+  // ── Onboarding (no layout — fullscreen, seamless post-signup) ──
+  { path: '/onboarding', element: <SkinSurveyPage /> },
+  { path: '/onboarding/results', element: <SurveyResultsPage /> },
 
   // DEFERRED: Post-Launch — Creator no-layout routes — see Notion "Deferred Work Tracker" for trigger condition
   // { path: '/creator/dashboard', element: <CreatorDashboardPage /> },
@@ -136,9 +139,9 @@ const routes: RouteObject[] = [
       { path: '/product-detail/:id', element: <ProductDetailPage /> },
       { path: '/ai-chat', element: <AIChatPage /> },
       { path: '/about', element: <AboutPage /> },
-      { path: '/skin-survey', element: <SkinSurveyPage /> },
+      { path: '/skin-survey', element: <Navigate to="/onboarding" replace /> },
       { path: '/skin-survey-account', element: <SkinSurveyAccountPage /> },
-      { path: '/skin-survey/results', element: <SurveyResultsPage /> },
+      { path: '/skin-survey/results', element: <Navigate to="/onboarding/results" replace /> },
       { path: '/cart', element: <CartPage /> },
       // ── Phase 4 Active ──
       { path: '/scan', element: <ScanPage /> },

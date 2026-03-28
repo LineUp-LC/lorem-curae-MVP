@@ -212,7 +212,6 @@ class SessionStateManager {
     '/auth/signup',
     '/auth/callback',
     '/auth/reset-password',
-    '/skin-survey',
     '/onboarding',
     '/password',
   ];

@@ -312,7 +312,7 @@ export default function HeroSection() {
         >
           <button
             className="lc-btn-start"
-            onClick={() => navigate('/skin-survey')}
+            onClick={() => navigate('/onboarding')}
           >
             Begin your journey
           </button>

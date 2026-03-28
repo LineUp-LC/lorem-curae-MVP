@@ -255,7 +255,7 @@ export function detectNavigationIntent(query: string): NavigationIntent {
   ];
   for (const pattern of surveyPatterns) {
     if (lowerQuery.includes(pattern)) {
-      return { type: 'survey', url: '/skin-survey' };
+      return { type: 'survey', url: '/onboarding' };
     }
   }
 

@@ -10,7 +10,7 @@ import { sessionState } from '../../lib/utils/sessionState';
  *
  * Exclusions:
  * - Auth pages (/auth/*)
- * - Onboarding (/skin-survey, /onboarding)
+ * - Onboarding (/onboarding)
  * - Home page (/)
  * - Password gate
  */

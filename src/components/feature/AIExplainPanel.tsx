@@ -150,7 +150,7 @@ export default function AIExplainPanel({
             <div className="flex items-center gap-2 mb-3 p-2.5 bg-cream/50 rounded-lg border border-blush/30">
               <i className="ri-sparkling-line text-primary/60 flex-shrink-0"></i>
               <p className="text-xs text-warm-gray">
-                <Link to="/skin-survey" className="text-primary hover:text-dark font-medium transition-colors">
+                <Link to="/onboarding" className="text-primary hover:text-dark font-medium transition-colors">
                   Complete your skin quiz
                 </Link>
                 {' '}to see personalized insights

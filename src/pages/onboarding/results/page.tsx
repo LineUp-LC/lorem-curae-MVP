@@ -89,7 +89,7 @@ const SurveyResultsPage = () => {
       };
     } else {
       // No survey data found - redirect to survey
-      navigate('/skin-survey');
+      navigate('/onboarding');
     }
   }, [navigate]);
 

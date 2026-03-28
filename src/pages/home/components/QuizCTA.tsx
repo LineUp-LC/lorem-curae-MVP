@@ -153,7 +153,7 @@ export default function QuizCTA() {
         {/* CTA matches Hero for consistency */}
         <motion.div variants={contentVariants}>
           <MotionLink
-            to="/skin-survey"
+            to="/onboarding"
             className="lc-btn-primary"
             whileHover={buttonHover}
             whileTap={buttonTap}

@@ -274,7 +274,7 @@ export default function ProfileViewPage() {
                 </p>
                 {isOwnProfile && (
                   <Link
-                    to="/skin-survey"
+                    to="/onboarding"
                     className="px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-dark transition-colors cursor-pointer"
                   >
                     Start Survey

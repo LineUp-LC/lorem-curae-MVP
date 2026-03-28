@@ -644,7 +644,7 @@ export default function MySkinPage() {
 
               {/* CTA */}
               <button
-                onClick={() => navigate('/skin-survey')}
+                onClick={() => navigate('/onboarding')}
                 className="px-6 py-3 bg-primary text-white rounded-full font-medium hover:bg-dark transition-colors cursor-pointer"
               >
                 Start Survey

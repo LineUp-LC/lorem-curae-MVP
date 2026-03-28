@@ -406,7 +406,7 @@ const AccountPage = () => {
             <div className="text-center py-4">
               <p className="text-sm text-warm-gray mb-3">You haven't completed your skin profile yet.</p>
               <Link
-                to="/skin-survey"
+                to="/onboarding"
                 className="inline-block px-5 py-2 bg-primary text-white rounded-lg text-sm font-medium transition-colors cursor-pointer hover:bg-dark"
               >
                 Start Survey

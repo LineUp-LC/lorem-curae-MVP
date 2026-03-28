@@ -39,7 +39,7 @@ const AuthCallbackPage = () => {
           }
           if (!profile?.survey_completed) {
             // Keep postAuthRedirect in localStorage — survey completion will consume it
-            return '/skin-survey';
+            return '/onboarding';
           }
         } catch (e) {
           console.error('[auth callback] Failed to check survey status:', e);
@@ -68,7 +68,7 @@ const AuthCallbackPage = () => {
           }
           setStatus('success');
           const redirect = await getPostAuthRedirect();
-          setTimeout(() => navigate(redirect), 2000);
+          navigate(redirect);
           return;
         }
 
@@ -110,11 +110,8 @@ const AuthCallbackPage = () => {
           setCallbackType(type);
           setStatus('success');
 
-          // Redirect after a short delay
           const redirect2 = await getPostAuthRedirect();
-          setTimeout(() => {
-            navigate(redirect2);
-          }, 2000);
+          navigate(redirect2);
         } else {
           // No tokens - check if there's an existing session
           const { data: { session } } = await supabase.auth.getSession();
@@ -122,9 +119,7 @@ const AuthCallbackPage = () => {
           if (session) {
             setStatus('success');
             const redirect3 = await getPostAuthRedirect();
-            setTimeout(() => {
-              navigate(redirect3);
-            }, 2000);
+            navigate(redirect3);
           } else {
             setStatus('error');
             setErrorMessage('No verification token found. Please try signing up again.');

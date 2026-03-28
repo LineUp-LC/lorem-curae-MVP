@@ -313,7 +313,7 @@ Verify the following areas:
   - Concerns → /discover?concern=:concern
   - Categories → /discover?category=:category
   - Routines → /routines
-  - Skin Survey → /skin-survey
+  - Skin Survey → /onboarding
   - FAQ → /faq
   - Community → /community
   - Progress Tracking → /my-skin

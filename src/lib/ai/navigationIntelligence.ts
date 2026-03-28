@@ -231,7 +231,7 @@ export const SITE_NAVIGATION = {
   marketplace: '/marketplace',
   discover: '/discover',
   routines: '/routines',
-  survey: '/skin-survey',
+  survey: '/onboarding',
   faq: '/faq',
   community: '/community',
   mySkin: '/my-skin',
@@ -427,7 +427,7 @@ export function getRoutineUrl(): PageLink {
  */
 export function getSurveyUrl(): PageLink {
   return {
-    url: '/skin-survey',
+    url: '/onboarding',
     label: 'Skin Survey',
     description: 'Take or retake your skin assessment',
   };
@@ -620,7 +620,7 @@ export function generateContextualLinks(
   if (options?.includeSurvey || context.primaryTarget === 'survey') {
     links.push({
       target: 'survey',
-      url: '/skin-survey',
+      url: '/onboarding',
       label: 'Skin Survey',
       isValid: true,
     });
@@ -743,7 +743,7 @@ export function isValidInternalUrl(url: string): boolean {
     '/discover',
     '/product-detail',
     '/routines',
-    '/skin-survey',
+    '/onboarding',
     '/faq',
     '/community',
     '/my-skin',
