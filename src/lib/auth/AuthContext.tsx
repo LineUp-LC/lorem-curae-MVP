@@ -42,9 +42,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [routineCount, setRoutineCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const hasHydratedRef = useRef(false)
+  const lastHydratedUserRef = useRef<string | null>(null)
+  const lastHydrationTimeRef = useRef<number>(0)
 
   // Sync profile to sessionState + rehydrate localStorage if needed
   const syncProfileToSessionState = (userProfile: UserProfile) => {
+    const now = Date.now()
+    if (
+      userProfile.id === lastHydratedUserRef.current &&
+      now - lastHydrationTimeRef.current < 2000
+    ) {
+      console.log('[rehydration] Skipped duplicate sync for same user within 2s')
+      return
+    }
+    lastHydratedUserRef.current = userProfile.id
+    lastHydrationTimeRef.current = now
+
     sessionState.setUser({
       id: userProfile.id,
       email: userProfile.email,
@@ -124,6 +137,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
 
         if (currentUser) {
+          // Skip if SIGNED_IN handler already hydrated (race condition)
+          if (hasHydratedRef.current) {
+            if (isMounted) setLoading(false)
+            return
+          }
           hasHydratedRef.current = true
           const userProfile = await loadUserProfile(currentUser.id)
           const count = await getRoutineCount(currentUser.id)
@@ -195,6 +213,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_OUT') {
           if (isMounted) {
             hasHydratedRef.current = false
+            lastHydratedUserRef.current = null
+            lastHydrationTimeRef.current = 0
             setProfile(null)
             setRoutineCount(0)
             sessionState.clearUser()
