@@ -42,22 +42,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [routineCount, setRoutineCount] = useState(0)
   const [loading, setLoading] = useState(true)
   const hasHydratedRef = useRef(false)
-  const lastHydratedUserRef = useRef<string | null>(null)
-  const lastHydrationTimeRef = useRef<number>(0)
 
   // Sync profile to sessionState + rehydrate localStorage if needed
   const syncProfileToSessionState = (userProfile: UserProfile) => {
-    const now = Date.now()
-    if (
-      userProfile.id === lastHydratedUserRef.current &&
-      now - lastHydrationTimeRef.current < 2000
-    ) {
-      console.log('[rehydration] Skipped duplicate sync for same user within 2s')
-      return
-    }
-    lastHydratedUserRef.current = userProfile.id
-    lastHydrationTimeRef.current = now
-
     sessionState.setUser({
       id: userProfile.id,
       email: userProfile.email,
@@ -82,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Best path: surveyAnswers IS the original skinSurveyData object
         localStorage.setItem('skinSurveyData', JSON.stringify(surveyAnswers))
         localStorage.setItem('survey_completed', 'true')
-        console.log('[rehydration] Profile data restored to localStorage (surveyAnswers)')
+        console.log(`[rehydration] Profile data restored to localStorage (surveyAnswers) — ${new Date().toISOString()}`)
       } else if (userProfile.skin_type || userProfile.concerns?.length) {
         // Fallback: reconstruct from individual profile fields
         const reconstructed: Record<string, any> = {}
@@ -106,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (ls.scarringType) reconstructed.scarringType = ls.scarringType
         localStorage.setItem('skinSurveyData', JSON.stringify(reconstructed))
         localStorage.setItem('survey_completed', 'true')
-        console.log('[rehydration] Profile data restored to localStorage (reconstructed)')
+        console.log(`[rehydration] Profile data restored to localStorage (reconstructed) — ${new Date().toISOString()}`)
       } else {
         console.log('[rehydration] No profile data to restore')
       }
@@ -213,8 +200,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (event === 'SIGNED_OUT') {
           if (isMounted) {
             hasHydratedRef.current = false
-            lastHydratedUserRef.current = null
-            lastHydrationTimeRef.current = 0
             setProfile(null)
             setRoutineCount(0)
             sessionState.clearUser()
