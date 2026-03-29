@@ -72,6 +72,7 @@ export default function WhereToBuySheet({
   // Dedicated product search state (finds the product across many retailers)
   const [buyProducts, setBuyProducts] = useState<WebProduct[]>([]);
   const [buySearchDone, setBuySearchDone] = useState(false);
+  const [buySearchError, setBuySearchError] = useState<string | null>(null);
   const buySearchFiredRef = useRef<string | null>(null);
 
   // General Google reviews state
@@ -91,19 +92,38 @@ export default function WhereToBuySheet({
   }, [isOpen, user?.id, productName]);
 
   // Dedicated product search — find this product across ALL retailers
+  const buySearchActiveRef = useRef(false);
+  const runBuySearch = useCallback(() => {
+    if (!user || buySearchActiveRef.current) return;
+    buySearchActiveRef.current = true;
+    setBuySearchDone(false);
+    setBuySearchError(null);
+    setBuyProducts([]);
+
+    searchWhereToBuy(productName, productBrand).then(({ products, error }) => {
+      buySearchActiveRef.current = false;
+      if (products) setBuyProducts(products);
+      if (error) setBuySearchError(error);
+      setBuySearchDone(true);
+    }).catch(() => {
+      buySearchActiveRef.current = false;
+      setBuySearchError('Search service unavailable');
+      setBuySearchDone(true);
+    });
+  }, [user, productName, productBrand]);
+
   useEffect(() => {
     if (!isOpen || !user) return;
     const searchKey = `${productBrand}:${productName}`;
     if (buySearchFiredRef.current === searchKey) return;
     buySearchFiredRef.current = searchKey;
+    runBuySearch();
+  }, [isOpen, user, productName, productBrand, runBuySearch]);
 
-    searchWhereToBuy(productName, productBrand).then(results => {
-      if (results) setBuyProducts(results);
-      setBuySearchDone(true);
-    }).catch(() => {
-      setBuySearchDone(true);
-    });
-  }, [isOpen, user, productName, productBrand]);
+  const handleRetryBuySearch = useCallback(() => {
+    buySearchFiredRef.current = null;
+    runBuySearch();
+  }, [runBuySearch]);
 
   // Fetch general Google reviews on sheet open (not on expand)
   useEffect(() => {
@@ -259,11 +279,13 @@ export default function WhereToBuySheet({
               <p className="text-[11px] text-warm-gray">
                 {isSearching
                   ? 'Searching retailers...'
-                  : retailerCount === 0
-                    ? 'Not available online'
-                    : retailerCount === 1
-                      ? `Available on ${listings[0].retailerName}`
-                      : `Compare ${retailerCount} retailers`}
+                  : buySearchError && retailerCount === 0
+                    ? 'Search failed'
+                    : retailerCount === 0
+                      ? 'Not available online'
+                      : retailerCount === 1
+                        ? `Available on ${listings[0].retailerName}`
+                        : `Compare ${retailerCount} retailers`}
               </p>
             </div>
           </div>
@@ -284,8 +306,26 @@ export default function WhereToBuySheet({
           </div>
         )}
 
+        {/* Error state — search failed */}
+        {!isSearching && buySearchError && retailerCount === 0 && (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+            <div className="w-14 h-14 flex items-center justify-center bg-cream rounded-full mb-4">
+              <i className="ri-wifi-off-line text-2xl text-warm-gray" />
+            </div>
+            <h3 className="font-serif font-bold text-deep text-lg mb-1">Couldn't search retailers</h3>
+            <p className="text-sm text-warm-gray mb-4">{buySearchError}</p>
+            <button
+              onClick={handleRetryBuySearch}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-full hover:bg-dark transition-colors cursor-pointer"
+            >
+              <i className="ri-refresh-line" />
+              Try again
+            </button>
+          </div>
+        )}
+
         {/* 0 retailers — Not available online (only after search completes) */}
-        {!isSearching && retailerCount === 0 && (
+        {!isSearching && !buySearchError && retailerCount === 0 && (
           <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
             <div className="w-14 h-14 flex items-center justify-center bg-cream rounded-full mb-4">
               <i className="ri-map-pin-line text-2xl text-warm-gray" />

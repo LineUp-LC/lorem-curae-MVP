@@ -245,8 +245,8 @@ export async function searchRetailerReviews(
 export async function searchWhereToBuy(
   productName: string,
   productBrand: string,
-): Promise<WebProduct[] | null> {
-  if (!productName?.trim() || !productBrand?.trim()) return null;
+): Promise<{ products: WebProduct[] | null; error?: string }> {
+  if (!productName?.trim() || !productBrand?.trim()) return { products: null };
 
   const result = await callProductSearch({
     type: 'buy',
@@ -254,8 +254,10 @@ export async function searchWhereToBuy(
     productBrand,
   });
 
-  if (!result.success || !result.products) return null;
-  return result.products;
+  if (!result.success || !result.products) {
+    return { products: null, error: result.error };
+  }
+  return { products: result.products };
 }
 
 /**
