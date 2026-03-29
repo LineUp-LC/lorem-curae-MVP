@@ -651,6 +651,18 @@ export function computeBestForYouScore(
 }
 
 // ---------------------------------------------------------------------------
+// URL helpers
+// ---------------------------------------------------------------------------
+
+function extractUrlHostname(url: string): string | null {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return null;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Build sorted + filtered retailer listings
 // ---------------------------------------------------------------------------
 
@@ -668,7 +680,7 @@ export function buildRetailerListings(
 
     return {
       retailerName: known?.name || wp.merchant,
-      domain: known?.domain || wp.merchant.toLowerCase().replace(/\s+/g, ''),
+      domain: known?.domain || extractUrlHostname(wp.externalUrl) || wp.merchant.toLowerCase().replace(/[^a-z0-9]/g, ''),
       price: wp.price,
       url: wp.externalUrl,
       productRating: wp.rating,
