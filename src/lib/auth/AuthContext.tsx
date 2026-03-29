@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Best path: surveyAnswers IS the original skinSurveyData object
         localStorage.setItem('skinSurveyData', JSON.stringify(surveyAnswers))
         localStorage.setItem('survey_completed', 'true')
-        console.log('[rehydration] Profile data restored to localStorage (surveyAnswers)')
+        console.log(`[rehydration] Profile data restored to localStorage (surveyAnswers) — ${new Date().toISOString()}`)
       } else if (userProfile.skin_type || userProfile.concerns?.length) {
         // Fallback: reconstruct from individual profile fields
         const reconstructed: Record<string, any> = {}
@@ -93,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (ls.scarringType) reconstructed.scarringType = ls.scarringType
         localStorage.setItem('skinSurveyData', JSON.stringify(reconstructed))
         localStorage.setItem('survey_completed', 'true')
-        console.log('[rehydration] Profile data restored to localStorage (reconstructed)')
+        console.log(`[rehydration] Profile data restored to localStorage (reconstructed) — ${new Date().toISOString()}`)
       } else {
         console.log('[rehydration] No profile data to restore')
       }
@@ -124,13 +124,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(currentUser)
 
         if (currentUser) {
+          // Skip if SIGNED_IN handler already hydrated (race condition)
+          if (hasHydratedRef.current) {
+            if (isMounted) setLoading(false)
+            return
+          }
+          hasHydratedRef.current = true
           const userProfile = await loadUserProfile(currentUser.id)
           const count = await getRoutineCount(currentUser.id)
           if (isMounted) {
             setProfile(userProfile)
             setRoutineCount(count)
             if (userProfile) syncProfileToSessionState(userProfile)
-            hasHydratedRef.current = true
           }
         }
       } catch (e) {
@@ -151,36 +156,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(authUser)
 
         if (event === 'SIGNED_IN' && authUser) {
-          // Skip re-hydration on session recovery / token refresh
+          // Skip re-hydration on session recovery (tab refocus, token refresh)
           if (hasHydratedRef.current) {
             return
           }
-
+          hasHydratedRef.current = true
           setLoading(true)
           try {
             const hydrate = async () => {
-              let userProfile = await loadUserProfile(authUser.id)
+              const existing = await loadUserProfile(authUser.id)
 
-              if (!userProfile) {
+              if (!existing) {
                 await mergeGuestDataToAccount(authUser.id, null)
                 await createUserProfile(authUser)
-                userProfile = await loadUserProfile(authUser.id)
               } else {
-                // Skip merge when no guest data exists — saves 1-2s on hydration
-                const hasGuestData =
-                  localStorage.getItem('skinSurveyData') ||
-                  localStorage.getItem('survey_answers') ||
-                  localStorage.getItem('savedProducts') ||
-                  localStorage.getItem('routines') ||
-                  localStorage.getItem('user_location')
-                if (hasGuestData) {
-                  await mergeGuestDataToAccount(authUser.id, userProfile)
-                  userProfile = await loadUserProfile(authUser.id)  // reload post-merge
-                } else {
-                  console.log('[auth] No guest data to merge, skipping')
-                }
+                await mergeGuestDataToAccount(authUser.id, existing)
               }
 
+              const userProfile = await loadUserProfile(authUser.id)
               const count = await getRoutineCount(authUser.id)
 
               if (isMounted) {
@@ -194,21 +187,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             await Promise.race([
               hydrate(),
               new Promise<void>((_, reject) =>
-                setTimeout(() => reject(new Error('[auth] Sign-in hydration timed out')), 10000)
+                setTimeout(() => reject(new Error('[auth] Sign-in hydration timed out')), 8000)
               ),
             ])
-            hasHydratedRef.current = true
           } catch (e) {
-            console.warn('[auth] Hydration slow or failed — continuing with cached data:', e)
-            hasHydratedRef.current = true
+            console.error('[auth] Failed to hydrate profile after sign-in:', e)
           } finally {
             if (isMounted) setLoading(false)
           }
         }
 
         if (event === 'SIGNED_OUT') {
-          hasHydratedRef.current = false
           if (isMounted) {
+            hasHydratedRef.current = false
             setProfile(null)
             setRoutineCount(0)
             sessionState.clearUser()

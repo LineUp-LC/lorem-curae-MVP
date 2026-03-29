@@ -119,6 +119,27 @@ export async function createScanThumbnail(file: File | Blob): Promise<string> {
 }
 
 // ---------------------------------------------------------------------------
+// Auth helper
+// ---------------------------------------------------------------------------
+
+/**
+ * Get a valid auth session, retrying once after a short delay if the
+ * Supabase client is mid-refresh and returns no token on the first call.
+ */
+async function getSessionWithRetry(): Promise<string | null> {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.access_token) return session.access_token;
+
+  // No session at all (guest user) — don't retry
+  if (!session) return null;
+
+  // Session exists but no token — likely mid-refresh. Wait and retry once.
+  await new Promise(r => setTimeout(r, 500));
+  const { data: { session: retry } } = await supabase.auth.getSession();
+  return retry?.access_token ?? null;
+}
+
+// ---------------------------------------------------------------------------
 // API caller
 // ---------------------------------------------------------------------------
 
@@ -141,8 +162,8 @@ export type ScanClientResponse = ScanClientResult | ScanClientError;
  * Skips image compression — sends only the barcode string.
  */
 export async function scanByUpc(upc: string): Promise<ScanClientResponse> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
+  const accessToken = await getSessionWithRetry();
+  if (!accessToken) {
     return { success: false, error: 'Sign in to scan products' };
   }
 
@@ -151,7 +172,7 @@ export async function scanByUpc(upc: string): Promise<ScanClientResponse> {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({ upc }),
     });
@@ -184,8 +205,8 @@ export async function scanByUpc(upc: string): Promise<ScanClientResponse> {
  */
 export async function scanProduct(file: File | Blob): Promise<ScanClientResponse> {
   // 1. Auth check — guest users blocked
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
+  const accessToken = await getSessionWithRetry();
+  if (!accessToken) {
     return { success: false, error: 'Sign in to scan products' };
   }
 
@@ -212,7 +233,7 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         image: base64,
@@ -257,8 +278,8 @@ export async function scanProduct(file: File | Blob): Promise<ScanClientResponse
  * safety tiers, caution reasons, and personalized relevance.
  */
 export async function scanProductFull(imageBase64: string): Promise<ScanClientResponse> {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (!session?.access_token) {
+  const accessToken = await getSessionWithRetry();
+  if (!accessToken) {
     return { success: false, error: 'Sign in to scan products' };
   }
 
@@ -272,7 +293,7 @@ export async function scanProductFull(imageBase64: string): Promise<ScanClientRe
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${session.access_token}`,
+        Authorization: `Bearer ${accessToken}`,
       },
       body: JSON.stringify({
         image: imageBase64,
