@@ -318,6 +318,9 @@ export function extractBrandSlug(domainOrName: string): string {
   // Strip simple TLD (.com, .sg, .fr, etc.)
   d = d.replace(/\.[a-z]{2,6}$/, '');
 
+  // Strip regional suffixes: kiehls-us → kiehls, boots-uk → boots, "boots uk" → "boots"
+  d = d.replace(/[-_\s](us|uk|ca|au|sg|fr|de|jp|kr|in|mx|br|eu|global|intl|int|middle[-_\s]east)$/, '');
+
   // Strip subdomains — keep only the last segment (brand name)
   const parts = d.split('.');
   d = parts[parts.length - 1];
@@ -325,6 +328,11 @@ export function extractBrandSlug(domainOrName: string): string {
   // Remove apostrophes and non-alphanumeric chars
   return d.replace(/[^a-z0-9]/g, '');
 }
+
+/** Pre-computed slug → domain map for O(1) fuzzy lookup in normalizeDomain */
+const RETAILER_SLUG_MAP = new Map(
+  Object.keys(KNOWN_RETAILERS).map(key => [extractBrandSlug(key), key]),
+);
 
 /**
  * Check if a web review matches a retailer for display in that retailer's card.
@@ -391,6 +399,12 @@ function normalizeDomain(input: string): string {
   const lower = input.toLowerCase().trim();
   for (const retailer of Object.values(KNOWN_RETAILERS)) {
     if (lower === retailer.name.toLowerCase()) return retailer.domain;
+  }
+  // Fuzzy match via brand slug (handles "Boots UK" → boots.com, "Olive Young Global" → oliveyoung.com)
+  const inputSlug = extractBrandSlug(d);
+  if (inputSlug.length >= 3) {
+    const slugMatch = RETAILER_SLUG_MAP.get(inputSlug);
+    if (slugMatch) return slugMatch;
   }
   return d;
 }
