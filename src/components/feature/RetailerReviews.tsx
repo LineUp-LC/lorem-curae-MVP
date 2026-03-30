@@ -1,11 +1,11 @@
 // src/components/feature/RetailerReviews.tsx
-// Per-retailer keyword-matched reviews with lazy AI summary.
-// Receives pre-fetched web reviews from parent — filters by domain client-side.
+// Per-retailer reviews with lazy AI summary.
+// Fetches retailer-scoped reviews via searchRetailerReviews() on mount.
 
 import { useState, useEffect, useMemo, useRef } from 'react';
 import type { WebReview } from '../../types/webSearch';
 import type { RetailerListing } from '../../types/retailerDirectory';
-import { reviewMatchesRetailer } from '../../lib/data/retailerDirectory';
+import { searchRetailerReviews } from '../../lib/api/productSearch';
 import { buildAIContext } from '../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
 import {
@@ -20,8 +20,6 @@ interface RetailerReviewsProps {
   listing: RetailerListing;
   productName: string;
   productBrand: string;
-  /** Pre-fetched general web reviews (from parent) */
-  webReviews: WebReview[];
   onKeywordMatches?: (domain: string, matches: KeywordMatch[], totalReviews: number) => void;
 }
 
@@ -55,14 +53,16 @@ export default function RetailerReviews({
   listing,
   productName,
   productBrand,
-  webReviews,
   onKeywordMatches,
 }: RetailerReviewsProps) {
   const [aiSummary, setAiSummary] = useState<string | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [reviews, setReviews] = useState<WebReview[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(true);
   const cancelledRef = useRef(false);
   const aiTriggeredRef = useRef(false);
+  const fetchedRef = useRef(false);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -73,14 +73,29 @@ export default function RetailerReviews({
   const concerns = getEffectiveConcerns();
   const sensitivity = getEffectiveSensitivity();
 
-  // Filter reviews: match by domain brand slug, subdomain, or retailer name.
-  // Handles regional TLDs (sephora.sg → sephora.com) and name variations.
-  const reviews = useMemo(() => {
-    const filtered = webReviews.filter(r => !isProductDescription(r.content));
-    return filtered.filter(r =>
-      reviewMatchesRetailer(r, listing.domain, listing.retailerName),
-    );
-  }, [webReviews, listing.domain, listing.retailerName]);
+  // Fetch retailer-scoped reviews on mount (component only renders when expanded)
+  useEffect(() => {
+    if (fetchedRef.current) return;
+    fetchedRef.current = true;
+
+    const userProfile = skinType || concerns.length > 0 || sensitivity
+      ? { skinType: skinType ?? undefined, concerns, sensitivity: sensitivity ?? undefined }
+      : undefined;
+
+    searchRetailerReviews(productName, productBrand, listing.domain, userProfile)
+      .then(results => {
+        if (cancelledRef.current) return;
+        const filtered = (results ?? []).filter(r => !isProductDescription(r.content));
+        setReviews(filtered);
+      })
+      .catch(() => {
+        if (!cancelledRef.current) setReviews([]);
+      })
+      .finally(() => {
+        if (!cancelledRef.current) setReviewsLoading(false);
+      });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Compute keyword matches from filtered reviews
   const keywordMatches = useMemo(() => {
@@ -177,10 +192,23 @@ export default function RetailerReviews({
     highlightSentiment: true,
   };
 
+  if (reviewsLoading) {
+    return (
+      <div className="px-4 py-3 space-y-2">
+        {[1, 2, 3].map(i => (
+          <div key={i} className="p-2.5 rounded-lg bg-cream/50 border border-blush/30 animate-pulse">
+            <div className="h-3 bg-blush/40 rounded w-full mb-2" />
+            <div className="h-3 bg-blush/30 rounded w-3/4" />
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   if (reviews.length === 0) {
     return (
       <div className="px-4 py-3 text-xs text-warm-gray text-center">
-        No {listing.retailerName} reviews found in web results.
+        No {listing.retailerName} reviews found.
       </div>
     );
   }

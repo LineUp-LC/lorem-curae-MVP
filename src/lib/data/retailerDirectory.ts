@@ -677,7 +677,6 @@ export function buildRetailerListings(
     const known = lookupRetailer(wp.merchant);
     const badges = known ? getTrustBadges(known) : [];
     const score = computeBestForYouScore(wp.price, maxPrice, known);
-
     return {
       retailerName: known?.name || wp.merchant,
       domain: known?.domain || extractUrlHostname(wp.externalUrl) || wp.merchant.toLowerCase().replace(/[^a-z0-9]/g, ''),

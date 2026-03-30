@@ -454,7 +454,6 @@ export default function WhereToBuySheet({
                       listing={listing}
                       productName={productName}
                       productBrand={productBrand}
-                      webReviews={googleReviews ?? []}
                       onKeywordMatches={handleKeywordMatches}
                     />
                   )}
