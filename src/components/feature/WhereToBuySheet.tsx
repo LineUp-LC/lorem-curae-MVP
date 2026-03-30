@@ -7,6 +7,7 @@ import type { RetailerListing, RetailerSortKey } from '../../types/retailerDirec
 import {
   buildRetailerListings,
   findRetailerListings,
+  KNOWN_RETAILER_DOMAINS,
 } from '../../lib/data/retailerDirectory';
 import RetailerCard from './RetailerCard';
 import RetailerReviews from './RetailerReviews';
@@ -239,7 +240,9 @@ export default function WhereToBuySheet({
   const retailerDomains = useMemo(() => new Set(listings.map(l => l.domain)), [listings]);
   const webOnlyReviews = useMemo(() => {
     if (!googleReviews) return null;
-    return googleReviews.filter(r => !retailerDomains.has(r.sourceDomain));
+    return googleReviews.filter(r =>
+      !retailerDomains.has(r.sourceDomain) && !KNOWN_RETAILER_DOMAINS.has(r.sourceDomain),
+    );
   }, [googleReviews, retailerDomains]);
 
   const activeFilterCount = (freeShipping ? 1 : 0) + (freeReturns ? 1 : 0) + (beautyAuthority ? 1 : 0);

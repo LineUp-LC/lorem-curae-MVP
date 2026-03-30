@@ -287,6 +287,9 @@ const KNOWN_RETAILERS: Record<string, KnownRetailer> = {
 // Brand slug extraction for fuzzy domain matching
 // ---------------------------------------------------------------------------
 
+/** Set of all known retailer domains — used to filter duplicates in web review lists */
+export const KNOWN_RETAILER_DOMAINS: ReadonlySet<string> = new Set(Object.keys(KNOWN_RETAILERS));
+
 /** Known compound TLDs (country-code second-level domains) */
 const COMPOUND_TLDS = new Set([
   'co.uk', 'co.jp', 'co.kr', 'co.in', 'co.nz', 'co.za', 'co.id', 'co.th',
