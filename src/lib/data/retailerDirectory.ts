@@ -284,6 +284,44 @@ const KNOWN_RETAILERS: Record<string, KnownRetailer> = {
 };
 
 // ---------------------------------------------------------------------------
+// Brand URL construction
+// ---------------------------------------------------------------------------
+
+/** Well-known brand slugs that don't follow the simple "brandname.com" pattern */
+const BRAND_DOMAIN_OVERRIDES: Record<string, string> = {
+  'theordinary': 'theordinary.com',
+  'drunkelephant': 'drunkelephant.com',
+  'paulaschoice': 'paulaschoice.com',
+  'larocheposay': 'laroche-posay.com',
+  'mariobadescu': 'mariobadescu.com',
+  'tatcha': 'tatcha.com',
+  'sundayriley': 'sundayriley.com',
+  'supergoop': 'supergoop.com',
+  'firstaidbeauty': 'firstaidbeauty.com',
+  'beautycounter': 'beautycounter.com',
+  'pureessence': 'pureessence.com',
+};
+
+/**
+ * Build a brand official site URL from a brand name.
+ * Returns null when the slug is too short or ambiguous to produce a reliable URL.
+ */
+export function buildBrandUrl(brandName: string): string | null {
+  if (!brandName || brandName.trim().length < 2) return null;
+  const slug = extractBrandSlug(brandName);
+  if (!slug || slug.length < 3) return null;
+
+  // Check overrides first
+  const override = BRAND_DOMAIN_OVERRIDES[slug];
+  if (override) return `https://www.${override}`;
+
+  // Skip if slug matches a known retailer (avoid linking Amazon as a "brand")
+  if (KNOWN_RETAILER_DOMAINS.has(`${slug}.com`)) return null;
+
+  return `https://www.${slug}.com`;
+}
+
+// ---------------------------------------------------------------------------
 // Brand slug extraction for fuzzy domain matching
 // ---------------------------------------------------------------------------
 
