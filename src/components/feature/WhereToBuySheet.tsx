@@ -235,6 +235,13 @@ export default function WhereToBuySheet({
     }));
   }, []);
 
+  // Filter out reviews whose sourceDomain matches a visible retailer tab (avoid duplication)
+  const retailerDomains = useMemo(() => new Set(listings.map(l => l.domain)), [listings]);
+  const webOnlyReviews = useMemo(() => {
+    if (!googleReviews) return null;
+    return googleReviews.filter(r => !retailerDomains.has(r.sourceDomain));
+  }, [googleReviews, retailerDomains]);
+
   const activeFilterCount = (freeShipping ? 1 : 0) + (freeReturns ? 1 : 0) + (beautyAuthority ? 1 : 0);
   const clearAllFilters = useCallback(() => {
     setFreeShipping(false);
@@ -482,8 +489,8 @@ export default function WhereToBuySheet({
                   <div className="flex items-center gap-1.5">
                     <i className="ri-chat-quote-line text-primary text-sm" />
                     <span className="text-xs font-medium text-deep">Reviews from across the web</span>
-                    {googleReviews && googleReviews.length > 0 && (
-                      <span className="text-[10px] text-warm-gray/70">({googleReviews.length})</span>
+                    {webOnlyReviews && webOnlyReviews.length > 0 && (
+                      <span className="text-[10px] text-warm-gray/70">({webOnlyReviews.length})</span>
                     )}
                   </div>
                   <i className={`ri-arrow-${googleReviewsOpen ? 'up' : 'down'}-s-line text-warm-gray`} />
@@ -502,8 +509,8 @@ export default function WhereToBuySheet({
                       </div>
                     )}
 
-                    {!googleReviewsLoading && googleReviews && googleReviews.length > 0 && (
-                      googleReviews.slice(0, 6).map((review, i) => (
+                    {!googleReviewsLoading && webOnlyReviews && webOnlyReviews.length > 0 && (
+                      webOnlyReviews.slice(0, 6).map((review, i) => (
                         <div key={i} className="p-2.5 rounded-lg bg-white border border-blush/30">
                           <div className="flex items-start justify-between gap-2">
                             <p className="text-xs text-warm-gray leading-relaxed flex-1">
@@ -530,7 +537,7 @@ export default function WhereToBuySheet({
                       ))
                     )}
 
-                    {!googleReviewsLoading && googleReviews && googleReviews.length === 0 && (
+                    {!googleReviewsLoading && webOnlyReviews && webOnlyReviews.length === 0 && (
                       <p className="text-xs text-warm-gray text-center py-3">No web reviews found for this product.</p>
                     )}
                   </div>

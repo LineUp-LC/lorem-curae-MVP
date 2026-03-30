@@ -64,8 +64,9 @@ export default function RetailerReviews({
   const aiTriggeredRef = useRef(false);
   const fetchedRef = useRef(false);
 
-  // Cleanup on unmount
+  // Cleanup on unmount (reset on re-mount for StrictMode compat)
   useEffect(() => {
+    cancelledRef.current = false;
     return () => { cancelledRef.current = true; };
   }, []);
 
