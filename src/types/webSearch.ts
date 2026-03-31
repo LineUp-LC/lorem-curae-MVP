@@ -101,6 +101,8 @@ export interface WebProduct {
   source: 'web';
   /** Stock status: true = in stock, false = out of stock, undefined = unknown */
   inStock?: boolean;
+  /** True when the merchant IS the brand selling directly (e.g. "CeraVe" on cerave.com) */
+  isBrandDirect?: boolean;
 }
 
 /** A review snippet found via Google Search. */

@@ -134,6 +134,16 @@ function parsePrice(priceStr: string): number {
 }
 
 // ---------------------------------------------------------------------------
+// Utility: Normalize a brand/merchant name to a comparable slug
+// ---------------------------------------------------------------------------
+
+function normalizeNameSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ''); // strip spaces, apostrophes, hyphens, etc.
+}
+
+// ---------------------------------------------------------------------------
 // Utility: Parse brand from product title
 // ---------------------------------------------------------------------------
 
@@ -395,9 +405,10 @@ function mapShoppingResults(
       const merchant = String(item.source || '');
       const delivery = item.delivery ? String(item.delivery) : undefined;
 
+      const brand = parseBrand(title, merchant);
       return {
         name: cleanProductTitle(title),
-        brand: parseBrand(title, merchant),
+        brand,
         price: parsePrice(String(item.price || '')),
         image: String(item.imageUrl || ''),
         rating: typeof item.rating === 'number' ? item.rating : 0,
@@ -407,6 +418,7 @@ function mapShoppingResults(
         category: category ?? inferCategoryFromTitle(title),
         source: 'web' as const,
         inStock: inferStockStatus(delivery, title),
+        isBrandDirect: normalizeNameSlug(merchant) === normalizeNameSlug(brand),
       };
     })
     .filter(p => p.name.length > 0);

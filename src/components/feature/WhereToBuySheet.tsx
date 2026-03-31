@@ -294,7 +294,7 @@ export default function WhereToBuySheet({
                     : retailerCount === 0
                       ? 'Not available online'
                       : retailerCount === 1
-                        ? `Available on ${listings[0].retailerName}`
+                        ? 'Available on 1 retailer'
                         : `Compare ${retailerCount} retailers`}
               </p>
             </div>

@@ -180,7 +180,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
       {!webLoading && filteredProducts.length > 0 && (
         <div className="space-y-3">
           {filteredProducts.map((wp, idx) => (
-            <WebProductCard key={`compat-${idx}`} product={wp} allProducts={webProducts} onWhereToBuy={setWtbProduct} />
+            <WebProductCard key={`compat-${idx}`} product={wp} onWhereToBuy={setWtbProduct} />
           ))}
         </div>
       )}

@@ -1163,7 +1163,7 @@ export default function ScanResultView({
                   {filteredSimilarProducts && filteredSimilarProducts.length > 0 ? (
                     <div className="space-y-2">
                       {filteredSimilarProducts.map((p, idx) => (
-                        <WebProductCard key={`sim-${idx}`} product={p} allProducts={similarProducts || []} onWhereToBuy={setWtbProduct} />
+                        <WebProductCard key={`sim-${idx}`} product={p} onWhereToBuy={setWtbProduct} />
                       ))}
                     </div>
                   ) : (
