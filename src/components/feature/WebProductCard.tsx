@@ -56,12 +56,6 @@ export default function WebProductCard({ product, onWhereToBuy }: WebProductCard
             )}
           </div>
 
-          {isBrandDirect && (
-            <div className="flex items-center gap-1 mt-1.5">
-              <span className="text-[10px] text-warm-gray/70">via {product.brand}</span>
-              <span className="text-[10px] text-warm-gray/40">· Verify ingredients before use</span>
-            </div>
-          )}
         </div>
       </div>
 

@@ -160,6 +160,16 @@ function getBrandUrl(brand: string): string {
   return `https://www.${domain}`;
 }
 
+// Mass-market brands distributed primarily through retailers — no meaningful DTC store.
+// Products from these brands will NOT show a "View on [Brand]" CTA.
+const RETAILER_ONLY_BRANDS = new Set([
+  'neutrogena', 'cerave', 'aveeno', 'olay', 'garnier',
+  'dove', 'nivea', 'vaseline', 'ponds', 'cleanandclear',
+  'stives', 'lubriderm', 'eucerin', 'aquaphor', 'jergens',
+  'loreal', 'lorealparis', 'maybelline', 'covergirl', 'revlon',
+  'elf', 'e.l.f', 'nyx',
+]);
+
 // ---------------------------------------------------------------------------
 // Utility: Parse brand from product title
 // ---------------------------------------------------------------------------
@@ -423,7 +433,7 @@ function mapShoppingResults(
       const delivery = item.delivery ? String(item.delivery) : undefined;
 
       const brand = parseBrand(title, merchant);
-      const isBrandDirect = normalizeNameSlug(merchant) === normalizeNameSlug(brand);
+      const isBrandDirect = !RETAILER_ONLY_BRANDS.has(normalizeNameSlug(brand));
       return {
         name: cleanProductTitle(title),
         brand,
