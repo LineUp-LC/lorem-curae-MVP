@@ -1,16 +1,41 @@
 // src/components/feature/WebProductCard.tsx
 // Shared product card for web search results (compatible + similar products).
 
+import { useMemo } from 'react';
 import type { WebProduct } from '../../types/webSearch';
-import { buildBrandUrl } from '../../lib/data/retailerDirectory';
+import { extractBrandSlug } from '../../lib/data/retailerDirectory';
 
 interface WebProductCardProps {
   product: WebProduct;
+  /** All sibling products from the same search — used to find brand-site URL */
+  allProducts: WebProduct[];
   onWhereToBuy: (product: WebProduct) => void;
 }
 
-export default function WebProductCard({ product, onWhereToBuy }: WebProductCardProps) {
-  const brandUrl = buildBrandUrl(product.brand);
+/**
+ * Find a real product page URL on the brand's official site by scanning sibling
+ * Serper results. Compares extractBrandSlug(brand) against the domain of each
+ * product's externalUrl. Returns the first matching URL, or null.
+ */
+function findBrandProductUrl(brand: string, allProducts: WebProduct[]): string | null {
+  if (!brand || brand.trim().length < 2) return null;
+  const brandSlug = extractBrandSlug(brand);
+  if (!brandSlug || brandSlug.length < 3) return null;
+
+  for (const p of allProducts) {
+    try {
+      const domain = new URL(p.externalUrl).hostname.replace(/^www\./, '');
+      if (extractBrandSlug(domain) === brandSlug) return p.externalUrl;
+    } catch { /* skip invalid URLs */ }
+  }
+  return null;
+}
+
+export default function WebProductCard({ product, allProducts, onWhereToBuy }: WebProductCardProps) {
+  const brandUrl = useMemo(
+    () => findBrandProductUrl(product.brand, allProducts),
+    [product.brand, allProducts],
+  );
 
   return (
     <div className="bg-white rounded-2xl border border-blush shadow-sm overflow-hidden">
