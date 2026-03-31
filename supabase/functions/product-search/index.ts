@@ -144,6 +144,23 @@ function normalizeNameSlug(name: string): string {
 }
 
 // ---------------------------------------------------------------------------
+// Utility: Resolve brand homepage URL from brand name
+// ---------------------------------------------------------------------------
+
+// Overrides for brands whose normalized slug doesn't match their real domain
+const BRAND_DOMAIN_OVERRIDES: Record<string, string> = {
+  'larochemposay': 'laroche-posay.us',
+  'loreal':        'lorealparisusa.com',
+  'lorealparis':   'lorealparisusa.com',
+};
+
+function getBrandUrl(brand: string): string {
+  const slug = normalizeNameSlug(brand);
+  const domain = BRAND_DOMAIN_OVERRIDES[slug] ?? `${slug}.com`;
+  return `https://www.${domain}`;
+}
+
+// ---------------------------------------------------------------------------
 // Utility: Parse brand from product title
 // ---------------------------------------------------------------------------
 
@@ -406,6 +423,7 @@ function mapShoppingResults(
       const delivery = item.delivery ? String(item.delivery) : undefined;
 
       const brand = parseBrand(title, merchant);
+      const isBrandDirect = normalizeNameSlug(merchant) === normalizeNameSlug(brand);
       return {
         name: cleanProductTitle(title),
         brand,
@@ -413,12 +431,12 @@ function mapShoppingResults(
         image: String(item.imageUrl || ''),
         rating: typeof item.rating === 'number' ? item.rating : 0,
         reviewCount: typeof item.ratingCount === 'number' ? item.ratingCount : 0,
-        externalUrl: String(item.link || ''),
+        externalUrl: isBrandDirect ? getBrandUrl(brand) : String(item.link || ''),
         merchant,
         category: category ?? inferCategoryFromTitle(title),
         source: 'web' as const,
         inStock: inferStockStatus(delivery, title),
-        isBrandDirect: normalizeNameSlug(merchant) === normalizeNameSlug(brand),
+        isBrandDirect,
       };
     })
     .filter(p => p.name.length > 0);
