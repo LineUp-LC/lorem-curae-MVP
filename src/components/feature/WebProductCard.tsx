@@ -56,25 +56,27 @@ export default function WebProductCard({ product, onWhereToBuy }: WebProductCard
             )}
           </div>
 
-          <div className="flex items-center gap-1 mt-1.5">
-            <span className="text-[10px] text-warm-gray/70">
-              via {isBrandDirect ? product.brand : product.merchant}
-            </span>
-            <span className="text-[10px] text-warm-gray/40">· Verify ingredients before use</span>
-          </div>
+          {isBrandDirect && (
+            <div className="flex items-center gap-1 mt-1.5">
+              <span className="text-[10px] text-warm-gray/70">via {product.brand}</span>
+              <span className="text-[10px] text-warm-gray/40">· Verify ingredients before use</span>
+            </div>
+          )}
         </div>
       </div>
 
       <div className="border-t border-blush/50 px-4 py-2 flex items-center gap-2">
-        <a
-          href={product.externalUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium text-primary hover:text-dark transition-colors"
-        >
-          <i className={isBrandDirect ? 'ri-global-line' : 'ri-external-link-line'} />
-          {isBrandDirect ? `View on ${product.brand}` : `View on ${product.merchant}`}
-        </a>
+        {isBrandDirect && (
+          <a
+            href={product.externalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-1 flex items-center justify-center gap-1 py-1.5 text-[11px] font-medium text-primary hover:text-dark transition-colors"
+          >
+            <i className="ri-global-line" />
+            View on {product.brand}
+          </a>
+        )}
         <button
           onClick={() => onWhereToBuy(product)}
           className="flex items-center gap-1 px-3 py-1.5 text-[11px] font-medium text-primary border border-primary/30 rounded-full hover:bg-primary/5 transition-colors cursor-pointer"
