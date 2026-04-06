@@ -174,22 +174,60 @@ const RETAILER_ONLY_BRANDS = new Set([
 // Utility: Parse brand from product title
 // ---------------------------------------------------------------------------
 
-function parseBrand(title: string, merchant: string): string {
-  // Common pattern: "BrandName ProductName - Size"
-  // Try to extract brand as the first word or known segment
-  const cleaned = title.replace(/\s*-\s*.*$/, '').trim();
-  const words = cleaned.split(/\s+/);
+// Explicitly known multi-word brands that the heuristic would miss
+const MULTI_WORD_BRANDS = [
+  'Youth To The People',
+  'Drunk Elephant',
+  'Sunday Riley',
+  'Peter Thomas Roth',
+  'First Aid Beauty',
+  'One Love Organics',
+  'Tatcha',
+  'Fresh',
+  'Allies of Skin',
+  'Alpha-H',
+];
 
-  // If first word is capitalized and short-ish, likely a brand
-  if (words.length > 1 && words[0].length <= 20) {
-    // Check for multi-word brands (e.g., "La Roche-Posay", "The Ordinary")
-    if (words[0] === 'The' || words[0] === 'La' || words[0] === 'Dr.') {
-      return words.slice(0, 2).join(' ');
+// Words that appear in product names, not brand names — heuristic stops here
+const PRODUCT_NAME_WORDS = new Set([
+  'Serum', 'Cream', 'Moisturizer', 'Cleanser', 'Toner', 'Mask', 'Oil',
+  'Lotion', 'Gel', 'Foam', 'Balm', 'Mist', 'Spray', 'Essence', 'Ampoule',
+  'Treatment', 'Sunscreen', 'Spf', 'Retinol', 'Vitamin', 'Hyaluronic',
+  'Niacinamide', 'Peptide', 'Exfoliant', 'Scrub', 'Peel', 'Brightening',
+  'Hydrating', 'Anti', 'Daily', 'Night', 'Day', 'Eye', 'Face', 'Skin',
+  'Advanced', 'Ultra', 'Super', 'Intense', 'Rich', 'Gentle', 'Soothing',
+]);
+
+function parseBrand(title: string, merchant: string): string {
+  const cleaned = title.replace(/\s*-\s*.*$/, '').trim();
+
+  // Check explicit multi-word brand list first (case-insensitive prefix match)
+  for (const brand of MULTI_WORD_BRANDS) {
+    if (cleaned.toLowerCase().startsWith(brand.toLowerCase())) {
+      return brand;
     }
-    return words[0];
   }
 
-  return merchant || 'Unknown';
+  const words = cleaned.split(/\s+/);
+  if (words.length < 2) return merchant || 'Unknown';
+
+  // "The X", "La X", "Dr. X" — 2-word brand
+  if (words[0] === 'The' || words[0] === 'La' || words[0] === 'Dr.' || words[0] === 'Le') {
+    return words.slice(0, 2).join(' ');
+  }
+
+  // Heuristic: if second word is Title Case and not a product descriptor, treat first two as brand
+  const second = words[1];
+  if (
+    second.length > 1 &&
+    second[0] === second[0].toUpperCase() &&
+    second[0] !== second[0].toLowerCase() &&
+    !PRODUCT_NAME_WORDS.has(second)
+  ) {
+    return words.slice(0, 2).join(' ');
+  }
+
+  return words[0].length <= 20 ? words[0] : (merchant || 'Unknown');
 }
 
 // ---------------------------------------------------------------------------
@@ -319,7 +357,11 @@ function buildReviewQuery(req: SearchRequest): string {
 function buildBuyQuery(req: SearchRequest): string {
   const product = req.productName || req.scannedProduct?.name || '';
   const brand = req.productBrand || req.scannedProduct?.brand || '';
-  const query = `${brand} ${product}`.trim();
+  // Strip brand prefix when productName already leads with it (compatible search names include brand)
+  const cleanProduct = brand && product.toLowerCase().startsWith(brand.toLowerCase())
+    ? product.slice(brand.length).trim()
+    : product;
+  const query = `${brand} ${cleanProduct}`.trim();
   return query ? `buy ${query}` : 'buy skincare product';
 }
 
@@ -422,6 +464,7 @@ function inferStockStatus(delivery?: string, title?: string): boolean | undefine
 function mapShoppingResults(
   items: Array<Record<string, unknown>>,
   category: string | null,
+  preserveRetailerLinks = false,
 ): WebProduct[] {
   if (!items || !Array.isArray(items)) return [];
 
@@ -433,7 +476,7 @@ function mapShoppingResults(
       const delivery = item.delivery ? String(item.delivery) : undefined;
 
       const brand = parseBrand(title, merchant);
-      const isBrandDirect = !RETAILER_ONLY_BRANDS.has(normalizeNameSlug(brand));
+      const isBrandDirect = !preserveRetailerLinks && !RETAILER_ONLY_BRANDS.has(normalizeNameSlug(brand));
       return {
         name: cleanProductTitle(title),
         brand,
@@ -799,7 +842,7 @@ serve(async (req: Request) => {
           { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } },
         );
       }
-      results = mapShoppingResults(serperData.shopping || [], categoryOverride);
+      results = mapShoppingResults(serperData.shopping || [], categoryOverride, body.type === 'buy');
 
       // Write-through: upsert shopping results into products + retailers tables (fire-and-forget)
       upsertProductsFromShopping(supabaseService, results as WebProduct[], query).catch(() => {});

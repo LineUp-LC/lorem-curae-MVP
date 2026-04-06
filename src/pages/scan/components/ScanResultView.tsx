@@ -25,7 +25,7 @@ import { useAuth } from '../../../lib/auth/AuthContext';
 import { scanProductFull } from '../../../lib/ai/scanClient';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
-import { searchSimilarProducts, searchCompatibleProducts, searchProductReviews } from '../../../lib/api/productSearch';
+import { searchSimilarProducts, searchCompatibleProducts, searchProductReviews, prefetchWhereToBuy } from '../../../lib/api/productSearch';
 import { fetchReviewsForProduct } from '../../../lib/data/reviews';
 import { getReviewsForProduct } from '../../../mocks/reviews';
 import { calculateSimilarityWeight } from '../../../lib/utils/reviewSimilarity';
@@ -388,6 +388,7 @@ export default function ScanResultView({
   const [isItForMeOpen, setIsItForMeOpen] = useState(false);
   const [isItForMeText, setIsItForMeText] = useState<string | null>(null);
   const [isItForMeLoading, setIsItForMeLoading] = useState(false);
+  const [isItForMeProgress, setIsItForMeProgress] = useState(0);
 
   // Tab state
   const [activeTab, setActiveTab] = useState<TabId | null>(null);
@@ -396,11 +397,13 @@ export default function ScanResultView({
   const [fullScanResult, setFullScanResult] = useState<ScanResult | null>(initialFullScanResult ?? null);
   const [fullScanLoading, setFullScanLoading] = useState(false);
   const [fullScanError, setFullScanError] = useState<string | null>(null);
+  const [fullScanProgress, setFullScanProgress] = useState(0);
 
   // Tab 3 (Similar) cache
   const [similarProducts, setSimilarProducts] = useState<WebProduct[] | null>(null);
   const [similarLoading, setSimilarLoading] = useState(false);
   const [similarError, setSimilarError] = useState(false);
+  const [similarProgress, setSimilarProgress] = useState(0);
 
   // Similar tab filters
   const [similarFilters, setSimilarFilters] = useState<Set<SimilarFilterId>>(new Set());
@@ -441,15 +444,15 @@ export default function ScanResultView({
     const concerns = getEffectiveConcerns();
     const sensitivity = getEffectiveSensitivity();
 
-    // Fire-and-forget: populates productSearch session cache
+    // Fire-and-forget: populates productSearch session cache + starts buy prefetch per product
     searchCompatibleProducts(
       { name: sourceProduct.name, brand: sourceProduct.brand, category: sourceProduct.category },
       { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
-    ).catch(() => {});
+    ).then(results => { results?.slice(0, 4).forEach(p => prefetchWhereToBuy(p.name, p.brand).catch(() => {})); }).catch(() => {});
 
     searchSimilarProducts(
       { name: sourceProduct.name, brand: sourceProduct.brand, category: sourceProduct.category },
-    ).catch(() => {});
+    ).then(results => { results?.slice(0, 4).forEach(p => prefetchWhereToBuy(p.name, p.brand).catch(() => {})); }).catch(() => {});
   }, [user, result, matchedProduct]);
 
   // Build product-like object for shelf/routine
@@ -580,6 +583,7 @@ export default function ScanResultView({
     if (!product) return;
 
     setIsItForMeLoading(true);
+    setIsItForMeProgress(0);
     try {
       // Gather shelf products
       const shelfProducts = savedProductsState.getSavedProducts().map(sp => ({
@@ -682,6 +686,7 @@ export default function ScanResultView({
         // Web reviews are supplementary — don't block the verdict
       }
 
+      setIsItForMeProgress(40);
       const ctx = buildAIContext('is_it_for_me', {
         page: {
           mode: 'is_it_for_me',
@@ -697,16 +702,17 @@ export default function ScanResultView({
 
       const minDisplay = new Promise(r => setTimeout(r, 800));
       const [res] = await Promise.all([requestAIInsight(ctx), minDisplay]);
+      setIsItForMeProgress(100);
       if (res.success) {
         setIsItForMeText(res.insight);
       } else {
         setIsItForMeText('fallbackInsight' in res && res.fallbackInsight ? res.fallbackInsight : 'Unable to analyze right now. Try again later.');
       }
     } catch {
+      setIsItForMeProgress(100);
       setIsItForMeText('Unable to analyze right now. Try again later.');
-    } finally {
-      setIsItForMeLoading(false);
     }
+    // setIsItForMeLoading(false) fires via PersonalizingLoader onComplete after 250ms hold
   };
 
   // Build a temporary Product for AI context when no catalog match
@@ -747,15 +753,19 @@ export default function ScanResultView({
       }
       setFullScanLoading(true);
       setFullScanError(null);
+      setFullScanProgress(0);
       const minDisplay = new Promise(r => setTimeout(r, 800));
+      setFullScanProgress(30);
       const [res] = await Promise.all([scanProductFull(imageBase64), minDisplay]);
+      setFullScanProgress(90);
       if (res.success) {
         setFullScanResult(res.result);
         onFullScanComplete?.(res.result);
       } else if (!res.success) {
         setFullScanError((res as { error: string }).error);
       }
-      setFullScanLoading(false);
+      setFullScanProgress(100);
+      // setFullScanLoading(false) fires via PersonalizingLoader onComplete after 250ms hold
     }
 
     // Tab 3: Similar — web search only
@@ -763,7 +773,9 @@ export default function ScanResultView({
       const sourceProduct = matchedProduct || buildTempProduct();
       if (sourceProduct && user) {
         setSimilarLoading(true);
+        setSimilarProgress(0);
         const minDisplay = new Promise(r => setTimeout(r, 800));
+        setSimilarProgress(50);
         Promise.all([
           searchSimilarProducts({
             name: sourceProduct.name,
@@ -772,14 +784,17 @@ export default function ScanResultView({
           }),
           minDisplay,
         ]).then(([results]) => {
+          setSimilarProgress(100);
           if (results) {
             setSimilarProducts(results);
+            results.forEach(p => prefetchWhereToBuy(p.name, p.brand).catch(() => {}));
           } else {
             setSimilarError(true);
           }
         }).catch(() => {
+          setSimilarProgress(100);
           setSimilarError(true);
-        }).finally(() => setSimilarLoading(false));
+        }); // setSimilarLoading(false) fires via PersonalizingLoader onComplete after 250ms hold
       } else {
         setSimilarProducts([]);
       }
@@ -969,6 +984,8 @@ export default function ScanResultView({
             {isItForMeLoading ? (
               <PersonalizingLoader
                 steps={['Analyzing for your skin profile...', 'Checking ingredient compatibility...', 'Personalizing recommendation...']}
+                progress={isItForMeProgress}
+                onComplete={() => setIsItForMeLoading(false)}
               />
             ) : isItForMeText ? (
               <IsItForMeVerdict text={isItForMeText} />
@@ -1010,6 +1027,8 @@ export default function ScanResultView({
               {fullScanLoading && (
                 <PersonalizingLoader
                   steps={['Scanning full ingredient list...', 'Categorizing ingredients...', 'Scoring safety for your skin...']}
+                  progress={fullScanProgress}
+                  onComplete={() => setFullScanLoading(false)}
                 />
               )}
               {fullScanError && !fullScanLoading && fullScanError !== 'no_image' && (
@@ -1057,6 +1076,8 @@ export default function ScanResultView({
               {fullScanLoading && (
                 <PersonalizingLoader
                   steps={['Scanning full ingredient list...', 'Finding compatible products...']}
+                  progress={fullScanProgress}
+                  onComplete={() => setFullScanLoading(false)}
                 />
               )}
               {fullScanError && !fullScanLoading && fullScanError !== 'no_image' && (
@@ -1104,6 +1125,8 @@ export default function ScanResultView({
                 <PersonalizingLoader
                   steps={['Searching for alternatives...', 'Comparing formulations...']}
                   icon="search"
+                  progress={similarProgress}
+                  onComplete={() => setSimilarLoading(false)}
                 />
               ) : similarError ? (
                 <div className="text-center py-4">
@@ -1119,6 +1142,8 @@ export default function ScanResultView({
                 <PersonalizingLoader
                   steps={['Searching for alternatives...', 'Comparing formulations...']}
                   icon="search"
+                  progress={similarProgress}
+                  onComplete={() => setSimilarLoading(false)}
                 />
               ) : similarProducts.length === 0 ? (
                 <div className="text-center py-4">

@@ -57,6 +57,8 @@ export default function ScanPage() {
   const [currentHistoryId, setCurrentHistoryId] = useState<string | null>(null);
   const [history, setHistory] = useState<ScanHistoryEntry[]>([]);
   const cancelledRef = useRef(false);
+  const [identifyProgress, setIdentifyProgress] = useState(0);
+  const pendingIdentifyRef = useRef<{ result: ScanResult; previewUrl: string; matchedProduct?: Product } | null>(null);
 
   // Warm up Edge Functions on mount (OPTIONS → warms container, no code execution)
   useEffect(() => {
@@ -94,10 +96,13 @@ export default function ScanPage() {
     resetSearchSession();
 
     const { file, previewUrl } = state;
+    setIdentifyProgress(0);
     setState({ phase: 'processing', previewUrl, file });
 
+    setIdentifyProgress(40);
     const response = await scanProduct(file);
     if (cancelledRef.current) return;
+    setIdentifyProgress(80);
 
     if (!response.success) {
       const errResponse = response as ScanClientError;
@@ -130,8 +135,9 @@ export default function ScanPage() {
     }
 
     if (cancelledRef.current) return;
-    setState({ phase: 'result', result, previewUrl, matchedProduct });
-    window.scrollTo(0, 0);
+    // Store result for onComplete — phase transition fires after 250ms hold at 100%
+    pendingIdentifyRef.current = { result, previewUrl, matchedProduct };
+    setIdentifyProgress(100);
   }, [state, user?.id]);
 
   const handleRetake = useCallback(() => {
@@ -313,7 +319,19 @@ export default function ScanPage() {
 
           {/* Processing — loading state */}
           {state.phase === 'processing' && (
-            <ScanProcessing previewUrl={state.previewUrl} />
+            <ScanProcessing
+              previewUrl={state.previewUrl}
+              progress={identifyProgress}
+              onComplete={() => {
+                if (cancelledRef.current) return;
+                const pending = pendingIdentifyRef.current;
+                if (pending) {
+                  pendingIdentifyRef.current = null;
+                  setState({ phase: 'result', result: pending.result, previewUrl: pending.previewUrl, matchedProduct: pending.matchedProduct });
+                  window.scrollTo(0, 0);
+                }
+              }}
+            />
           )}
 
           {/* Result — match or no match (lazy loaded) */}

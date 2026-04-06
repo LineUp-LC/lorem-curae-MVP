@@ -39,7 +39,7 @@ related: ["09-security.md", "11-testing.md"]
 |----------|--------|
 | ai-insight | AI — Claude Sonnet 4.5 proxy |
 | ai-chat | AI — conversational chat |
-| product-scan | AI — Claude Vision product identification |
+| product-scan | AI — Claude Vision product identification + ingredient persistence |
 | get-uv-index | Environment — UV API wrapper |
 | geocode-location | Environment — geocoding wrapper |
 | ingest-retailer-feed | Data — retailer pricing ingestion |
@@ -67,7 +67,7 @@ related: ["09-security.md", "11-testing.md"]
 
 ## Database Migrations
 
-13 migrations in `supabase/migrations/`:
+14 migrations in `supabase/migrations/`:
 
 | Migration | Purpose |
 |-----------|---------|
@@ -84,6 +84,7 @@ related: ["09-security.md", "11-testing.md"]
 | `20260322000000_create_web_search_cache` | Serper.dev result cache (24h TTL) |
 | `20260324000000_extend_product_cache` | Serper write-through: cache columns, source constraints, dedup index |
 | `20260324000001_create_product_reviews_table` | User product reviews with RLS |
+| `20260405000000_create_product_ingredients` | Parsed ingredient storage + products.source 'scan' |
 
 ### Migration Rules
 - Never apply automatically

@@ -9,12 +9,21 @@ import { useState, useEffect, useMemo } from 'react';
 import type { ScanResult } from '../../../types/scan';
 import type { Product } from '../../../types/product';
 import type { WebProduct } from '../../../types/webSearch';
-import { searchCompatibleProducts } from '../../../lib/api/productSearch';
+import { searchCompatibleProducts, prefetchWhereToBuy } from '../../../lib/api/productSearch';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
   getEffectiveSensitivity,
+  getEffectiveOnboardingV2,
+  getEffectivePreferences,
+  parseBudgetCeiling,
 } from '../../../lib/utils/sessionState';
+import {
+  normalizeUserConcern,
+  getProductConcernVariations,
+  ingredientMap,
+  PREFERENCE_KEYWORDS,
+} from '../../../lib/utils/matching';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import PersonalizingLoader from '../../../components/feature/PersonalizingLoader';
 import WhereToBuySheet from '../../../components/feature/WhereToBuySheet';
@@ -72,6 +81,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
   const [webProducts, setWebProducts] = useState<WebProduct[]>([]);
   const [webLoading, setWebLoading] = useState(false);
   const [webError, setWebError] = useState(false);
+  const [webProgress, setWebProgress] = useState(0);
   const [wtbProduct, setWtbProduct] = useState<WebProduct | null>(null);
 
   const skinType = getEffectiveSkinType() ?? undefined;
@@ -100,20 +110,86 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
     };
   }, [scanResult, matchedProduct]);
 
+  // Post-search personalization reranking
+  const rankedProducts = useMemo(() => {
+    if (webProducts.length === 0) return [];
+
+    const userConcerns = getEffectiveConcerns();
+    const preferences = getEffectivePreferences();
+    const onboarding = getEffectiveOnboardingV2();
+    const ceiling = onboarding.searchFilters.useBudget !== false
+      ? parseBudgetCeiling(onboarding.monthlySpend)
+      : null;
+    const total = webProducts.length;
+
+    // Pre-compute concern search terms once (not per-product)
+    const concernTerms = userConcerns.map(c => {
+      const key = normalizeUserConcern(c);
+      const variations = getProductConcernVariations(c);
+      const ingredients = ingredientMap[key] || [];
+      return [...variations, ...ingredients].map(t => t.toLowerCase());
+    });
+
+    const scored = webProducts.map((wp, idx) => {
+      let score = 0;
+      const searchText = `${wp.name} ${wp.category || ''}`.toLowerCase();
+
+      // Concern match (0–40pts)
+      if (concernTerms.length > 0) {
+        let pts = 0;
+        const per = 40 / concernTerms.length;
+        for (const terms of concernTerms) {
+          if (terms.some(t => searchText.includes(t))) {
+            pts += per;
+          }
+        }
+        score += Math.min(40, pts);
+      }
+
+      // Budget fit (0–30pts)
+      if (ceiling && ceiling > 0 && wp.price > 0) {
+        score += wp.price <= ceiling
+          ? 30
+          : Math.max(0, 30 * (1 - (wp.price - ceiling) / ceiling));
+      }
+
+      // Preference match (0–20pts)
+      let prefPts = 0;
+      for (const [prefKey, keywords] of Object.entries(PREFERENCE_KEYWORDS)) {
+        if (preferences[prefKey] && keywords.some(kw => searchText.includes(kw))) {
+          prefPts += 10;
+          if (prefPts >= 20) break;
+        }
+      }
+      score += prefPts;
+
+      // Serper rank preservation (0–10pts)
+      score += 10 * (1 - idx / total);
+
+      return { product: wp, score };
+    });
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.map(s => s.product);
+  }, [webProducts]);
+
   // Filter client-side using the same inference as countByCategory — counts always match display
   const filteredProducts = useMemo(() => {
-    if (categoryFilter === 'all') return webProducts;
-    return webProducts.filter(p => inferCategoryFromName(p.name) === categoryFilter);
-  }, [webProducts, categoryFilter]);
+    if (categoryFilter === 'all') return rankedProducts;
+    return rankedProducts.filter(p => inferCategoryFromName(p.name) === categoryFilter);
+  }, [rankedProducts, categoryFilter]);
 
   // Fetch once on mount — all filtering is client-side so no re-fetch per category
   useEffect(() => {
     if (!user) return;
 
     let cancelled = false;
+    let completed = false;
     setWebLoading(true);
     setWebError(false);
+    setWebProgress(0);
 
+    setWebProgress(50);
     searchCompatibleProducts(
       {
         name: scanSourceProduct.name,
@@ -124,14 +200,18 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
       { skinType: skinType || undefined, concerns, sensitivity: sensitivity || undefined },
     ).then((results) => {
       if (cancelled) return;
+      completed = true;
+      setWebProgress(100);
       if (results) {
         setWebProducts(results);
+        results.forEach(p => prefetchWhereToBuy(p.name, p.brand).catch(() => {}));
       } else {
         setWebError(true);
         setWebProducts([]);
       }
     }).finally(() => {
-      if (!cancelled) setWebLoading(false);
+      // Safety net: only fires if search failed before reaching 100% (unexpected rejection)
+      if (!cancelled && !completed) setWebLoading(false);
     });
 
     return () => { cancelled = true; };
@@ -150,7 +230,7 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
       {/* Category filter pills */}
       <div className="flex gap-1.5 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
         {CATEGORY_OPTIONS.map(opt => {
-          const count = countByCategory(webProducts, opt.value);
+          const count = countByCategory(rankedProducts, opt.value);
           return (
             <button
               key={opt.value}
@@ -173,6 +253,8 @@ export default function PostScanDiscovery({ scanResult, matchedProduct }: PostSc
         <PersonalizingLoader
           steps={['Searching for compatible products...', 'Filtering by your skin profile...', 'Ranking results...']}
           icon="search"
+          progress={webProgress}
+          onComplete={() => setWebLoading(false)}
         />
       )}
 

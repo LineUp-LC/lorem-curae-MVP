@@ -38,10 +38,29 @@ let sessionCallCount = 0;
 /** In-memory cache: cacheKey → result */
 const sessionCache = new Map<string, WebSearchResponse>();
 
+/** In-flight dedup: prevents concurrent duplicate prefetch requests */
+const inFlightKeys = new Set<string>();
+
+/** Serial prefetch queue — processes one buy prefetch at a time to prevent Serper burst overload */
+const prefetchQueue: Array<() => Promise<void>> = [];
+let prefetchQueueRunning = false;
+
+function drainPrefetchQueue(): void {
+  if (prefetchQueueRunning || prefetchQueue.length === 0) return;
+  prefetchQueueRunning = true;
+  const next = prefetchQueue.shift()!;
+  next().finally(() => {
+    prefetchQueueRunning = false;
+    drainPrefetchQueue();
+  });
+}
+
 /** Reset call counter (call when starting a new scan) */
 export function resetSearchSession(): void {
   sessionCallCount = 0;
   sessionCache.clear();
+  prefetchQueue.length = 0;   // discard pending prefetches from previous scan
+  inFlightKeys.clear();        // clear stale in-flight tracking
 }
 
 // ---------------------------------------------------------------------------
@@ -272,4 +291,36 @@ export function getSearchCallCount(): number {
  */
 export function canSearch(): boolean {
   return sessionCallCount < MAX_CALLS_PER_SESSION;
+}
+
+/**
+ * Prefetch Where to Buy data for a product into the session cache.
+ * Fire-and-forget safe. Deduplicates concurrent requests for the same product.
+ * Call for each compatible/similar product as soon as results load.
+ */
+export async function prefetchWhereToBuy(productName: string, productBrand: string): Promise<void> {
+  if (!productName?.trim() || !productBrand?.trim()) return;
+  const body: WebSearchRequest = { type: 'buy', productName, productBrand };
+  const key = JSON.stringify(body);
+  if (sessionCache.has(key) || inFlightKeys.has(key)) return;
+  inFlightKeys.add(key);
+  prefetchQueue.push(async () => {
+    try {
+      await callProductSearch(body);
+    } finally {
+      inFlightKeys.delete(key);
+    }
+  });
+  drainPrefetchQueue();
+}
+
+/**
+ * Return pre-cached buy results for a product, or null if not yet fetched.
+ * Used by WhereToBuySheet to initialize state synchronously from the prefetch cache.
+ */
+export function getCachedBuyResults(productName: string, productBrand: string): WebProduct[] | null {
+  const cacheKey = JSON.stringify({ type: 'buy', productName, productBrand });
+  const cached = sessionCache.get(cacheKey);
+  if (cached?.success && cached.products) return cached.products;
+  return null;
 }

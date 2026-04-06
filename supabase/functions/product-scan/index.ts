@@ -37,7 +37,25 @@ const VALID_CATEGORIES = new Set([
 ]);
 
 // ---------------------------------------------------------------------------
-// System prompt builder
+// Service role client (lazy singleton — bypasses RLS for server-side writes)
+// ---------------------------------------------------------------------------
+
+let _serviceClient: ReturnType<typeof createClient> | null = null;
+function getServiceClient(): ReturnType<typeof createClient> | null {
+  if (!_serviceClient) {
+    const url = Deno.env.get('SUPABASE_URL');
+    const key = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    if (!url || !key) {
+      console.error('[Product-Scan] SUPABASE_SERVICE_ROLE_KEY not configured — ingredient persistence disabled');
+      return null;
+    }
+    _serviceClient = createClient(url, key);
+  }
+  return _serviceClient;
+}
+
+// ---------------------------------------------------------------------------
+// Types (declared early for use in persistence helpers)
 // ---------------------------------------------------------------------------
 
 interface SkinProfile {
@@ -45,71 +63,6 @@ interface SkinProfile {
   concerns?: string[];
   sensitivity?: string;
 }
-
-function buildIdentifyPrompt(): string {
-  return `You are a skincare product analyzer for Lorem Curae. Identify the product from the photo.
-
-INSTRUCTIONS:
-1. Read the product name, brand, and any visible text on the packaging.
-2. Common skincare brands: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy.
-3. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible, "low" if guessing.
-4. Do NOT parse ingredients — set ingredients to [] and ingredientCount to 0.
-
-Respond ONLY with valid JSON (no markdown, no explanation):
-{"match":false,"confidence":"high","detectedProduct":"Product Name","detectedBrand":"Brand","detectedCategory":"serum","ingredients":[],"ingredientCount":0}`;
-}
-
-function buildSystemPrompt(skinProfile?: SkinProfile): string {
-  let profileContext = '';
-  if (skinProfile?.skinType || (skinProfile?.concerns && skinProfile.concerns.length > 0)) {
-    const parts: string[] = [];
-    if (skinProfile.skinType) parts.push(`- Skin type: ${skinProfile.skinType}`);
-    if (skinProfile.concerns?.length) parts.push(`- Concerns: ${skinProfile.concerns.join(', ')}`);
-    if (skinProfile.sensitivity) parts.push(`- Sensitivity: ${skinProfile.sensitivity}`);
-    profileContext = `
-
-USER SKIN PROFILE:
-${parts.join('\n')}
-For each ingredient, add a "relevance" field: a short phrase explaining how it relates to this user's skin (e.g., "helps with dryness", "may irritate sensitive skin"). If no specific relevance to this user, omit the relevance field for that ingredient.`;
-  }
-
-  return `You are a skincare product analyzer for Lorem Curae. You receive a photo of a skincare product and must:
-1. Identify the product — brand name, product name, and category
-2. Parse the full ingredient list visible on the product label
-3. Optionally match against our internal catalog (most products will NOT be in it — that is expected)
-
-IDENTIFICATION INSTRUCTIONS:
-1. Read the product name, brand, and any visible text on the packaging.
-2. If you can see ANY text on the product packaging — even partial brand names, partial product names, or ingredient lists — report what you can see. Do not return null for detectedProduct or detectedBrand unless you literally cannot read any text.
-3. Common skincare brands to look for: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy. If you recognize any of these brands or similar ones, always include the brand name.
-4. If the image is blurry or partially obscured, still attempt identification with confidence: "low". A low-confidence result with a brand name is more useful than null.
-5. Confidence: "high" if brand and product name are clearly readable, "medium" if partially visible or inferred from context, "low" if guessing from partial text or packaging shape alone.
-
-INGREDIENT PARSING INSTRUCTIONS:
-1. Read every ingredient visible on the product label (usually in the ingredients list / INCI list).
-2. For each ingredient provide:
-   - name: the ingredient name as written on the label
-   - function: its primary skincare function in plain language (e.g., "moisturizes and attracts water to skin", "helps protect from sun damage", "gentle surfactant that cleanses skin")
-   - safetyTier: "safe", "caution", or "avoid"
-   - category: EVERY ingredient MUST have a category — never leave it blank or null. Choose from these primary categories based on what the ingredient actually does: Active Exfoliant, Hydration/Moisture, Soothing/Botanical, Antioxidant, Brightening, Anti-Aging, Acne Treatment, Sun Protection, Preservative, Base/Solvent, Emulsifier, Surfactant/Cleanser, Fragrance, pH Adjuster, Thickener/Texture, Vitamin/Nutrient, Barrier Repair. Use consistent names within the same product. If an ingredient doesn't fit these, pick the closest match — do NOT use "Other".
-   - cautionReason: REQUIRED when safetyTier is "caution" or "avoid". A 2-4 sentence explanation of: (1) why this ingredient is flagged, (2) what skin types or conditions should be careful, and (3) what precautions to take. Example: "Glycolic Acid is an AHA exfoliant that can cause irritation, redness, and sun sensitivity, especially at higher concentrations. People with sensitive or rosacea-prone skin should start with low concentrations (5-8%) and use only 2-3 times per week. Always apply SPF the morning after using this ingredient. Avoid combining with retinol or other strong exfoliants."
-3. List ingredients in the order they appear on the label.
-4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.
-5. Keep function descriptions SHORT — maximum 8 words per ingredient (e.g., "moisturizes and attracts water to skin").
-6. Keep cautionReason to exactly 2 sentences. Be concise.
-7. CRITICAL: You MUST list ALL ingredients on the label. Do not stop early. If the label has 35 ingredients, the JSON must have 35 entries. Completeness is more important than detail — if running low on space, shorten function/cautionReason text rather than dropping ingredients.${profileContext}
-
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
-
-{"match":false,"confidence":"medium","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum","ingredients":[{"name":"Niacinamide","function":"improves skin texture and tone","safetyTier":"safe","category":"Brightening"}],"ingredientCount":1}
-
-If the image does not show a skincare product:
-{"match":false,"confidence":"low","detectedProduct":null,"detectedBrand":null,"detectedCategory":null,"ingredients":[],"ingredientCount":0}`;
-}
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
 
 interface ScanRequestBody {
   image?: string;
@@ -138,6 +91,214 @@ interface ClaudeVisionResult {
   ingredients?: ParsedIngredientResult[];
   ingredientCount?: number;
   ingredientsTruncated?: boolean;
+}
+
+// ---------------------------------------------------------------------------
+// Ingredient persistence helpers
+// ---------------------------------------------------------------------------
+
+function getConcentrationRange(position: number): string {
+  if (position <= 0) return 'low';
+  if (position <= 3) return 'very_high';
+  if (position <= 8) return 'high';
+  if (position <= 15) return 'medium';
+  return 'low';
+}
+
+async function findOrCreateProduct(
+  brand: string,
+  name: string,
+  category?: string,
+): Promise<string | null> {
+  const client = getServiceClient();
+  if (!client || !brand || !name) return null;
+
+  try {
+    // Case-insensitive lookup matching the dedup index
+    const { data: existing, error: selectError } = await client
+      .from('products')
+      .select('id')
+      .ilike('brand', brand)
+      .ilike('name', name)
+      .limit(1)
+      .single();
+
+    if (existing?.id) {
+      return existing.id;
+    }
+
+    // Insert new product
+    const slug = `${brand}-${name}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '');
+
+    const { data: inserted, error } = await client
+      .from('products')
+      .insert({
+        slug,
+        name,
+        brand,
+        category: category || 'unknown',
+        price: 0,
+        source: 'scan',
+        status: 'draft',
+      })
+      .select('id')
+      .single();
+
+    if (error) {
+      // Unique constraint race — another scan inserted this product concurrently
+      if (error.code === '23505') {
+        console.log('[Product-Scan] Concurrent product creation detected, retrying lookup');
+        const { data: retry } = await client
+          .from('products')
+          .select('id')
+          .ilike('brand', brand)
+          .ilike('name', name)
+          .limit(1)
+          .single();
+        return retry?.id ?? null;
+      }
+      console.error('[Product-Scan] findOrCreateProduct insert error:', error.message);
+      return null;
+    }
+
+    return inserted?.id ?? null;
+  } catch (err) {
+    console.error('[Product-Scan] findOrCreateProduct failed:', err);
+    return null;
+  }
+}
+
+async function persistIngredients(
+  productId: string,
+  ingredients: ParsedIngredientResult[],
+): Promise<void> {
+  const client = getServiceClient();
+  if (!client || ingredients.length === 0) return;
+
+  try {
+    const rows = ingredients.map((ing, idx) => ({
+      product_id: productId,
+      ingredient_name: ing.name,
+      inci_name: null,
+      position: idx + 1,
+      estimated_concentration_range: getConcentrationRange(idx + 1),
+      safety_tier: ing.safetyTier,
+      caution_reason: ing.cautionReason ?? null,
+      function: ing.function,
+      category: ing.category ?? null,
+      source: 'scan',
+      needs_review: false,
+      last_verified_at: new Date().toISOString(),
+    }));
+
+    const { error } = await client
+      .from('product_ingredients')
+      .upsert(rows, {
+        onConflict: 'product_id,position',
+        ignoreDuplicates: false,
+      });
+
+    if (error) {
+      console.error('[Product-Scan] persistIngredients error:', error.message);
+    } else {
+      console.log(`[Product-Scan] Persisted ${rows.length} ingredients for product ${productId}`);
+    }
+  } catch (err) {
+    console.error('[Product-Scan] persistIngredients failed:', err);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// System prompt builder
+// ---------------------------------------------------------------------------
+
+function buildIdentifyPrompt(): string {
+  return `You are a skincare product analyzer for Lorem Curae. Identify the product from the photo.
+
+INSTRUCTIONS:
+1. Read the product name, brand, and any visible text on the packaging.
+2. Common skincare brands: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy.
+3. Confidence: "high" if brand OR product name is readable, even partially. If you can identify the brand from packaging shape, color, typography, or any visible text, return "high". "medium" if image is blurry but a best-guess identification is possible. "low" ONLY if the image shows literally no skincare product packaging or is completely unreadable noise.
+4. IMPORTANT: Never return confidence "low" for a recognizable skincare product. If you can see any brand name, product type, or packaging style — return "high" or "medium". Low confidence should only appear when the image contains no skincare product at all.
+5. Do NOT parse ingredients — set ingredients to [] and ingredientCount to 0.
+
+Respond ONLY with valid JSON (no markdown, no explanation):
+{"match":false,"confidence":"high","detectedProduct":"Product Name","detectedBrand":"Brand","detectedCategory":"serum","ingredients":[],"ingredientCount":0}`;
+}
+
+function buildSystemPrompt(skinProfile?: SkinProfile): string {
+  let profileContext = '';
+  if (skinProfile?.skinType || (skinProfile?.concerns && skinProfile.concerns.length > 0)) {
+    const parts: string[] = [];
+    if (skinProfile.skinType) parts.push(`- Skin type: ${skinProfile.skinType}`);
+    if (skinProfile.concerns?.length) parts.push(`- Concerns: ${skinProfile.concerns.join(', ')}`);
+    if (skinProfile.sensitivity) parts.push(`- Sensitivity: ${skinProfile.sensitivity}`);
+    profileContext = `
+
+USER SKIN PROFILE:
+${parts.join('\n')}
+For each ingredient, add a "relevance" field: a short phrase explaining how it relates to this user's skin (e.g., "helps with dryness", "may irritate sensitive skin"). If no specific relevance to this user, omit the relevance field for that ingredient.`;
+  }
+
+  return `You are a skincare product analyzer for Lorem Curae. You receive a photo of a skincare product and must:
+1. Identify the product — brand name, product name, and category
+2. Parse the full ingredient list visible on the product label
+3. Optionally match against our internal catalog (most products will NOT be in it — that is expected)
+
+IDENTIFICATION INSTRUCTIONS:
+1. Read the product name, brand, and any visible text on the packaging.
+2. If you can see ANY text on the product packaging — even partial brand names, partial product names, or ingredient lists — report what you can see. Do not return null for detectedProduct or detectedBrand unless you literally cannot read any text.
+3. Common skincare brands to look for: CeraVe, Cetaphil, Neutrogena, La Roche-Posay, The Ordinary, Paula's Choice, Drunk Elephant, Tatcha, COSRX, Vanicream, Aveeno, Olay, Kiehl's, Clinique, SK-II, EltaMD, Supergoop, First Aid Beauty, Sunday Riley, Glossier, Peter Thomas Roth, Dr. Dennis Gross, Murad, Origins, Laneige, Innisfree, Bioderma, Avène, Vichy. If you recognize any of these brands or similar ones, always include the brand name.
+4. Confidence: "high" if brand OR product name is readable, even partially. If you can identify the brand from packaging shape, color, typography, or any visible text, return "high". "medium" if image is blurry but a best-guess identification is possible. "low" ONLY if the image shows literally no skincare product packaging or is completely unreadable noise.
+5. IMPORTANT: Never return confidence "low" for a recognizable skincare product. If you can see any brand name, product type, or packaging style — return "high" or "medium". Low confidence should only appear when the image contains no skincare product at all.
+
+INGREDIENT PARSING INSTRUCTIONS:
+1. Read every ingredient visible on the product label (usually in the ingredients list / INCI list).
+2. For each ingredient provide:
+   - name: the ingredient name as written on the label
+   - function: its primary skincare function in plain language (e.g., "moisturizes and attracts water to skin", "helps protect from sun damage", "gentle surfactant that cleanses skin")
+   - safetyTier: "safe", "caution", or "avoid" — apply the SAFETY TIER RULES below deterministically
+
+SAFETY TIER RULES (apply these exact rules for every ingredient — do not improvise):
+
+"avoid" — the ingredient MUST be classified as "avoid" if ANY of the following is true:
+  - Listed in EU Cosmetics Regulation Annex II (banned substances) — e.g., hydroquinone (in OTC cosmetics), mercury compounds, lead acetate, triclosan (in most uses), coal tar, certain parabens (isopropyl-, isobutyl-, phenyl-, benzyl-, pentylparaben).
+  - Formaldehyde or a formaldehyde-releasing preservative — DMDM hydantoin, diazolidinyl urea, imidazolidinyl urea, quaternium-15, 2-bromo-2-nitropropane-1,3-diol (bronopol), sodium hydroxymethylglycinate.
+  - Methylisothiazolinone (MI) or methylchloroisothiazolinone (MCI) — known high-risk allergens/sensitizers.
+  - Heavy metals or heavy-metal salts (lead, mercury, arsenic, cadmium compounds).
+  - Known carcinogens, mutagens, or reproductive toxins (CMR substances) restricted in cosmetics.
+  - PFAS / fluorinated compounds (PTFE, perfluorodecalin, perfluorohexane, etc.).
+
+"caution" — the ingredient MUST be classified as "caution" if it is NOT in the "avoid" list AND ANY of the following is true:
+  - Known skin sensitizer or common contact allergen — fragrance/parfum, essential oils (limonene, linalool, citral, geraniol, eugenol, cinnamal), balsam of Peru, lanolin.
+  - Strong active with known irritation/sun-sensitivity risk — any AHA (glycolic, lactic, mandelic, citric as active), any BHA (salicylic acid), PHAs at high concentrations, retinol/retinal/retinyl esters/tretinoin/adapalene, benzoyl peroxide, hydroquinone alternatives at high strengths.
+  - High-concentration vitamin C (L-ascorbic acid ≥ 10%) or vitamin C derivatives at high strengths.
+  - Denatured alcohol / alcohol denat / SD alcohol / isopropyl alcohol when listed in the top 5 ingredients.
+  - Sulfates as primary surfactants (sodium lauryl sulfate, sodium laureth sulfate, ammonium lauryl sulfate).
+  - Known comedogenic ingredients at notable concentrations — coconut oil, isopropyl myristate, isopropyl palmitate, myristyl myristate, algae extract.
+  - Chemical sunscreen filters with known sensitization or hormone-disruption concerns — oxybenzone, octinoxate, homosalate, octocrylene, avobenzone.
+  - Limited long-term safety data or regulatory uncertainty.
+
+"safe" — everything that does NOT meet the "avoid" or "caution" criteria above. This includes water, glycerin, hyaluronic acid, niacinamide (at typical concentrations), ceramides, peptides, panthenol, allantoin, squalane, most plant butters/oils at typical use levels, zinc oxide, titanium dioxide (non-nano), xanthan gum, typical emulsifiers and thickeners.
+
+CONSISTENCY RULE: Apply safety tiers based on the ingredient's known chemical properties and regulatory status, NOT based on the specific product or context. The same ingredient must always receive the same safety tier regardless of which product it appears in. Water is always safe. Fragrance is always caution. Methylisothiazolinone is always avoid. Do not vary these judgments between scans.
+   - category: EVERY ingredient MUST have a category — never leave it blank or null. Choose from these primary categories based on what the ingredient actually does: Active Exfoliant, Hydration/Moisture, Soothing/Botanical, Antioxidant, Brightening, Anti-Aging, Acne Treatment, Sun Protection, Preservative, Base/Solvent, Emulsifier, Surfactant/Cleanser, Fragrance, pH Adjuster, Thickener/Texture, Vitamin/Nutrient, Barrier Repair. Use consistent names within the same product. If an ingredient doesn't fit these, pick the closest match — do NOT use "Other".
+   - cautionReason: REQUIRED when safetyTier is "caution" or "avoid". A 2-4 sentence explanation of: (1) why this ingredient is flagged, (2) what skin types or conditions should be careful, and (3) what precautions to take. Example: "Glycolic Acid is an AHA exfoliant that can cause irritation, redness, and sun sensitivity, especially at higher concentrations. People with sensitive or rosacea-prone skin should start with low concentrations (5-8%) and use only 2-3 times per week. Always apply SPF the morning after using this ingredient. Avoid combining with retinol or other strong exfoliants."
+3. List ingredients in the order they appear on the label.
+4. If no ingredient list is visible, set ingredients to [] and ingredientCount to 0.
+5. Keep function descriptions SHORT — maximum 8 words per ingredient (e.g., "moisturizes and attracts water to skin").
+6. Keep cautionReason to exactly 2 sentences. Be concise.
+7. CRITICAL: You MUST list ALL ingredients on the label. Do not stop early. If the label has 35 ingredients, the JSON must have 35 entries. Completeness is more important than detail — if running low on space, shorten function/cautionReason text rather than dropping ingredients.${profileContext}
+
+Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+
+{"match":false,"confidence":"high","detectedProduct":"Some Product Name","detectedBrand":"Some Brand","detectedCategory":"serum","ingredients":[{"name":"Niacinamide","function":"improves skin texture and tone","safetyTier":"safe","category":"Brightening"}],"ingredientCount":1}
+
+If the image does not show a skincare product:
+{"match":false,"confidence":"low","detectedProduct":null,"detectedBrand":null,"detectedCategory":null,"ingredients":[],"ingredientCount":0}`;
 }
 
 // ---------------------------------------------------------------------------
@@ -171,6 +332,7 @@ async function callClaudeVision(
       body: JSON.stringify({
         model: ANTHROPIC_MODEL,
         max_tokens: maxTokens,
+        temperature: 0,
         system: systemPrompt,
         messages: [{
           role: 'user',
@@ -239,15 +401,7 @@ async function callClaudeVision(
 
       const parsed: ClaudeVisionResult = JSON.parse(jsonText);
 
-      // Validate productId is in catalog if match is true
-      if (parsed.match && parsed.productId) {
-        const inCatalog = PRODUCT_CATALOG.some(p => p.id === parsed.productId);
-        if (!inCatalog) {
-          console.warn(`[Product-Scan] Claude hallucinated product ID ${parsed.productId} (not in catalog) — demoting to no-match`);
-          parsed.match = false;
-          parsed.productId = undefined;
-        }
-      }
+      // match field comes from Claude's response — no local catalog lookup
 
       // Sanitize ingredients array
       if (parsed.ingredients && Array.isArray(parsed.ingredients)) {
@@ -328,31 +482,18 @@ serve(async (req: Request) => {
     const body: ScanRequestBody = await req.json();
 
     // ── UPC barcode lookup (skips Vision entirely) ──────────────────────
+    // match field comes from Claude's response — no local catalog lookup
     if (body.upc && typeof body.upc === 'string') {
       const upc = body.upc.trim();
-      const match = PRODUCT_CATALOG.find(p => p.upc === upc);
 
-      const scanResult = match
-        ? {
-            match: true,
-            productId: match.id,
-            confidence: 'high' as const,
-            detectedProduct: match.name,
-            detectedBrand: match.brand,
-            detectedCategory: match.category,
-            upc,
-            ingredients: [],
-            ingredientCount: 0,
-            timestamp: new Date().toISOString(),
-          }
-        : {
-            match: false,
-            confidence: 'high' as const,
-            upc,
-            ingredients: [],
-            ingredientCount: 0,
-            timestamp: new Date().toISOString(),
-          };
+      const scanResult = {
+        match: false,
+        confidence: 'high' as const,
+        upc,
+        ingredients: [],
+        ingredientCount: 0,
+        timestamp: new Date().toISOString(),
+      };
 
       return new Response(
         JSON.stringify({
@@ -420,6 +561,31 @@ serve(async (req: Request) => {
       ingredientsTruncated: result.result.ingredientsTruncated ?? false,
       timestamp: new Date().toISOString(),
     };
+
+    // ── Fire-and-forget: persist ingredients to DB ──────────────────────
+    // Started BEFORE return so the promise is in-flight within the Deno isolate
+    if (
+      mode === 'full' &&
+      scanResult.ingredients.length > 0 &&
+      scanResult.detectedBrand &&
+      scanResult.detectedProduct
+    ) {
+      const ingredientPersistPromise = (async () => {
+        try {
+          const productId = await findOrCreateProduct(
+            scanResult.detectedBrand!,
+            scanResult.detectedProduct!,
+            scanResult.detectedCategory,
+          );
+          if (productId) {
+            await persistIngredients(productId, scanResult.ingredients);
+          }
+        } catch {
+          // silent — never affect scan response
+        }
+      })();
+      void ingredientPersistPromise;
+    }
 
     return new Response(
       JSON.stringify({

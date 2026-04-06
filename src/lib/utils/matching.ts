@@ -58,6 +58,18 @@ export const ingredientMap: Record<string, string[]> = {
   scarring: ['retinol', 'vitamin c', 'niacinamide', 'aha', 'centella asiatica'],
 };
 
+// Preference keywords: preference key → product name/category search terms
+export const PREFERENCE_KEYWORDS: Record<string, string[]> = {
+  fragranceFree: ['fragrance-free', 'fragrance free', 'unscented'],
+  vegan: ['vegan'],
+  crueltyFree: ['cruelty-free', 'cruelty free'],
+  glutenFree: ['gluten-free', 'gluten free'],
+  alcoholFree: ['alcohol-free', 'alcohol free'],
+  siliconeFree: ['silicone-free', 'silicone free'],
+  plantBased: ['plant-based', 'plant based'],
+  chemicalFree: ['chemical-free', 'chemical free'],
+};
+
 /**
  * Normalize a user concern from the quiz to our internal key
  * e.g., "Acne Prone" -> "acne", "Signs of Aging" -> "aging"

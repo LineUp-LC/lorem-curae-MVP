@@ -6,9 +6,11 @@ import PersonalizingLoader from '../../../components/feature/PersonalizingLoader
 
 interface ScanProcessingProps {
   previewUrl: string;
+  progress?: number;
+  onComplete?: () => void;
 }
 
-export default function ScanProcessing({ previewUrl }: ScanProcessingProps) {
+export default function ScanProcessing({ previewUrl, progress, onComplete }: ScanProcessingProps) {
   return (
     <div className="flex flex-col items-center gap-6">
       {/* Photo preview with scanning overlay (hidden for barcode scans) */}
@@ -26,6 +28,8 @@ export default function ScanProcessing({ previewUrl }: ScanProcessingProps) {
       <div className="w-full max-w-xs">
         <PersonalizingLoader
           steps={['Identifying product...', 'Reading label...', 'Almost there...']}
+          progress={progress}
+          onComplete={onComplete}
         />
       </div>
     </div>

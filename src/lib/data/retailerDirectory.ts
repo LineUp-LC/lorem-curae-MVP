@@ -624,11 +624,19 @@ export function computeBestForYouScore(
   price: number,
   maxPrice: number,
   retailer: KnownRetailer | null,
+  budgetCeiling?: number | null,
 ): number {
-  // Price component: 0-30 (lower is better)
-  const priceScore = maxPrice > 0
-    ? (1 - price / maxPrice) * 30
-    : 15;
+  // Price component: 0-30
+  let priceScore: number;
+  if (budgetCeiling && budgetCeiling > 0 && price > 0) {
+    // Budget-aware: full points at/below ceiling, linear taper to 0 at 2× ceiling
+    priceScore = price <= budgetCeiling
+      ? 30
+      : Math.max(0, 30 * (1 - (price - budgetCeiling) / budgetCeiling));
+  } else {
+    // Generic: lower price relative to max = higher score
+    priceScore = maxPrice > 0 ? (1 - price / maxPrice) * 30 : 15;
+  }
 
   // Shipping: 0-20
   const days = estimateShippingDays(retailer);
@@ -672,14 +680,14 @@ function extractUrlHostname(url: string): string | null {
 export function buildRetailerListings(
   webProducts: WebProduct[],
   sortKey: RetailerSortKey = 'best',
-  filters: { freeShipping?: boolean; freeReturns?: boolean } = {},
+  filters: { freeShipping?: boolean; freeReturns?: boolean; budgetCeiling?: number | null } = {},
 ): RetailerListing[] {
   const maxPrice = Math.max(...webProducts.map(p => p.price).filter(p => p > 0), 1);
 
   let listings: RetailerListing[] = webProducts.map(wp => {
     const known = lookupRetailer(wp.merchant);
     const badges = known ? getTrustBadges(known) : [];
-    const score = computeBestForYouScore(wp.price, maxPrice, known);
+    const score = computeBestForYouScore(wp.price, maxPrice, known, filters.budgetCeiling);
     return {
       retailerName: known?.name || wp.merchant,
       domain: known?.domain || extractUrlHostname(wp.externalUrl) || wp.merchant.toLowerCase().replace(/[^a-z0-9]/g, ''),
@@ -736,6 +744,13 @@ export function buildRetailerListings(
     const aStock = a.inStock === false ? 1 : 0;
     const bStock = b.inStock === false ? 1 : 0;
     return aStock - bStock;
+  });
+
+  // Skincare specialists sorted to top (stable — preserves sort-key order within each tier)
+  listings.sort((a, b) => {
+    const aSpec = a.knownRetailer?.skincareSpecialist ? 0 : 1;
+    const bSpec = b.knownRetailer?.skincareSpecialist ? 0 : 1;
+    return aSpec - bSpec;
   });
 
   // Curae partners pinned first regardless of sort

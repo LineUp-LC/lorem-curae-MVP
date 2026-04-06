@@ -18,6 +18,7 @@
 - AI summary timeout in RetailerReviews → Sonnet 4.5 used for 256-token task + 15s client timeout too tight for Deno cold start → Route lightweight modes (retailer_review_summary, curated_review_summary, natural_discovery) to Haiku 4.5 in ai-insight Edge Function; increase timeout to 25s
 - surfaceClient.ts fetch() has no AbortController → hangs indefinitely if Edge Function stalls → only protected by Promise.race in consuming component (known gap, not fixed)
 - Where to Buy sheet shows "Not available online" on search failure → `searchWhereToBuy` collapsed all errors (auth, timeout, network) into `null`, UI treated `null` same as empty results → Return `{ products, error }` instead, add error state UI with retry button. Note: `buy` type is in `RATE_LIMIT_EXEMPT` — rate limiter was never the cause
+- WhereToBuy shows 1-2 retailers for premium brands → `mapShoppingResults` set `externalUrl = getBrandUrl(brand)` for any brand not in RETAILER_ONLY_BRANDS (~22 mass-market only), so Amazon/Sephora/Target listings all got same brand homepage domain → URL-hostname deduplication collapsed them to 1 → fix: `preserveRetailerLinks=true` for `buy` type (always use `item.link`), deduplicate by normalized merchant name not URL hostname, strip duplicate brand prefix in `buildBuyQuery`. Edge Function redeployed.
 
 ## Phase 1: Website Hub Restructure (Steps 2-3)
 
@@ -48,6 +49,16 @@
   - All checks passed: build, types, lint, dead imports, route integrity
   - Phase 1 Website Hub Restructure: COMPLETE
 
+## Product Ingredients Persistence (2026-04-05)
+
+- Migration: `20260405000000_create_product_ingredients` — product_ingredients table (UUID FK to products), products.source constraint extended with 'scan'
+- Edge Function: product-scan v22 deployed — fire-and-forget ingredient persistence on mode='full' scans
+- Added: service role client (lazy singleton), findOrCreateProduct (case-insensitive dedup), persistIngredients (upsert on product_id+position)
+- Cleanup: removed dead PRODUCT_CATALOG references (was undefined, never worked), simplified UPC path
+- RLS: public read, service role insert+update on product_ingredients
+- Files modified: supabase/functions/product-scan/index.ts, supabase/migrations/20260405000000_create_product_ingredients.sql, .claude/rules/10-data-layer.md
+
 ## Observations (Not Yet Patterns)
 
 <!-- Items seen once. Promote to Confirmed Patterns after 2+ occurrences. -->
+- PRODUCT_CATALOG was referenced but never defined in product-scan Edge Function — dead code that would crash if reached (UPC barcode path, catalog validation). Removed 2026-04-05.

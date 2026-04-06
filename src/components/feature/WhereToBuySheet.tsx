@@ -12,13 +12,15 @@ import {
 import RetailerCard from './RetailerCard';
 import RetailerReviews from './RetailerReviews';
 import RoutinePickerModal from './RoutinePickerModal';
-import { searchWhereToBuy, searchProductReviews } from '../../lib/api/productSearch';
+import { searchWhereToBuy, searchProductReviews, getCachedBuyResults } from '../../lib/api/productSearch';
 import { onAction } from '../../lib/utils/gamificationTriggers';
 import { useAuth } from '../../lib/auth/AuthContext';
 import {
   getEffectiveSkinType,
   getEffectiveConcerns,
   getEffectiveSensitivity,
+  getEffectiveOnboardingV2,
+  parseBudgetCeiling,
 } from '../../lib/utils/sessionState';
 import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
 
@@ -71,10 +73,13 @@ export default function WhereToBuySheet({
   const routineTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Dedicated product search state (finds the product across many retailers)
-  const [buyProducts, setBuyProducts] = useState<WebProduct[]>([]);
-  const [buySearchDone, setBuySearchDone] = useState(false);
+  // Lazy init from prefetch cache — eliminates spinner when data is already available
+  const [buyProducts, setBuyProducts] = useState<WebProduct[]>(() => getCachedBuyResults(productName, productBrand) ?? []);
+  const [buySearchDone, setBuySearchDone] = useState(() => getCachedBuyResults(productName, productBrand) !== null);
   const [buySearchError, setBuySearchError] = useState<string | null>(null);
-  const buySearchFiredRef = useRef<string | null>(null);
+  const buySearchFiredRef = useRef<string | null>(
+    getCachedBuyResults(productName, productBrand) !== null ? `${productBrand}:${productName}` : null
+  );
 
   // General Google reviews state
   const [googleReviews, setGoogleReviews] = useState<WebReview[] | null>(null);
@@ -181,30 +186,33 @@ export default function WhereToBuySheet({
     const fromExisting = findRetailerListings(targetProduct, allWebProducts);
     if (buyProducts.length === 0) return fromExisting;
 
-    const seenDomains = new Set(fromExisting.map(p => {
-      try { return new URL(p.externalUrl).hostname.replace('www.', ''); } catch { return p.merchant.toLowerCase(); }
-    }));
+    const normMerchant = (p: WebProduct) => p.merchant.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const seenMerchants = new Set(fromExisting.map(normMerchant));
 
     const additional = buyProducts.filter(p => {
-      const domain = (() => {
-        try { return new URL(p.externalUrl).hostname.replace('www.', ''); } catch { return p.merchant.toLowerCase(); }
-      })();
-      if (seenDomains.has(domain)) return false;
-      seenDomains.add(domain);
+      const key = normMerchant(p);
+      if (seenMerchants.has(key)) return false;
+      seenMerchants.add(key);
       return true;
     });
 
     return [...fromExisting, ...additional];
   }, [isOpen, targetProduct, allWebProducts, buyProducts]);
 
+  // Budget ceiling for "Best for You" sort scoring
+  const budgetCeiling = useMemo(() => {
+    const ob = getEffectiveOnboardingV2();
+    return ob.searchFilters.useBudget !== false ? parseBudgetCeiling(ob.monthlySpend) : null;
+  }, []);
+
   // Build sorted + filtered listings
   const listings = useMemo(() => {
-    let result = buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns });
+    let result = buildRetailerListings(allRetailerProducts, sortKey, { freeShipping, freeReturns, budgetCeiling });
     if (beautyAuthority) {
       result = result.filter(l => l.knownRetailer?.skincareSpecialist === true);
     }
     return result;
-  }, [allRetailerProducts, sortKey, freeShipping, freeReturns, beautyAuthority]);
+  }, [allRetailerProducts, sortKey, freeShipping, freeReturns, beautyAuthority, budgetCeiling]);
 
   const handleBuyClick = useCallback((listing: RetailerListing) => {
     onBuyIntent?.(listing);
@@ -450,7 +458,7 @@ export default function WhereToBuySheet({
             {/* Retailer list */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {listings.map((listing) => (
-                <div key={listing.domain}>
+                <div key={listing.retailerName}>
                   <RetailerCard
                     listing={listing}
                     onBuyClick={handleBuyClick}

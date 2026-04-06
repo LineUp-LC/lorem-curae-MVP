@@ -629,6 +629,22 @@ export function getEffectiveOnboardingV2(): OnboardingV2Data {
   };
 }
 
+// ========================================
+// Budget ceiling helper
+// ========================================
+
+const MONTHLY_SPEND_CEILING: Record<string, number> = {
+  'Under $25': 25,
+  '$25 - $50': 50,
+  '$50 - $100': 100,
+  '$100 - $200': 200,
+};
+
+export function parseBudgetCeiling(monthlySpend: string | null): number | null {
+  if (!monthlySpend) return null;
+  return MONTHLY_SPEND_CEILING[monthlySpend] ?? null;
+}
+
 // React hook for using session state
 export function useSessionState() {
   const [state, setState] = React.useState(sessionState.getState());
