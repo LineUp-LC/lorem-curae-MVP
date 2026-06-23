@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import Toast from '../../../components/feature/Toast';
@@ -8,6 +8,7 @@ import type { ActiveIngredient } from '../../../types/product';
 import {
   fetchAllProducts,
   fetchProductForEdit,
+  fetchProductsNeedingVerification,
   createProduct,
   updateProduct,
   updateProductStatus,
@@ -19,6 +20,7 @@ import {
   type ProductFormData,
   type ProductVersion,
   type ProductStatus,
+  type VerificationItem,
 } from '../../../lib/data/supabaseProductsAdmin';
 import type { SupabaseProductRow } from '../../../lib/data/supabaseProducts';
 
@@ -1313,11 +1315,189 @@ function ProductEditView({
 // ═══════════════════════════════════════════════════════════════
 // AdminProductsPage (main export)
 // ═══════════════════════════════════════════════════════════════
+// ProductVerificationView
+// ═══════════════════════════════════════════════════════════════
+
+const VERIFICATION_STATUS_CLASSES: Record<string, string> = {
+  verified: 'bg-green-100 text-green-700',
+  needs_review: 'bg-amber-100 text-amber-700',
+  conflict: 'bg-red-100 text-red-700',
+};
+
+const ISSUE_PILL_CLASSES: Record<string, string> = {
+  'Ingredient conflict — needs review': 'bg-red-100 text-red-700',
+  'Pending merge available': 'bg-blue-50 text-blue-600',
+  'Needs verification': 'bg-amber-100 text-amber-700',
+  'No ingredients scanned': 'bg-amber-100 text-amber-700',
+  'Still draft': 'bg-amber-100 text-amber-700',
+  'Missing image': 'bg-red-50 text-red-600',
+  'Missing description': 'bg-red-50 text-red-600',
+  'No skin types': 'bg-cream-100 text-warm-gray',
+  'No concerns': 'bg-cream-100 text-warm-gray',
+};
+
+const VERIFICATION_FILTERS = [
+  { key: 'action',    label: 'Needs Action' },
+  { key: 'missing',   label: 'Missing Data' },
+  { key: 'unscanned', label: 'Unscanned' },
+  { key: 'all',       label: 'All Issues' },
+] as const;
+type VerificationFilterKey = typeof VERIFICATION_FILTERS[number]['key'];
+const ACTION_ISSUES  = new Set(['Ingredient conflict — needs review', 'Needs verification', 'Pending merge available']);
+const MISSING_ISSUES = new Set(['Missing image', 'Missing description', 'No skin types', 'No concerns']);
+
+function ProductVerificationView() {
+  const navigate = useNavigate();
+  const [items, setItems] = useState<VerificationItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoading(true);
+    fetchProductsNeedingVerification().then(data => {
+      if (!cancelled) {
+        setItems(data);
+        setLoading(false);
+      }
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  const [verificationFilter, setVerificationFilter] = useState<VerificationFilterKey>('action');
+  const filteredItems = useMemo(() => {
+    if (verificationFilter === 'all')       return items;
+    if (verificationFilter === 'action')    return items.filter(item => item.issues.some(i => ACTION_ISSUES.has(i)));
+    if (verificationFilter === 'missing')   return items.filter(item => item.issues.some(i => MISSING_ISSUES.has(i)));
+    if (verificationFilter === 'unscanned') return items.filter(item => item.issues.includes('No ingredients scanned') && item.status === 'published');
+    return items;
+  }, [items, verificationFilter]);
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+        <p className="text-sm text-warm-gray">Checking products...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-serif font-semibold text-deep">Verification</h2>
+          <p className="text-sm text-warm-gray mt-1">Products with missing data or ingredient conflicts</p>
+        </div>
+        <span className="px-3 py-1 rounded-full text-sm font-medium bg-amber-100 text-amber-700">
+          {filteredItems.length} {filteredItems.length === 1 ? 'product' : 'products'} need attention
+        </span>
+      </div>
+
+      {items.length === 0 ? (
+        <div className="bg-white rounded-xl border border-blush-200 p-12 text-center">
+          <i className="ri-checkbox-circle-line text-3xl text-sage mb-3 block" />
+          <p className="text-deep font-medium">All products look good</p>
+          <p className="text-sm text-warm-gray mt-1">No verification issues found</p>
+        </div>
+      ) : (
+        <>
+        <div className="flex gap-1 mb-6 bg-cream-100 rounded-lg p-1 w-fit">
+          {VERIFICATION_FILTERS.map(f => (
+            <button
+              key={f.key}
+              onClick={() => setVerificationFilter(f.key)}
+              className={`px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                verificationFilter === f.key ? 'bg-white text-deep shadow-sm' : 'text-warm-gray hover:text-deep'
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="bg-white rounded-xl border border-blush-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-blush-200 bg-cream-50">
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Product</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Category</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Status</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Verification</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Confidence</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Source</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Issues</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray">Updated</th>
+                  <th className="text-left px-4 py-3 font-medium text-warm-gray" />
+                </tr>
+              </thead>
+              <tbody>
+                {filteredItems.length === 0 ? (
+                  <tr><td colSpan={9} className="px-4 py-12 text-center text-sm text-warm-gray">
+                    No products match this filter.
+                  </td></tr>
+                ) : filteredItems.map((item, i) => (
+                  <tr key={item.id} className={`border-b border-blush-100 hover:bg-cream-50 transition-colors ${i === filteredItems.length - 1 ? 'border-b-0' : ''}`}>
+                    <td className="px-4 py-3">
+                      <div className="font-medium text-deep">{item.name}</div>
+                      <div className="text-warm-gray text-xs mt-0.5">{item.brand}</div>
+                    </td>
+                    <td className="px-4 py-3 text-warm-gray capitalize">{item.category}</td>
+                    <td className="px-4 py-3">
+                      <StatusBadge status={item.status} />
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-medium capitalize ${VERIFICATION_STATUS_CLASSES[item.verification_status ?? ''] ?? 'bg-gray-100 text-gray-500'}`}>
+                        {item.verification_status ?? 'unverified'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-warm-gray text-sm capitalize">
+                      {item.verification_confidence ?? '—'}
+                    </td>
+                    <td className="px-4 py-3 text-warm-gray text-sm">
+                      {item.verification_source ?? '—'}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-1">
+                        {item.issues.map(issue => (
+                          <span
+                            key={issue}
+                            className={`px-2 py-0.5 rounded-full text-xs font-medium ${ISSUE_PILL_CLASSES[issue] ?? 'bg-cream-100 text-warm-gray'}`}
+                          >
+                            {issue}
+                          </span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-warm-gray text-xs whitespace-nowrap">
+                      {new Date(item.updated_at).toLocaleDateString()}
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        onClick={() => navigate(`/admin/products/${item.id}`)}
+                        className="px-3 py-1.5 text-xs font-medium text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 rounded-lg transition-colors cursor-pointer"
+                      >
+                        Edit
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </>
+      )}
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 export default function AdminProductsPage() {
   const { id } = useParams<{ id: string }>();
   const { user } = useAuth();
   const [toast, setToast] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'products' | 'verification'>('products');
 
   const isListMode = !id;
   const isCreateMode = id === 'new';
@@ -1343,7 +1523,23 @@ export default function AdminProductsPage() {
 
       {/* Content */}
       <main className="max-w-6xl mx-auto px-4 lg:px-8 py-8">
-        {isListMode && <ProductListView />}
+        {isListMode && (
+          <div className="flex gap-1 mb-6 bg-cream-100 rounded-lg p-1 w-fit">
+            {(['products', 'verification'] as const).map(view => (
+              <button
+                key={view}
+                onClick={() => setActiveView(view)}
+                className={`px-4 py-2 text-sm font-medium rounded-md cursor-pointer transition-colors ${
+                  activeView === view ? 'bg-white text-deep shadow-sm' : 'text-warm-gray hover:text-deep'
+                }`}
+              >
+                {view === 'products' ? 'Products' : 'Verification'}
+              </button>
+            ))}
+          </div>
+        )}
+        {isListMode && activeView === 'products' && <ProductListView />}
+        {isListMode && activeView === 'verification' && <ProductVerificationView />}
         {(isCreateMode || editProductId) && (
           <ProductEditView
             productId={editProductId}
