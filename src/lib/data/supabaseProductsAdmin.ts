@@ -467,20 +467,36 @@ export async function fetchProductIngredients(productId: string): Promise<{
   }
 }
 
-export async function approvePendingMerge(productId: string, pendingIngredients: ParsedIngredient[]): Promise<{ success: boolean; result?: string; error?: string }> {
+export async function approvePendingMerge(productId: string, currentIngredients: ParsedIngredient[], pendingIngredients: ParsedIngredient[]): Promise<{ success: boolean; result?: string; error?: string }> {
+  // Union of current + pending (current first so its tier/category wins on dedup), deduped
+  // by normalized name. Mirrors the verify-product auto-merge: approval merges, never replaces.
+  const normalize = (s: string) => s.toLowerCase().trim();
+  const seen = new Set<string>();
+  const unionIngredients = [...currentIngredients, ...pendingIngredients].filter((ing) => {
+    const norm = normalize(ing.name);
+    if (seen.has(norm)) return false;
+    seen.add(norm);
+    return true;
+  });
   try {
     const { data: rpcResult, error: rpcError } = await supabase.rpc(
       'resolve_product_ingredients_safe',
       {
         p_id: productId,
-        p_new_ingredients: pendingIngredients,
-        p_source: 'admin_merge',
+        p_new_ingredients: unionIngredients,
+        p_source: 'verification_agent',
         p_authority_tier: 'A',
       }
     );
     if (rpcError) {
       console.error('[adminProducts] approvePendingMerge RPC failed:', rpcError.message);
       return { success: false, error: rpcError.message };
+    }
+    // Only clear pending if the resolver actually wrote. A blocked decision means the union
+    // was NOT persisted -- clearing pending would silently lose it.
+    const blockedResults = new Set(['kept_longer', 'locked_verified', 'rejected_empty']);
+    if (blockedResults.has(rpcResult as string)) {
+      return { success: false, error: `Merge blocked by resolver: ${rpcResult}` };
     }
     const { error: clearError } = await supabase
       .from('products')

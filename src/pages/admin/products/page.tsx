@@ -1397,7 +1397,7 @@ function MergeReviewModal({
     if (!pending) return;
     setSubmitting(true);
     setError(null);
-    const result = await approvePendingMerge(productId, pending);
+    const result = await approvePendingMerge(productId, scanned ?? [], pending);
     setSubmitting(false);
     if (result.success) {
       onSuccess();
