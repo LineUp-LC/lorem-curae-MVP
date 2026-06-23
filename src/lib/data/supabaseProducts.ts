@@ -9,6 +9,7 @@
 import { supabase } from '../supabase-browser';
 import type { Product, ActiveIngredient, ProductSize, ProductSource } from '../../types/product';
 import type { ProductCategory } from '../utils/categoryRegistry';
+import { ParsedIngredient } from '@/types/scan';
 
 /** Shape returned by a Supabase SELECT on the products table */
 export interface SupabaseProductRow {
@@ -38,6 +39,8 @@ export interface SupabaseProductRow {
   status: string;
   created_at: string;
   updated_at: string;
+  scanned_ingredients: ParsedIngredient[] | null;
+  scanned_ingredients_pending: ParsedIngredient[] | null;
 }
 
 /**

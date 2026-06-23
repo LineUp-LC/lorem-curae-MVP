@@ -8,6 +8,7 @@
 import { supabase } from '../supabase-browser';
 import type { SupabaseProductRow } from './supabaseProducts';
 import type { ActiveIngredient } from '../../types/product';
+import { ParsedIngredient } from '@/types/scan';
 
 // ─── Types ───────────────────────────────────────────────────
 
@@ -437,5 +438,78 @@ export async function uploadProductImage(
     return urlData.publicUrl;
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Upload failed' };
+  }
+}
+
+// ─── Ingredient Merge Review ─────────────────────────────────
+
+export async function fetchProductIngredients(productId: string): Promise<{
+  scanned: ParsedIngredient[] | null;
+  pending: ParsedIngredient[] | null;
+}> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('scanned_ingredients, scanned_ingredients_pending')
+      .eq('id', productId)
+      .single();
+    if (error) {
+      console.error('[adminProducts] fetchProductIngredients failed:', error.message);
+      return { scanned: null, pending: null };
+    }
+    return {
+      scanned: (data?.scanned_ingredients as ParsedIngredient[] | null) ?? null,
+      pending: (data?.scanned_ingredients_pending as ParsedIngredient[] | null) ?? null,
+    };
+  } catch (err) {
+    console.error('[adminProducts] fetchProductIngredients error:', err);
+    return { scanned: null, pending: null };
+  }
+}
+
+export async function approvePendingMerge(productId: string, pendingIngredients: ParsedIngredient[]): Promise<{ success: boolean; result?: string; error?: string }> {
+  try {
+    const { data: rpcResult, error: rpcError } = await supabase.rpc(
+      'resolve_product_ingredients_safe',
+      {
+        p_id: productId,
+        p_new_ingredients: pendingIngredients,
+        p_source: 'admin_merge',
+        p_authority_tier: 'A',
+      }
+    );
+    if (rpcError) {
+      console.error('[adminProducts] approvePendingMerge RPC failed:', rpcError.message);
+      return { success: false, error: rpcError.message };
+    }
+    const { error: clearError } = await supabase
+      .from('products')
+      .update({ scanned_ingredients_pending: null })
+      .eq('id', productId);
+    if (clearError) {
+      console.error('[adminProducts] approvePendingMerge clear pending failed:', clearError.message);
+      return { success: false, error: clearError.message };
+    }
+    return { success: true, result: rpcResult as string };
+  } catch (err) {
+    console.error('[adminProducts] approvePendingMerge error:', err);
+    return { success: false, error: String(err) };
+  }
+}
+
+export async function rejectPendingMerge(productId: string): Promise<{ success: boolean; error?: string }> {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .update({ scanned_ingredients_pending: null })
+      .eq('id', productId);
+    if (error) {
+      console.error('[adminProducts] rejectPendingMerge failed:', error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
+  } catch (err) {
+    console.error('[adminProducts] rejectPendingMerge error:', err);
+    return { success: false, error: String(err) };
   }
 }

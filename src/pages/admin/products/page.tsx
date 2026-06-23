@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../../lib/auth/AuthContext';
 import Toast from '../../../components/feature/Toast';
@@ -16,6 +16,9 @@ import {
   fetchIngredientLinks,
   fetchVersionHistory,
   uploadProductImage,
+  fetchProductIngredients,
+  approvePendingMerge,
+  rejectPendingMerge,
   type AdminProductListItem,
   type ProductFormData,
   type ProductVersion,
@@ -23,6 +26,7 @@ import {
   type VerificationItem,
 } from '../../../lib/data/supabaseProductsAdmin';
 import type { SupabaseProductRow } from '../../../lib/data/supabaseProducts';
+import { ParsedIngredient } from '@/types/scan';
 
 // ─── Constants ───────────────────────────────────────────────
 
@@ -1346,8 +1350,153 @@ type VerificationFilterKey = typeof VERIFICATION_FILTERS[number]['key'];
 const ACTION_ISSUES  = new Set(['Ingredient conflict — needs review', 'Needs verification', 'Pending merge available']);
 const MISSING_ISSUES = new Set(['Missing image', 'Missing description', 'No skin types', 'No concerns']);
 
-function ProductVerificationView({ items, loading }: { items: VerificationItem[]; loading: boolean }) {
+function MergeReviewModal({
+  productId,
+  productName,
+  productBrand,
+  onClose,
+  onSuccess,
+}: {
+  productId: string;
+  productName: string;
+  productBrand: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
+  const [scanned, setScanned] = useState<ParsedIngredient[] | null>(null);
+  const [pending, setPending] = useState<ParsedIngredient[] | null>(null);
+  const [loadingIngredients, setLoadingIngredients] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setLoadingIngredients(true);
+    fetchProductIngredients(productId).then(result => {
+      if (cancelled) return;
+      setScanned(result.scanned);
+      setPending(result.pending);
+      setLoadingIngredients(false);
+    });
+    return () => { cancelled = true; };
+  }, [productId]);
+
+  const handleReject = async () => {
+    setSubmitting(true);
+    setError(null);
+    const result = await rejectPendingMerge(productId);
+    setSubmitting(false);
+    if (result.success) {
+      onSuccess();
+    } else {
+      setError(result.error ?? 'Failed to reject merge');
+    }
+  };
+
+  const handleApprove = async () => {
+    if (!pending) return;
+    setSubmitting(true);
+    setError(null);
+    const result = await approvePendingMerge(productId, pending);
+    setSubmitting(false);
+    if (result.success) {
+      onSuccess();
+    } else {
+      setError(result.error ?? 'Failed to approve merge');
+    }
+  };
+
+  const renderPill = (ing: ParsedIngredient, idx: number) => {
+    const tierClass =
+      ing.safetyTier === 'safe' ? 'bg-green-100 text-green-700'
+      : ing.safetyTier === 'caution' ? 'bg-amber-100 text-amber-700'
+      : 'bg-red-100 text-red-700';
+    return (
+      <div key={idx} className="border border-blush-200 rounded-lg p-2 mb-1.5">
+        <div className="flex items-center gap-2">
+          <span className="text-sm font-medium text-deep">{ing.name}</span>
+          <span className={`text-xs px-1.5 py-0.5 rounded-full ${tierClass}`}>{ing.safetyTier}</span>
+        </div>
+        {ing.category && <div className="text-xs text-warm-gray mt-0.5">{ing.category}</div>}
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/40" onClick={submitting ? undefined : onClose} />
+      <div className="relative max-w-4xl w-full bg-white rounded-xl shadow-xl max-h-[90vh] overflow-y-auto mx-4">
+        <div className="flex items-start justify-between p-6 border-b border-blush-200">
+          <div>
+            <h3 className="font-semibold text-deep">{productName}</h3>
+            <p className="text-warm-gray text-sm">{productBrand}</p>
+          </div>
+          <button
+            onClick={onClose}
+            disabled={submitting}
+            className="text-warm-gray hover:text-deep cursor-pointer disabled:opacity-50"
+          >
+            <i className="ri-close-line text-xl" />
+          </button>
+        </div>
+
+        {loadingIngredients ? (
+          <div className="text-center py-16">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+            <p className="text-sm text-warm-gray">Loading ingredients...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-2 gap-6 p-6">
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-semibold text-deep">Current Ingredients</h4>
+                  <span className="bg-cream-100 text-warm-gray text-xs px-2 py-0.5 rounded-full">{scanned?.length ?? 0}</span>
+                </div>
+                {scanned && scanned.length > 0 ? scanned.map(renderPill) : (
+                  <p className="text-sm text-warm-gray">No current ingredients.</p>
+                )}
+              </div>
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-semibold text-deep">Pending Merge</h4>
+                  <span className="bg-blue-50 text-blue-600 text-xs px-2 py-0.5 rounded-full">{pending?.length ?? 0}</span>
+                </div>
+                {pending && pending.length > 0 ? pending.map(renderPill) : (
+                  <p className="text-sm text-warm-gray">No pending ingredients.</p>
+                )}
+              </div>
+            </div>
+
+            {error && <p className="px-6 text-red-600 text-sm">{error}</p>}
+
+            <div className="border-t border-blush-200 p-4 flex justify-end gap-3">
+              <button
+                onClick={handleReject}
+                disabled={submitting}
+                className="px-4 py-2 text-sm font-medium border border-blush-300 text-warm-gray rounded-lg hover:bg-cream-50 cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? 'Working...' : 'Reject'}
+              </button>
+              <button
+                onClick={handleApprove}
+                disabled={submitting}
+                className="px-4 py-2 text-sm font-medium bg-primary-500 text-white rounded-lg hover:bg-primary-600 cursor-pointer disabled:opacity-50"
+              >
+                {submitting ? 'Working...' : 'Approve Merge'}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function ProductVerificationView({ items, loading, onMergeSuccess }: { items: VerificationItem[]; loading: boolean; onMergeSuccess: () => void }) {
   const navigate = useNavigate();
+  const [mergeModalProductId, setMergeModalProductId] = useState<string | null>(null);
+  const [mergeModalProduct, setMergeModalProduct] = useState<{ name: string; brand: string } | null>(null);
 
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilterKey>('action');
   const filteredItems = useMemo(() => {
@@ -1468,12 +1617,22 @@ function ProductVerificationView({ items, loading }: { items: VerificationItem[]
                       {new Date(item.updated_at).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => navigate(`/admin/products/${item.id}`)}
-                        className="px-3 py-1.5 text-xs font-medium text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 rounded-lg transition-colors cursor-pointer"
-                      >
-                        Edit
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        {item.hasPendingMerge && (
+                          <button
+                            onClick={() => { setMergeModalProductId(item.id); setMergeModalProduct({ name: item.name, brand: item.brand }); }}
+                            className="px-3 py-1.5 text-xs font-medium bg-blue-50 text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-100 cursor-pointer transition-colors"
+                          >
+                            Review merge
+                          </button>
+                        )}
+                        <button
+                          onClick={() => navigate(`/admin/products/${item.id}`)}
+                          className="px-3 py-1.5 text-xs font-medium text-primary-600 hover:text-primary-700 border border-primary-200 hover:border-primary-300 rounded-lg transition-colors cursor-pointer"
+                        >
+                          Edit
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -1482,6 +1641,15 @@ function ProductVerificationView({ items, loading }: { items: VerificationItem[]
           </div>
         </div>
         </>
+      )}
+      {mergeModalProductId && mergeModalProduct && (
+        <MergeReviewModal
+          productId={mergeModalProductId}
+          productName={mergeModalProduct.name}
+          productBrand={mergeModalProduct.brand}
+          onClose={() => { setMergeModalProductId(null); setMergeModalProduct(null); }}
+          onSuccess={() => { setMergeModalProductId(null); setMergeModalProduct(null); onMergeSuccess(); }}
+        />
       )}
     </div>
   );
@@ -1496,6 +1664,14 @@ export default function AdminProductsPage() {
   const [activeView, setActiveView] = useState<'products' | 'verification'>('products');
   const [verificationItems, setVerificationItems] = useState<VerificationItem[]>([]);
   const [verificationLoading, setVerificationLoading] = useState(true);
+
+  const refreshVerification = useCallback(() => {
+    setVerificationLoading(true);
+    fetchProductsNeedingVerification().then(data => {
+      setVerificationItems(data);
+      setVerificationLoading(false);
+    }).catch(() => setVerificationLoading(false));
+  }, []);
 
   const isListMode = !id;
   const isCreateMode = id === 'new';
@@ -1564,7 +1740,7 @@ export default function AdminProductsPage() {
         )}
         {isListMode && activeView === 'products' && <ProductListView />}
         {isListMode && activeView === 'verification' && (
-          <ProductVerificationView items={verificationItems} loading={verificationLoading} />
+          <ProductVerificationView items={verificationItems} loading={verificationLoading} onMergeSuccess={refreshVerification} />
         )}
         {(isCreateMode || editProductId) && (
           <ProductEditView
