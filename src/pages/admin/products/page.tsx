@@ -1346,22 +1346,8 @@ type VerificationFilterKey = typeof VERIFICATION_FILTERS[number]['key'];
 const ACTION_ISSUES  = new Set(['Ingredient conflict — needs review', 'Needs verification', 'Pending merge available']);
 const MISSING_ISSUES = new Set(['Missing image', 'Missing description', 'No skin types', 'No concerns']);
 
-function ProductVerificationView() {
+function ProductVerificationView({ items, loading }: { items: VerificationItem[]; loading: boolean }) {
   const navigate = useNavigate();
-  const [items, setItems] = useState<VerificationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    fetchProductsNeedingVerification().then(data => {
-      if (!cancelled) {
-        setItems(data);
-        setLoading(false);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
 
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilterKey>('action');
   const filteredItems = useMemo(() => {
@@ -1508,10 +1494,29 @@ export default function AdminProductsPage() {
   const { user } = useAuth();
   const [toast, setToast] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'products' | 'verification'>('products');
+  const [verificationItems, setVerificationItems] = useState<VerificationItem[]>([]);
+  const [verificationLoading, setVerificationLoading] = useState(true);
 
   const isListMode = !id;
   const isCreateMode = id === 'new';
   const editProductId = id && id !== 'new' ? id : null;
+
+  useEffect(() => {
+    if (!isListMode) return;
+    let cancelled = false;
+    setVerificationLoading(true);
+    fetchProductsNeedingVerification().then(data => {
+      if (!cancelled) {
+        setVerificationItems(data);
+        setVerificationLoading(false);
+      }
+    }).catch(() => { if (!cancelled) setVerificationLoading(false); });
+    return () => { cancelled = true; };
+  }, [isListMode]);
+
+  const verificationActionCount = verificationItems.filter(
+    item => item.issues.some(i => ACTION_ISSUES.has(i))
+  ).length;
 
   return (
     <div className="min-h-screen bg-cream">
@@ -1543,13 +1548,24 @@ export default function AdminProductsPage() {
                   activeView === view ? 'bg-white text-deep shadow-sm' : 'text-warm-gray hover:text-deep'
                 }`}
               >
-                {view === 'products' ? 'Products' : 'Verification'}
+                {view === 'products' ? 'Products' : (
+                  <span className="flex items-center gap-1.5">
+                    Verification
+                    {!verificationLoading && verificationActionCount > 0 && (
+                      <span className="bg-primary-500 text-white text-xs font-medium px-1.5 py-0.5 rounded-full leading-none">
+                        {verificationActionCount}
+                      </span>
+                    )}
+                  </span>
+                )}
               </button>
             ))}
           </div>
         )}
         {isListMode && activeView === 'products' && <ProductListView />}
-        {isListMode && activeView === 'verification' && <ProductVerificationView />}
+        {isListMode && activeView === 'verification' && (
+          <ProductVerificationView items={verificationItems} loading={verificationLoading} />
+        )}
         {(isCreateMode || editProductId) && (
           <ProductEditView
             productId={editProductId}
