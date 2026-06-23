@@ -126,6 +126,74 @@ export async function fetchAllProducts(filters?: {
   }
 }
 
+// ─── Verification ────────────────────────────────────────────
+
+export interface VerificationItem {
+  id: string;
+  slug: string;
+  name: string;
+  brand: string;
+  category: string;
+  status: string;
+  image: string;
+  updated_at: string;
+  verification_status: string | null;
+  verification_confidence: string | null;
+  verification_source: string | null;
+  verified_at: string | null;
+  hasScannedIngredients: boolean;
+  hasPendingMerge: boolean;
+  issues: string[];
+}
+
+export async function fetchProductsNeedingVerification(): Promise<VerificationItem[]> {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('id, slug, name, brand, category, status, image, description, skin_types, concerns, updated_at, verification_status, verification_confidence, verification_source, verified_at, scanned_ingredients, scanned_ingredients_pending')
+      .order('updated_at', { ascending: false });
+
+    if (error) {
+      console.error('[adminProducts] fetchVerification failed:', error.message);
+      return [];
+    }
+
+    const rows = (data ?? []) as any[];
+    return rows.map(row => {
+      const issues: string[] = [];
+      if (row.verification_status === 'conflict') issues.push('Ingredient conflict — needs review');
+      if (row.verification_status === 'needs_review') issues.push('Needs verification');
+      if (row.scanned_ingredients_pending != null) issues.push('Pending merge available');
+      if (row.scanned_ingredients == null) issues.push('No ingredients scanned');
+      if (!row.image) issues.push('Missing image');
+      if (!row.description) issues.push('Missing description');
+      if (!row.skin_types?.length) issues.push('No skin types');
+      if (!row.concerns?.length) issues.push('No concerns');
+      if (row.status === 'draft') issues.push('Still draft');
+      return {
+        id: row.id,
+        slug: row.slug,
+        name: row.name,
+        brand: row.brand,
+        category: row.category,
+        status: row.status,
+        image: row.image,
+        updated_at: row.updated_at,
+        verification_status: row.verification_status ?? null,
+        verification_confidence: row.verification_confidence ?? null,
+        verification_source: row.verification_source ?? null,
+        verified_at: row.verified_at ?? null,
+        hasScannedIngredients: row.scanned_ingredients != null,
+        hasPendingMerge: row.scanned_ingredients_pending != null,
+        issues,
+      };
+    }).filter(item => item.issues.length > 0);
+  } catch (err) {
+    console.error('[adminProducts] fetchVerification error:', err);
+    return [];
+  }
+}
+
 export async function fetchProductForEdit(id: string): Promise<SupabaseProductRow | null> {
   try {
     const { data, error } = await supabase
