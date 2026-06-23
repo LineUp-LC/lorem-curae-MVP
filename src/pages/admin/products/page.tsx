@@ -1412,12 +1412,12 @@ function MergeReviewModal({
       : ing.safetyTier === 'caution' ? 'bg-amber-100 text-amber-700'
       : 'bg-red-100 text-red-700';
     return (
-      <div key={idx} className="border border-blush-200 rounded-lg p-2 mb-1.5">
-        <div className="flex items-center gap-2">
+      <div key={idx} className="border border-blush-200 rounded-lg p-2.5 mb-1.5">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-sm font-medium text-deep">{ing.name}</span>
           <span className={`text-xs px-1.5 py-0.5 rounded-full ${tierClass}`}>{ing.safetyTier}</span>
         </div>
-        {ing.category && <div className="text-xs text-warm-gray mt-0.5">{ing.category}</div>}
+        <div className="text-xs text-warm-gray mt-0.5">{ing.category}</div>
       </div>
     );
   };
