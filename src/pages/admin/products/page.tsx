@@ -1365,11 +1365,21 @@ function ProductVerificationView() {
 
   const [verificationFilter, setVerificationFilter] = useState<VerificationFilterKey>('action');
   const filteredItems = useMemo(() => {
-    if (verificationFilter === 'all')       return items;
-    if (verificationFilter === 'action')    return items.filter(item => item.issues.some(i => ACTION_ISSUES.has(i)));
-    if (verificationFilter === 'missing')   return items.filter(item => item.issues.some(i => MISSING_ISSUES.has(i)));
-    if (verificationFilter === 'unscanned') return items.filter(item => item.issues.includes('No ingredients scanned') && item.status === 'published');
-    return items;
+    let filtered: VerificationItem[];
+    if (verificationFilter === 'action')         filtered = items.filter(item => item.issues.some(i => ACTION_ISSUES.has(i)));
+    else if (verificationFilter === 'missing')   filtered = items.filter(item => item.issues.some(i => MISSING_ISSUES.has(i)));
+    else if (verificationFilter === 'unscanned') filtered = items.filter(item => item.issues.includes('No ingredients scanned') && item.status === 'published');
+    else                                         filtered = items;
+
+    const severityScore = (item: VerificationItem): number => {
+      if (item.verification_status === 'conflict') return 0;
+      if (item.issues.includes('Pending merge available')) return 1;
+      if (item.verification_status === 'needs_review') return 2;
+      if (!item.verification_status || item.verification_status === 'unverified') return 3;
+      return 4;
+    };
+
+    return [...filtered].sort((a, b) => severityScore(a) - severityScore(b));
   }, [items, verificationFilter]);
 
   if (loading) {
