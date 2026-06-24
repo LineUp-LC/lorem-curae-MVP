@@ -10,7 +10,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { requestAIInsight } from '../../lib/ai/surfaceClient';
 import { generateContextCacheKey } from '../../lib/ai/surfaceContext';
 import type { AISurfaceContext, AIMode } from '../../lib/ai/surfaceContext';
-import type { AIInsightResult } from '../../lib/ai/surfaceClient';
+import type { AIInsightResult, AIInsightError } from '../../lib/ai/surfaceClient';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
 import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
 import { getEffectiveSkinType, getEffectiveConcerns, getEffectiveSensitivity } from '../../lib/utils/sessionState';
@@ -126,8 +126,8 @@ export default function AIInsightBlock({
   let insightText: string | undefined;
   if (result?.success) {
     insightText = result.insight;
-  } else if (result && !result.success && result.fallbackInsight) {
-    insightText = result.fallbackInsight;
+  } else if (result && !result.success && (result as AIInsightError).fallbackInsight) {
+    insightText = (result as AIInsightError).fallbackInsight;
   }
 
   // Graceful degradation — render nothing if no insight available

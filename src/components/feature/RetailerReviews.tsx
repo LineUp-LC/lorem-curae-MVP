@@ -174,7 +174,6 @@ export default function RetailerReviews({
 
       const result = await Promise.race([aiPromise, timeoutPromise]);
       if (cancelledRef.current) return;
-      console.log('[RetailerReviews] AI summary result:', result.success, result.insight?.substring(0, 50));
       if (result.success && result.insight) {
         setAiSummary(result.insight);
       }

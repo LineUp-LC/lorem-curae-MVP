@@ -9,7 +9,7 @@
 
 import { useState, useCallback, useRef, useMemo } from 'react';
 import type { Product } from '../../types/product';
-import type { AIInsightResult } from '../../lib/ai/surfaceClient';
+import type { AIInsightResult, AIInsightError } from '../../lib/ai/surfaceClient';
 import { discoverWithAI } from '../../lib/ai/discoveryClient';
 import NeuralBloomIcon from '../icons/NeuralBloomIcon';
 import { highlightRelevantKeywords } from '../../lib/utils/highlightKeywords';
@@ -83,8 +83,8 @@ export default function AIDiscoveryBar({
   let insightText: string | undefined;
   if (aiResult?.success) {
     insightText = aiResult.insight;
-  } else if (aiResult && !aiResult.success && aiResult.fallbackInsight) {
-    insightText = aiResult.fallbackInsight;
+  } else if (aiResult && !aiResult.success && (aiResult as AIInsightError).fallbackInsight) {
+    insightText = (aiResult as AIInsightError).fallbackInsight;
   }
 
   // Build full highlight profile — excludes all product names/brands from highlighting
@@ -167,7 +167,7 @@ export default function AIDiscoveryBar({
       {!aiLoading && aiResult && !aiResult.success && !insightText && (
         <div className="max-w-2xl mx-auto mt-2">
           <p className="text-center text-[10px] text-warm-gray">
-            {aiResult.error || 'Unable to generate insight right now.'}
+            {(aiResult as AIInsightError).error || 'Unable to generate insight right now.'}
           </p>
         </div>
       )}

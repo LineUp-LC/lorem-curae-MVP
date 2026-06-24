@@ -11,7 +11,7 @@ import { useState, useCallback, useMemo } from 'react';
 import type { Product } from '../../types/product';
 import type { MockReview } from '../../mocks/reviews';
 import type { EnvironmentContext } from '../../lib/environment/context';
-import type { AIInsightResult } from '../../lib/ai/surfaceClient';
+import type { AIInsightResult, AIInsightError } from '../../lib/ai/surfaceClient';
 import { computeReviewSummaryEvidence } from '../../lib/ai/discoveryAssistant';
 import { summarizeReviewsForUser } from '../../lib/ai/discoveryClient';
 import { calculateSimilarityWeight } from '../../lib/utils/reviewSimilarity';
@@ -120,8 +120,8 @@ export default function AIReviewSummary({
   let aiInsightText: string | undefined;
   if (aiResult?.success) {
     aiInsightText = aiResult.insight;
-  } else if (aiResult && !aiResult.success && aiResult.fallbackInsight) {
-    aiInsightText = aiResult.fallbackInsight;
+  } else if (aiResult && !aiResult.success && (aiResult as AIInsightError).fallbackInsight) {
+    aiInsightText = (aiResult as AIInsightError).fallbackInsight;
   }
 
   // Star rendering
@@ -295,7 +295,7 @@ export default function AIReviewSummary({
 
             {!aiLoading && !aiInsightText && aiResult && !aiResult.success && (
               <p className="text-xs text-warm-gray">
-                {aiResult.error || 'Unable to generate summary right now.'}
+                {(aiResult as AIInsightError).error || 'Unable to generate summary right now.'}
               </p>
             )}
           </div>

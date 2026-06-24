@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { buildAIContext } from '../../../lib/ai/surfaceContext';
 import { requestAIInsight } from '../../../lib/ai/surfaceClient';
+import type { AIInsightError } from '../../../lib/ai/surfaceClient';
 import type { ConversationMessage } from '../../../lib/ai/types';
 
 interface Message {
@@ -78,7 +79,7 @@ export default function AIAssistant({ productName, noteContent }: AIAssistantPro
 
       const responseText = result.success
         ? result.insight
-        : result.fallbackInsight || 'I was unable to generate a response right now. Please try again in a moment.';
+        : (result as AIInsightError).fallbackInsight || 'I was unable to generate a response right now. Please try again in a moment.';
 
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
