@@ -140,8 +140,6 @@ export default function AIInsightBlock({
   const isIngredientDetail = context.mode === 'ingredient_detail';
   const isPersonalized = !!context.user.skinType;
 
-  console.log('[AI Insight] Context user profile:', JSON.stringify({ skinType: context.user.skinType, concerns: context.user.concerns }));
-
   // Build highlight profile from session state, with product name exclusions
   const excludeNames: string[] = [];
   if ('product' in context.page && context.page.product) {

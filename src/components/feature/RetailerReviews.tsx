@@ -146,8 +146,6 @@ export default function RetailerReviews({
   async function generateAiSummary(summaryReviews: WebReview[], matches: KeywordMatch[]) {
     setAiLoading(true);
     try {
-      console.log('[RetailerReviews] AI summary call starting for', listing.retailerName);
-
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('AI summary timeout')), 25000),
       );
