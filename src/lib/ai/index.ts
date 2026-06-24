@@ -158,8 +158,8 @@ export {
   type RetrievalSource,
   type RetrievedChunk,
   type UserContext as RetrievalUserContext,
-  type RetrievalOptions,
-  type RetrievalResult,
+  type RetrievalOptions as SearchRetrievalOptions,
+  type RetrievalResult as SearchRetrievalResult,
   type SafetyFilterResult,
 } from './searchRetrievalIntelligence';
 
@@ -177,7 +177,7 @@ export {
   type ExperienceLevel,
   type SensitivityLevel,
   type FitzpatrickType,
-  type SkinProfile,
+  type SkinProfile as IntelSkinProfile,
   type ProfileSafetyResult,
   type IngredientFilterResult,
   type TextureRecommendation,
@@ -202,7 +202,7 @@ export {
   type ProductStrength,
   type ProductTiming,
   type ProductExplanation,
-  type ProductComparison,
+  type ProductComparison as ProductIntelComparison,
   type RoutineCompatibility,
 } from './productIntelligence';
 
@@ -246,7 +246,7 @@ export {
   BEGINNER_FRIENDLY,
   ADVANCED_ACTIVES,
   type RoutineTiming,
-  type ExperienceLevel,
+  type ExperienceLevel as RoutineExperienceLevel,
   type RoutineStep,
   type SkincareRoutine,
   type RoutineBuilderResult,
@@ -532,9 +532,9 @@ export {
   type ContentType,
   type ResponseSection,
   type IngredientExplanation,
-  type ProductExplanation,
-  type ConcernExplanation,
-  type RoutineStep,
+  type ProductExplanation as FormattedProductExplanation,
+  type ConcernExplanation as FormattedConcernExplanation,
+  type RoutineStep as FormattedRoutineStep,
   type RoutineFormat,
   type ComparisonItem,
   type TroubleshootingFormat,
@@ -595,7 +595,7 @@ export {
   type BehaviorPatterns,
   type BehavioralTrend,
   type PreferenceConflict,
-  type PersonalizationContext,
+  type PersonalizationContext as BehavioralPersonalizationContext,
 } from './behavioralIntelligence';
 
 // Mode Switching Intelligence
@@ -672,14 +672,14 @@ export {
   type EvidenceBundle,
   type InteractionHistory,
   type PageDataInput,
-  type IngredientConflict,
+  type IngredientConflict as SurfaceIngredientConflict,
   type NutritionFood,
   type Retailer as AIRetailer,
   type RoutineStep as AIRoutineStep,
   type ReviewForSummary,
   type ReviewSummaryEvidence,
   type AlternativesEvidence,
-  type ExplanationLevel,
+  type ExplanationLevel as SurfaceExplanationLevel,
 } from './surfaceContext';
 
 // System Prompt Builder
