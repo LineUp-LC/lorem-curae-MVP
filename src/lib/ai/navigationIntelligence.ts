@@ -379,7 +379,7 @@ export function getConcernUrl(concern: string): PageLink | null {
  */
 export function getCategoryUrl(
   category: string,
-  source: ProductSource = 'discover'
+  source: ProductSource = 'discovery'
 ): PageLink | null {
   const slug = toCategorySlug(category);
 

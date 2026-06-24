@@ -290,7 +290,7 @@ class AdaptiveAIEngine {
     }
 
     if (intent === 'recommendation') {
-      const result = retrieveProducts(userProfile, { category, limit: 3 });
+      const result = retrieveProductsLegacy(userProfile, { category, limit: 3 });
 
       if (result.products.length > 0) {
         const context = category
@@ -305,7 +305,7 @@ class AdaptiveAIEngine {
     }
 
     // Default: retrieve general recommendations
-    const result = retrieveProducts(userProfile, { limit: 3 });
+    const result = retrieveProductsLegacy(userProfile, { limit: 3 });
     if (result.products.length > 0) {
       return formatRecommendations(result.products, `Here are products that suit your ${skinType} skin:`);
     }
@@ -370,7 +370,7 @@ class AdaptiveAIEngine {
 
     const engagement = patterns.engagementLevel;
     if (engagement === 'high') {
-      const result = retrieveProducts(userProfile, { limit: 2 });
+      const result = retrieveProductsLegacy(userProfile, { limit: 2 });
       if (result.products.length > 0) {
         let response = `You've been actively exploring! Based on your ${preferences.skinType} skin`;
         if (preferences.concerns?.length > 0) {
