@@ -10,7 +10,6 @@ declare global {
   const NavLink: typeof import('react-router-dom')['NavLink']
   const Navigate: typeof import('react-router-dom')['Navigate']
   const Outlet: typeof import('react-router-dom')['Outlet']
-  const React: typeof import('react')['React']
   const Trans: typeof import('react-i18next')['Trans']
   const cloneElement: typeof import('react')['cloneElement']
   const createContext: typeof import('react')['createContext']

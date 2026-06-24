@@ -20,7 +20,6 @@ export default defineConfig({
       imports: [
         {
           react: [
-            "React",
             "useState",
             "useEffect",
             "useContext",
