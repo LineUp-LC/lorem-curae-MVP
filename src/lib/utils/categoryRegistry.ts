@@ -63,7 +63,7 @@ const iconMap = new Map(PRODUCT_CATEGORIES.map(c => [c.value, c.icon]))
  * Returns the value itself (capitalized) if not found.
  */
 export function getCategoryLabel(value: string): string {
-  return labelMap.get(value) ?? value.charAt(0).toUpperCase() + value.slice(1)
+  return labelMap.get(value as ProductCategory) ?? value.charAt(0).toUpperCase() + value.slice(1)
 }
 
 /**
@@ -71,5 +71,5 @@ export function getCategoryLabel(value: string): string {
  * Returns a default grid icon if not found.
  */
 export function getCategoryIcon(value: string): string {
-  return iconMap.get(value) ?? 'ri-grid-line'
+  return iconMap.get(value as ProductCategory) ?? 'ri-grid-line'
 }

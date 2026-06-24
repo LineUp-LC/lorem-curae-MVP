@@ -67,7 +67,7 @@ const ProductOverview = ({
         <div className="mt-2">
           <span className="text-xl font-bold">${product.price}</span>
           <span className="ml-2 text-yellow-500">
-            ★ {product.rating} ({product.reviews} reviews)
+            ★ {product.rating} ({product.reviewCount} reviews)
           </span>
         </div>
 
@@ -76,7 +76,7 @@ const ProductOverview = ({
         <div className="mt-4">
           <h3 className="font-semibold">Key Ingredients</h3>
           <ul className="list-disc ml-5 text-gray-700">
-            {product.key_ingredients?.map((ing) => (
+            {product.keyIngredients?.map((ing) => (
               <li key={ing}>{ing}</li>
             ))}
           </ul>
@@ -85,7 +85,7 @@ const ProductOverview = ({
         <div className="mt-4">
           <h3 className="font-semibold">Skin Type Match</h3>
           <p>
-            {product.skin_types?.includes(userProfile.skinType)
+            {product.skinTypes?.includes(userProfile.skinType)
               ? '✔ Good match'
               : '⚠ Not ideal for your skin type'}
           </p>

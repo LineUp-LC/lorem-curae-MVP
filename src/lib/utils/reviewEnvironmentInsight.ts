@@ -209,8 +209,8 @@ export function generateReviewEnvironmentInsight(
   // Determine which keyword sets to use
   const keywordSets: readonly string[][] =
     activeFilter === 'all'
-      ? [WEATHER_KEYWORDS, TEXTURE_KEYWORDS, WEAR_KEYWORDS]
-      : [CATEGORY_KEYWORDS[activeFilter]];
+      ? [[...WEATHER_KEYWORDS], [...TEXTURE_KEYWORDS], [...WEAR_KEYWORDS]]
+      : [[...CATEGORY_KEYWORDS[activeFilter]]];
 
   // Step 2: Filter by content keywords (at least 1 match from active sets)
   const qualifying: { entry: ScoredReviewEntry; relevance: number; keywords: string[] }[] = [];

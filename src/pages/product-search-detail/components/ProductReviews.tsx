@@ -209,7 +209,7 @@ const ProductReviews = ({ productId }: ProductReviewsProps) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {featuredReviews.map((review) => {
             const similarityBadge = showPersonalized && 'similarityScore' in review 
-              ? getSimilarityBadge(review.similarityScore) 
+              ? getSimilarityBadge(Number(review.similarityScore))
               : null;
             
             return (

@@ -224,7 +224,7 @@ function respondIngredient(q: string, ctx: ModalChatContext, conditions: Conditi
     // No condition-specific benefit; use generic class benefit
     const CLASS_KEYS: IngredientClass[] = ['humectant', 'barrier', 'soothing', 'supportive', 'sensitizing', 'protective', 'emollient', 'occlusive', 'peptide'];
     for (const cls of CLASS_KEYS) {
-      const names = cls === 'humectant' ? matched.humectants : (matched as Record<string, string[]>)[cls];
+      const names = cls === 'humectant' ? matched.humectants : (matched as unknown as Record<string, string[]>)[cls];
       if (names && names.length > 0) {
         sentences.push(`${mentionedIngredient} ${CLASS_BENEFIT[cls]}.`);
         break;

@@ -45,7 +45,7 @@ const iconMap = new Map(INGREDIENT_CATEGORIES.map(c => [c.value, c.icon]))
  * Returns the value itself (capitalized) if not found.
  */
 export function getIngredientCategoryLabel(value: string): string {
-  return labelMap.get(value) ?? value.charAt(0).toUpperCase() + value.slice(1)
+  return labelMap.get(value as IngredientCategory) ?? value.charAt(0).toUpperCase() + value.slice(1)
 }
 
 /**
@@ -53,5 +53,5 @@ export function getIngredientCategoryLabel(value: string): string {
  * Returns a default grid icon if not found.
  */
 export function getIngredientCategoryIcon(value: string): string {
-  return iconMap.get(value) ?? 'ri-grid-line'
+  return iconMap.get(value as IngredientCategory) ?? 'ri-grid-line'
 }

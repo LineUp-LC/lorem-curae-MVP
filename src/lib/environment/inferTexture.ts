@@ -83,7 +83,7 @@ function inferFromIngredients(ingredients: string[]): InferredTexture | null {
  */
 export function inferTexture(product: Product): InferredTexture {
   // If product has explicit texture (future enrichment)
-  const explicit = (product as Record<string, unknown>).texture;
+  const explicit = (product as unknown as Record<string, unknown>).texture;
   if (typeof explicit === 'string') {
     const mapped = mapExplicitTexture(explicit);
     if (mapped) return mapped;
