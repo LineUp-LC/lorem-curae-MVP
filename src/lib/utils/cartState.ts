@@ -8,6 +8,9 @@ interface CartItem {
   quantity: number;
   image: string;
   inStock: boolean;
+  /** Pre-discount price for the strikethrough in the cart. Optional — only set when the item
+   *  was added on discount; the cart UI hides the strikethrough when absent. */
+  originalPrice?: number;
 }
 
 class CartStateManager {

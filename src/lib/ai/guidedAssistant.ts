@@ -88,7 +88,8 @@ export function buildHelpMeChooseContext(input: HelpMeChooseInput): HelpMeChoose
 
   for (const p of products) {
     // Skin type match
-    skinTypeScores[p.id] = skinType && isSkinTypeMatch(p.skinTypes, skinType) ? 25 : 0;
+    skinTypeScores[p.id] =
+      skinType && p.skinTypes.some((t) => isSkinTypeMatch(t, skinType)) ? 25 : 0;
 
     // Concern alignment
     const alignment = computeConcernAlignment(concerns, p.concerns ?? []);
@@ -290,7 +291,7 @@ export function buildExplainRoutineContext(input: ExplainRoutineInput): ExplainR
       stepAnalysis.push({
         step: stepNum++,
         product,
-        role: orderEntry.label ?? orderEntry.category,
+        role: orderEntry.category,
         keyBenefit: keyIngredients.length > 0
           ? `Contains ${keyIngredients.join(', ')}`
           : product.description?.slice(0, 80) ?? product.category,

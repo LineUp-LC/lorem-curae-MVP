@@ -36,17 +36,21 @@ const ProductOverview = ({
         : ['hydration', 'texture'],
   };
 
+  // The canonical Product carries a single `image` (not an `images` array); render it as a
+  // one-item gallery so the thumbnail/selected-image UI works without reading an undefined field.
+  const images = product.image ? [product.image] : [];
+
   return (
     <div className="product-overview">
       <div className="image-gallery">
         <img
-          src={product.images[selectedImage]}
+          src={images[selectedImage]}
           alt={product.name}
           className="main-image"
         />
 
         <div className="thumbnail-row">
-          {product.images.map((img, index) => (
+          {images.map((img, index) => (
             <img
               key={index}
               src={img}
