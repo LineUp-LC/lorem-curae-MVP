@@ -386,7 +386,7 @@ export default function CommunityPage() {
                       <div key={community.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                         <div className="h-32 bg-gradient-to-r from-teal-400 to-sage relative">
                           <img
-                            src={community.cover_image}
+                            src={community.cover_image_url}
                             alt={community.name}
                             className="w-full h-full object-cover"
                           />
@@ -409,7 +409,7 @@ export default function CommunityPage() {
                               </span>
                               <span className="flex items-center gap-1">
                                 <i className="ri-chat-3-line"></i>
-                                {community.post_count} posts
+                                {community.posts_count} posts
                               </span>
                             </div>
                             <button
@@ -445,7 +445,7 @@ export default function CommunityPage() {
                         <div key={community.id} className="bg-white rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow">
                           <div className="h-32 bg-gradient-to-r from-teal-400 to-sage relative">
                             <img
-                              src={community.cover_image}
+                              src={community.cover_image_url}
                               alt={community.name}
                               className="w-full h-full object-cover"
                             />
@@ -461,7 +461,7 @@ export default function CommunityPage() {
                                 </span>
                                 <span className="flex items-center gap-1">
                                   <i className="ri-chat-3-line"></i>
-                                  {community.post_count} posts
+                                  {community.posts_count} posts
                                 </span>
                               </div>
                               <Link

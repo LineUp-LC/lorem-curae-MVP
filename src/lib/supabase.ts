@@ -53,8 +53,10 @@ export interface Community {
   name: string;
   description: string | null;
   image_url: string | null;
+  cover_image_url: string | null;
   category: string | null;
   member_count: number;
+  posts_count: number;
   is_private: boolean;
   created_by: string;
   created_at: string;
