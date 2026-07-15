@@ -120,7 +120,6 @@ export default function CommunityPage() {
       if (error) throw error;
 
       setNewPost('');
-      setShowPostModal(false);
       loadPosts();
     } catch (error) {
       console.error('Error creating post:', error);

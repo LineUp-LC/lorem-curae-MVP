@@ -434,8 +434,9 @@ export function canTransition(from: FunctionalMode, to: FunctionalMode): boolean
   // Safety mode can always activate
   if (to === 'safety_checker') return true;
 
-  // Workflow mode overrides when active
-  if (from === 'workflow_manager' && to !== 'safety_checker') {
+  // Workflow mode overrides when active. (safety_checker already returned above, so `to`
+  // can never be it here — the redundant `to !== 'safety_checker'` guard was removed.)
+  if (from === 'workflow_manager') {
     // Allow transitions within workflow context
     return MODE_COMPATIBILITY[from]?.includes(to) ?? false;
   }

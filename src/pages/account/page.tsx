@@ -176,11 +176,6 @@ const AccountPage = () => {
         
         setRecentPurchases(purchases || []);
       }
-      
-      const searches = localStorage.getItem('recent_searches');
-      if (searches) {
-        setRecentSearches(JSON.parse(searches));
-      }
     } catch (error) {
       console.error('Error loading account data:', error);
     } finally {
