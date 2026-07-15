@@ -83,7 +83,7 @@ export default function GuidedAssistantPanel({
   onNavigateToProduct,
 }: GuidedAssistantPanelProps) {
   const navigate = useNavigate();
-  const environment = useEnvironmentContext();
+  const environment = useEnvironmentContext().env;
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Conversation state

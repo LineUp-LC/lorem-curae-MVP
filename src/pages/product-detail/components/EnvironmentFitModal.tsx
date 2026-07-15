@@ -149,7 +149,7 @@ export default function EnvironmentFitModal({
       try {
         const fitContext = buildProductFitContext(product, env, userProfile, reviewerEvidence);
         const question = formatProductFitPrompt(fitContext);
-        const aiContext = buildAIContext({
+        const aiContext = buildAIContext('product_detail', {
           page: { mode: 'product_detail', product },
           environment: env,
         });
