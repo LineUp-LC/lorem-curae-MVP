@@ -101,6 +101,9 @@ export async function fetchAllProducts(filters?: {
     let query = supabase
       .from('products')
       .select('id, legacy_id, slug, name, brand, category, status, price, image, updated_at, in_stock')
+      // Defensive: never surface Serper web-scrape rows in the admin list. The mobile repo
+      // stopped persisting them (and purged the existing ~936), so this is belt-and-suspenders.
+      .neq('source', 'serper')
       .order('updated_at', { ascending: false });
 
     if (filters?.status && filters.status !== 'all') {
@@ -152,6 +155,9 @@ export async function fetchProductsNeedingVerification(): Promise<VerificationIt
     const { data, error } = await supabase
       .from('products')
       .select('id, slug, name, brand, category, status, image, description, skin_types, concerns, updated_at, verification_status, verification_confidence, verification_source, verified_at, scanned_ingredients, scanned_ingredients_pending')
+      // Defensive: keep Serper web-scrape rows out of the verification queue (they have no
+      // ingredients/description and would flood it as false "needs attention"). Belt-and-suspenders.
+      .neq('source', 'serper')
       .order('updated_at', { ascending: false });
 
     if (error) {
