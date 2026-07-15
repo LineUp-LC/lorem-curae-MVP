@@ -428,7 +428,9 @@ const SettingsPage = () => {
     try {
       setSavingProfile(true);
       const existingPrefs = (profile?.preferences as Record<string, any>) || {};
-      const updatedPrefs = {
+      // Typed as Record so the name-change-limit keys (stored in the preferences JSONB, not columns)
+      // can be assigned below without the object narrowing to just { bio }.
+      const updatedPrefs: Record<string, any> = {
         ...existingPrefs,
         bio: bio,
       };

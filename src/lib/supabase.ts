@@ -87,6 +87,7 @@ export interface DataImpactContribution {
   data_points_shared: number;
   impact_score: number;
   rewards_earned: number;
+  contributed_at: string | null;
   created_at: string;
   updated_at: string;
 }

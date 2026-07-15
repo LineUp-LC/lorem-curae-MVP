@@ -60,7 +60,7 @@ export default function DataImpactPage() {
           .from('data_impact_contributions')
           .update({ 
             opted_in: newOptInStatus,
-            last_contribution_at: newOptInStatus ? new Date().toISOString() : contribution.last_contribution_at
+            contributed_at: newOptInStatus ? new Date().toISOString() : contribution.contributed_at
           })
           .eq('id', userProfile.id);
 
@@ -73,7 +73,7 @@ export default function DataImpactPage() {
             user_id: userProfile.id,
             opted_in: newOptInStatus,
             contribution_count: 0,
-            last_contribution_at: newOptInStatus ? new Date().toISOString() : null
+            contributed_at: newOptInStatus ? new Date().toISOString() : null
           });
 
         if (error) throw error;

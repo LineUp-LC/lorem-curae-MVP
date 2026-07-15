@@ -571,8 +571,8 @@ export default function ProductDetailPage() {
                     product={productFromMock}
                     environment={env}
                     evidence={{
-                      environmentFit: envFit ? { explanation: envFit.explanation, disclaimer: envFit.disclaimer } : undefined,
-                      reviewerEvidence: reviewerEvidence ? { count: reviewerEvidence.matchCount, detail: reviewerEvidence.detail } : undefined,
+                      environmentFit: envFit ?? undefined,
+                      reviewerEvidence: reviewerEvidence ?? undefined,
                     }}
                   />
                 </div>
@@ -1037,7 +1037,6 @@ export default function ProductDetailPage() {
           name: product.name,
           brand: product.brand,
           image: product.images?.[0],
-          category: product.category,
         }}
       />
 

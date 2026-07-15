@@ -55,15 +55,15 @@ const DataAnonymizationPage: React.FC = () => {
       // Get last processed time
       const { data: lastProcessedData } = await supabase
         .from('data_impact_contributions')
-        .select('last_contribution_at')
-        .not('last_contribution_at', 'is', null)
-        .order('last_contribution_at', { ascending: false })
+        .select('contributed_at')
+        .not('contributed_at', 'is', null)
+        .order('contributed_at', { ascending: false })
         .limit(1);
 
       setStats({
         totalDataPoints: totalDataPoints || 0,
         contributingUsers: contributingUsers || 0,
-        lastProcessed: lastProcessedData?.[0]?.last_contribution_at || 'Never',
+        lastProcessed: lastProcessedData?.[0]?.contributed_at || 'Never',
         categories
       });
     } catch (error) {
