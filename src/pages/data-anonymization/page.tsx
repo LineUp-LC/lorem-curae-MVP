@@ -107,7 +107,7 @@ const DataAnonymizationPage: React.FC = () => {
       // Get all opted-in users
       const { data: contributors } = await supabase
         .from('data_impact_contributions')
-        .select('id')
+        .select('id, user_id')
         .eq('opted_in', true);
 
       if (contributors) {
@@ -119,8 +119,9 @@ const DataAnonymizationPage: React.FC = () => {
               'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
             },
             body: JSON.stringify({
+              // The EF (lorem-curae-waitlist) reads body.user_id and looks up by the user_id column.
               action: 'process_user_data',
-              id: contributor.user_id
+              user_id: contributor.user_id
             })
           });
 

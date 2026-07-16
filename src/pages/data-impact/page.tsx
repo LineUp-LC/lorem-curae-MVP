@@ -72,7 +72,6 @@ export default function DataImpactPage() {
           .insert({
             user_id: userProfile.id,
             opted_in: newOptInStatus,
-            contribution_count: 0,
             contributed_at: newOptInStatus ? new Date().toISOString() : null
           });
 
@@ -215,8 +214,8 @@ export default function DataImpactPage() {
                   </div>
                   <h3 className="font-semibold text-gray-900">Your Impact</h3>
                 </div>
-                <p className="text-3xl font-bold text-gray-900 mb-1">{contribution?.contribution_count || 0}</p>
-                <p className="text-sm text-gray-600">Data contributions</p>
+                <p className="text-3xl font-bold text-gray-900 mb-1">—</p>
+                <p className="text-sm text-gray-600">Stats coming soon</p>
               </div>
             </div>
           )}
