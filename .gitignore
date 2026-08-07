@@ -1,8 +1,8 @@
 node_modules/
 out/
 dist/
-.env
-.env.local
+.env*
+!.env.example
 
 # Claude Code config (local settings only)
 .claude/settings.local.json
@@ -10,5 +10,3 @@ dist/
 # Build artifacts
 *.zip
 pnpm-lock.yaml
-
-nul
