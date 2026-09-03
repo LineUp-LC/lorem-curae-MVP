@@ -137,7 +137,16 @@ const routes: RouteObject[] = [
       { path: '/account', element: <AccountPage /> },
       { path: '/product-detail', element: <ProductDetailPage /> },
       { path: '/product-detail/:id', element: <ProductDetailPage /> },
-      { path: '/ai-chat', element: <AIChatPage /> },
+      // GUEST-GATED 2026-09-03. This page called the `ai-chat` Edge Function with NO
+      // Authorization header when signed out (chatClient.ts sends it only `if (session)`),
+      // and that function ran `verify_jwt = false` with a soft auth check that never
+      // rejected -- so this route was the live entry point to an unauthenticated, billable
+      // Claude proxy that also accepted a caller-supplied system prompt.
+      //
+      // RequireAuth is the prerequisite for locking that function down: the gate has to come
+      // off the caller before it goes on the endpoint, or signed-out visitors hit a 401 with
+      // no explanation. Do not unwrap this without re-checking the function's auth posture.
+      { path: '/ai-chat', element: <RequireAuth><AIChatPage /></RequireAuth> },
       { path: '/about', element: <AboutPage /> },
       { path: '/skin-survey', element: <Navigate to="/onboarding" replace /> },
       { path: '/skin-survey-account', element: <SkinSurveyAccountPage /> },
