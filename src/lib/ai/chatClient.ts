@@ -104,9 +104,36 @@ function buildChatSystemPrompt(conversationHistory: ConversationMessage[] = []):
 /**
  * Call the AI chat edge function with Claude-powered responses
  */
+/**
+ * SEVERED 2026-09-03, the sibling of AI_INSIGHT_CLIENT_DISABLED in ./surfaceClient.ts.
+ *
+ * WHY. `ai-chat` takes its system prompt FROM THE CALLER, and this client builds one on every
+ * request (`buildChatSystemPrompt` below). That endpoint is being locked down to server-owned
+ * prompts behind a mode enum, at which point any request carrying `systemPrompt` is REJECTED --
+ * so every call from here would 400. Severing the caller first is the ordering rule: the gate
+ * comes off the caller before it goes on the endpoint, never the other way round.
+ *
+ * WHAT HAPPENS INSTEAD. `callAIChatAPI` returns `{ success: false }` without a network call, which
+ * routes `pages/ai-chat/page.tsx` down its EXISTING failure branch: `generateRetrievalBasedResponse`
+ * answers from local retrieval, with real product cards and routines. The page is not broken and
+ * shows no error -- it answers without Claude. That branch already runs today whenever the API
+ * errors, so this is an exercised path, not a new state.
+ *
+ * It returns rather than throwing so the promise settles: the page clears `isTyping` after the
+ * await, and an unsettled promise would leave the typing indicator up forever.
+ *
+ * TO RESTORE: flip this to `false`. That is the whole revert. Not before `ai-chat` stops
+ * requiring a server-owned mode, or every call here will 400.
+ */
+export const AI_CHAT_CLIENT_DISABLED = true;
+
 export async function callAIChatAPI(
   request: AIChatRequest
 ): Promise<{ success: true; response: string; meta: AIChatSuccessResponse['meta'] } | { success: false; error: string }> {
+  if (AI_CHAT_CLIENT_DISABLED) {
+    return { success: false, error: 'AI chat is not available on web.' };
+  }
+
   try {
     // Get current session for auth token
     const { data: { session } } = await supabase.auth.getSession();
