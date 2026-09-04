@@ -45,6 +45,33 @@ export type AIInsightResult = AIInsightSuccess | AIInsightError;
 
 const AI_INSIGHT_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-insight`;
 
+/**
+ * SEVERED 2026-09-03. This client no longer calls the `ai-insight` Edge Function.
+ *
+ * WHY. That function takes the system prompt FROM THE CALLER and has no server-side prompt of its
+ * own, so anyone holding a key could choose what the model is told on a health-adjacent product.
+ * It is being locked down to server-owned prompts behind a 4-mode enum (`skin_read`,
+ * `routine_verdict`, `ingredient_conflict_explain`, `ingredient_conflict_verdict`) for the mobile
+ * app. This client sends 13 modes that are not in that set AND sends its own `systemPrompt`, so it
+ * cannot survive the lockdown. Severing here is the prerequisite: the caller stops before the
+ * endpoint changes, never the other way round.
+ *
+ * WHAT HAPPENS INSTEAD. Every request takes the pre-existing GUEST path below: no network call,
+ * `buildFallbackInsight` deterministic prose, returned as `success: true`. That path already runs
+ * in production for every signed-out visitor, so this is an existing, exercised behaviour rather
+ * than a new "disabled" state. Audited across all 11 consumers: 10 render deterministic content or
+ * nothing; the 11th (routines `AIAssistant`) sends `mode: 'chat'`, which was never in the
+ * function's `SUPPORTED_MODES` and already 400s on every message, so nothing changes for it.
+ *
+ * It short-circuits rather than throwing on purpose: the consumers have no request timeout, so an
+ * unsettled promise would spin `AIInsightBlock`'s skeleton and `ScanResultView`'s loader forever.
+ * An early return settles immediately and every `finally` runs.
+ *
+ * TO RESTORE: flip this to `false`. That is the whole revert. Do not do it while `ai-insight`
+ * requires a server-owned mode, or every web call will 400.
+ */
+export const AI_INSIGHT_CLIENT_DISABLED = true;
+
 /** Cache TTL: 24 hours in milliseconds */
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
@@ -413,10 +440,11 @@ async function executeAIRequest(
   options: { skipCache?: boolean; question?: string } | undefined,
   cacheKey: string,
 ): Promise<AIInsightResult> {
-  // 1. Check auth — guest users get fallback only (no API call)
+  // 1. Check auth — guest users get fallback only (no API call).
+  //    AI_INSIGHT_CLIENT_DISABLED routes EVERY caller down this same path (see the const).
   const { data: { session } } = await supabase.auth.getSession();
 
-  if (!session?.access_token) {
+  if (AI_INSIGHT_CLIENT_DISABLED || !session?.access_token) {
     const fallback = buildFallbackInsight(ctx);
     if (fallback) {
       return {
@@ -425,13 +453,21 @@ async function executeAIRequest(
         mode: ctx.mode,
         cached: false,
         meta: {
-          authenticated: false,
+          // Derived, not hardcoded false: a signed-in user on the severed path IS authenticated.
+          authenticated: !!session?.access_token,
           hasProfile: !!ctx.user.skinType,
           timestamp: new Date().toISOString(),
         },
       };
     }
-    return { success: false, error: 'Sign in for personalised AI insights' };
+    // Only reachable for the modes buildFallbackInsight does not cover, all of which land in
+    // components that render nothing. The message still has to be honest about which case it is.
+    return {
+      success: false,
+      error: AI_INSIGHT_CLIENT_DISABLED
+        ? 'AI insights are not available on web.'
+        : 'Sign in for personalised AI insights',
+    };
   }
 
   // 2. Build system prompt
