@@ -1701,6 +1701,7 @@ export default function AdminProductsPage() {
         <Link to="/" className="font-serif text-xl font-semibold text-deep">Lorem Curae</Link>
         <span className="ml-3 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">Admin</span>
         <div className="ml-auto flex items-center gap-4">
+          <Link to="/admin/scan-confidence" className="text-sm text-warm-gray hover:text-deep transition-colors">Scan Confidence</Link>
           <Link to="/" className="text-sm text-warm-gray hover:text-deep transition-colors">
             <i className="ri-arrow-left-line mr-1" />Back to Site
           </Link>

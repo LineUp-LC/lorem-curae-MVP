@@ -35,6 +35,7 @@ const FAQPage = lazy(() => import('../pages/faq/page'));
 const AccessibilityPage = lazy(() => import('../pages/accessibility/page'));
 const CommunityGuidelinesPage = lazy(() => import('../pages/community-guidelines/page'));
 const AdminProductsPage = lazy(() => import('../pages/admin/products/page'));
+const AdminScanConfidencePage = lazy(() => import('../pages/admin/scan-confidence/page'));
 
 // ═══════════════════════════════════════════════════════════════
 // DEFERRED IMPORTS — see Notion "Deferred Work Tracker" for trigger conditions
@@ -110,6 +111,7 @@ const routes: RouteObject[] = [
   { path: '/data-anonymization', element: <DataAnonymizationPage /> },
   { path: '/admin/products', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
   { path: '/admin/products/:id', element: <RequireAuth><AdminProductsPage /></RequireAuth> },
+  { path: '/admin/scan-confidence', element: <RequireAuth><AdminScanConfidencePage /></RequireAuth> },
   // ── Onboarding (no layout — fullscreen, seamless post-signup) ──
   { path: '/onboarding', element: <SkinSurveyPage /> },
   { path: '/onboarding/results', element: <SurveyResultsPage /> },
